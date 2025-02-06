@@ -9,7 +9,5 @@ namespace Pathfinding.App.Console.ViewModel.Interface
         ExportOptions Options { get; set; }
 
         ReactiveCommand<Func<StreamModel>, Unit> ExportGraphCommand { get; }
-
-        int[] SelectedGraphIds { get; set; }
     }
 }

@@ -18,8 +18,8 @@ namespace Pathfinding.App.Console.View
 {
     internal sealed partial class RunsTableView : TableView
     {
-        private readonly CompositeDisposable disposables = new();
-        private readonly Dictionary<int, IDisposable> modelsSubs = new();
+        private readonly CompositeDisposable disposables = [];
+        private readonly Dictionary<int, IDisposable> modelsSubs = [];
 
         public RunsTableView(IRunsTableViewModel viewModel,
             [KeyFilter(KeyFilters.Views)] IMessenger messenger) : this()

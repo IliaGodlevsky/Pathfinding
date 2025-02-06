@@ -4,17 +4,10 @@ using System.Runtime.CompilerServices;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms.StepRules
 {
-    public sealed class CardinalStepRule : IStepRule
+    [method: MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public sealed class CardinalStepRule(IStepRule stepRule) : IStepRule
     {
         private readonly static double DiagonalStepFactor = Math.Sqrt(2);
-
-        private readonly IStepRule stepRule;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public CardinalStepRule(IStepRule stepRule)
-        {
-            this.stepRule = stepRule;
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double CalculateStepCost(IPathfindingVertex neighbour, IPathfindingVertex current)

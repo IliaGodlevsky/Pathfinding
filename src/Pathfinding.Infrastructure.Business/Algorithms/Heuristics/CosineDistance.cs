@@ -19,21 +19,21 @@ namespace Pathfinding.Infrastructure.Business.Algorithms.Heuristics
             return Math.Round(Radians * Math.Acos(cosine), digits: 10);
         }
 
-        private static double GetScalarProduct(IReadOnlyList<int> self,
-            IReadOnlyList<int> coordinate)
+        private static double GetScalarProduct(int[] self,
+            int[] coordinate)
         {
             double result = default;
-            for (int i = 0; i < self.Count; i++)
+            for (int i = 0; i < self.Length; i++)
             {
                 result += self[i] * coordinate[i];
             }
             return result;
         }
 
-        private static double GetVectorLength(IReadOnlyList<int> self)
+        private static double GetVectorLength(int[] self)
         {
             double result = 0;
-            for (int i = 0; i < self.Count; i++)
+            for (int i = 0; i < self.Length; i++)
             {
                 result += self[i] * self[i];
             }

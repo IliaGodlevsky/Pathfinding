@@ -3,18 +3,9 @@ using System.Runtime.CompilerServices;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms.Heuristics
 {
-    public sealed class WeightedHeuristic : IHeuristic
+    [method: MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public sealed class WeightedHeuristic(IHeuristic heuristic, double weight) : IHeuristic
     {
-        private readonly IHeuristic heuristic;
-        private readonly double weight;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public WeightedHeuristic(IHeuristic heuristic, double weight)
-        {
-            this.heuristic = heuristic;
-            this.weight = weight;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public double Calculate(IPathfindingVertex first, IPathfindingVertex second)
         {

@@ -1,5 +1,6 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel;
 using Pathfinding.App.Console.Model;
@@ -12,6 +13,7 @@ using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Requests.Create;
+using Pathfinding.Shared.Extensions;
 using Pathfinding.Shared.Primitives;
 using ReactiveUI;
 using System.Reactive;
@@ -108,7 +110,8 @@ namespace Pathfinding.App.Console.ViewModel
             await ExecuteSafe(async () =>
             {
                 var random = Random.Shared;
-                var costLayer = new VertexCostLayer(CostRange, range => new VertexCost(random.Next(range.LowerValueOfRange, range.UpperValueOfRange + 1), range));
+                var costLayer = new VertexCostLayer(CostRange, range => new VertexCost(random.Next(
+                    range.LowerValueOfRange, range.UpperValueOfRange + 1), range));
                 var obstacleLayer = new ObstacleLayer(Obstacles);
                 var layers = new Layers(costLayer, obstacleLayer);
                 var graph = await graphAssemble.AssembleGraphAsync(layers, Width, Length)
@@ -122,17 +125,7 @@ namespace Pathfinding.App.Console.ViewModel
                     Status = GraphStatuses.Editable
                 };
                 var graphModel = await service.CreateGraphAsync(request).ConfigureAwait(false);
-                var info = new GraphInfoModel()
-                {
-                    Id = graphModel.Id,
-                    Name = Name,
-                    SmoothLevel = SmoothLevel,
-                    Neighborhood = Neighborhood,
-                    ObstaclesCount = graphModel.Vertices.GetObstaclesCount(),
-                    Width = Width,
-                    Length = Length,
-                    Status = GraphStatuses.Editable
-                };
+                var info = graphModel.ToGraphInformationModel().ToGraphInfo();
                 messenger.Send(new GraphCreatedMessage([info]));
             }, logger.Error).ConfigureAwait(false);
         }

@@ -22,7 +22,7 @@ namespace Pathfinding.App.Console.ViewModel
             ISerializer<PathfindingHisotiriesSerializationModel>> serializers;
 
         private int[] selectedGraphIds = [];
-        public int[] SelectedGraphIds
+        private int[] SelectedGraphIds
         {
             get => selectedGraphIds;
             set => this.RaiseAndSetIfChanged(ref selectedGraphIds, value);

@@ -123,7 +123,8 @@ namespace Pathfinding.App.Console.ViewModel
 
         private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
         {
-            Graph = new Graph<GraphVertexModel>(msg.Graph.Vertices, msg.Graph.DimensionSizes);
+            Graph = new Graph<GraphVertexModel>(msg.Graph.Vertices,
+                msg.Graph.DimensionSizes);
             ActivatedGraphId = msg.Graph.Id;
         }
 
@@ -157,7 +158,7 @@ namespace Pathfinding.App.Console.ViewModel
                 {
                     visitedCount = 0;
                     var val = from + step * i;
-                    double? weight = val == 0 ? null : Math.Round(val, 1);
+                    double? weight = val == 0 ? null : Math.Round(val, 2);
                     var buildInfo = new AlgorithmBuildInfo(Algorithm.Value, 
                         Heuristic, weight, StepRule);
                     var algorithm = buildInfo.ToAlgorithm(pathfindingRange);
