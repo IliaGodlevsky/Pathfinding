@@ -17,7 +17,7 @@ namespace Pathfinding.App.Console.View
     internal sealed partial class HeuristicsView : FrameView
     {
         private readonly ustring[] radioLabels;
-        private readonly CompositeDisposable disposables = new();
+        private readonly CompositeDisposable disposables = [];
         private readonly IRequireHeuristicsViewModel heuristicsViewModel;
 
         public HeuristicsView(

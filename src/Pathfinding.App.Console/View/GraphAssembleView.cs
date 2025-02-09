@@ -13,16 +13,14 @@ namespace Pathfinding.App.Console.View
     internal sealed partial class GraphAssembleView : FrameView
     {
         private readonly CompositeDisposable disposables = [];
-        private readonly Terminal.Gui.View[] children;
 
         public GraphAssembleView(
-            [KeyFilter(KeyFilters.GraphAssembleView)] IEnumerable<Terminal.Gui.View> children,
+            [KeyFilter(KeyFilters.GraphAssembleView)] Terminal.Gui.View[] children,
             IGraphAssembleViewModel viewModel)
         {
             Initialize();
-            this.children = children.ToArray();
-            Add(this.children);
-            viewModel.CreateCommand.CanExecute
+            Add(children);
+            viewModel.AssembleGraphCommand.CanExecute
                 .BindTo(createButton, x => x.Enabled)
                 .DisposeWith(disposables);
             createButton.Events()
@@ -30,7 +28,7 @@ namespace Pathfinding.App.Console.View
                 .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
                 .Select(x => Unit.Default)
                 .Do(x => Visible = false)
-                .InvokeCommand(viewModel, x => x.CreateCommand)
+                .InvokeCommand(viewModel, x => x.AssembleGraphCommand)
                 .DisposeWith(disposables);
             foreach (var child in children)
             {

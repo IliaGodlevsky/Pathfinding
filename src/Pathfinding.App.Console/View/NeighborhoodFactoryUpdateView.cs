@@ -13,7 +13,7 @@ namespace Pathfinding.App.Console.View
 {
     internal sealed partial class NeighborhoodFactoryUpdateView : FrameView
     {
-        private readonly CompositeDisposable disposables = new();
+        private readonly CompositeDisposable disposables = [];
 
         public NeighborhoodFactoryUpdateView(GraphUpdateViewModel viewModel)
         {

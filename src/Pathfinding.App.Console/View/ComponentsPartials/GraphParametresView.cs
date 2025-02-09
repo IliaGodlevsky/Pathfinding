@@ -65,11 +65,8 @@ namespace Pathfinding.App.Console.View
                 args.KeyEvent.Key == Key.CursorLeft ||
                 args.KeyEvent.Key == Key.CursorRight ||
                 args.KeyEvent.Key == Key.Home ||
-                args.KeyEvent.Key == Key.End)
-            {
-                return;
-            }
-            if (char.IsDigit(keyChar))
+                args.KeyEvent.Key == Key.End ||
+                char.IsDigit(keyChar))
             {
                 return;
             }

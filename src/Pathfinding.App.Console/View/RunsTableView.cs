@@ -20,6 +20,7 @@ namespace Pathfinding.App.Console.View
     {
         private readonly CompositeDisposable disposables = [];
         private readonly Dictionary<int, IDisposable> modelsSubs = [];
+        private readonly Dictionary<string, bool> sortOrder = [];
 
         public RunsTableView(IRunsTableViewModel viewModel,
             [KeyFilter(KeyFilters.Views)] IMessenger messenger) : this()
@@ -55,7 +56,6 @@ namespace Pathfinding.App.Console.View
                     && args.KeyEvent.Key.HasFlag(Key.CtrlMask)
                     && Table.Rows.Count > 1)
                 .Do(x => OrderTable(IdCol, Ascending))
-                .Do(x => PreviousSortedColumn = string.Empty)
                 .Select(x => GetSelectedRows())
                 .InvokeCommand(viewModel, x => x.SelectRunsCommand)
                 .DisposeWith(disposables);
@@ -111,10 +111,10 @@ namespace Pathfinding.App.Console.View
             var selectedColumn = ScreenToCell(args.MouseEvent.X,
                 headerLinesConsumed);
             var column = Table.Columns[selectedColumn.Value.X].ColumnName;
-            Order = PreviousSortedColumn != column || !Order;
-            PreviousSortedColumn = column;
-            string sortOrder = Order ? Ascending : Descending;
-            OrderTable(column, sortOrder);
+            var toSort = !sortOrder.GetValueOrDefault(column, true);
+            sortOrder[column] = toSort;
+            string order = toSort ? Ascending : Descending;
+            OrderTable(column, order);
         }
 
         private void OrderTable(string columnName, string order)
@@ -126,7 +126,7 @@ namespace Pathfinding.App.Console.View
             SetNeedsDisplay();
         }
 
-        private object ToTableValue<T>(T? value)
+        private static object ToTableValue<T>(T? value)
             where T : struct => value == null ? DBNull.Value : value.Value;
 
         private void OnAdded(RunInfoModel model)
@@ -184,6 +184,7 @@ namespace Pathfinding.App.Console.View
                         Table.AcceptChanges();
                         modelsSubs.Values.ForEach(x => x.Dispose());
                         modelsSubs.Clear();
+                        sortOrder.Clear();
                         break;
                     case NotifyCollectionChangedAction.Add:
                         OnAdded((RunInfoModel)e.NewItems[0]);

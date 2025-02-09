@@ -6,10 +6,10 @@ namespace Pathfinding.App.Console.View
 {
     internal sealed partial class GraphTableButtonsFrame : FrameView
     {
-        public GraphTableButtonsFrame([KeyFilter(KeyFilters.GraphTableButtons)] IEnumerable<Terminal.Gui.View> children)
+        public GraphTableButtonsFrame([KeyFilter(KeyFilters.GraphTableButtons)] Terminal.Gui.View[] children)
         {
             Initialize();
-            Add(children.ToArray());
+            Add(children);
         }
     }
 }

@@ -6,10 +6,10 @@ namespace Pathfinding.App.Console.View
 {
     internal sealed partial class GraphPanel : FrameView
     {
-        public GraphPanel([KeyFilter(KeyFilters.GraphPanel)] IEnumerable<Terminal.Gui.View> children)
+        public GraphPanel([KeyFilter(KeyFilters.GraphPanel)] Terminal.Gui.View[] children)
         {
             Initialize();
-            Add(children.ToArray());
+            Add(children);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Pathfinding.App.Console.Extensions;
 using Pathfinding.Domain.Core;
 using System.Data;
+using System.Globalization;
 using Terminal.Gui;
 
 namespace Pathfinding.App.Console.View
@@ -17,16 +18,11 @@ namespace Pathfinding.App.Console.View
         private const string LogicCol = "Logic";
         private const string WeightCol = "Weight";
         private const string StatusCol = "Status";
-        private const string TimeFormat = @"ss\.fff";
 
         private const string Ascending = "ASC";
         private const string Descending = "DESC";
 
         private readonly int headerLinesConsumed;
-
-        private bool Order { get; set; } = false;
-
-        private string PreviousSortedColumn { get; set; } = string.Empty;
 
         private void SetTableStyle()
         {
@@ -39,7 +35,8 @@ namespace Pathfinding.App.Console.View
                 { Table.Columns[VisitedCol], new() { Alignment = TextAlignment.Centered } },
                 { Table.Columns[StepsCol], new() { Alignment = TextAlignment.Centered } },
                 { Table.Columns[CostCol], new() { Alignment = TextAlignment.Centered } },
-                { Table.Columns[ElapsedCol], new() { Format = TimeFormat, Alignment = TextAlignment.Centered } },
+                { Table.Columns[ElapsedCol], new() { Alignment = TextAlignment.Centered,
+                    RepresentationGetter = TimeToMilliseconds} },
                 { Table.Columns[StepCol], new() { MinWidth = 9, MaxWidth = 9, Alignment = TextAlignment.Centered,
                     RepresentationGetter = StepRulesToString } },
                 { Table.Columns[LogicCol], new() { MinWidth = 9, MaxWidth = 9, Alignment = TextAlignment.Centered,
@@ -59,6 +56,12 @@ namespace Pathfinding.App.Console.View
                 ColumnStyles = columnStyles,
                 ShowHorizontalScrollIndicators = true
             };
+        }
+
+        private static string TimeToMilliseconds(object time)
+        {
+            var t = (TimeSpan)time;
+            return Math.Round(t.TotalMilliseconds, 2).ToString(CultureInfo.InvariantCulture);
         }
 
         private static string AlgorithmToString(object algorithm)

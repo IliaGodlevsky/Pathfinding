@@ -13,15 +13,13 @@ namespace Pathfinding.App.Console.View
     internal sealed partial class GraphUpdateView : FrameView
     {
         private readonly CompositeDisposable disposables = [];
-        private readonly Terminal.Gui.View[] children;
 
         public GraphUpdateView(
-            [KeyFilter(KeyFilters.GraphUpdateView)] IEnumerable<Terminal.Gui.View> children,
+            [KeyFilter(KeyFilters.GraphUpdateView)] Terminal.Gui.View[] children,
             GraphUpdateViewModel viewModel)
         {
             Initialize();
-            this.children = children.ToArray();
-            Add(this.children);
+            Add(children);
             viewModel.UpdateGraphCommand.CanExecute
                 .BindTo(updateButton, x => x.Enabled)
                 .DisposeWith(disposables);

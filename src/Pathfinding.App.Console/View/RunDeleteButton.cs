@@ -15,8 +15,7 @@ namespace Pathfinding.App.Console.View
         public RunDeleteButton(IRunDeleteViewModel viewModel)
         {
             Initialize();
-            viewModel.WhenAnyValue(x => x.SelectedRunsIds)
-                .Select(x => x.Length > 0)
+            viewModel.DeleteRunsCommand.CanExecute
                 .BindTo(this, x => x.Enabled)
                 .DisposeWith(disposables);
             this.Events().MouseClick

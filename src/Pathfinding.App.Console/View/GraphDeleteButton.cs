@@ -15,13 +15,13 @@ namespace Pathfinding.App.Console.View
         public GraphDeleteButton(IGraphDeleteViewModel viewModel)
         {
             Initialize();
-            viewModel.DeleteCommand.CanExecute
+            viewModel.DeleteGraphCommand.CanExecute
                 .BindTo(this, x => x.Enabled)
                 .DisposeWith(disposables);
             this.Events().MouseClick
                 .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
                 .Select(x => Unit.Default)
-                .InvokeCommand(viewModel, x => x.DeleteCommand)
+                .InvokeCommand(viewModel, x => x.DeleteGraphCommand)
                 .DisposeWith(disposables);
         }
     }

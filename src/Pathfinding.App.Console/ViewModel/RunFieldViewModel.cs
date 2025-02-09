@@ -43,7 +43,7 @@ namespace Pathfinding.App.Console.ViewModel
             }
         }
 
-        public ObservableCollection<RunModel> Runs { get; } = [];
+        private ObservableCollection<RunModel> Runs { get; } = [];
 
         public IGraph<RunVertexModel> RunGraph { get; private set; } = Graph<RunVertexModel>.Empty;
 

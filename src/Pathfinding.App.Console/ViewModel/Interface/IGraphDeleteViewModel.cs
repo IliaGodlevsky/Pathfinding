@@ -5,6 +5,6 @@ namespace Pathfinding.App.Console.ViewModel.Interface
 {
     internal interface IGraphDeleteViewModel
     {
-        ReactiveCommand<Unit, Unit> DeleteCommand { get; }
+        ReactiveCommand<Unit, Unit> DeleteGraphCommand { get; }
     }
 }

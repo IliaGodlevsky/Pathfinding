@@ -27,12 +27,11 @@ namespace Pathfinding.App.Console.View
 
         private static (string Path, StreamFormat? Format) GetFileName()
         {
-            var formats = Enum
-                .GetValues<StreamFormat>()
+            var formats = Enum.GetValues<StreamFormat>()
                 .ToDictionary(x => x.ToExtensionRepresentation());
             var extensions = formats.Keys.ToList();
             using var dialog = new OpenDialog("Import",
-                "Import graph", extensions)
+                "Choose file", extensions)
             {
                 Width = Dim.Percent(45),
                 Height = Dim.Percent(55)

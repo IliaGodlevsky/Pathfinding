@@ -17,11 +17,11 @@ namespace Pathfinding.App.Console.View
 
         public RunCreateView(
             IRunCreateViewModel viewModel,
-            [KeyFilter(KeyFilters.AlgorithmCreationView)] IEnumerable<Terminal.Gui.View> children)
+            [KeyFilter(KeyFilters.AlgorithmCreationView)] Terminal.Gui.View[] children)
         {
             Initialize();
             
-            Add(children.ToArray());
+            Add(children);
             Add(buttonFrame);
             cancelButton.Events().MouseClick
                 .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)

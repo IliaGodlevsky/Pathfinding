@@ -5,6 +5,6 @@ namespace Pathfinding.App.Console.ViewModel.Interface
 {
     internal interface IGraphAssembleViewModel
     {
-        ReactiveCommand<Unit, Unit> CreateCommand { get; }
+        ReactiveCommand<Unit, Unit> AssembleGraphCommand { get; }
     }
 }

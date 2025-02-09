@@ -35,7 +35,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
 
             var viewModel = mock.Create<GraphDeleteViewModel>();
 
-            var command = viewModel.DeleteCommand;
+            var command = viewModel.DeleteGraphCommand;
             var canExecute = await command.CanExecute.FirstOrDefaultAsync();
             if (canExecute)
             {
@@ -74,7 +74,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
 
             var viewModel = mock.Create<GraphDeleteViewModel>();
 
-            await viewModel.DeleteCommand.Execute();
+            await viewModel.DeleteGraphCommand.Execute();
 
             mock.Mock<ILog>()
                 .Verify(x => x.Error(
@@ -90,7 +90,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
 
             var viewModel = mock.Create<GraphDeleteViewModel>();
 
-            var command = viewModel.DeleteCommand;
+            var command = viewModel.DeleteGraphCommand;
             var canExecute = await command.CanExecute.FirstOrDefaultAsync();
             if (canExecute)
             {

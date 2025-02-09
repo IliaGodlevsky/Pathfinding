@@ -7,10 +7,10 @@ namespace Pathfinding.App.Console.View
 {
     internal sealed partial class RunsPanel : FrameView
     {
-        public RunsPanel([KeyFilter(KeyFilters.RunsPanel)] IEnumerable<Terminal.Gui.View> children)
+        public RunsPanel([KeyFilter(KeyFilters.RunsPanel)] Terminal.Gui.View[] children)
         {
             Initialize();
-            Add(children.AsArray());
+            Add(children);
         }
     }
 }

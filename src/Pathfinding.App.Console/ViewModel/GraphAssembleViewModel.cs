@@ -13,7 +13,6 @@ using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Requests.Create;
-using Pathfinding.Shared.Extensions;
 using Pathfinding.Shared.Primitives;
 using ReactiveUI;
 using System.Reactive;
@@ -76,7 +75,7 @@ namespace Pathfinding.App.Console.ViewModel
             set => this.RaiseAndSetIfChanged(ref neighborhood, value);
         }
 
-        public ReactiveCommand<Unit, Unit> CreateCommand { get; }
+        public ReactiveCommand<Unit, Unit> AssembleGraphCommand { get; }
 
         public GraphAssembleViewModel(IRequestService<GraphVertexModel> service,
             IGraphAssemble<GraphVertexModel> graphAssemble,
@@ -87,7 +86,7 @@ namespace Pathfinding.App.Console.ViewModel
             this.messenger = messenger;
             this.logger = logger;
             this.graphAssemble = graphAssemble;
-            CreateCommand = ReactiveCommand.CreateFromTask(CreateGraph, CanExecute());
+            AssembleGraphCommand = ReactiveCommand.CreateFromTask(CreateGraph, CanExecute());
         }
 
         private IObservable<bool> CanExecute()

@@ -6,10 +6,10 @@ namespace Pathfinding.App.Console.View
 {
     internal sealed partial class RunsTableButtonsFrame : FrameView
     {
-        public RunsTableButtonsFrame([KeyFilter(KeyFilters.RunButtonsFrame)] IEnumerable<Terminal.Gui.View> children)
+        public RunsTableButtonsFrame([KeyFilter(KeyFilters.RunButtonsFrame)] Terminal.Gui.View[] children)
         {
             Initialize();
-            Add(children.ToArray());
+            Add(children);
         }
     }
 }

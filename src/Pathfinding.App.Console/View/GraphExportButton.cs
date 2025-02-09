@@ -43,7 +43,7 @@ namespace Pathfinding.App.Console.View
                 .ToDictionary(x => x.ToExtensionRepresentation());
             var allowedTypes = formats.Keys.ToList();
             using var dialog = new SaveDialog("Export",
-                "Enter file name", allowedTypes)
+                "Choose file", allowedTypes)
             {
                 Width = Dim.Percent(45),
                 Height = Dim.Percent(55)

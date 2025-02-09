@@ -48,7 +48,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             viewModel.Obstacles = 10;
             viewModel.Name = "Demo";
 
-            var command = viewModel.CreateCommand;
+            var command = viewModel.AssembleGraphCommand;
             bool canExecute = await command.CanExecute.FirstOrDefaultAsync();
             if (canExecute)
             {

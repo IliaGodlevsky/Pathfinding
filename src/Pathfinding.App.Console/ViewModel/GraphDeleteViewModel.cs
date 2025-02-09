@@ -24,14 +24,14 @@ namespace Pathfinding.App.Console.ViewModel
             set => this.RaiseAndSetIfChanged(ref selectedGraphIds, value);
         }
 
-        public ReactiveCommand<Unit, Unit> DeleteCommand { get; }
+        public ReactiveCommand<Unit, Unit> DeleteGraphCommand { get; }
 
         public GraphDeleteViewModel(
             [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
             IRequestService<GraphVertexModel> service,
             ILog logger)
         {
-            DeleteCommand = ReactiveCommand.CreateFromTask(DeleteGraph, CanDelete());
+            DeleteGraphCommand = ReactiveCommand.CreateFromTask(DeleteGraph, CanDelete());
             this.messenger = messenger;
             this.service = service;
             this.logger = logger;
@@ -41,7 +41,7 @@ namespace Pathfinding.App.Console.ViewModel
         private IObservable<bool> CanDelete()
         {
             return this.WhenAnyValue(x => x.SelectedGraphIds,
-                (ids) => ids.Length > 0);
+                ids => ids.Length > 0);
         }
 
         private async Task DeleteGraph()

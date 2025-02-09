@@ -6,7 +6,7 @@ namespace Pathfinding.App.Console.View
 {
     internal sealed class RightPanelView : Window
     {
-        public RightPanelView([KeyFilter(KeyFilters.RightPanel)] IEnumerable<Terminal.Gui.View> children)
+        public RightPanelView([KeyFilter(KeyFilters.RightPanel)] Terminal.Gui.View[] children)
         {
             X = Pos.Percent(66);
             Y = 0;
@@ -14,7 +14,7 @@ namespace Pathfinding.App.Console.View
             Height = Dim.Fill();
             Border = new Border();
 
-            Add(children.ToArray());
+            Add(children);
         }
     }
 }

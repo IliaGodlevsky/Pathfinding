@@ -6,14 +6,14 @@ namespace Pathfinding.App.Console.View
 {
     internal sealed class MainView : Window
     {
-        public MainView([KeyFilter(KeyFilters.MainWindow)] IEnumerable<Terminal.Gui.View> children)
+        public MainView([KeyFilter(KeyFilters.MainWindow)] Terminal.Gui.View[] children)
         {
             X = 0;
             Y = 0;
             Height = Dim.Fill();
             Width = Dim.Fill();
             Border = new() { DrawMarginFrame = false, BorderThickness = new(0) };
-            Add(children.ToArray());
+            Add(children);
             Loaded += OnActivate;
         }
 

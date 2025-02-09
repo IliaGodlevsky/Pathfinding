@@ -66,7 +66,7 @@ namespace Pathfinding.App.Console.ViewModel
         private IObservable<bool> CanExecute()
         {
             return this.WhenAnyValue(x => x.SelectedGraphIds,
-                (ids) => ids.Length > 0);
+                ids => ids.Length > 0);
         }
     }
 }

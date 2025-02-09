@@ -9,7 +9,7 @@ namespace Pathfinding.App.Console.View
 {
     internal sealed class GraphVertexView : VertexView<GraphVertexModel>
     {
-        private readonly CompositeDisposable disposables = new();
+        private readonly CompositeDisposable disposables = [];
 
         public GraphVertexView(GraphVertexModel model)
             : base(model)

@@ -3,15 +3,10 @@ using System.Reactive;
 
 namespace Pathfinding.App.Console.Messages.ViewModel
 {
-    internal sealed class AsyncGraphUpdatedMessage : IAsyncMessage<Unit>
+    internal sealed class AsyncGraphUpdatedMessage(GraphInformationModel model) : IAsyncMessage<Unit>
     {
-        public GraphInformationModel Model { get; }
+        public GraphInformationModel Model { get; } = model;
 
         public Action<Unit> Signal { get; set; } = unit => throw new InvalidOperationException();
-
-        public AsyncGraphUpdatedMessage(GraphInformationModel model)
-        {
-            Model = model;
-        }
     }
 }
