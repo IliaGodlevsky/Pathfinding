@@ -4,12 +4,12 @@ namespace Pathfinding.App.Console.View
 {
     internal sealed partial class GraphParametresView
     {
-        private readonly Label graphWidthLabel = new Label("Width");
+        private readonly Label graphWidthLabel = new("Width");
         private readonly TextField graphWidthInput = new TextField();
-        private readonly Label graphLengthLabel = new Label("Length");
+        private readonly Label graphLengthLabel = new("Length");
         private readonly TextField graphLengthInput = new TextField();
-        private readonly Label obstaclesLabel = new Label("Obstacles");
-        private readonly TextField obstaclesInput = new TextField();
+        private readonly Label obstaclesLabel = new("Obstacles");
+        private readonly TextField obstaclesInput = new();
 
         private void Initialize()
         {

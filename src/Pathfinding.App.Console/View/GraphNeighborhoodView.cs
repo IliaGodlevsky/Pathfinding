@@ -10,11 +10,11 @@ using Terminal.Gui;
 
 namespace Pathfinding.App.Console.View
 {
-    internal sealed partial class NeighborhoodFactoryView : FrameView
+    internal sealed partial class GraphNeighborhoodView : FrameView
     {
         private readonly CompositeDisposable disposables = [];
 
-        public NeighborhoodFactoryView(IRequireNeighborhoodNameViewModel viewModel)
+        public GraphNeighborhoodView(IRequireNeighborhoodNameViewModel viewModel)
         {
             var neighborhoods = Enum.GetValues<Neighborhoods>()
                 .ToDictionary(x => x.ToStringRepresentation());

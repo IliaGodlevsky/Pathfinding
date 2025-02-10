@@ -11,11 +11,11 @@ using Terminal.Gui;
 
 namespace Pathfinding.App.Console.View
 {
-    internal sealed partial class SmoothLevelUpdateView : FrameView
+    internal sealed partial class GraphSmoothLevelUpdateView : FrameView
     {
         private readonly CompositeDisposable disposables = [];
 
-        public SmoothLevelUpdateView(GraphUpdateViewModel viewModel)
+        public GraphSmoothLevelUpdateView(GraphUpdateViewModel viewModel)
         {
             var lvls = Enum.GetValues<SmoothLevels>()
                 .ToDictionary(x => x.ToStringRepresentation());

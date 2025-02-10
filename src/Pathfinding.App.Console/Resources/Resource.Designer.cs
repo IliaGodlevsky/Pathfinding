@@ -358,6 +358,15 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Populate.
+        /// </summary>
+        internal static string RunsPopulate {
+            get {
+                return ResourceManager.GetString("RunsPopulate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Snake.
         /// </summary>
         internal static string Snake {

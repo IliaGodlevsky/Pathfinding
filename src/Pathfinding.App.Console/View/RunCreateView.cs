@@ -17,7 +17,7 @@ namespace Pathfinding.App.Console.View
 
         public RunCreateView(
             IRunCreateViewModel viewModel,
-            [KeyFilter(KeyFilters.AlgorithmCreationView)] Terminal.Gui.View[] children)
+            [KeyFilter(KeyFilters.RunCreateView)] Terminal.Gui.View[] children)
         {
             Initialize();
             

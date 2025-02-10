@@ -2,9 +2,9 @@
 
 namespace Pathfinding.App.Console.View
 {
-    internal partial class StepRulesView
+    internal partial class RunStepRulesView
     {
-        private readonly RadioGroup stepRules = new RadioGroup();
+        private readonly RadioGroup stepRules = new();
 
         private void Initialize()
         {

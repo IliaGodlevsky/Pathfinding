@@ -63,7 +63,7 @@ namespace Pathfinding.App.Console.Injection
             builder.RegisterGenericDecorator(typeof(BufferedSerializer<>), typeof(ISerializer<>));
 
             builder.RegisterType<FileLog>().As<ILog>().SingleInstance();
-            builder.RegisterType<ConsoleLog>().As<ILog>().SingleInstance();
+            builder.RegisterType<MessageBoxLog>().As<ILog>().SingleInstance();
             builder.RegisterComposite<Logs, ILog>().As<ILog>().SingleInstance();
 
             builder.RegisterType<WeakReferenceMessenger>().Keyed<IMessenger>(KeyFilters.Views)
@@ -99,12 +99,12 @@ namespace Pathfinding.App.Console.Injection
 
             builder.RegisterType<GraphNameView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
             builder.RegisterType<GraphParametresView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
-            builder.RegisterType<NeighborhoodFactoryView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
-            builder.RegisterType<SmoothLevelView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
+            builder.RegisterType<GraphNeighborhoodView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
+            builder.RegisterType<GraphSmoothLevelView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
 
             builder.RegisterType<GraphNameUpdateView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
-            builder.RegisterType<SmoothLevelUpdateView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
-            builder.RegisterType<NeighborhoodFactoryUpdateView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
+            builder.RegisterType<GraphSmoothLevelUpdateView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
+            builder.RegisterType<GraphNeighborhoodUpdateView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
 
             builder.RegisterType<RunsTableView>().Keyed<Terminal.Gui.View>(KeyFilters.RunsPanel).WithAttributeFiltering();
             builder.RegisterType<RunsTableButtonsFrame>().Keyed<Terminal.Gui.View>(KeyFilters.RunsPanel).WithAttributeFiltering();
@@ -114,12 +114,12 @@ namespace Pathfinding.App.Console.Injection
             builder.RegisterType<RunUpdateView>().Keyed<Terminal.Gui.View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
             builder.RegisterType<RunDeleteButton>().Keyed<Terminal.Gui.View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
 
-            builder.RegisterType<RunsListView>().Keyed<Terminal.Gui.View>(KeyFilters.AlgorithmCreationView).WithAttributeFiltering();
-            builder.RegisterType<RunParametresView>().Keyed<Terminal.Gui.View>(KeyFilters.AlgorithmCreationView).WithAttributeFiltering();
+            builder.RegisterType<RunsListView>().Keyed<Terminal.Gui.View>(KeyFilters.RunCreateView).WithAttributeFiltering();
+            builder.RegisterType<RunParametresView>().Keyed<Terminal.Gui.View>(KeyFilters.RunCreateView).WithAttributeFiltering();
 
-            builder.RegisterType<StepRulesView>().Keyed<Terminal.Gui.View>(KeyFilters.AlgorithmParametresView).WithAttributeFiltering();
-            builder.RegisterType<HeuristicsView>().Keyed<Terminal.Gui.View>(KeyFilters.AlgorithmParametresView).WithAttributeFiltering();
-            builder.RegisterType<RunsPopulateView>().Keyed<Terminal.Gui.View>(KeyFilters.AlgorithmParametresView).WithAttributeFiltering();
+            builder.RegisterType<RunStepRulesView>().Keyed<Terminal.Gui.View>(KeyFilters.RunParametresView).WithAttributeFiltering();
+            builder.RegisterType<RunHeuristicsView>().Keyed<Terminal.Gui.View>(KeyFilters.RunParametresView).WithAttributeFiltering();
+            builder.RegisterType<RunsPopulateView>().Keyed<Terminal.Gui.View>(KeyFilters.RunParametresView).WithAttributeFiltering();
 
             return builder.Build();
         }

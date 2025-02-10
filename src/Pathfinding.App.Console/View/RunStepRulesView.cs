@@ -15,13 +15,13 @@ using Terminal.Gui;
 
 namespace Pathfinding.App.Console.View
 {
-    internal sealed partial class StepRulesView : FrameView
+    internal sealed partial class RunStepRulesView : FrameView
     {
         private readonly CompositeDisposable disposables = [];
 
         private readonly IRequireStepRuleViewModel viewModel;
 
-        public StepRulesView(
+        public RunStepRulesView(
             [KeyFilter(KeyFilters.Views)] IMessenger messenger,
             IRequireStepRuleViewModel viewModel)
         {

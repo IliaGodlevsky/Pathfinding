@@ -14,8 +14,7 @@
         public const string IncludeCommands = nameof(IncludeCommands);
         public const string ExcludeCommands = nameof(ExcludeCommands);
         public const string RunButtonsFrame = nameof(RunButtonsFrame);
-        public const string AlgorithmCreationView = nameof(AlgorithmCreationView);
-        public const string AlgorithmParametresView = nameof(AlgorithmParametresView);
-        public const string CreateRunButtonsFrame = nameof(CreateRunButtonsFrame);
+        public const string RunCreateView = nameof(RunCreateView);
+        public const string RunParametresView = nameof(RunParametresView);
     }
 }

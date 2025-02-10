@@ -2,9 +2,9 @@
 
 namespace Pathfinding.App.Console.View
 {
-    internal sealed partial class NeighborhoodFactoryView
+    internal sealed partial class GraphNeighborhoodView
     {
-        private readonly RadioGroup neighborhoods = new RadioGroup();
+        private readonly RadioGroup neighborhoods = new();
 
         private void Initialize()
         {

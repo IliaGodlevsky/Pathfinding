@@ -3,7 +3,7 @@ using Terminal.Gui;
 
 namespace Pathfinding.App.Console.View
 {
-    internal sealed class ConsoleLog : ILog
+    internal sealed class MessageBoxLog : ILog
     {
         private static void QueryMessageBox(string title, string message)
         {

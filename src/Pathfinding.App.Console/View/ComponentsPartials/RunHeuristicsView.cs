@@ -2,9 +2,9 @@
 
 namespace Pathfinding.App.Console.View
 {
-    internal sealed partial class HeuristicsView : FrameView
+    internal sealed partial class RunHeuristicsView : FrameView
     {
-        private readonly RadioGroup heuristics = new RadioGroup();
+        private readonly RadioGroup heuristics = new();
 
         private void Initialize()
         {

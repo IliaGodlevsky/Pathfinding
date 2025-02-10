@@ -11,11 +11,11 @@ using Terminal.Gui;
 
 namespace Pathfinding.App.Console.View
 {
-    internal sealed partial class NeighborhoodFactoryUpdateView : FrameView
+    internal sealed partial class GraphNeighborhoodUpdateView : FrameView
     {
         private readonly CompositeDisposable disposables = [];
 
-        public NeighborhoodFactoryUpdateView(GraphUpdateViewModel viewModel)
+        public GraphNeighborhoodUpdateView(GraphUpdateViewModel viewModel)
         {
             Initialize();
             var factories = Enum.GetValues<Neighborhoods>()

@@ -14,13 +14,13 @@ using Terminal.Gui;
 
 namespace Pathfinding.App.Console.View
 {
-    internal sealed partial class HeuristicsView : FrameView
+    internal sealed partial class RunHeuristicsView : FrameView
     {
         private readonly ustring[] radioLabels;
         private readonly CompositeDisposable disposables = [];
         private readonly IRequireHeuristicsViewModel heuristicsViewModel;
 
-        public HeuristicsView(
+        public RunHeuristicsView(
             [KeyFilter(KeyFilters.Views)] IMessenger messenger,
             IRequireHeuristicsViewModel heuristicsViewModel)
         {

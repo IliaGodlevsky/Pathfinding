@@ -1,74 +1,70 @@
-﻿using NLog;
-using Pathfinding.Logging.Interface;
+﻿using Pathfinding.Logging.Interface;
+using Serilog;
+using Serilog.Events;
 
 namespace Pathfinding.Logging.Loggers
 {
-    public sealed class FileLog : ILog
+    public sealed class FileLog : ILog, IDisposable
     {
-        private readonly ILogger infoLogger;
-        private readonly ILogger debugLogger;
-        private readonly Logger errorLogger;
-        private readonly ILogger traceLogger;
-
         public FileLog()
         {
-            infoLogger = LogManager.GetLogger("Info");
-            errorLogger = LogManager.GetLogger("Error");
-            debugLogger = LogManager.GetLogger("Debug");
-            traceLogger = LogManager.GetLogger("Trace");
-        }
-
-        public void Trace(string message)
-        {
-            Write(message, traceLogger.Trace);
-        }
-
-        public void Warn(Exception ex, string message = null)
-        {
-            Write(ex, message, errorLogger.Warn);
-        }
-
-        public void Warn(string message)
-        {
-            errorLogger.Warn(message);
-        }
-
-        public void Error(Exception ex, string message = null)
-        {
-            Write(ex, message, errorLogger.Error);
-        }
-
-        public void Error(string message)
-        {
-            errorLogger.Error(message);
-        }
-
-        public void Fatal(Exception ex, string message = null)
-        {
-            Write(ex, message, errorLogger.Fatal);
-        }
-
-        public void Fatal(string message)
-        {
-            errorLogger.Fatal(message);
-        }
-
-        public void Info(string message)
-        {
-            Write(message, infoLogger.Info);
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.File(
+                    path: "logs\\log-.txt",
+                    rollingInterval: RollingInterval.Month,
+                    restrictedToMinimumLevel: LogEventLevel.Information)
+                .CreateLogger();
         }
 
         public void Debug(string message)
         {
-            Write(message, debugLogger.Debug);
+            Log.Logger.Debug(message);
         }
 
-        private static void Write(string message, Action<string> action) => action(message);
-
-        private static void Write(Exception ex, string message,
-            Action<Exception, string> action)
+        public void Error(Exception ex, string message = null)
         {
-            action(ex, string.IsNullOrEmpty(message) ? string.Empty : message);
+            Log.Logger.Error(ex, message ?? ex.Message);
+        }
+
+        public void Error(string message)
+        {
+            Log.Logger.Error(message);
+        }
+
+        public void Fatal(Exception ex, string message = null)
+        {
+            Log.Logger.Fatal(ex, message ?? ex.Message);
+        }
+
+        public void Fatal(string message)
+        {
+            Log.Logger.Fatal(message);
+        }
+
+        public void Info(string message)
+        {
+            Log.Logger.Information(message);
+        }
+
+        public void Trace(string message)
+        {
+            Log.Logger.Information(message);
+        }
+
+        public void Warn(Exception ex, string message = null)
+        {
+            Log.Logger.Warning(ex, message ?? ex.Message);
+        }
+
+        public void Warn(string message)
+        {
+            Log.Logger.Warning(message);
+        }
+
+        public void Dispose()
+        {
+            Log.CloseAndFlush();
         }
     }
 }

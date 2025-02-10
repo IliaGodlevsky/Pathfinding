@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Pathfinding.App.Console.Resources;
+using System.Globalization;
 using Terminal.Gui;
 
 namespace Pathfinding.App.Console.View
@@ -16,12 +17,12 @@ namespace Pathfinding.App.Console.View
         {
             X = 0;
             Y = Pos.Percent(58);
-            Height = Dim.Percent(40);
+            Height = Dim.Percent(42);
             Width = Dim.Percent(30);
             Border = new Border()
             {
                 BorderStyle = BorderStyle.Rounded,
-                Title = "Populate"
+                Title = Resource.RunsPopulate
             };
             Visible = false;
 
