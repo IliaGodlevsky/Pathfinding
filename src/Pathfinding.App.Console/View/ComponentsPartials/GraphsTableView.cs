@@ -1,5 +1,5 @@
 ﻿using Pathfinding.App.Console.Extensions;
-using Pathfinding.Domain.Core;
+using Pathfinding.Domain.Core.Enums;
 using System.Data;
 using Terminal.Gui;
 
@@ -21,18 +21,18 @@ namespace Pathfinding.App.Console.View
 
         public GraphsTableView()
         {
-            table.Columns.AddRange(new DataColumn[]
-            {
-                new DataColumn(IdCol, typeof(int)),
-                new DataColumn(NameCol, typeof(string)),
-                new DataColumn(WidthCol, typeof(int)),
-                new DataColumn(LengthCol, typeof(int)),
-                new DataColumn(NeighborsCol, typeof(Neighborhoods)),
-                new DataColumn(SmoothCol, typeof(SmoothLevels)),
-                new DataColumn(ObstaclesCol, typeof(int)),
-                new DataColumn(StatusCol, typeof(GraphStatuses)),
-            });
-            table.PrimaryKey = new DataColumn[] { table.Columns[IdCol] };
+            table.Columns.AddRange(
+            [
+                new(IdCol, typeof(int)),
+                new(NameCol, typeof(string)),
+                new(WidthCol, typeof(int)),
+                new(LengthCol, typeof(int)),
+                new(NeighborsCol, typeof(Neighborhoods)),
+                new(SmoothCol, typeof(SmoothLevels)),
+                new(ObstaclesCol, typeof(int)),
+                new(StatusCol, typeof(GraphStatuses)),
+            ]);
+            table.PrimaryKey = [table.Columns[IdCol]];
             var columnStyles = new Dictionary<DataColumn, ColumnStyle>()
             {
                 { table.Columns[IdCol], new() { Visible = false } },

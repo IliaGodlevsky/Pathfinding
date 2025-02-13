@@ -1,4 +1,4 @@
-﻿namespace Pathfinding.Domain.Core
+﻿namespace Pathfinding.Domain.Core.Enums
 {
     public enum Neighborhoods
     {

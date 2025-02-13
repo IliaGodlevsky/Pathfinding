@@ -1,4 +1,6 @@
-﻿namespace Pathfinding.Domain.Core
+﻿using Pathfinding.Domain.Core.Enums;
+
+namespace Pathfinding.Domain.Core.Entities
 {
     public class Graph : IEntity<int>
     {

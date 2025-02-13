@@ -1,4 +1,4 @@
-﻿using Pathfinding.Domain.Core;
+﻿using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface;
 
 namespace Pathfinding.Service.Interface.Requests.Create

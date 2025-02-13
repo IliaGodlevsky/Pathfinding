@@ -18,16 +18,12 @@ namespace Pathfinding.App.Console.View
 {
     internal sealed partial class GraphsTableView
     {
-        private readonly IGraphTableViewModel viewModel;
         private readonly CompositeDisposable disposables = [];
         private readonly Dictionary<int, IDisposable> modelChangingSubs = [];
-        private readonly IMessenger messenger;
 
         public GraphsTableView(IGraphTableViewModel viewModel,
             [KeyFilter(KeyFilters.Views)] IMessenger messenger) : this()
         {
-            this.viewModel = viewModel;
-            this.messenger = messenger;
             viewModel.Graphs.ActOnEveryObject(AddToTable, RemoveFromTable)
                 .DisposeWith(disposables);
             this.Events().Initialized

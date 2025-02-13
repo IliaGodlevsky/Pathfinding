@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Pathfinding.Domain.Core;
+using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface.Models.Read;

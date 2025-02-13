@@ -6,7 +6,7 @@ using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel;
 using Pathfinding.App.Console.Model;
 using Pathfinding.App.Console.ViewModel.Interface;
-using Pathfinding.Domain.Core;
+using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
 using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Infrastructure.Data.Pathfinding;

@@ -1,5 +1,5 @@
 ﻿using Pathfinding.App.Console.Extensions;
-using Pathfinding.Domain.Core;
+using Pathfinding.Domain.Core.Enums;
 using System.Data;
 using System.Globalization;
 using Terminal.Gui;

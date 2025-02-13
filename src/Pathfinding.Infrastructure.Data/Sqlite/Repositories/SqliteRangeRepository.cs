@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Data.Sqlite;
-using Pathfinding.Domain.Core;
+using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Interface.Repositories;
 
 namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories

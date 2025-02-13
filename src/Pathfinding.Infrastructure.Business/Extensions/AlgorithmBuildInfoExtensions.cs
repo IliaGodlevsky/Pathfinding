@@ -1,10 +1,10 @@
-﻿using Pathfinding.Domain.Core;
+﻿using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Business.Algorithms;
 using Pathfinding.Infrastructure.Business.Algorithms.Heuristics;
 using Pathfinding.Infrastructure.Business.Algorithms.StepRules;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models;
-using Algorithm = Pathfinding.Domain.Core.Algorithms;
+using Algorithm = Pathfinding.Domain.Core.Enums.Algorithms;
 
 namespace Pathfinding.Infrastructure.Business.Extensions;
 

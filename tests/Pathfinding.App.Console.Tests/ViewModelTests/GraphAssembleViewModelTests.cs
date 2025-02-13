@@ -5,6 +5,7 @@ using Pathfinding.App.Console.Messages.ViewModel;
 using Pathfinding.App.Console.Model;
 using Pathfinding.App.Console.ViewModel;
 using Pathfinding.ConsoleApp.Tests;
+using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
@@ -33,18 +34,18 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                 {
                     Id = 1,
                     Name = "Demo",
-                    SmoothLevel = Domain.Core.SmoothLevels.No,
-                    Neighborhood = Domain.Core.Neighborhoods.VonNeumann,
-                    Status = Domain.Core.GraphStatuses.Editable,
+                    SmoothLevel = SmoothLevels.No,
+                    Neighborhood = Neighborhoods.VonNeumann,
+                    Status = GraphStatuses.Editable,
                     Vertices = [],
                     DimensionSizes = [15, 15]
                 }));
 
             var viewModel = mock.Create<GraphAssembleViewModel>();
-            viewModel.SmoothLevel = Domain.Core.SmoothLevels.No;
+            viewModel.SmoothLevel = SmoothLevels.No;
             viewModel.Length = 15;
             viewModel.Width = 15;
-            viewModel.Neighborhood = Domain.Core.Neighborhoods.VonNeumann;
+            viewModel.Neighborhood = Neighborhoods.VonNeumann;
             viewModel.Obstacles = 10;
             viewModel.Name = "Demo";
 

@@ -27,7 +27,7 @@ namespace Pathfinding.Infrastructure.Data.Pathfinding
                 return coordinate;
             }
             var coordinates = range.Iterate().Select(Coordinate).ToArray();
-            return new Coordinate(coordinates);
+            return new(coordinates);
         }
     }
 }

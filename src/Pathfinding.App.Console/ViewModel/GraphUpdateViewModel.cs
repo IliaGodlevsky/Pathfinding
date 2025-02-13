@@ -5,7 +5,7 @@ using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel;
 using Pathfinding.App.Console.Model;
-using Pathfinding.Domain.Core;
+using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using ReactiveUI;

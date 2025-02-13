@@ -1,5 +1,8 @@
 ﻿using Pathfinding.Domain.Interface;
 using Pathfinding.Infrastructure.Data.Extensions;
+using ReactiveUI;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Terminal.Gui;
 using static Pathfinding.App.Console.Settings;
 
@@ -20,9 +23,16 @@ namespace Pathfinding.App.Console.View
 
         protected readonly T model;
         protected const int LabelWidth = GraphFieldView.DistanceBetweenVertices;
+        protected readonly CompositeDisposable disposables = [];
 
         protected VertexView(T model)
         {
+            model.WhenAnyValue(x => x.Cost)
+                .Select(x => x.CurrentCost.ToString())
+                .Do(x => Text = x)
+                .Subscribe()
+                .DisposeWith(disposables);
+
             this.model = model;
             X = model.Position.GetX() * LabelWidth;
             Y = model.Position.GetY();
@@ -35,6 +45,12 @@ namespace Pathfinding.App.Console.View
             var backgroundColor = Enum.Parse<Color>(Settings.Default.BackgroundColor);
             var attribute = driver.MakeAttribute(Enum.Parse<Color>(foreground), backgroundColor);
             return new() { Normal = attribute };
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            disposables.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

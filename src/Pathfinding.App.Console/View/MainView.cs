@@ -23,7 +23,7 @@ namespace Pathfinding.App.Console.View
             var backgroundColor = Enum.Parse<Color>(Settings.Default.BackgroundColor);
             var foregroundColor = Enum.Parse<Color>(Settings.Default.ForegroundColor);
             var attribute = driver.MakeAttribute(foregroundColor, backgroundColor);
-            Colors.Base.Normal = attribute;
+            Colors.ColorSchemes["Base"].Normal = attribute;
         }
     }
 }

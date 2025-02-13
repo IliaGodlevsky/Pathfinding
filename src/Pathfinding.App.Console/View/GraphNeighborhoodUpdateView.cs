@@ -2,7 +2,7 @@
 using NStack;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.ViewModel;
-using Pathfinding.Domain.Core;
+using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive.Disposables;

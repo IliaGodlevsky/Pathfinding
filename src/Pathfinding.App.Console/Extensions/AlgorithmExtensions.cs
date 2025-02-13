@@ -1,5 +1,5 @@
 ﻿using Pathfinding.App.Console.Resources;
-using Pathfinding.Domain.Core;
+using Pathfinding.Domain.Core.Enums;
 
 namespace Pathfinding.App.Console.Extensions
 {

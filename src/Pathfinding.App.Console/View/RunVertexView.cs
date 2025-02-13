@@ -9,16 +9,8 @@ namespace Pathfinding.App.Console.View
 {
     internal sealed class RunVertexView : VertexView<RunVertexModel>
     {
-        private readonly CompositeDisposable disposables = [];
-
         public RunVertexView(RunVertexModel model) : base(model)
         {
-            model.WhenAnyValue(x => x.Cost)
-                .Select(x => x.CurrentCost.ToString())
-                .Do(x => Text = x)
-                .Subscribe()
-                .DisposeWith(disposables);
-
             BindTo(x => x.IsObstacle, ObstacleColor, RegularColor, 0);
             BindTo(x => x.IsTarget, TargetColor, RegularColor);
             BindTo(x => x.IsSource, SourceColor, RegularColor);
@@ -37,12 +29,6 @@ namespace Pathfinding.App.Console.View
                .Select(x => x ? toColor : falseColor)
                .BindTo(this, x => x.ColorScheme)
                .DisposeWith(disposables);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            disposables.Dispose();
-            base.Dispose(disposing);
         }
     }
 }

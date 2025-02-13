@@ -1,4 +1,4 @@
-﻿using Pathfinding.Domain.Core;
+﻿using Pathfinding.Domain.Core.Enums;
 
 namespace Pathfinding.App.Console.ViewModel.Interface
 {

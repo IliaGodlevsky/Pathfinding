@@ -74,7 +74,7 @@ namespace Pathfinding.App.Console.View
             });
             Application.MainLoop.Invoke(() =>
             {
-                container.Add(children.ToArray());
+                container.Add([.. children]);
                 container.Width = graph.GetWidth()
                     * GraphFieldView.DistanceBetweenVertices;
                 container.Height = graph.GetLength();

@@ -4,7 +4,7 @@ using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel;
 using Pathfinding.App.Console.Model;
 using Pathfinding.App.Console.ViewModel.Interface;
-using Pathfinding.Domain.Core;
+using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Business.Algorithms.Exceptions;
 using Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
 using Pathfinding.Infrastructure.Business.Extensions;

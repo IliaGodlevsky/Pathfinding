@@ -1,4 +1,4 @@
-﻿using Pathfinding.Domain.Core;
+﻿using Pathfinding.Domain.Core.Enums;
 
 namespace Pathfinding.Service.Interface.Requests.Create
 {
@@ -6,7 +6,7 @@ namespace Pathfinding.Service.Interface.Requests.Create
     {
         public int GraphId { get; set; }
 
-        public Domain.Core.Algorithms Algorithm { get; set; }
+        public Algorithms Algorithm { get; set; }
 
         public HeuristicFunctions? Heuristics { get; set; } = null;
 

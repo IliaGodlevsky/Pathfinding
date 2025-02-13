@@ -1,4 +1,4 @@
-﻿using Pathfinding.Domain.Core;
+﻿using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Service.Interface.Extensions;
 using System.Xml;
 using System.Xml.Schema;

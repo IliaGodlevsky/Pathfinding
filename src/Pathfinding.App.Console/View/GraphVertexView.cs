@@ -9,8 +9,6 @@ namespace Pathfinding.App.Console.View
 {
     internal sealed class GraphVertexView : VertexView<GraphVertexModel>
     {
-        private readonly CompositeDisposable disposables = [];
-
         public GraphVertexView(GraphVertexModel model)
             : base(model)
         {
@@ -18,12 +16,6 @@ namespace Pathfinding.App.Console.View
             BindTo(x => x.IsSource, SourceColor);
             BindTo(x => x.IsTransit, TransitColor);
             BindTo(x => x.IsObstacle, ObstacleColor);
-
-            model.WhenAnyValue(x => x.Cost)
-                .Select(x => x.CurrentCost.ToString())
-                .Do(x => Text = x)
-                .Subscribe()
-                .DisposeWith(disposables);
         }
 
         private void BindTo(Expression<Func<GraphVertexModel, bool>> expression,
@@ -33,12 +25,6 @@ namespace Pathfinding.App.Console.View
                .Select(x => x ? toColor : RegularColor)
                .BindTo(this, x => x.ColorScheme)
                .DisposeWith(disposables);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            disposables.Dispose();
-            base.Dispose(disposing);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Pathfinding.Domain.Core;
+﻿using Pathfinding.Domain.Core.Entities;
 
 namespace Pathfinding.Domain.Interface.Repositories
 {

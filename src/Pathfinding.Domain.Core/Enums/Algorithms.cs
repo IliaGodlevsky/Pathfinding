@@ -1,4 +1,4 @@
-﻿namespace Pathfinding.Domain.Core
+﻿namespace Pathfinding.Domain.Core.Enums
 {
     // Do not change the values of the enums, they are
     // used to identify the algorithms in the database
