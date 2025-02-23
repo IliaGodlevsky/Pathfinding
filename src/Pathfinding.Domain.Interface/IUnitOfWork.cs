@@ -2,7 +2,7 @@
 
 namespace Pathfinding.Domain.Interface
 {
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork : IDisposable, IAsyncDisposable
     {
         IGraphParametresRepository GraphRepository { get; }
 
@@ -12,14 +12,10 @@ namespace Pathfinding.Domain.Interface
 
         IStatisticsRepository StatisticsRepository { get; }
 
-        void BeginTransaction();
+        Task BeginTransactionAsync(CancellationToken token = default);
 
-        void Rollback();
+        Task RollbackTransactionAsync(CancellationToken token = default);
 
-        void Commit();
-
-        Task RollbackAsync(CancellationToken token = default);
-
-        Task CommitAsync(CancellationToken token = default);
+        Task CommitTransactionAsync(CancellationToken token = default);
     }
 }

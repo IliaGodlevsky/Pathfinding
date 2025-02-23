@@ -59,8 +59,8 @@ namespace Pathfinding.App.Console.ViewModel
                 var stream = streamFactory();
                 var exportFormat = stream.Format;
                 var exportStream = stream.Stream;
-                using (exportStream)
-                {
+                await using (exportStream)
+                { 
                     if (exportStream != Stream.Null && exportFormat.HasValue)
                     {
                         var serializer = serializers[exportFormat.Value];

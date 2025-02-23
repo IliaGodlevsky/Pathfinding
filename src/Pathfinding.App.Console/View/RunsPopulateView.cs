@@ -26,173 +26,120 @@ namespace Pathfinding.App.Console.View
             IRequireHeuristicsViewModel heuristicsViewModel)
         {
             Initialize();
+            this.heuristicsViewModel = heuristicsViewModel;
+
             weightTextField.Events().TextChanging
-                .Select(x =>
-                {
-                    if (string.IsNullOrEmpty(x.NewText.ToString()))
-                    {
-                        return -1;
-                    }
-                    else if (double.TryParse(x.NewText.ToString(), out double value))
-                    {
-                        if (!WeightRange.Contains(value))
-                        {
-                            value = WeightRange.ReturnInRange(value);
-                            x.NewText = value.ToString();
-                        }
-                        return value;
-                    }
-                    return -1;
-                })
+                .Select(e => GetValidValue(e, ClampWeight))
                 .BindTo(heuristicsViewModel, x => x.FromWeight)
                 .DisposeWith(disposables);
+
             toWeightTextField.Events().TextChanging
-                .Select(x =>
-                {
-                    double value;
-                    if (string.IsNullOrEmpty(x.NewText.ToString()))
-                    {
-                        return -1;
-                    }
-                    else if (double.TryParse(x.NewText.ToString(), out value))
-                    {
-                        if (value == -1)
-                        {
-                            x.NewText = string.Empty;
-                            return -1;
-                        }
-                        if (!WeightRange.Contains(value))
-                        {
-                            value = WeightRange.ReturnInRange(value);
-                            x.NewText = value.ToString();
-                        }
-                        if (double.TryParse(weightTextField.Text.ToString(), out var weight)
-                            && value < weight)
-                        {
-                            value = weight;
-                            x.NewText = value.ToString();
-                        }
-                    }
-                    return value;
-                })
+                .Select(e => GetValidValue(e, ClampToWeight))
                 .BindTo(heuristicsViewModel, x => x.ToWeight)
                 .DisposeWith(disposables);
-            toWeightTextField.Events()
-                .TextChanged
-                .Do(x =>
-                {
-                    if (double.TryParse(weightTextField.Text.ToString(), out var weight)
-                        && double.TryParse(toWeightTextField.Text.ToString(), out var toWeight))
-                    {
-                        var parsed = double.TryParse(stepTextField.Text.ToString(), out var step);
-                        if (parsed && step == 0 && toWeight > weight)
-                        {
-                            double value = toWeight - weight;
-                            var round = Math.Round(value, 3);
-                            stepTextField.Text = round.ToString();
-                        }
-                        else if (toWeight - weight < step || toWeight == weight)
-                        {
-                            stepTextField.Text = (toWeight - weight).ToString();
-                        }
-                    }
-                })
-                .Subscribe()
-                .DisposeWith(disposables);
-            weightTextField.Events()
-                .TextChanged
-                .Do(x =>
-                {
-                    if (double.TryParse(weightTextField.Text.ToString(), out var weight)
-                        && double.TryParse(toWeightTextField.Text.ToString(), out var toWeight))
-                    {
-                        var parsed = double.TryParse(stepTextField.Text.ToString(), out var step);
-                        if (weight >= toWeight)
-                        {
-                            toWeightTextField.Text = weightTextField.Text;
-                            stepTextField.Text = 0.ToString();
-                        }
-                        else if (parsed && step == 0 || toWeight - weight < step)
-                        {
-                            double value = toWeight - weight;
-                            var round = Math.Round(value, 3);
-                            stepTextField.Text = round.ToString();
-                        }
-                    }
-                })
-                .Subscribe()
-                .DisposeWith(disposables);
-            stepTextField.Events().TextChanging
-                .Select(x =>
-                {
-                    if (string.IsNullOrEmpty(x.NewText.ToString()))
-                    {
-                        return -1;
-                    }
-                    else if (double.TryParse(x.NewText.ToString(), out var value)
-                        && !WeightRange.Contains(value))
-                    {
-                        if (value == -1)
-                        {
-                            x.NewText = string.Empty;
-                            return -1;
-                        }
 
-                        var returned = WeightRange.ReturnInRange(value);
-                        x.NewText = returned.ToString();
-                        return returned;
-                    }
-                    else if (double.TryParse(x.NewText.ToString(), out var val))
-                    {
-                        if (double.TryParse(weightTextField.Text.ToString(), out var weight)
-                            && double.TryParse(toWeightTextField.Text.ToString(), out var toWeight))
-                        {
-                            var range = Math.Round(toWeight - weight, 3);
-                            if (val > range)
-                            {
-                                val = range;
-                                x.NewText = val.ToString();
-                            }
-                        }
-                        return val;
-                    }
-                    return -1;
-                })
+            stepTextField.Events().TextChanging
+                .Select(e => GetValidValue(e, ClampStep))
                 .BindTo(heuristicsViewModel, x => x.Step)
                 .DisposeWith(disposables);
+
+            Observable.Merge(
+                weightTextField.Events().TextChanged,
+                toWeightTextField.Events().TextChanged)
+                .Do(_ => UpdateStepAndSync())
+                .Subscribe()
+                .DisposeWith(disposables);
+
             messenger.Register<OpenRunsPopulateViewMessage>(this, OnOpen);
             messenger.Register<CloseRunPopulateViewMessage>(this, OnViewClosed);
             messenger.Register<CloseRunCreateViewMessage>(this, OnRunCreationViewClosed);
             messenger.Register<OpenHeuristicsViewMessage>(this, OnHeuristicsOpen);
-            this.heuristicsViewModel = heuristicsViewModel;
+        }
+
+        private static double GetValidValue(TextChangingEventArgs e, Func<double, double> clampFunc)
+        {
+            var text = e.NewText.ToString();
+            if (string.IsNullOrWhiteSpace(text))
+                return -1;
+
+            if (!double.TryParse(text, out var value))
+                return -1;
+
+            var clamped = clampFunc(value);
+            if (clamped != value)
+            {
+                value = clamped;
+                e.NewText = value.ToString();
+            }
+            return value;
+        }
+
+        private double ClampWeight(double value) =>
+            WeightRange.Contains(value) ? value : WeightRange.ReturnInRange(value);
+
+        private double ClampToWeight(double value)
+        {
+            value = ClampWeight(value);
+            if (double.TryParse(weightTextField.Text.ToString(), out var weight) && value < weight)
+                value = weight;
+            return value;
+        }
+
+        private double ClampStep(double value)
+        {
+            if (double.TryParse(weightTextField.Text.ToString(), out var weight) &&
+                double.TryParse(toWeightTextField.Text.ToString(), out var toWeight))
+            {
+                var maxStep = Math.Round(toWeight - weight, 3);
+                return value > maxStep ? maxStep : value;
+            }
+            return value;
+        }
+
+        private void UpdateStepAndSync()
+        {
+            if (!double.TryParse(weightTextField.Text.ToString(), out var weight) ||
+                !double.TryParse(toWeightTextField.Text.ToString(), out var toWeight))
+            {
+                return;
+            }
+
+            if (weight >= toWeight)
+            {
+                toWeightTextField.Text = weight.ToString();
+                stepTextField.Text = "0";
+                return;
+            }
+
+            var step = double.TryParse(stepTextField.Text.ToString(), out var s) ? s : 0;
+            var calculatedStep = Math.Round(toWeight - weight, 3);
+            if (step == 0 || step > calculatedStep)
+                stepTextField.Text = calculatedStep.ToString();
         }
 
         private void OnHeuristicsOpen(object recipient, OpenHeuristicsViewMessage msg)
         {
-            heuristicsViewModel.FromWeight = DefaultWeight;
-            heuristicsViewModel.ToWeight = DefaultWeight;
-            heuristicsViewModel.Step = 0;
+            SetDefaults();
         }
 
         private void OnOpen(object recipient, OpenRunsPopulateViewMessage msg)
         {
-            weightTextField.Text = DefaultWeight.ToString();
-            toWeightTextField.Text = DefaultWeight.ToString();
-            stepTextField.Text = 0.ToString();
-            heuristicsViewModel.FromWeight = DefaultWeight;
-            heuristicsViewModel.ToWeight = DefaultWeight;
-            heuristicsViewModel.Step = 0;
+            SetDefaults();
             Visible = true;
         }
 
-        private void OnViewClosed(object recipient, CloseRunPopulateViewMessage msg)
-        {
-            Close();
-        }
+        private void OnViewClosed(object recipient, CloseRunPopulateViewMessage msg) => Close();
 
-        private void OnRunCreationViewClosed(object recipient, CloseRunCreateViewMessage msg)
+        private void OnRunCreationViewClosed(object recipient, CloseRunCreateViewMessage msg) => Close();
+
+        private void SetDefaults()
         {
-            Close();
+            weightTextField.Text = DefaultWeight.ToString();
+            toWeightTextField.Text = DefaultWeight.ToString();
+            stepTextField.Text = "0";
+            heuristicsViewModel.FromWeight = DefaultWeight;
+            heuristicsViewModel.ToWeight = DefaultWeight;
+            heuristicsViewModel.Step = 0;
         }
 
         private void Close()
@@ -203,4 +150,5 @@ namespace Pathfinding.App.Console.View
             Visible = false;
         }
     }
+
 }

@@ -41,19 +41,10 @@ namespace Pathfinding.Infrastructure.Data.LiteDb
             StatisticsRepository = new LiteDbStatisticsRepository(database);
         }
 
-        public void BeginTransaction()
+        public async Task BeginTransactionAsync(CancellationToken token = default)
         {
             database.BeginTrans();
-        }
-
-        public void Commit()
-        {
-            database.Commit();
-        }
-
-        public void Rollback()
-        {
-            database.Rollback();
+            await Task.CompletedTask;
         }
 
         public void Dispose()
@@ -61,17 +52,21 @@ namespace Pathfinding.Infrastructure.Data.LiteDb
             database.Dispose();
         }
 
-        public async Task RollbackAsync(CancellationToken token = default)
+        public async Task RollbackTransactionAsync(CancellationToken token = default)
         {
-            token.ThrowIfCancellationRequested();
             database.Rollback();
             await Task.CompletedTask;
         }
 
-        public async Task CommitAsync(CancellationToken token = default)
+        public async Task CommitTransactionAsync(CancellationToken token = default)
         {
-            token.ThrowIfCancellationRequested();
             database.Commit();
+            await Task.CompletedTask;
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            database.Dispose();
             await Task.CompletedTask;
         }
     }

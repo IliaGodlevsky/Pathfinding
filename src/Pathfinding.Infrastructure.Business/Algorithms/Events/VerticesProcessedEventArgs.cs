@@ -3,19 +3,13 @@ using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms.Events
 {
-    public class VerticesProcessedEventArgs : EventArgs
+    public class VerticesProcessedEventArgs(IPathfindingVertex current,
+        IEnumerable<IPathfindingVertex> enqueued) : EventArgs
     {
-        public Coordinate Current { get; }
+        public Coordinate Current { get; } = current.Position;
 
-        public IReadOnlyList<Coordinate> Enqueued { get; }
-
-        public VerticesProcessedEventArgs(IPathfindingVertex current,
-            IEnumerable<IPathfindingVertex> enqueued)
-        {
-            Current = current.Position;
-            Enqueued = enqueued.Select(x => x.Position)
+        public IReadOnlyList<Coordinate> Enqueued { get; } = enqueued.Select(x => x.Position)
                 .ToList()
                 .AsReadOnly();
-        }
     }
 }

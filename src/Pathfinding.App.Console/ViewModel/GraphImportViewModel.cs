@@ -45,7 +45,7 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
             var stream = streamFactory();
             var importFormat = stream.Format;
             var importStream = stream.Stream;
-            using (importStream)
+            await using (importStream)
             {
                 if (importStream != Stream.Null && importFormat.HasValue)
                 {

@@ -26,29 +26,23 @@ namespace Pathfinding.Infrastructure.Data.Sqlite
         {
             connection = new SqliteConnection(connectionString);
             connection.Open();
-            transaction = connection.BeginTransaction();
-            _ = new SqliteVerticesRepository(connection, transaction);
         }
 
-        public void BeginTransaction()
+        public async Task BeginTransactionAsync(CancellationToken token = default)
         {
-            transaction ??= connection.BeginTransaction();
+            transaction ??= (SqliteTransaction)await connection
+                .BeginTransactionAsync(token)
+                .ConfigureAwait(false);
         }
 
-        public void Commit()
+        public async Task CommitTransactionAsync(CancellationToken token = default)
         {
             if (transaction is not null)
             {
-                transaction.Commit();
-                transaction.Dispose();
+                await transaction.CommitAsync(token).ConfigureAwait(false);
+                await transaction.DisposeAsync().ConfigureAwait(false);
                 transaction = null;
             }
-        }
-
-        public async Task CommitAsync(CancellationToken token = default)
-        {
-            Commit();
-            await Task.CompletedTask;
         }
 
         public void Dispose()
@@ -57,20 +51,23 @@ namespace Pathfinding.Infrastructure.Data.Sqlite
             connection.Dispose();
         }
 
-        public void Rollback()
+        public async Task RollbackTransactionAsync(CancellationToken token = default)
         {
             if (transaction is not null)
             {
-                transaction.Rollback();
-                transaction.Dispose();
+                await transaction.RollbackAsync(token).ConfigureAwait(false);
+                await transaction.DisposeAsync().ConfigureAwait(false);
                 transaction = null;
             }
         }
 
-        public async Task RollbackAsync(CancellationToken token = default)
+        public async ValueTask DisposeAsync()
         {
-            Rollback();
-            await Task.CompletedTask;
+            if (transaction is not null)
+            {
+                await transaction.DisposeAsync().ConfigureAwait(false);
+            }
+            await connection.DisposeAsync().ConfigureAwait(false);
         }
     }
 }

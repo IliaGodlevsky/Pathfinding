@@ -2,13 +2,8 @@
 
 namespace Pathfinding.Infrastructure.Business.Algorithms.Events
 {
-    public class SubPathFoundEventArgs : EventArgs
+    public class SubPathFoundEventArgs(IGraphPath subPath) : EventArgs
     {
-        public IGraphPath SubPath { get; }
-
-        public SubPathFoundEventArgs(IGraphPath subPath)
-        {
-            SubPath = subPath;
-        }
+        public IGraphPath SubPath { get; } = subPath;
     }
 }

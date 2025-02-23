@@ -25,17 +25,12 @@ namespace Pathfinding.Infrastructure.Data.InMemory
             GraphRepository = new InMemoryGraphParametresRepository(range, vertices, statistics);
         }
 
-        public void BeginTransaction()
+        public async Task BeginTransactionAsync(CancellationToken token = default)
         {
-
+            await Task.CompletedTask;
         }
 
-        public void Commit()
-        {
-
-        }
-
-        public async Task CommitAsync(CancellationToken token = default)
+        public async Task CommitTransactionAsync(CancellationToken token = default)
         {
             await Task.CompletedTask;
         }
@@ -45,12 +40,12 @@ namespace Pathfinding.Infrastructure.Data.InMemory
 
         }
 
-        public void Rollback()
+        public async Task RollbackTransactionAsync(CancellationToken token = default)
         {
-
+            await Task.CompletedTask;
         }
 
-        public async Task RollbackAsync(CancellationToken token = default)
+        public async ValueTask DisposeAsync()
         {
             await Task.CompletedTask;
         }

@@ -63,7 +63,7 @@ namespace Pathfinding.Infrastructure.Business
                     await unitOfWork.StatisticsRepository.CreateAsync(statistics, t);
                     var range = history.Range
                         .Select(x => new Coordinate(x.Coordinate))
-                        .ToList().AsReadOnly();
+                        .ToList();
                     var rangeVertices = range
                         .Select((x, i) => (Order: i, Vertex: graph.Get(x)))
                         .ToList();
@@ -110,7 +110,7 @@ namespace Pathfinding.Infrastructure.Business
             CancellationToken token = default)
         {
             return await Transaction(async (unitOfWork, t)
-                => await unitOfWork.RangeRepository.DeleteByGraphIdAsync(graphId, t), token).ConfigureAwait(false);
+                => await unitOfWork.RangeRepository.DeleteByGraphIdAsync(graphId, t).ConfigureAwait(false), token).ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyCollection<GraphInformationModel>> ReadAllGraphInfoAsync(CancellationToken token = default)
@@ -131,14 +131,16 @@ namespace Pathfinding.Infrastructure.Business
             CancellationToken token = default)
         {
             return await Transaction(async (unitOfWork, t)
-                => await ReadGraphInternalAsync(unitOfWork, graphId, t).ConfigureAwait(false), token);
+                => await ReadGraphInternalAsync(unitOfWork, graphId, t).ConfigureAwait(false), token)
+                .ConfigureAwait(false);
         }
 
         public async Task<GraphModel<T>> CreateGraphAsync(CreateGraphRequest<T> graph,
             CancellationToken token = default)
         {
             return await Transaction(async (unit, t)
-                => await CreateGraphAsyncInternal(unit, graph, t).ConfigureAwait(false), token);
+                => await CreateGraphAsyncInternal(unit, graph, t).ConfigureAwait(false), token)
+                .ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeAsync(int graphId,
@@ -157,7 +159,7 @@ namespace Pathfinding.Infrastructure.Business
                 var result = await unit.StatisticsRepository
                     .ReadByGraphIdAsync(graphId, t).ConfigureAwait(false);
                 return result.ToRunStatisticsModels();
-            }, token);
+            }, token).ConfigureAwait(false);
         }
 
         public async Task<PathfindingHisotiriesSerializationModel> ReadSerializationHistoriesAsync(IEnumerable<int> graphIds,
@@ -233,7 +235,7 @@ namespace Pathfinding.Infrastructure.Business
                 var vertices = request.Vertices.ToVertexEntities();
                 return await vertices
                        .ForEach(x => x.GraphId = request.GraphId)
-                       .ToAsync(async (x, tkn) => await repo.UpdateVerticesAsync(x, tkn), t);
+                       .ToAsync(async (x, tkn) => await repo.UpdateVerticesAsync(x, tkn).ConfigureAwait(false), t);
             }, token).ConfigureAwait(false);
         }
 
@@ -252,7 +254,7 @@ namespace Pathfinding.Infrastructure.Business
             {
                 var entities = models.ToStatistics();
                 return await unit.StatisticsRepository.UpdateAsync(entities, t).ConfigureAwait(false);
-            }, token);
+            }, token).ConfigureAwait(false);
         }
 
         public async Task<bool> DeleteRunsAsync(IEnumerable<int> runIds, CancellationToken token = default)
@@ -269,7 +271,7 @@ namespace Pathfinding.Infrastructure.Business
             return await Transaction(async (unit, t) =>
             {
                 var range = (await unit.RangeRepository
-                    .ReadByGraphIdAsync(graphId, t)).ToList();
+                    .ReadByGraphIdAsync(graphId, t).ConfigureAwait(false)).ToList();
                 var pathfindingRange = new PathfindingRange()
                 {
                     GraphId = graphId,
@@ -283,18 +285,19 @@ namespace Pathfinding.Infrastructure.Business
                     range[i].IsTarget = i == range.Count - 1 && range.Count > 1;
                     range[i].Order = i;
                 }
-                await unit.RangeRepository.UpsertAsync(range, t);
+                await unit.RangeRepository.UpsertAsync(range, t).ConfigureAwait(false);
                 return true;
-            }, token);
+            }, token).ConfigureAwait(false);
         }
 
         public async Task<RunStatisticsModel> ReadStatisticAsync(int runId, CancellationToken token = default)
         {
             return await Transaction(async (unit, t) =>
             {
-                var statistic = await unit.StatisticsRepository.ReadByIdAsync(runId, token);
+                var statistic = await unit.StatisticsRepository
+                    .ReadByIdAsync(runId, t).ConfigureAwait(false);
                 return statistic.ToRunStatisticsModel();
-            }, token);
+            }, token).ConfigureAwait(false);
         }
 
         public async Task<GraphInformationModel> ReadGraphInfoAsync(int graphId, CancellationToken token = default)
@@ -311,24 +314,24 @@ namespace Pathfinding.Infrastructure.Business
             {
                 var graphInfo = graph.ToGraphEntity();
                 return await unit.GraphRepository.UpdateAsync(graphInfo, t);
-            }, token);
+            }, token).ConfigureAwait(false);
         }
 
         private async Task<TParam> Transaction<TParam>(
             Func<IUnitOfWork, CancellationToken, Task<TParam>> action,
             CancellationToken token)
         {
-            using var unitOfWork = factory();
+            await using var unitOfWork = factory();
             try
             {
-                unitOfWork.BeginTransaction();
+                await unitOfWork.BeginTransactionAsync(token).ConfigureAwait(false);
                 var result = await action(unitOfWork, token).ConfigureAwait(false);
-                await unitOfWork.CommitAsync(token).ConfigureAwait(false);
+                await unitOfWork.CommitTransactionAsync(token).ConfigureAwait(false);
                 return result;
             }
             catch (Exception)
             {
-                await unitOfWork.RollbackAsync(token).ConfigureAwait(false);
+                await unitOfWork.RollbackTransactionAsync(token).ConfigureAwait(false);
                 throw;
             }
         }

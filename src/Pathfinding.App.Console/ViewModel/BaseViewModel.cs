@@ -8,7 +8,7 @@ namespace Pathfinding.App.Console.ViewModel
         {
             try
             {
-                await action();
+                await action().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
