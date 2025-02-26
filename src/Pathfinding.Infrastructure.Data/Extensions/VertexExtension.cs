@@ -1,5 +1,4 @@
 ﻿using Pathfinding.Domain.Interface;
-using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Data.Extensions
 {
@@ -9,11 +8,6 @@ namespace Pathfinding.Infrastructure.Data.Extensions
         {
             return self?.IsObstacle == true
                 || self?.Neighbors.All(vertex => vertex.IsObstacle) == true;
-        }
-
-        public static bool HasNoNeighbours(this IPathfindingVertex vertex)
-        {
-            return vertex.Neighbors.Count == 0;
         }
 
         public static bool IsEqual(this IVertex self, IVertex vertex)

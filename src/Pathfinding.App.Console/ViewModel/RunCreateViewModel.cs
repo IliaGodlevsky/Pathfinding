@@ -93,13 +93,13 @@ namespace Pathfinding.App.Console.ViewModel
             this.messenger = messenger;
             this.service = service;
             this.logger = logger;
-            CreateRunCommand = ReactiveCommand.CreateFromTask(StartAlgorithm,
-                CanStartAlgorithm());
+            CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm,
+                CanCreateAlgorithm());
             messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
             messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
         }
 
-        private IObservable<bool> CanStartAlgorithm()
+        private IObservable<bool> CanCreateAlgorithm()
         {
             return this.WhenAnyValue(
                 x => x.Graph,
@@ -112,7 +112,7 @@ namespace Pathfinding.App.Console.ViewModel
                 {
                     bool canExecute = graph != Graph<GraphVertexModel>.Empty
                         && algorithm != null
-                        && Enum.IsDefined(typeof(Algorithms), algorithm.Value);
+                        && Enum.IsDefined(algorithm.Value);
                     if (heuristic != null)
                     {
                         return canExecute && weight > 0 && to > 0 && step >= 0;
@@ -137,7 +137,7 @@ namespace Pathfinding.App.Console.ViewModel
             }
         }
 
-        private async Task StartAlgorithm()
+        private async Task CreateAlgorithm()
         {
             var pathfindingRange = (await service.ReadRangeAsync(ActivatedGraphId)
                 .ConfigureAwait(false))
@@ -199,7 +199,8 @@ namespace Pathfinding.App.Console.ViewModel
                 }
                 await ExecuteSafe(async () =>
                 {
-                    var result = await service.CreateStatisticsAsync(list).ConfigureAwait(false);
+                    var result = await service.CreateStatisticsAsync(list)
+                        .ConfigureAwait(false);
                     messenger.Send(new RunCreatedMessaged(result));
                 }, logger.Error).ConfigureAwait(false);
             }

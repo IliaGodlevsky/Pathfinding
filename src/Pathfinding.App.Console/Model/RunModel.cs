@@ -136,7 +136,7 @@ internal class RunModel : ReactiveObject, IDisposable
     {
         if (graph.Count == 0 || pathfindingResult.Count == 0 || range.Count < 2)
         {
-            return Array.AsReadOnly(Array.Empty<RunVertexStateModel>());
+            return ReadOnlyCollection<RunVertexStateModel>.Empty;
         }
 
         var previousVisited = new HashSet<Coordinate>();

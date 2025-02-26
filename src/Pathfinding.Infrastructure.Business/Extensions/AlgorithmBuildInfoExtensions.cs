@@ -15,14 +15,17 @@ public static class AlgorithmBuildInfoExtensions
     {
         return info.Algorithm switch
         {
-            Algorithm.AStar => new AStarAlgorithm(range, GetStepRule(info.StepRule),
+            Algorithm.AStar => new AStarAlgorithm(range, 
+                GetStepRule(info.StepRule),
                 GetHeuristic(info.Heuristics, info.Weight)),
             Algorithm.AStarGreedy => new AStarGreedyAlgorithm(range,
-                GetHeuristic(info.Heuristics, info.Weight), GetStepRule(info.StepRule)),
+                GetHeuristic(info.Heuristics, info.Weight), 
+                GetStepRule(info.StepRule)),
             Algorithm.AStarLee => new AStarLeeAlgorithm(range,
                 GetHeuristic(info.Heuristics, info.Weight)),
             Algorithm.BidirectAStar => new BidirectAStarAlgorithm(range,
-                GetStepRule(info.StepRule), GetHeuristic(info.Heuristics, info.Weight)),
+                GetStepRule(info.StepRule), 
+                GetHeuristic(info.Heuristics, info.Weight)),
             Algorithm.BidirectDijkstra => new BidirectDijkstraAlgorithm(range,
                 GetStepRule(info.StepRule)),
             Algorithm.BidirectLee => new BidirectLeeAlgorithm(range),

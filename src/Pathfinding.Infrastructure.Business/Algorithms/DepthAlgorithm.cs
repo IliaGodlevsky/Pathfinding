@@ -35,7 +35,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
 
         protected override void VisitCurrentVertex()
         {
-            if (CurrentVertex.HasNoNeighbours())
+            if (CurrentVertex.Neighbors.Count == 0)
             {
                 CurrentVertex = storage.PopOrThrowDeadEndVertexException();
             }

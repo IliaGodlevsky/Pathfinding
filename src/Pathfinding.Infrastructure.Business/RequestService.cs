@@ -60,7 +60,7 @@ namespace Pathfinding.Infrastructure.Business
                     var model = await CreateGraphAsyncInternal(unitOfWork, createGraphRequest, t).ConfigureAwait(false);
                     var statistics = history.Statistics.ToStatistics();
                     statistics.ForEach(x => x.GraphId = model.Id);
-                    await unitOfWork.StatisticsRepository.CreateAsync(statistics, t);
+                    await unitOfWork.StatisticsRepository.CreateAsync(statistics, t).ConfigureAwait(false);
                     var range = history.Range
                         .Select(x => new Coordinate(x.Coordinate))
                         .ToList();
@@ -75,7 +75,7 @@ namespace Pathfinding.Infrastructure.Business
                         IsSource = x.Order == 0,
                         IsTarget = x.Order == rangeVertices.Count - 1 && rangeVertices.Count > 1
                     }).ToReadOnly();
-                    await unitOfWork.RangeRepository.CreateAsync(entities, t);
+                    await unitOfWork.RangeRepository.CreateAsync(entities, t).ConfigureAwait(false);
                     models.Add(new PathfindingHistoryModel<T>()
                     {
                         Graph = new()
@@ -102,7 +102,8 @@ namespace Pathfinding.Infrastructure.Business
             return await Transaction(async (unitOfWork, t) =>
             {
                 var verticesIds = request.Select(x => x.Id);
-                return await unitOfWork.RangeRepository.DeleteByVerticesIdsAsync(verticesIds, t);
+                return await unitOfWork.RangeRepository.DeleteByVerticesIdsAsync(verticesIds, t)
+                    .ConfigureAwait(false);
             }, token).ConfigureAwait(false);
         }
 
@@ -110,14 +111,16 @@ namespace Pathfinding.Infrastructure.Business
             CancellationToken token = default)
         {
             return await Transaction(async (unitOfWork, t)
-                => await unitOfWork.RangeRepository.DeleteByGraphIdAsync(graphId, t).ConfigureAwait(false), token).ConfigureAwait(false);
+                => await unitOfWork.RangeRepository.DeleteByGraphIdAsync(graphId, t)
+                .ConfigureAwait(false), token).ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyCollection<GraphInformationModel>> ReadAllGraphInfoAsync(CancellationToken token = default)
         {
             return await Transaction(async (unitOfWork, t) =>
             {
-                var result = (await unitOfWork.GraphRepository.GetAll(t)).ToList();
+                var result = (await unitOfWork.GraphRepository.GetAll(t)
+                    .ConfigureAwait(false)).ToList();
                 var ids = result.Select(x => x.Id).ToList();
                 var obstaclesCount = await unitOfWork.GraphRepository.ReadObstaclesCountAsync(ids, token)
                     .ConfigureAwait(false);
@@ -192,7 +195,8 @@ namespace Pathfinding.Infrastructure.Business
                 var result = new List<PathfindingHistorySerializationModel>();
                 foreach (var graphId in graphIds)
                 {
-                    var graph = await ReadGraphInternalAsync(unitOfWork, graphId, t).ConfigureAwait(false);
+                    var graph = await ReadGraphInternalAsync(unitOfWork, graphId, t)
+                        .ConfigureAwait(false);
                     graph.Status = GraphStatuses.Editable;
                     result.Add(new()
                     {
@@ -235,7 +239,8 @@ namespace Pathfinding.Infrastructure.Business
                 var vertices = request.Vertices.ToVertexEntities();
                 return await vertices
                        .ForEach(x => x.GraphId = request.GraphId)
-                       .ToAsync(async (x, tkn) => await repo.UpdateVerticesAsync(x, tkn).ConfigureAwait(false), t);
+                       .ToAsync(async (x, tkn) => await repo.UpdateVerticesAsync(x, tkn)
+                            .ConfigureAwait(false), t);
             }, token).ConfigureAwait(false);
         }
 
@@ -243,7 +248,8 @@ namespace Pathfinding.Infrastructure.Business
             CancellationToken token = default)
         {
             return await Transaction(async (unitOfWork, t)
-                => await unitOfWork.GraphRepository.DeleteAsync(ids, t).ConfigureAwait(false), token)
+                => await unitOfWork.GraphRepository.DeleteAsync(ids, t)
+                    .ConfigureAwait(false), token)
                 .ConfigureAwait(false);
         }
 
@@ -253,7 +259,8 @@ namespace Pathfinding.Infrastructure.Business
             return await Transaction(async (unit, t) =>
             {
                 var entities = models.ToStatistics();
-                return await unit.StatisticsRepository.UpdateAsync(entities, t).ConfigureAwait(false);
+                return await unit.StatisticsRepository.UpdateAsync(entities, t)
+                    .ConfigureAwait(false);
             }, token).ConfigureAwait(false);
         }
 
@@ -261,7 +268,8 @@ namespace Pathfinding.Infrastructure.Business
         {
             return await Transaction(async (unit, t) =>
             {
-                return await unit.StatisticsRepository.DeleteByIdsAsync(runIds, t).ConfigureAwait(false);
+                return await unit.StatisticsRepository.DeleteByIdsAsync(runIds, t)
+                    .ConfigureAwait(false);
             }, token).ConfigureAwait(false);
         }
 
@@ -313,7 +321,8 @@ namespace Pathfinding.Infrastructure.Business
             return await Transaction(async (unit, t) =>
             {
                 var graphInfo = graph.ToGraphEntity();
-                return await unit.GraphRepository.UpdateAsync(graphInfo, t);
+                return await unit.GraphRepository.UpdateAsync(graphInfo, t)
+                    .ConfigureAwait(false);
             }, token).ConfigureAwait(false);
         }
 
