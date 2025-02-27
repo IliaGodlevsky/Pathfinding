@@ -1,4 +1,4 @@
-﻿using Pathfinding.App.Console.Model;
+﻿using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.Resources;
 
 namespace Pathfinding.App.Console.Extensions

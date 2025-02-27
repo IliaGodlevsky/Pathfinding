@@ -1,6 +1,6 @@
 ﻿using Autofac;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.View;
+using Pathfinding.App.Console.Views;
 using Terminal.Gui;
 
 Application.Init();

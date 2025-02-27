@@ -1,16 +1,15 @@
 ﻿using Pathfinding.Domain.Interface;
 using Pathfinding.Shared.Primitives;
 
-namespace Pathfinding.Service.Interface
+namespace Pathfinding.Service.Interface;
+
+public interface IPathfindingVertex
 {
-    public interface IPathfindingVertex
-    {
-        public bool IsObstacle { get; }
+    public bool IsObstacle { get; }
 
-        public Coordinate Position { get; }
+    public Coordinate Position { get; }
 
-        public IVertexCost Cost { get; }
+    public IVertexCost Cost { get; }
 
-        public IReadOnlyCollection<IPathfindingVertex> Neighbors { get; }
-    }
+    public IReadOnlyCollection<IPathfindingVertex> Neighbors { get; }
 }

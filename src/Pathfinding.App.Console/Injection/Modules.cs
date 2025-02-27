@@ -1,9 +1,9 @@
 ﻿using Autofac;
 using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
-using Pathfinding.App.Console.Model;
-using Pathfinding.App.Console.View;
-using Pathfinding.App.Console.ViewModel;
+using Pathfinding.App.Console.Models;
+using Pathfinding.App.Console.Views;
+using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Business;
 using Pathfinding.Infrastructure.Business.Commands;
@@ -15,6 +15,7 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Logging.Loggers;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Serialization;
+using Terminal.Gui;
 
 namespace Pathfinding.App.Console.Injection
 {
@@ -77,49 +78,49 @@ namespace Pathfinding.App.Console.Injection
 
             builder.RegisterType<MainView>().AsSelf().WithAttributeFiltering();
 
-            builder.RegisterType<RightPanelView>().Keyed<Terminal.Gui.View>(KeyFilters.MainWindow).WithAttributeFiltering();
-            builder.RegisterType<GraphFieldView>().Keyed<Terminal.Gui.View>(KeyFilters.MainWindow).WithAttributeFiltering();
-            builder.RegisterType<RunFieldView>().Keyed<Terminal.Gui.View>(KeyFilters.MainWindow).WithAttributeFiltering();
-            builder.RegisterType<RunProgressView>().Keyed<Terminal.Gui.View>(KeyFilters.MainWindow).WithAttributeFiltering();
+            builder.RegisterType<RightPanelView>().Keyed<View>(KeyFilters.MainWindow).WithAttributeFiltering();
+            builder.RegisterType<GraphFieldView>().Keyed<View>(KeyFilters.MainWindow).WithAttributeFiltering();
+            builder.RegisterType<RunFieldView>().Keyed<View>(KeyFilters.MainWindow).WithAttributeFiltering();
+            builder.RegisterType<RunProgressView>().Keyed<View>(KeyFilters.MainWindow).WithAttributeFiltering();
 
-            builder.RegisterType<GraphPanel>().Keyed<Terminal.Gui.View>(KeyFilters.RightPanel).WithAttributeFiltering();
-            builder.RegisterType<RunsPanel>().Keyed<Terminal.Gui.View>(KeyFilters.RightPanel).WithAttributeFiltering();
+            builder.RegisterType<GraphPanel>().Keyed<View>(KeyFilters.RightPanel).WithAttributeFiltering();
+            builder.RegisterType<RunsPanel>().Keyed<View>(KeyFilters.RightPanel).WithAttributeFiltering();
 
-            builder.RegisterType<GraphsTableView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphPanel).WithAttributeFiltering();
-            builder.RegisterType<GraphTableButtonsFrame>().Keyed<Terminal.Gui.View>(KeyFilters.GraphPanel).WithAttributeFiltering();
-            builder.RegisterType<GraphAssembleView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphPanel).AsSelf().WithAttributeFiltering().SingleInstance();
-            builder.RegisterType<GraphUpdateView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphPanel).AsSelf().WithAttributeFiltering().SingleInstance();
+            builder.RegisterType<GraphsTableView>().Keyed<View>(KeyFilters.GraphPanel).WithAttributeFiltering();
+            builder.RegisterType<GraphTableButtonsFrame>().Keyed<View>(KeyFilters.GraphPanel).WithAttributeFiltering();
+            builder.RegisterType<GraphAssembleView>().Keyed<View>(KeyFilters.GraphPanel).AsSelf().WithAttributeFiltering().SingleInstance();
+            builder.RegisterType<GraphUpdateView>().Keyed<View>(KeyFilters.GraphPanel).AsSelf().WithAttributeFiltering().SingleInstance();
 
-            builder.RegisterType<GraphAssembleButton>().Keyed<Terminal.Gui.View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
-            builder.RegisterType<GraphUpdateButton>().Keyed<Terminal.Gui.View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
-            builder.RegisterType<GraphCopyButton>().Keyed<Terminal.Gui.View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
-            builder.RegisterType<GraphExportButton>().Keyed<Terminal.Gui.View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
-            builder.RegisterType<GraphImportButton>().Keyed<Terminal.Gui.View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
-            builder.RegisterType<GraphDeleteButton>().Keyed<Terminal.Gui.View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
+            builder.RegisterType<GraphAssembleButton>().Keyed<View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
+            builder.RegisterType<GraphUpdateButton>().Keyed<View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
+            builder.RegisterType<GraphCopyButton>().Keyed<View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
+            builder.RegisterType<GraphExportButton>().Keyed<View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
+            builder.RegisterType<GraphImportButton>().Keyed<View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
+            builder.RegisterType<GraphDeleteButton>().Keyed<View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
 
-            builder.RegisterType<GraphNameView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
-            builder.RegisterType<GraphParametresView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
-            builder.RegisterType<GraphNeighborhoodView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
-            builder.RegisterType<GraphSmoothLevelView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
+            builder.RegisterType<GraphNameView>().Keyed<View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
+            builder.RegisterType<GraphParametresView>().Keyed<View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
+            builder.RegisterType<GraphNeighborhoodView>().Keyed<View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
+            builder.RegisterType<GraphSmoothLevelView>().Keyed<View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
 
-            builder.RegisterType<GraphNameUpdateView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
-            builder.RegisterType<GraphSmoothLevelUpdateView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
-            builder.RegisterType<GraphNeighborhoodUpdateView>().Keyed<Terminal.Gui.View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
+            builder.RegisterType<GraphNameUpdateView>().Keyed<View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
+            builder.RegisterType<GraphSmoothLevelUpdateView>().Keyed<View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
+            builder.RegisterType<GraphNeighborhoodUpdateView>().Keyed<View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
 
-            builder.RegisterType<RunsTableView>().Keyed<Terminal.Gui.View>(KeyFilters.RunsPanel).WithAttributeFiltering();
-            builder.RegisterType<RunsTableButtonsFrame>().Keyed<Terminal.Gui.View>(KeyFilters.RunsPanel).WithAttributeFiltering();
-            builder.RegisterType<RunCreateView>().Keyed<Terminal.Gui.View>(KeyFilters.RunsPanel).AsSelf().WithAttributeFiltering().SingleInstance();
+            builder.RegisterType<RunsTableView>().Keyed<View>(KeyFilters.RunsPanel).WithAttributeFiltering();
+            builder.RegisterType<RunsTableButtonsFrame>().Keyed<View>(KeyFilters.RunsPanel).WithAttributeFiltering();
+            builder.RegisterType<RunCreateView>().Keyed<View>(KeyFilters.RunsPanel).AsSelf().WithAttributeFiltering().SingleInstance();
 
-            builder.RegisterType<RunCreateButton>().Keyed<Terminal.Gui.View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
-            builder.RegisterType<RunUpdateView>().Keyed<Terminal.Gui.View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
-            builder.RegisterType<RunDeleteButton>().Keyed<Terminal.Gui.View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
+            builder.RegisterType<RunCreateButton>().Keyed<View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
+            builder.RegisterType<RunUpdateView>().Keyed<View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
+            builder.RegisterType<RunDeleteButton>().Keyed<View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
 
-            builder.RegisterType<RunsListView>().Keyed<Terminal.Gui.View>(KeyFilters.RunCreateView).WithAttributeFiltering();
-            builder.RegisterType<RunParametresView>().Keyed<Terminal.Gui.View>(KeyFilters.RunCreateView).WithAttributeFiltering();
+            builder.RegisterType<RunsListView>().Keyed<View>(KeyFilters.RunCreateView).WithAttributeFiltering();
+            builder.RegisterType<RunParametresView>().Keyed<View>(KeyFilters.RunCreateView).WithAttributeFiltering();
 
-            builder.RegisterType<RunStepRulesView>().Keyed<Terminal.Gui.View>(KeyFilters.RunParametresView).WithAttributeFiltering();
-            builder.RegisterType<RunHeuristicsView>().Keyed<Terminal.Gui.View>(KeyFilters.RunParametresView).WithAttributeFiltering();
-            builder.RegisterType<RunsPopulateView>().Keyed<Terminal.Gui.View>(KeyFilters.RunParametresView).WithAttributeFiltering();
+            builder.RegisterType<RunStepRulesView>().Keyed<View>(KeyFilters.RunParametresView).WithAttributeFiltering();
+            builder.RegisterType<RunHeuristicsView>().Keyed<View>(KeyFilters.RunParametresView).WithAttributeFiltering();
+            builder.RegisterType<RunsPopulateView>().Keyed<View>(KeyFilters.RunParametresView).WithAttributeFiltering();
 
             return builder.Build();
         }

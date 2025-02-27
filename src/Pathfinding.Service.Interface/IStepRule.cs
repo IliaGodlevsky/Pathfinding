@@ -1,8 +1,7 @@
-﻿namespace Pathfinding.Service.Interface
+﻿namespace Pathfinding.Service.Interface;
+
+public interface IStepRule
 {
-    public interface IStepRule
-    {
-        double CalculateStepCost(IPathfindingVertex neighbour,
-            IPathfindingVertex current);
-    }
+    double CalculateStepCost(IPathfindingVertex neighbour,
+        IPathfindingVertex current);
 }

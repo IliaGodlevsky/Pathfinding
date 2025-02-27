@@ -1,9 +1,8 @@
 ﻿using Pathfinding.Shared.Primitives;
 
-namespace Pathfinding.Service.Interface
+namespace Pathfinding.Service.Interface;
+
+public interface IGraphPath : IReadOnlyCollection<Coordinate>
 {
-    public interface IGraphPath : IReadOnlyCollection<Coordinate>
-    {
-        double Cost { get; }
-    }
+    double Cost { get; }
 }

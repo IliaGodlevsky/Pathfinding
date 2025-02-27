@@ -1,7 +1,6 @@
-﻿namespace Pathfinding.Service.Interface
+﻿namespace Pathfinding.Service.Interface;
+
+public interface IHeuristic
 {
-    public interface IHeuristic
-    {
-        double Calculate(IPathfindingVertex first, IPathfindingVertex second);
-    }
+    double Calculate(IPathfindingVertex first, IPathfindingVertex second);
 }

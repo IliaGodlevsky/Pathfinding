@@ -1,9 +1,8 @@
-﻿namespace Pathfinding.Service.Interface
-{
-    public interface IBinarySerializable
-    {
-        void Serialize(BinaryWriter writer);
+﻿namespace Pathfinding.Service.Interface;
 
-        void Deserialize(BinaryReader reader);
-    }
+public interface IBinarySerializable
+{
+    void Serialize(BinaryWriter writer);
+
+    void Deserialize(BinaryReader reader);
 }

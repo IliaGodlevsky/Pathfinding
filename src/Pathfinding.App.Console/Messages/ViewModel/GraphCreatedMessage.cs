@@ -1,4 +1,4 @@
-﻿using Pathfinding.App.Console.Model;
+﻿using Pathfinding.App.Console.Models;
 
 namespace Pathfinding.App.Console.Messages.ViewModel
 {

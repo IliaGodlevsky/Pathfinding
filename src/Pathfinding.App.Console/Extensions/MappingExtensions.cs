@@ -1,4 +1,4 @@
-﻿using Pathfinding.App.Console.Model;
+﻿using Pathfinding.App.Console.Models;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Undefined;

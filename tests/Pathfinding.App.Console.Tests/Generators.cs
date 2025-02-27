@@ -1,5 +1,5 @@
 ﻿using Bogus;
-using Pathfinding.App.Console.Model;
+using Pathfinding.App.Console.Models;
 using Pathfinding.Domain.Core.Enums;
 
 namespace Pathfinding.App.Console.Tests
