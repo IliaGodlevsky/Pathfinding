@@ -15,7 +15,7 @@ namespace Pathfinding.App.Console.Views
         private readonly CompositeDisposable disposables = [];
 
         public GraphAssembleView(
-            [KeyFilter(KeyFilters.GraphAssembleView)] Terminal.Gui.View[] children,
+            [KeyFilter(KeyFilters.GraphAssembleView)] View[] children,
             IGraphAssembleViewModel viewModel)
         {
             Initialize();
