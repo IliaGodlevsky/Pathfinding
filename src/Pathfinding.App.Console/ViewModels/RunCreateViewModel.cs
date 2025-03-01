@@ -13,6 +13,8 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models;
 using Pathfinding.Service.Interface.Requests.Create;
+using Pathfinding.Shared.Extensions;
+using Pathfinding.Shared.Primitives;
 using ReactiveUI;
 using System.Diagnostics;
 using System.Reactive;
@@ -25,6 +27,8 @@ namespace Pathfinding.App.Console.ViewModels
         IRequireStepRuleViewModel,
         IRequireRunNameViewModel
     {
+        private static readonly InclusiveValueRange<double> WeightRange = (5, 0);
+
         private sealed record class AlgorithmBuildInfo(Algorithms Algorithm, 
             HeuristicFunctions? Heuristics,
             double? Weight, StepRules? StepRule) : IAlgorithmBuildInfo;
@@ -49,25 +53,25 @@ namespace Pathfinding.App.Console.ViewModels
             set => this.RaiseAndSetIfChanged(ref heuristic, value);
         }
 
-        private double? weight;
+        private double? fromWeight;
         public double? FromWeight
         {
-            get => weight;
-            set => this.RaiseAndSetIfChanged(ref weight, value);
+            get => fromWeight;
+            set { SetFromWeight(ref fromWeight, value); this.RaisePropertyChanged(); }
         }
 
-        private double? to;
+        private double? toWeight;
         public double? ToWeight
         {
-            get => to;
-            set => this.RaiseAndSetIfChanged(ref to, value);
+            get => toWeight;
+            set { SetToWeight(ref toWeight, value); this.RaisePropertyChanged(); }
         }
 
         private double? step;
         public double? Step
         {
             get => step;
-            set => this.RaiseAndSetIfChanged(ref step, value);
+            set { SetStep(ref step, value); this.RaisePropertyChanged(); }
         }
 
         private StepRules? stepRule;
@@ -80,6 +84,7 @@ namespace Pathfinding.App.Console.ViewModels
         private int ActivatedGraphId { get; set; }
 
         private Graph<GraphVertexModel> graph = Graph<GraphVertexModel>.Empty;
+
         private Graph<GraphVertexModel> Graph
         {
             get => graph;
@@ -115,7 +120,11 @@ namespace Pathfinding.App.Console.ViewModels
                         && Enum.IsDefined(algorithm.Value);
                     if (heuristic != null)
                     {
-                        return canExecute && weight > 0 && to > 0 && step >= 0;
+                        canExecute = canExecute && weight > 0 && to > 0 && step >= 0;
+                        if (to - weight > 0 && step == 0)
+                        {
+                            canExecute = false;
+                        }
                     }
                     return canExecute;
                 });
@@ -135,6 +144,49 @@ namespace Pathfinding.App.Console.ViewModels
                 Graph = Graph<GraphVertexModel>.Empty;
                 ActivatedGraphId = 0;
             }
+        }
+
+        private void SetFromWeight(ref double? field, double? value)
+        {
+            if (value == null)
+            {
+                field = value;
+                return;
+            }
+            field = WeightRange.ReturnInRange(value.Value);
+            if (toWeight < field)
+            {
+                ToWeight = field;
+            }
+            if (Step == 0 && ToWeight != field 
+                || ToWeight - field < Step)
+            {
+                Step = ToWeight - field;
+            }
+        }
+
+        private void SetToWeight(ref double? field, double? value)
+        {
+            if (value == null)
+            {
+                field = value;
+                return;
+            }
+            field = value > fromWeight ? value : fromWeight;
+            field = WeightRange.ReturnInRange(field.Value);
+            var amplitude = field - fromWeight;
+            if (field == fromWeight && Step != amplitude
+                || amplitude < Step
+                || (Step == 0 && amplitude > 0))
+            {
+                Step = amplitude;
+            }
+        }
+
+        private void SetStep(ref double? field, double? value)
+        {
+            var amplitude = toWeight - fromWeight;
+            field = amplitude < value ? amplitude : value;
         }
 
         private async Task CreateAlgorithm()

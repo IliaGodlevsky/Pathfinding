@@ -13,6 +13,7 @@ using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Requests.Create;
+using Pathfinding.Shared.Extensions;
 using Pathfinding.Shared.Primitives;
 using ReactiveUI;
 using System.Reactive;
@@ -26,6 +27,9 @@ namespace Pathfinding.App.Console.ViewModels
         IRequireSmoothLevelViewModel,
         IRequireNeighborhoodNameViewModel
     {
+        private static readonly InclusiveValueRange<int> WidthRange = (51, 1);
+        private static readonly InclusiveValueRange<int> LengthRange = (48, 1);
+        private static readonly InclusiveValueRange<int> ObstaclesRange = (99, 0);
         private static readonly InclusiveValueRange<int> CostRange = (9, 1);
 
         private readonly IRequestService<GraphVertexModel> service;
@@ -44,21 +48,21 @@ namespace Pathfinding.App.Console.ViewModels
         public int Width
         {
             get => width;
-            set => this.RaiseAndSetIfChanged(ref width, value);
+            set { width = WidthRange.ReturnInRange(value); this.RaisePropertyChanged(); }
         }
 
         private int length;
         public int Length
         {
             get => length;
-            set => this.RaiseAndSetIfChanged(ref length, value);
+            set { length = LengthRange.ReturnInRange(value); this.RaisePropertyChanged(); }
         }
 
         private int obstacles;
         public int Obstacles
         {
             get => obstacles;
-            set => this.RaiseAndSetIfChanged(ref obstacles, value);
+            set { obstacles = ObstaclesRange.ReturnInRange(value); this.RaisePropertyChanged(); }
         }
 
         private SmoothLevels level;

@@ -42,8 +42,9 @@ namespace Pathfinding.App.Console.Views
         private static ColorScheme Create(string foreground)
         {
             var driver = Application.Driver;
-            var backgroundColor = Enum.Parse<Color>(Settings.Default.BackgroundColor);
-            var attribute = driver.MakeAttribute(Enum.Parse<Color>(foreground), backgroundColor);
+            var backgroundColor = Enum.Parse<Color>(Default.BackgroundColor);
+            var foregroundColor = Enum.Parse<Color>(foreground);
+            var attribute = driver.MakeAttribute(foregroundColor, backgroundColor);
             return new() { Normal = attribute };
         }
 

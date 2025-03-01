@@ -1,6 +1,4 @@
 ﻿using Pathfinding.App.Console.ViewModels.Interface;
-using Pathfinding.Shared.Extensions;
-using Pathfinding.Shared.Primitives;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Linq.Expressions;
@@ -12,10 +10,6 @@ namespace Pathfinding.App.Console.Views;
 
 internal sealed partial class GraphParametresView : FrameView
 {
-    private static readonly InclusiveValueRange<int> WidthRange = (51, 1);
-    private static readonly InclusiveValueRange<int> LengthRange = (48, 1);
-    private static readonly InclusiveValueRange<int> ObstaclesRange = (99, 0);
-
     private readonly IRequireGraphParametresViewModel viewModel;
     private readonly CompositeDisposable disposables = [];
 
@@ -23,9 +17,9 @@ internal sealed partial class GraphParametresView : FrameView
     {
         this.viewModel = viewModel;
         Initialize();
-        BindTo(obstaclesInput, x => x.Obstacles, ObstaclesRange);
-        BindTo(graphWidthInput, x => x.Width, WidthRange);
-        BindTo(graphLengthInput, x => x.Length, LengthRange);
+        BindTo(obstaclesInput, x => x.Obstacles);
+        BindTo(graphWidthInput, x => x.Width);
+        BindTo(graphLengthInput, x => x.Length);
         this.Events().VisibleChanged
             .Where(x => Visible)
             .Do(x =>
@@ -37,23 +31,29 @@ internal sealed partial class GraphParametresView : FrameView
             .Subscribe();
     }
 
-    private void BindTo(TextField field,
-        Expression<Func<IRequireGraphParametresViewModel, int>> expression,
-        InclusiveValueRange<int> range)
+    private void BindTo(TextField field, Expression<Func<IRequireGraphParametresViewModel, int>> expression)
     {
-        field.Events()
-            .TextChanging
-            .Select(x =>
-            {
-                if (int.TryParse(x.NewText.ToString(), out var value))
-                {
-                    var returned = range.ReturnInRange(value);
-                    x.NewText = returned.ToString();
-                    return returned;
-                }
-                return -1;
-            })
+        var compiled = expression.Compile();
+        var propertyName = ((MemberExpression)expression.Body).Member.Name;
+        field.Events().TextChanging
+            .Select(x => int.TryParse(x.NewText.ToString(), out var value) ? value : default)
             .BindTo(viewModel, expression)
+            .DisposeWith(disposables);
+        viewModel.Events().PropertyChanged
+            .Where(x => x.PropertyName == propertyName)
+            .Do(x =>
+            {
+                Application.MainLoop.Invoke(() =>
+                {
+                    var propertyValue = compiled(viewModel);
+                    bool parsed = int.TryParse(field.Text.ToString(), out var value);
+                    if (parsed && value != propertyValue)
+                    {
+                        field.Text = propertyValue.ToString();
+                    }
+                });
+            })
+            .Subscribe()
             .DisposeWith(disposables);
     }
 }
