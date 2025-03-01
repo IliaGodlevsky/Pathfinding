@@ -62,11 +62,6 @@ namespace Pathfinding.Shared.Extensions
             return new RangeEnumerator(range);
         }
 
-        public static long Amplitude(this InclusiveValueRange<int> valueRange)
-        {
-            return (long)valueRange.UpperValueOfRange - valueRange.LowerValueOfRange;
-        }
-
         public static T ReturnInRange<T>(this InclusiveValueRange<T> self, T value, ReturnOptions options)
             where T : IComparable<T>
         {
@@ -77,13 +72,6 @@ namespace Pathfinding.Shared.Extensions
             where T : IComparable<T>
         {
             return self.ReturnInRange(value, ReturnOptions.Limit);
-        }
-
-        public static bool Contains<T>(this InclusiveValueRange<T> range, T value)
-            where T : IComparable<T>
-        {
-            return value.IsLessOrEqualThan(range.UpperValueOfRange)
-                && value.IsGreaterOrEqualThan(range.LowerValueOfRange);
         }
     }
 }
