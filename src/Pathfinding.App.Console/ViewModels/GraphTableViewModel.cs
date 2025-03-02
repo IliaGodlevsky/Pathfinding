@@ -11,7 +11,6 @@ using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
-using Pathfinding.Shared.Extensions;
 using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Reactive;

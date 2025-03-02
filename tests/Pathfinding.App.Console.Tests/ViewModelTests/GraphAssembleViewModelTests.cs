@@ -4,7 +4,6 @@ using Moq;
 using Pathfinding.App.Console.Messages.ViewModel;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
-using Pathfinding.ConsoleApp.Tests;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Data.Pathfinding;

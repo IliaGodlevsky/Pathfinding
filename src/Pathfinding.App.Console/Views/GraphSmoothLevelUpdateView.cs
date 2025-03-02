@@ -1,5 +1,4 @@
-﻿using DynamicData;
-using NStack;
+﻿using NStack;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Domain.Core.Enums;

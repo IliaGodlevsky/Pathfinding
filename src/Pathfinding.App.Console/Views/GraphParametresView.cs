@@ -28,7 +28,8 @@ internal sealed partial class GraphParametresView : FrameView
                 graphLengthInput.Text = string.Empty;
                 obstaclesInput.Text = string.Empty;
             })
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(disposables);
     }
 
     private void BindTo(TextField field, Expression<Func<IRequireGraphParametresViewModel, int>> expression)
