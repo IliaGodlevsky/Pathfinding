@@ -14,6 +14,7 @@ using Pathfinding.Service.Interface.Requests.Update;
 using Pathfinding.Shared.Extensions;
 using ReactiveUI;
 using System.Reactive;
+using System.Reactive.Linq;
 
 namespace Pathfinding.App.Console.ViewModels
 {
@@ -28,6 +29,13 @@ namespace Pathfinding.App.Console.ViewModels
         {
             get => graphId;
             set => this.RaiseAndSetIfChanged(ref graphId, value);
+        }
+
+        private SmoothLevels smoothLevels;
+        public SmoothLevels SmoothLevel 
+        {
+            get => smoothLevels;
+            set => this.RaiseAndSetIfChanged(ref smoothLevels, value);
         }
 
         private bool isReadOnly;
@@ -65,16 +73,37 @@ namespace Pathfinding.App.Console.ViewModels
             messenger.Register<GraphActivatedMessage, int>(this, Tokens.GraphField, OnGraphActivated);
             messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
             messenger.Register<GraphStateChangedMessage>(this, OnGraphBecameReadonly);
-            var canExecute = this.WhenAnyValue(
-                x => x.GraphId,
-                x => x.Graph,
-                x => x.IsReadOnly,
-                (id, graph, isRead) => id > 0 && graph != Graph<GraphVertexModel>.Empty && !isRead);
+            var canExecute = CanExecute();
+            var canChangeCost = CanChangeCost();
             ChangeVertexPolarityCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(ChangePolarity, canExecute);
             InverseVertexCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(InverseVertex, canExecute);
             ReverseVertexCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(ReverseVertex, canExecute);
-            IncreaseVertexCostCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(IncreaseVertexCost, canExecute);
-            DecreaseVertexCostCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(DecreaseVertexCost, canExecute);
+            IncreaseVertexCostCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(IncreaseVertexCost, canChangeCost);
+            DecreaseVertexCostCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(DecreaseVertexCost, canChangeCost);
+        }
+
+        private IObservable<bool> CanExecute()
+        {
+            return this.WhenAnyValue(
+                x => x.GraphId,
+                x => x.Graph,
+                x => x.IsReadOnly,
+                (id, graph, isRead) => id > 0 
+                    && graph != Graph<GraphVertexModel>.Empty 
+                    && !isRead);
+        }
+
+        private IObservable<bool> CanChangeCost()
+        {
+            return this.WhenAnyValue(
+                x => x.GraphId,
+                x => x.Graph,
+                x => x.IsReadOnly,
+                x => x.SmoothLevel,
+                (id, graph, isRead, level) => id > 0 
+                    && graph != Graph<GraphVertexModel>.Empty 
+                    && !isRead 
+                    && level == SmoothLevels.No);
         }
 
         private async Task ReverseVertex(GraphVertexModel vertex)
@@ -140,6 +169,7 @@ namespace Pathfinding.App.Console.ViewModels
             Graph = new Graph<GraphVertexModel>(msg.Graph.Vertices, msg.Graph.DimensionSizes);
             GraphId = msg.Graph.Id;
             IsReadOnly = msg.Graph.Status == GraphStatuses.Readonly;
+            SmoothLevel = msg.Graph.SmoothLevel;
         }
 
         private void OnGraphBecameReadonly(object recipient, GraphStateChangedMessage msg)

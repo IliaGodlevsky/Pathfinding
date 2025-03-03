@@ -4,6 +4,7 @@ using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
+using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Infrastructure.Data.Extensions;
 using ReactiveMarbles.ObservableEvents;
