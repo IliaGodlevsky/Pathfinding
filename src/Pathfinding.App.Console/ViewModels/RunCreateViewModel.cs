@@ -204,8 +204,8 @@ namespace Pathfinding.App.Console.ViewModels
                 double from = FromWeight ?? 0;
                 double to = ToWeight ?? 0;
                 double step = Step ?? 1;
-                int limit = (int)Math.Floor(((to - from)) / (step + double.Epsilon));
-                var list = new List<CreateStatisticsRequest>(limit + 1);
+                int limit = Step == 0 ? 0 : (int)Math.Ceiling((to - from) / step);
+                var list = new List<CreateStatisticsRequest>();
                 for (int i = 0; i <= limit; i++)
                 {
                     visitedCount = 0;
