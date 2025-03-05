@@ -32,7 +32,7 @@ namespace Pathfinding.App.Console.ViewModels
         }
 
         private SmoothLevels smoothLevels;
-        public SmoothLevels SmoothLevel 
+        private SmoothLevels SmoothLevel 
         {
             get => smoothLevels;
             set => this.RaiseAndSetIfChanged(ref smoothLevels, value);
@@ -108,17 +108,17 @@ namespace Pathfinding.App.Console.ViewModels
 
         private async Task ReverseVertex(GraphVertexModel vertex)
         {
-            await ChangeVertexPolarity(vertex, true);
+            await ChangeVertexPolarity(vertex, true).ConfigureAwait(false);
         }
 
         private async Task InverseVertex(GraphVertexModel vertex)
         {
-            await ChangeVertexPolarity(vertex, false);
+            await ChangeVertexPolarity(vertex, false).ConfigureAwait(false);
         }
 
         private async Task ChangePolarity(GraphVertexModel vertex)
         {
-            await ChangeVertexPolarity(vertex, !vertex.IsObstacle);
+            await ChangeVertexPolarity(vertex, !vertex.IsObstacle).ConfigureAwait(false);
         }
 
         private async Task ChangeVertexPolarity(GraphVertexModel vertex, bool polarity)
@@ -143,12 +143,12 @@ namespace Pathfinding.App.Console.ViewModels
 
         private async Task IncreaseVertexCost(GraphVertexModel vertex)
         {
-            await ChangeVertexCost(vertex, 1);
+            await ChangeVertexCost(vertex, 1).ConfigureAwait(false);
         }
 
         private async Task DecreaseVertexCost(GraphVertexModel vertex)
         {
-            await ChangeVertexCost(vertex, -1);
+            await ChangeVertexCost(vertex, -1).ConfigureAwait(false);
         }
 
         private async Task ChangeVertexCost(GraphVertexModel vertex, int delta)

@@ -4,7 +4,6 @@ using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
-using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Infrastructure.Data.Extensions;
 using ReactiveMarbles.ObservableEvents;
@@ -14,132 +13,94 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
-namespace Pathfinding.App.Console.Views
+using static Terminal.Gui.MouseFlags;
+
+namespace Pathfinding.App.Console.Views;
+
+internal sealed partial class GraphFieldView : FrameView
 {
-    internal sealed partial class GraphFieldView : FrameView
+    public const int DistanceBetweenVertices = 3;
+
+    private readonly IGraphFieldViewModel graphFieldViewModel;
+    private readonly IRunRangeViewModel runRangeViewModel;
+
+    private readonly CompositeDisposable disposables = [];
+    private readonly CompositeDisposable vertexDisposables = [];
+
+    private readonly View container = new();
+
+    public GraphFieldView(
+        IGraphFieldViewModel graphFieldViewModel,
+        IRunRangeViewModel runRangeViewModel,
+        [KeyFilter(KeyFilters.Views)] IMessenger messenger)
     {
-        public const int DistanceBetweenVertices = 3;
+        this.graphFieldViewModel = graphFieldViewModel;
+        this.runRangeViewModel = runRangeViewModel;
+        Initialize();
+        this.graphFieldViewModel.WhenAnyValue(x => x.Graph)
+            .Where(x => x != null)
+            .Do(RenderGraph)
+            .Subscribe()
+            .DisposeWith(disposables);
+        messenger.Register<OpenRunFieldMessage>(this, OnOpenAlgorithmRunView);
+        messenger.Register<CloseRunFieldMessage>(this, OnCloseAlgorithmRunField);
+        container.X = Pos.Center();
+        container.Y = Pos.Center();
+        Add(container);
+    }
 
-        private readonly IGraphFieldViewModel graphFieldViewModel;
-        private readonly IRunRangeViewModel runRangeViewModel;
+    private void OnOpenAlgorithmRunView(object recipient, OpenRunFieldMessage msg)
+    {
+        Application.MainLoop.Invoke(() => Visible = false);
+    }
 
-        private readonly CompositeDisposable disposables = [];
-        private readonly CompositeDisposable vertexDisposables = [];
+    private void OnCloseAlgorithmRunField(object recipient, CloseRunFieldMessage msg)
+    {
+        Application.MainLoop.Invoke(() => Visible = true);
+    }
 
-        private readonly View container = new();
+    private void RenderGraph(IGraph<GraphVertexModel> graph)
+    {
+        Application.MainLoop.Invoke(container.RemoveAll);
+        vertexDisposables.Clear();
 
-        public GraphFieldView(
-            IGraphFieldViewModel graphFieldViewModel,
-            IRunRangeViewModel runRangeViewModel,
-            [KeyFilter(KeyFilters.Views)] IMessenger messenger)
+        var views = new List<GraphVertexView>(graph.Count);
+
+        foreach (var vertex in graph)
         {
-            this.graphFieldViewModel = graphFieldViewModel;
-            this.runRangeViewModel = runRangeViewModel;
-            Initialize();
-            this.graphFieldViewModel.WhenAnyValue(x => x.Graph)
-                .Where(x => x != null)
-                .Do(RenderGraph)
-                .Subscribe()
-                .DisposeWith(disposables);
-            messenger.Register<OpenRunFieldMessage>(this, OnOpenAlgorithmRunView);
-            messenger.Register<CloseRunFieldMessage>(this, OnCloseAlgorithmRunField);
-            container.X = Pos.Center();
-            container.Y = Pos.Center();
-            Add(container);
+            var view = new GraphVertexView(vertex);
+
+            BindTo(view, vertex, runRangeViewModel.AddToRangeCommand, Button1Pressed);
+            BindTo(view, vertex, runRangeViewModel.RemoveFromRangeCommand, Button1Pressed, ButtonCtrl);
+            BindTo(view, Unit.Default, runRangeViewModel.DeletePathfindingRange,
+                Button1DoubleClicked, ButtonCtrl, ButtonAlt);
+
+            BindTo(view, vertex, graphFieldViewModel.ReverseVertexCommand, Button3Pressed, ButtonCtrl);
+            BindTo(view, vertex, graphFieldViewModel.InverseVertexCommand, Button3Pressed, ButtonAlt);
+            BindTo(view, vertex, graphFieldViewModel.ChangeVertexPolarityCommand, Button3Clicked);
+
+            BindTo(view, vertex, graphFieldViewModel.DecreaseVertexCostCommand, WheeledDown);
+            BindTo(view, vertex, graphFieldViewModel.IncreaseVertexCostCommand, WheeledUp);
+
+            views.Add(view);
+            view.DisposeWith(vertexDisposables);
         }
 
-        private void OnOpenAlgorithmRunView(object recipient, OpenRunFieldMessage msg)
+        Application.MainLoop.Invoke(() =>
         {
-            Application.MainLoop.Invoke(() => Visible = false);
-        }
+            container.Add([.. views]);
+            container.Width = graph.GetWidth() * DistanceBetweenVertices;
+            container.Height = graph.GetLength();
+        });
+    }
 
-        private void OnCloseAlgorithmRunField(object recipient, CloseRunFieldMessage msg)
-        {
-            Application.MainLoop.Invoke(() => Visible = true);
-        }
-
-        private void RenderGraph(IGraph<GraphVertexModel> graph)
-        {
-            Application.MainLoop.Invoke(container.RemoveAll);
-            vertexDisposables.Clear();
-
-            var views = new List<GraphVertexView>();
-
-            foreach (var vertex in graph)
-            {
-                var view = new GraphVertexView(vertex);
-                view.DisposeWith(vertexDisposables);
-                SubscribeToButton1Clicked(view, vertex);
-                SubscribeToButton3Clicked(view, vertex);
-                SubscribeOnWheelButton(view, vertex);
-                views.Add(view);
-            }
-
-            Application.MainLoop.Invoke(() =>
-            {
-                container.Add([.. views]);
-                container.Width = graph.GetWidth() * DistanceBetweenVertices;
-                container.Height = graph.GetLength();
-            });
-        }
-
-        private void SubscribeToButton1Clicked(GraphVertexView view, GraphVertexModel model)
-        {
-            view.Events().MouseClick
-                .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Pressed)
-                .Select(x => model)
-                .InvokeCommand(runRangeViewModel, x => x.AddToRangeCommand)
-                .DisposeWith(vertexDisposables);
-
-            view.Events().MouseClick
-                .Where(x => x.MouseEvent.Flags.HasFlag(MouseFlags.Button1Pressed)
-                       && x.MouseEvent.Flags.HasFlag(MouseFlags.ButtonCtrl))
-                .Select(x => model)
-                .InvokeCommand(runRangeViewModel, x => x.RemoveFromRangeCommand)
-                .DisposeWith(vertexDisposables);
-
-            view.Events().MouseClick
-                .Where(x => x.MouseEvent.Flags.HasFlag(MouseFlags.Button1DoubleClicked)
-                       && x.MouseEvent.Flags.HasFlag(MouseFlags.ButtonCtrl)
-                       && x.MouseEvent.Flags.HasFlag(MouseFlags.ButtonAlt))
-                .Select(x => Unit.Default)
-                .InvokeCommand(runRangeViewModel, x => x.DeletePathfindingRange)
-                .DisposeWith(vertexDisposables);
-        }
-
-        private void SubscribeToButton3Clicked(GraphVertexView view, GraphVertexModel model)
-        {
-            view.Events().MouseClick
-                .Where(x => x.MouseEvent.Flags.HasFlag(MouseFlags.Button3Pressed)
-                         && x.MouseEvent.Flags.HasFlag(MouseFlags.ButtonCtrl))
-                .Select(x => model)
-                .InvokeCommand(graphFieldViewModel, x => x.ReverseVertexCommand)
-                .DisposeWith(vertexDisposables);
-            view.Events().MouseClick
-                .Where(x => x.MouseEvent.Flags.HasFlag(MouseFlags.Button3Pressed)
-                         && x.MouseEvent.Flags.HasFlag(MouseFlags.ButtonAlt))
-                .Select(x => model)
-                .InvokeCommand(graphFieldViewModel, x => x.InverseVertexCommand)
-                .DisposeWith(vertexDisposables);
-            view.Events().MouseClick
-                .Where(x => x.MouseEvent.Flags.HasFlag(MouseFlags.Button3Clicked))
-                .Select(x => model)
-                .InvokeCommand(graphFieldViewModel, x => x.ChangeVertexPolarityCommand)
-                .DisposeWith(vertexDisposables);
-        }
-
-        private void SubscribeOnWheelButton(GraphVertexView view, GraphVertexModel model)
-        {
-            view.Events().MouseClick
-                .Where(x => x.MouseEvent.Flags.HasFlag(MouseFlags.WheeledDown))
-                .Select(x => model)
-                .InvokeCommand(graphFieldViewModel, x => x.DecreaseVertexCostCommand)
-                .DisposeWith(vertexDisposables);
-            view.Events().MouseClick
-                .Where(x => x.MouseEvent.Flags.HasFlag(MouseFlags.WheeledUp))
-                .Select(x => model)
-                .InvokeCommand(graphFieldViewModel, x => x.IncreaseVertexCostCommand)
-                .DisposeWith(vertexDisposables);
-        }
+    private void BindTo<T>(GraphVertexView view, T model,
+        ReactiveCommand<T, Unit> command, params MouseFlags[] flags)
+    {
+        view.Events().MouseClick
+            .Where(x => flags.All(z => x.MouseEvent.Flags.HasFlag(z)))
+            .Select(x => model)
+            .InvokeCommand(command)
+            .DisposeWith(vertexDisposables);
     }
 }
