@@ -6,7 +6,6 @@ using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -19,7 +18,6 @@ internal sealed partial class RunProgressView : FrameView
     private const float FractionPerClick = 0.015f;
     private const float ExtraFractionPerClick = FractionPerClick * 3;
 
-    private readonly CompositeDisposable disposables = [];
     private readonly IRunFieldViewModel viewModel;
 
     public RunProgressView(
@@ -30,7 +28,7 @@ internal sealed partial class RunProgressView : FrameView
         messenger.Register<CloseRunFieldMessage>(this, OnRunFieldClosed);
         messenger.Register<OpenRunFieldMessage>(this, OnRunFieldOpen);
         this.viewModel = viewModel;
-        
+
         BindTo(leftLabel, x => bar.Fraction - FractionPerClick, Button1Pressed);
         BindTo(leftLabel, x => bar.Fraction - ExtraFractionPerClick, Button1Pressed, ButtonCtrl);
         BindTo(leftLabel, x => bar.Fraction - FractionPerClick, WheeledDown);
@@ -41,7 +39,7 @@ internal sealed partial class RunProgressView : FrameView
         BindTo(rightLabel, x => bar.Fraction - FractionPerClick, WheeledDown);
         BindTo(rightLabel, x => bar.Fraction + FractionPerClick, WheeledUp);
         BindTo(rightLabel, x => RunModel.FractionRange.UpperValueOfRange, Button2Clicked);
-        BindTo(bar, x => (float)Math.Round((float)(x.MouseEvent.X + 1) / bar.Bounds.Width, 3), Button1Clicked);
+        BindTo(bar, x => (float)Math.Round((x.MouseEvent.X + 1f) / bar.Bounds.Width, 3), Button1Clicked);
         viewModel.WhenAnyValue(x => x.SelectedRun.Fraction).BindTo(bar, x => x.Fraction);
     }
 
@@ -66,11 +64,5 @@ internal sealed partial class RunProgressView : FrameView
         rightLabel.Visible = true;
         leftLabel.Visible = true;
         bar.Visible = true;
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-        disposables.Dispose();
-        base.Dispose(disposing);
     }
 }
