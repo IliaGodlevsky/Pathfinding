@@ -4,6 +4,8 @@ using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
+using Pathfinding.Shared.Extensions;
+using Pathfinding.Shared.Primitives;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive.Linq;
@@ -18,7 +20,15 @@ internal sealed partial class RunProgressView : FrameView
     private const float FractionPerClick = 0.015f;
     private const float ExtraFractionPerClick = FractionPerClick * 3;
 
+    private static readonly InclusiveValueRange<float> FractionRange = (1, 0);
+
     private readonly IRunFieldViewModel viewModel;
+
+    private float Fraction
+    {
+        get => bar.Fraction;
+        set => bar.Fraction = FractionRange.ReturnInRange(value);
+    }
 
     public RunProgressView(
         [KeyFilter(KeyFilters.Views)] IMessenger messenger,
@@ -29,18 +39,18 @@ internal sealed partial class RunProgressView : FrameView
         messenger.Register<OpenRunFieldMessage>(this, OnRunFieldOpen);
         this.viewModel = viewModel;
 
-        BindTo(leftLabel, x => bar.Fraction - FractionPerClick, Button1Pressed);
-        BindTo(leftLabel, x => bar.Fraction - ExtraFractionPerClick, Button1Pressed, ButtonCtrl);
-        BindTo(leftLabel, x => bar.Fraction - FractionPerClick, WheeledDown);
-        BindTo(leftLabel, x => bar.Fraction + FractionPerClick, WheeledUp);
-        BindTo(leftLabel, x => RunModel.FractionRange.LowerValueOfRange, Button2Clicked);
-        BindTo(rightLabel, x => bar.Fraction + FractionPerClick, Button1Pressed);
-        BindTo(rightLabel, x => bar.Fraction + ExtraFractionPerClick, Button1Pressed, ButtonCtrl);
-        BindTo(rightLabel, x => bar.Fraction - FractionPerClick, WheeledDown);
-        BindTo(rightLabel, x => bar.Fraction + FractionPerClick, WheeledUp);
-        BindTo(rightLabel, x => RunModel.FractionRange.UpperValueOfRange, Button2Clicked);
+        BindTo(leftLabel, x => Fraction - FractionPerClick, Button1Pressed);
+        BindTo(leftLabel, x => Fraction - ExtraFractionPerClick, Button1Pressed, ButtonCtrl);
+        BindTo(leftLabel, x => Fraction - FractionPerClick, WheeledDown);
+        BindTo(leftLabel, x => Fraction + FractionPerClick, WheeledUp);
+        BindTo(leftLabel, x => FractionRange.LowerValueOfRange, Button2Clicked);
+        BindTo(rightLabel, x => Fraction + FractionPerClick, Button1Pressed);
+        BindTo(rightLabel, x => Fraction + ExtraFractionPerClick, Button1Pressed, ButtonCtrl);
+        BindTo(rightLabel, x => Fraction - FractionPerClick, WheeledDown);
+        BindTo(rightLabel, x => Fraction + FractionPerClick, WheeledUp);
+        BindTo(rightLabel, x => FractionRange.UpperValueOfRange, Button2Clicked);
         BindTo(bar, x => (float)Math.Round((x.MouseEvent.X + 1f) / bar.Bounds.Width, 3), Button1Clicked);
-        viewModel.WhenAnyValue(x => x.SelectedRun.Fraction).BindTo(bar, x => x.Fraction);
+        viewModel.WhenAnyValue(x => x.SelectedRun.Fraction).BindTo(this, x => x.Fraction);
     }
 
     private void BindTo(View view, Func<MouseEventArgs, float> function, params MouseFlags[] flags)

@@ -231,9 +231,11 @@ namespace Pathfinding.App.Console.ViewModels
                         status = RunStatuses.Failure;
                         logger.Error(ex);
                     }
-
-                    stopwatch.Stop();
-                    algorithm.VertexProcessed -= OnVertexProcessed;
+                    finally
+                    {
+                        stopwatch.Stop();
+                        algorithm.VertexProcessed -= OnVertexProcessed;
+                    }
 
                     list.Add(new()
                     {

@@ -19,8 +19,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
 
         }
 
-        protected override void PrepareForSubPathfinding(
-            (IPathfindingVertex Source, IPathfindingVertex Target) range)
+        protected override void PrepareForSubPathfinding(SubRange range)
         {
             base.PrepareForSubPathfinding(range);
             forwardStorage.EnqueueOrUpdatePriority(Range.Source, default);
@@ -45,7 +44,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
         {
             var forward = forwardStorage.TryFirstOrThrowDeadEndVertexException();
             var backward = backwardStorage.TryFirstOrThrowDeadEndVertexException();
-            Current = (forward, backward);
+            Current = new(forward, backward);
         }
 
         protected override void RelaxForwardVertex(IPathfindingVertex vertex)
@@ -60,7 +59,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
                 {
                     Intersection = vertex;
                 }
-                forwardTraces[vertex.Position] = Current.Forward;
+                forwardTraces[vertex.Position] = Current.Source;
             }
         }
 
@@ -76,7 +75,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
                 {
                     Intersection = vertex;
                 }
-                backwardTraces[vertex.Position] = Current.Backward;
+                backwardTraces[vertex.Position] = Current.Target;
             }
         }
 
@@ -102,26 +101,26 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
 
         protected virtual double GetForwardVertexRelaxedCost(IPathfindingVertex neighbour)
         {
-            return stepRule.CalculateStepCost(neighbour, Current.Forward)
-                   + GetForwardVertexCurrentCost(Current.Forward);
+            return stepRule.CalculateStepCost(neighbour, Current.Source)
+                   + GetForwardVertexCurrentCost(Current.Source);
         }
 
         protected virtual double GetBackwardVertexRelaxedCost(IPathfindingVertex neighbour)
         {
-            return stepRule.CalculateStepCost(neighbour, Current.Backward)
-                   + GetBackwardVertexCurrentCost(Current.Backward);
+            return stepRule.CalculateStepCost(neighbour, Current.Target)
+                   + GetBackwardVertexCurrentCost(Current.Target);
         }
 
         protected override void RelaxForwardNeighbours(IReadOnlyCollection<IPathfindingVertex> neighbours)
         {
             base.RelaxForwardNeighbours(neighbours);
-            forwardStorage.TryRemove(Current.Forward);
+            forwardStorage.TryRemove(Current.Source);
         }
 
         protected override void RelaxBackwardNeighbours(IReadOnlyCollection<IPathfindingVertex> vertices)
         {
             base.RelaxBackwardNeighbours(vertices);
-            backwardStorage.TryRemove(Current.Backward);
+            backwardStorage.TryRemove(Current.Target);
         }
     }
 }

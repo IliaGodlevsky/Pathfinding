@@ -25,8 +25,7 @@ public class AStarAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange,
         accumulatedCosts.Clear();
     }
 
-    protected override void PrepareForSubPathfinding(
-        (IPathfindingVertex Source, IPathfindingVertex Target) range)
+    protected override void PrepareForSubPathfinding(SubRange range)
     {
         base.PrepareForSubPathfinding(range);
         accumulatedCosts[CurrentRange.Source.Position] = default;

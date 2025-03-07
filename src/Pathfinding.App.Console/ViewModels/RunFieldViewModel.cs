@@ -170,11 +170,13 @@ namespace Pathfinding.App.Console.ViewModels
                 {
                     AddSubAlgorithm();
                 }
-                algorithm.SubPathFound -= OnSubPathFound;
-                algorithm.VertexProcessed -= OnVertexProcessed;
+                finally
+                {
+                    algorithm.SubPathFound -= OnSubPathFound;
+                    algorithm.VertexProcessed -= OnVertexProcessed;
+                }
 
-                run = new RunModel(RunGraph,
-                    subRevisions, rangeCoordinates) { Id = model.Id };
+                run = new RunModel(RunGraph, subRevisions, rangeCoordinates) { Id = model.Id };
                 Runs.Add(run);
             }
             SelectedRun = run;

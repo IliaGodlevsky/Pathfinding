@@ -9,8 +9,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
     {
         protected abstract void RelaxVertex(IPathfindingVertex vertex);
 
-        protected override void PrepareForSubPathfinding(
-            (IPathfindingVertex Source, IPathfindingVertex Target) range)
+        protected override void PrepareForSubPathfinding(SubRange range)
         {
             base.PrepareForSubPathfinding(range);
             VisitCurrentVertex();

@@ -9,13 +9,13 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
         protected override void RelaxForwardVertex(IPathfindingVertex vertex)
         {
             forwardVisited.Add(vertex);
-            forwardTraces[vertex.Position] = Current.Forward;
+            forwardTraces[vertex.Position] = Current.Source;
         }
 
         protected override void RelaxBackwardVertex(IPathfindingVertex vertex)
         {
             backwardVisited.Add(vertex);
-            backwardTraces[vertex.Position] = Current.Backward;
+            backwardTraces[vertex.Position] = Current.Target;
         }
     }
 }

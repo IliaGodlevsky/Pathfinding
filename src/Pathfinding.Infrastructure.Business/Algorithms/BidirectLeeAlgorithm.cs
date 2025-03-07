@@ -40,13 +40,13 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
         {
             var forward = forwardStorage.DequeueOrThrowDeadEndVertexException();
             var backward = backwardStorage.DequeueOrThrowDeadEndVertexException();
-            Current = (forward, backward);
+            Current = new(forward, backward);
         }
 
         protected override void VisitCurrentVertex()
         {
-            forwardVisited.Add(Current.Forward);
-            backwardVisited.Add(Current.Backward);
+            forwardVisited.Add(Current.Source);
+            backwardVisited.Add(Current.Target);
         }
     }
 }

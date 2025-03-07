@@ -19,8 +19,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
             CurrentVertex = GetVertex(neighbours);
         }
 
-        protected override void PrepareForSubPathfinding(
-            (IPathfindingVertex Source, IPathfindingVertex Target) range)
+        protected override void PrepareForSubPathfinding(SubRange range)
         {
             base.PrepareForSubPathfinding(range);
             visited.Add(CurrentVertex);

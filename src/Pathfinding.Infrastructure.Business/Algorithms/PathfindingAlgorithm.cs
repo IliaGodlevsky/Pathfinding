@@ -14,7 +14,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
         protected readonly Dictionary<Coordinate, IPathfindingVertex> traces = [];
         protected readonly TStorage storage = new();
 
-        protected (IPathfindingVertex Source, IPathfindingVertex Target) CurrentRange { get; set; } = (NullPathfindingVertex.Interface, NullPathfindingVertex.Interface);
+        protected SubRange CurrentRange { get; set; } = SubRange.Default;
 
         protected IPathfindingVertex CurrentVertex { get; set; } = NullPathfindingVertex.Interface;
 
@@ -23,8 +23,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
             return CurrentVertex.Equals(CurrentRange.Target);
         }
 
-        protected override void PrepareForSubPathfinding(
-            (IPathfindingVertex Source, IPathfindingVertex Target) range)
+        protected override void PrepareForSubPathfinding(SubRange range)
         {
             CurrentRange = range;
             CurrentVertex = CurrentRange.Source;

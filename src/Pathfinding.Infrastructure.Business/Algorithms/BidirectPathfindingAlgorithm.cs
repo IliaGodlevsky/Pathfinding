@@ -19,20 +19,19 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
 
         protected IPathfindingVertex Intersection { get; set; } = NullPathfindingVertex.Interface;
 
-        protected (IPathfindingVertex Forward, IPathfindingVertex Backward) Current { get; set; } = (NullPathfindingVertex.Instance, NullPathfindingVertex.Interface);
+        protected SubRange Current { get; set; } = SubRange.Default;
 
-        protected (IPathfindingVertex Source, IPathfindingVertex Target) Range { get; set; } = (NullPathfindingVertex.Instance, NullPathfindingVertex.Interface);
+        protected SubRange Range { get; set; } = SubRange.Default;
 
         protected override bool IsDestination()
         {
             return Intersection != NullPathfindingVertex.Interface;
         }
 
-        protected override void PrepareForSubPathfinding(
-            (IPathfindingVertex Source, IPathfindingVertex Target) range)
+        protected override void PrepareForSubPathfinding(SubRange range)
         {
             Range = range;
-            Current = (Range.Source, Range.Target);
+            Current = Range;
         }
 
         protected override IGraphPath GetSubPath()
@@ -53,12 +52,12 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
 
         protected virtual IReadOnlyCollection<IPathfindingVertex> GetForwardUnvisitedNeighbours()
         {
-            return GetUnvisitedNeighbours(Current.Forward, forwardVisited);
+            return GetUnvisitedNeighbours(Current.Source, forwardVisited);
         }
 
         protected virtual IReadOnlyCollection<IPathfindingVertex> GetBackwardUnvisitedNeighbours()
         {
-            return GetUnvisitedNeighbours(Current.Backward, backwardVisited);
+            return GetUnvisitedNeighbours(Current.Target, backwardVisited);
         }
 
         private static IPathfindingVertex[] GetUnvisitedNeighbours(IPathfindingVertex vertex,

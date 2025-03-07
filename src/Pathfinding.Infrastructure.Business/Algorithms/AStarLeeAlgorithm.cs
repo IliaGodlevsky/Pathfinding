@@ -29,8 +29,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
             heuristics.Clear();
         }
 
-        protected override void PrepareForSubPathfinding(
-            (IPathfindingVertex Source, IPathfindingVertex Target) range)
+        protected override void PrepareForSubPathfinding(SubRange range)
         {
             base.PrepareForSubPathfinding(range);
             double value = CalculateHeuristic(CurrentRange.Source);

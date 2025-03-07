@@ -1,19 +1,29 @@
 ﻿using Pathfinding.Infrastructure.Business.Algorithms.Events;
 using Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
+using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms
 {
-    public abstract class PathfindingProcess(IEnumerable<IPathfindingVertex> pathfindingRange) 
-        : IAlgorithm<IGraphPath>
+    public abstract class PathfindingProcess(IEnumerable<IPathfindingVertex> range) : IAlgorithm<IGraphPath>
     {
+        protected readonly record struct SubRange(
+            IPathfindingVertex Source,
+            IPathfindingVertex Target)
+        {
+            public static readonly SubRange Default = new(
+                NullPathfindingVertex.Instance, 
+                NullPathfindingVertex.Instance);
+        }
+
         public event VertexProcessedEventHandler VertexProcessed;
         public event SubPathFoundEventHandler SubPathFound;
 
-        public virtual IGraphPath FindPath()
+        public IGraphPath FindPath()
         {
+            var subRanges = GetSubRanges();
             var subPaths = new List<IGraphPath>();
-            foreach (var range in GetSubRanges())
+            foreach (var range in subRanges)
             {
                 PrepareForSubPathfinding(range);
                 while (!IsDestination())
@@ -40,8 +50,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
 
         protected abstract void DropState();
 
-        protected abstract void PrepareForSubPathfinding(
-            (IPathfindingVertex Source, IPathfindingVertex Target) range);
+        protected abstract void PrepareForSubPathfinding(SubRange range);
 
         protected abstract IGraphPath GetSubPath();
 
@@ -56,19 +65,11 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
             SubPathFound?.Invoke(this, new(subPath));
         }
 
-        private IEnumerable<(IPathfindingVertex Source, IPathfindingVertex Target)> GetSubRanges()
+        private List<SubRange> GetSubRanges()
         {
-            using var iterator = pathfindingRange.GetEnumerator();
-            if (iterator.MoveNext())
-            {
-                var previous = iterator.Current;
-                while (iterator.MoveNext())
-                {
-                    var current = iterator.Current;
-                    yield return (previous, current);
-                    previous = iterator.Current;
-                }
-            }
+            return range
+                .Zip(range.Skip(1), (s, t) => new SubRange(s, t))
+                .ToList();
         }
 
         private static IGraphPath CreatePath(List<IGraphPath> subPaths)

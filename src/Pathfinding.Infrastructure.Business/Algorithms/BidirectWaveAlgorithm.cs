@@ -11,8 +11,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
 
         protected abstract void RelaxBackwardVertex(IPathfindingVertex vertex);
 
-        protected override void PrepareForSubPathfinding(
-            (IPathfindingVertex Source, IPathfindingVertex Target) range)
+        protected override void PrepareForSubPathfinding(SubRange range)
         {
             base.PrepareForSubPathfinding(range);
             VisitCurrentVertex();
@@ -20,8 +19,8 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
 
         protected override void VisitCurrentVertex()
         {
-            forwardVisited.Add(Current.Forward);
-            backwardVisited.Add(Current.Backward);
+            forwardVisited.Add(Current.Source);
+            backwardVisited.Add(Current.Target);
         }
 
         protected virtual void RelaxForwardNeighbours(IReadOnlyCollection<IPathfindingVertex> vertices)
@@ -38,8 +37,8 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
         {
             var forwardNeighbors = GetForwardUnvisitedNeighbours();
             var backwardNeighbors = GetBackwardUnvisitedNeighbours();
-            RaiseVertexProcessed(Current.Forward, forwardNeighbors);
-            RaiseVertexProcessed(Current.Backward, backwardNeighbors);
+            RaiseVertexProcessed(Current.Source, forwardNeighbors);
+            RaiseVertexProcessed(Current.Target, backwardNeighbors);
             RelaxForwardNeighbours(forwardNeighbors);
             RelaxBackwardNeighbours(backwardNeighbors);
         }

@@ -27,8 +27,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
             backwardHeuristics.Clear();
         }
 
-        protected override void PrepareForSubPathfinding(
-            (IPathfindingVertex Source, IPathfindingVertex Target) range)
+        protected override void PrepareForSubPathfinding(SubRange range)
         {
             base.PrepareForSubPathfinding(range);
             forwardAccumulatedCosts[Range.Source.Position] = default;

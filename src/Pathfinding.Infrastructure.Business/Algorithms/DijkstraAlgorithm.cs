@@ -35,8 +35,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
             CurrentVertex = storage.TryFirstOrThrowDeadEndVertexException();
         }
 
-        protected override void PrepareForSubPathfinding(
-            (IPathfindingVertex Source, IPathfindingVertex Target) range)
+        protected override void PrepareForSubPathfinding(SubRange range)
         {
             base.PrepareForSubPathfinding(range);
             storage.EnqueueOrUpdatePriority(CurrentRange.Source, default);
