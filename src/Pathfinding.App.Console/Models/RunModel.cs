@@ -19,42 +19,19 @@ internal class RunModel : ReactiveObject, IDisposable
         IReadOnlyCollection<VisitedModel> Visited,
         IReadOnlyCollection<Coordinate> Path);
 
-    private enum RunVertexState
-    {
-        No,
-        Source,
-        Target,
-        Transit,
-        Visited,
-        Enqueued,
-        Path,
-        CrossPath
-    }
+    private enum RunVertexState { No, Source, Target,
+        Transit, Visited, Enqueued, Path, CrossPath }
 
     private readonly record struct RunVertexStateModel(
         RunVertexModel Vertex,
         RunVertexState State,
-        bool Value)
+        bool Value = true)
     {
-        public static RunVertexStateModel CreateVisited(RunVertexModel model, bool value = true) => new(model, RunVertexState.Visited, value);
+        public readonly void Set() => Set(Value);
 
-        public static RunVertexStateModel CreateEnqueued(RunVertexModel model) => new(model, RunVertexState.Enqueued, true);
+        public readonly void SetInverse() => Set(!Value);
 
-        public static RunVertexStateModel CreateCrossedPath(RunVertexModel model) => new(model, RunVertexState.CrossPath, true);
-
-        public static RunVertexStateModel CreatePath(RunVertexModel model) => new(model, RunVertexState.Path, true);
-
-        public static RunVertexStateModel CreateSource(RunVertexModel model) => new(model, RunVertexState.Source, true);
-
-        public static RunVertexStateModel CreateTarget(RunVertexModel model) => new(model, RunVertexState.Target, true);
-
-        public static RunVertexStateModel CreateTransit(RunVertexModel model) => new(model, RunVertexState.Transit, true);
-
-        public void Set() => Set(Value);
-
-        public void SetInverse() => Set(!Value);
-
-        private void Set(bool value)
+        private readonly void Set(bool value)
         {
             switch (State)
             {
@@ -96,7 +73,7 @@ internal class RunModel : ReactiveObject, IDisposable
     private int Cursor
     {
         get => cursor;
-        set => this.RaiseAndSetIfChanged(ref cursor, CursorRange.ReturnInRange(value));
+        set => cursor = CursorRange.ReturnInRange(value);
     }
 
     public RunModel(
@@ -145,9 +122,9 @@ internal class RunModel : ReactiveObject, IDisposable
         var subAlgorithms = new List<RunVertexStateModel>();
 
         range.Skip(1).Take(range.Count - 2)
-            .Select(x => RunVertexStateModel.CreateTransit(graph.Get(x)))
-            .Prepend(RunVertexStateModel.CreateSource(graph.Get(range.First())))
-            .Append(RunVertexStateModel.CreateTarget(graph.Get(range.Last())))
+            .Select(x => new RunVertexStateModel(graph.Get(x), RunVertexState.Transit))
+            .Prepend(new RunVertexStateModel(graph.Get(range.First()), RunVertexState.Source))
+            .Append(new RunVertexStateModel(graph.Get(range.Last()), RunVertexState.Target))
             .ForWhole(subAlgorithms.AddRange);
 
         foreach (var subAlgorithm in pathfindingResult)
@@ -157,17 +134,17 @@ internal class RunModel : ReactiveObject, IDisposable
 
             subAlgorithm.Visited.SelectMany(v =>
                  v.Enqueued.Intersect(previousVisited).Except(visitedIgnore)
-                    .Select(x => RunVertexStateModel.CreateVisited(graph.Get(x), false))
+                    .Select(x => new RunVertexStateModel(graph.Get(x), RunVertexState.Visited, false))
                     .Concat(v.Visited.Enumerate().Except(visitedIgnore)
-                    .Select(x => RunVertexStateModel.CreateVisited(graph.Get(x)))
+                    .Select(x => new RunVertexStateModel(graph.Get(x), RunVertexState.Visited))
                     .Concat(v.Enqueued.Except(visitedIgnore).Except(previousEnqueued)
-                    .Select(x => RunVertexStateModel.CreateEnqueued(graph.Get(x))))))
+                    .Select(x => new RunVertexStateModel(graph.Get(x), RunVertexState.Enqueued)))))
                     .Distinct().ForWhole(subAlgorithms.AddRange);
 
             exceptRangePath.Intersect(previousPaths)
-                .Select(x => RunVertexStateModel.CreateCrossedPath(graph.Get(x)))
+                .Select(x => new RunVertexStateModel(graph.Get(x), RunVertexState.CrossPath))
                 .Concat(exceptRangePath.Except(previousPaths)
-                .Select(x => RunVertexStateModel.CreatePath(graph.Get(x))))
+                .Select(x => new RunVertexStateModel(graph.Get(x), RunVertexState.Path)))
                 .ForWhole(subAlgorithms.AddRange);
 
             previousVisited.AddRange(subAlgorithm.Visited.Select(x => x.Visited));
