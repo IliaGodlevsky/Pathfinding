@@ -1,5 +1,6 @@
 ﻿using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Models;
+using Pathfinding.App.Console.Resources;
 using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
@@ -29,9 +30,8 @@ namespace Pathfinding.App.Console.Views
         {
             var formats = Enum.GetValues<StreamFormat>()
                 .ToDictionary(x => x.ToExtensionRepresentation());
-            var extensions = formats.Keys.ToList();
-            using var dialog = new OpenDialog("Import",
-                "Choose file", extensions)
+            using var dialog = new OpenDialog(Resource.Import,
+                Resource.ChooseFile, [.. formats.Keys])
             {
                 Width = Dim.Percent(45),
                 Height = Dim.Percent(55)

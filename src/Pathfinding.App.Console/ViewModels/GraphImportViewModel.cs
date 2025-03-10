@@ -13,26 +13,27 @@ using Pathfinding.Service.Interface.Models.Serialization;
 using ReactiveUI;
 using System.Reactive;
 
+using Serializer = Pathfinding.Service.Interface.ISerializer<Pathfinding.Service.Interface.Models.Serialization.PathfindingHisotiriesSerializationModel>;
+
 namespace Pathfinding.App.Console.ViewModels;
 
 internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewModel
 {
-    private readonly IMessenger messenger;
+    private readonly Dictionary<StreamFormat, Serializer> serializers;
     private readonly IRequestService<GraphVertexModel> service;
+    private readonly IMessenger messenger;
     private readonly ILog logger;
-    private readonly Dictionary<StreamFormat,
-        ISerializer<PathfindingHisotiriesSerializationModel>> serializers;
 
     public ReactiveCommand<Func<StreamModel>, Unit> ImportGraphCommand { get; }
 
-    public GraphImportViewModel([KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        IEnumerable<Meta<ISerializer<PathfindingHisotiriesSerializationModel>>> serializers,
-        IRequestService<GraphVertexModel> service,
+    public GraphImportViewModel(IRequestService<GraphVertexModel> service,
+        [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
+        IEnumerable<Meta<Serializer>> serializers,
         ILog logger)
     {
         this.messenger = messenger;
-        this.serializers = serializers
-            .ToDictionary(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], x => x.Value);
+        this.serializers = serializers.ToDictionary(x => 
+            (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], x => x.Value);
         this.service = service;
         this.logger = logger;
         ImportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(LoadGraph);

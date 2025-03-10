@@ -133,11 +133,29 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Choose file.
+        /// </summary>
+        internal static string ChooseFile {
+            get {
+                return ResourceManager.GetString("ChooseFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Close.
         /// </summary>
         internal static string CloseAlgorithms {
             get {
                 return ResourceManager.GetString("CloseAlgorithms", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy.
+        /// </summary>
+        internal static string Copy {
+            get {
+                return ResourceManager.GetString("Copy", resourceCulture);
             }
         }
         
@@ -232,6 +250,15 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Export.
+        /// </summary>
+        internal static string Export {
+            get {
+                return ResourceManager.GetString("Export", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Extreme.
         /// </summary>
         internal static string Extreme {
@@ -250,6 +277,15 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Graph field.
+        /// </summary>
+        internal static string GraphField {
+            get {
+                return ResourceManager.GetString("GraphField", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Graph only.
         /// </summary>
         internal static string GraphOnly {
@@ -264,6 +300,15 @@ namespace Pathfinding.App.Console.Resources {
         internal static string High {
             get {
                 return ResourceManager.GetString("High", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Import.
+        /// </summary>
+        internal static string Import {
+            get {
+                return ResourceManager.GetString("Import", resourceCulture);
             }
         }
         
@@ -291,6 +336,15 @@ namespace Pathfinding.App.Console.Resources {
         internal static string Lee {
             get {
                 return ResourceManager.GetString("Lee", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Load.
+        /// </summary>
+        internal static string Load {
+            get {
+                return ResourceManager.GetString("Load", resourceCulture);
             }
         }
         
@@ -363,6 +417,15 @@ namespace Pathfinding.App.Console.Resources {
         internal static string RunsPopulate {
             get {
                 return ResourceManager.GetString("RunsPopulate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save.
+        /// </summary>
+        internal static string Save {
+            get {
+                return ResourceManager.GetString("Save", resourceCulture);
             }
         }
         

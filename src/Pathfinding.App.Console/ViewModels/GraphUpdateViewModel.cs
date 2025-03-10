@@ -56,8 +56,8 @@ namespace Pathfinding.App.Console.ViewModels
 
         public ReactiveCommand<Unit, Unit> UpdateGraphCommand { get; }
 
-        public GraphUpdateViewModel([KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-            IRequestService<GraphVertexModel> service,
+        public GraphUpdateViewModel(IRequestService<GraphVertexModel> service,
+            [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
             ILog log)
         {
             this.messenger = messenger;

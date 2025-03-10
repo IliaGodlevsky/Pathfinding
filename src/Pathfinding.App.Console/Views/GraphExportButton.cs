@@ -1,9 +1,9 @@
 ﻿using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Models;
+using Pathfinding.App.Console.Resources;
 using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -11,8 +11,6 @@ namespace Pathfinding.App.Console.Views
 {
     internal sealed partial class GraphExportButton
     {
-        private readonly CompositeDisposable disposables = [];
-
         public GraphExportButton(IGraphExportViewModel viewModel)
         {
             Initialize();
@@ -25,11 +23,9 @@ namespace Pathfinding.App.Console.Views
                         ? new(Stream.Null, null)
                         : new(OpenWrite(filePath.Path), filePath.Format);
                 }))
-                .InvokeCommand(viewModel, x => x.ExportGraphCommand)
-                .DisposeWith(disposables);
+                .InvokeCommand(viewModel, x => x.ExportGraphCommand);
             viewModel.ExportGraphCommand.CanExecute
-                .BindTo(this, x => x.Enabled)
-                .DisposeWith(disposables);
+                .BindTo(this, x => x.Enabled);
         }
 
         private static FileStream OpenWrite(string path)
@@ -41,9 +37,8 @@ namespace Pathfinding.App.Console.Views
         {
             var formats = Enum.GetValues<StreamFormat>()
                 .ToDictionary(x => x.ToExtensionRepresentation());
-            var allowedTypes = formats.Keys.ToList();
-            using var dialog = new SaveDialog("Export",
-                "Choose file", allowedTypes)
+            using var dialog = new SaveDialog(Resource.Export,
+                Resource.ChooseFile, [.. formats.Keys])
             {
                 Width = Dim.Percent(45),
                 Height = Dim.Percent(55)
@@ -63,12 +58,6 @@ namespace Pathfinding.App.Console.Views
             return !dialog.Canceled && dialog.FilePath != null
                 ? (filePath, formats[extension])
                 : (string.Empty, null);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            disposables.Dispose();
-            base.Dispose(disposing);
         }
     }
 }

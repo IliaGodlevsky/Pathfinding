@@ -29,8 +29,8 @@ namespace Pathfinding.App.Console.ViewModels
 
         private int ActivatedGraphId { get; set; }
 
-        public RunsTableViewModel([KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-            IRequestService<GraphVertexModel> service,
+        public RunsTableViewModel(IRequestService<GraphVertexModel> service,
+            [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
             ILog logger)
         {
             this.messenger = messenger;

@@ -1,4 +1,5 @@
-﻿using Pathfinding.App.Console.ViewModels.Interface;
+﻿using Pathfinding.App.Console.Resources;
+using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive;
@@ -17,7 +18,7 @@ namespace Pathfinding.App.Console.Views
             X = Pos.Percent(33.34f);
             Y = 0;
             Width = Dim.Percent(16.67f);
-            Text = "Copy";
+            Text = Resource.Copy;
             viewModel.CopyGraphCommand.CanExecute
                 .BindTo(this, x => x.Enabled)
                 .DisposeWith(disposables);

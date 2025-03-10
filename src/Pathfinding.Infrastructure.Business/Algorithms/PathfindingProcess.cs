@@ -5,7 +5,8 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms
 {
-    public abstract class PathfindingProcess(IEnumerable<IPathfindingVertex> range) : IAlgorithm<IGraphPath>
+    public abstract class PathfindingProcess(IEnumerable<IPathfindingVertex> range) 
+        : IAlgorithm<IGraphPath>
     {
         protected readonly record struct SubRange(
             IPathfindingVertex Source,
@@ -21,9 +22,8 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
 
         public IGraphPath FindPath()
         {
-            var subRanges = GetSubRanges();
             var subPaths = new List<IGraphPath>();
-            foreach (var range in subRanges)
+            foreach (var range in GetSubRanges())
             {
                 PrepareForSubPathfinding(range);
                 while (!IsDestination())
@@ -65,11 +65,9 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
             SubPathFound?.Invoke(new(subPath));
         }
 
-        private List<SubRange> GetSubRanges()
+        private IEnumerable<SubRange> GetSubRanges()
         {
-            return range
-                .Zip(range.Skip(1), (s, t) => new SubRange(s, t))
-                .ToList();
+            return range.Zip(range.Skip(1), (s, t) => new SubRange(s, t));
         }
 
         private static IGraphPath CreatePath(List<IGraphPath> subPaths)

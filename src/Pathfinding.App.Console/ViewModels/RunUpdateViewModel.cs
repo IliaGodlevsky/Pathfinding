@@ -43,8 +43,8 @@ namespace Pathfinding.App.Console.ViewModels
 
         public ReactiveCommand<Unit, Unit> UpdateRunsCommand { get; }
 
-        public RunUpdateViewModel([KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-            IRequestService<GraphVertexModel> service,
+        public RunUpdateViewModel(IRequestService<GraphVertexModel> service,
+            [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
             ILog log)
         {
             this.messenger = messenger;

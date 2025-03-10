@@ -141,8 +141,14 @@
   <data name="Chebyshev" xml:space="preserve">
     <value>Chebyshev</value>
   </data>
+  <data name="ChooseFile" xml:space="preserve">
+    <value>Choose file</value>
+  </data>
   <data name="CloseAlgorithms" xml:space="preserve">
     <value>Close</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
   </data>
   <data name="Cosine" xml:space="preserve">
     <value>Cosine</value>
@@ -174,17 +180,26 @@
   <data name="Euclidian" xml:space="preserve">
     <value>Euclidian</value>
   </data>
+  <data name="Export" xml:space="preserve">
+    <value>Export</value>
+  </data>
   <data name="Extreme" xml:space="preserve">
     <value>Extreme</value>
   </data>
   <data name="Failure" xml:space="preserve">
     <value>Failure</value>
   </data>
+  <data name="GraphField" xml:space="preserve">
+    <value>Graph field</value>
+  </data>
   <data name="GraphOnly" xml:space="preserve">
     <value>Graph only</value>
   </data>
   <data name="High" xml:space="preserve">
     <value>High</value>
+  </data>
+  <data name="Import" xml:space="preserve">
+    <value>Import</value>
   </data>
   <data name="InvalidExportOptions" xml:space="preserve">
     <value>Invalid export option</value>
@@ -194,6 +209,9 @@
   </data>
   <data name="Lee" xml:space="preserve">
     <value>Lee</value>
+  </data>
+  <data name="Load" xml:space="preserve">
+    <value>Load</value>
   </data>
   <data name="Low" xml:space="preserve">
     <value>Low</value>
@@ -218,6 +236,9 @@
   </data>
   <data name="RunsPopulate" xml:space="preserve">
     <value>Populate</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
   </data>
   <data name="Snake" xml:space="preserve">
     <value>Snake</value>

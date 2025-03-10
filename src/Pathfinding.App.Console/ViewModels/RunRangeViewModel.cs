@@ -23,6 +23,9 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
+using Command = Pathfinding.Service.Interface
+    .IPathfindingRangeCommand<Pathfinding.App.Console.Models.GraphVertexModel>;
+
 namespace Pathfinding.App.Console.ViewModels;
 
 internal sealed class RunRangeViewModel : BaseViewModel,
@@ -30,8 +33,8 @@ internal sealed class RunRangeViewModel : BaseViewModel,
 {
     private readonly CompositeDisposable disposables = [];
     private readonly IRequestService<GraphVertexModel> service;
-    private readonly IEnumerable<IPathfindingRangeCommand<GraphVertexModel>> includeCommands;
-    private readonly IEnumerable<IPathfindingRangeCommand<GraphVertexModel>> excludeCommands;
+    private readonly IEnumerable<Command> includeCommands;
+    private readonly IEnumerable<Command> excludeCommands;
     private readonly IPathfindingRange<GraphVertexModel> pathfindingRange;
     private readonly ILog logger;
 
@@ -98,9 +101,9 @@ internal sealed class RunRangeViewModel : BaseViewModel,
 
     public RunRangeViewModel(
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
+        [KeyFilter(KeyFilters.IncludeCommands)] IEnumerable<Meta<Command>> includeCommands,
+        [KeyFilter(KeyFilters.ExcludeCommands)] IEnumerable<Meta<Command>> excludeCommands,
         IRequestService<GraphVertexModel> service,
-        [KeyFilter(KeyFilters.IncludeCommands)] IEnumerable<Meta<IPathfindingRangeCommand<GraphVertexModel>>> includeCommands,
-        [KeyFilter(KeyFilters.ExcludeCommands)] IEnumerable<Meta<IPathfindingRangeCommand<GraphVertexModel>>> excludeCommands,
         ILog logger)
     {
         pathfindingRange = this;

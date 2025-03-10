@@ -1,4 +1,5 @@
-﻿using Terminal.Gui;
+﻿using Pathfinding.App.Console.Resources;
+using Terminal.Gui;
 
 namespace Pathfinding.App.Console.Views
 {
@@ -14,7 +15,7 @@ namespace Pathfinding.App.Console.Views
             {
                 BorderBrush = Color.BrightYellow,
                 BorderStyle = BorderStyle.Rounded,
-                Title = "Graph field"
+                Title = Resource.GraphField
             };
         }
     }
