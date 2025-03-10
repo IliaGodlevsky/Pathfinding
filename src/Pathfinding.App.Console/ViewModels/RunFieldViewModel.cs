@@ -150,11 +150,11 @@ namespace Pathfinding.App.Console.ViewModels
                     subRevisions.Add(new(visitedVertices, path ?? []));
                     visitedVertices = [];
                 }
-                void OnVertexProcessed(object sender, VerticesProcessedEventArgs e)
+                void OnVertexProcessed(VerticesProcessedEventArgs e)
                 {
                     visitedVertices.Add(new(e.Current, e.Enqueued));
                 }
-                void OnSubPathFound(object sender, SubPathFoundEventArgs args)
+                void OnSubPathFound(SubPathFoundEventArgs args)
                 {
                     AddSubAlgorithm(args.SubPath);
                 }

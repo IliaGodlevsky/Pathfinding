@@ -1,14 +1,11 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
-using NStack;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
-using ReactiveUI;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -16,36 +13,35 @@ namespace Pathfinding.App.Console.Views
 {
     internal sealed partial class RunHeuristicsView : FrameView
     {
-        private readonly ustring[] radioLabels;
-        private readonly CompositeDisposable disposables = [];
-        private readonly IRequireHeuristicsViewModel heuristicsViewModel;
+        private readonly IRequireHeuristicsViewModel viewModel;
 
-        public RunHeuristicsView(
-            [KeyFilter(KeyFilters.Views)] IMessenger messenger,
-            IRequireHeuristicsViewModel heuristicsViewModel)
+        public RunHeuristicsView([KeyFilter(KeyFilters.Views)] IMessenger messenger,
+            IRequireHeuristicsViewModel viewModel)
         {
             Initialize();
-            var heurs = Enum.GetValues<HeuristicFunctions>()
-                .ToDictionary(x => x.ToStringRepresentation());
-            var labels = heurs.Keys.Select(ustring.Make).ToArray();
-            var values = labels.Select(x => heurs[x.ToString()]).ToList();
-            radioLabels = labels;
-            heuristics.RadioLabels = radioLabels;
-            heuristics.Events().SelectedItemChanged
-               .Where(x => x.SelectedItem > -1)
-               .Select(x => values[x.SelectedItem])
-               .BindTo(heuristicsViewModel, x => x.Heuristic)
-               .DisposeWith(disposables);
-            messenger.Register<OpenHeuristicsViewMessage>(this, OnOpen);
+            int i = 0;
+            foreach (var function in Enum.GetValues<Heuristics>())
+            {
+                var text = function.ToStringRepresentation();
+                var checkBox = new CheckBox(text) { Y = i++ };
+                checkBox.Events().Toggled
+                    .Do(x =>
+                    {
+                        if (x) { viewModel.Heuristics.Remove(function); }
+                        else { viewModel.Heuristics.Add(function); }
+                    })
+                    .Subscribe();
+                Add(checkBox);
+            }
+            messenger.Register<OpenHeuristicsViewMessage>(this, OnHeuristicsViewOpen);
             messenger.Register<CloseHeuristicsViewMessage>(this, OnHeuristicsViewClosed);
             messenger.Register<CloseRunCreateViewMessage>(this, OnRunCreationViewClosed);
-            this.heuristicsViewModel = heuristicsViewModel;
+            this.viewModel = viewModel;
         }
 
-        private void OnOpen(object recipient, OpenHeuristicsViewMessage msg)
+        private void OnHeuristicsViewOpen(object recipient, OpenHeuristicsViewMessage msg)
         {
-            heuristics.SelectedItem = 0;
-
+            viewModel.Heuristics.Add(default);
             Visible = true;
         }
 
@@ -61,10 +57,10 @@ namespace Pathfinding.App.Console.Views
 
         private void Close()
         {
-            heuristicsViewModel.FromWeight = null;
-            heuristicsViewModel.Heuristic = null;
-            heuristicsViewModel.ToWeight = null;
-            heuristicsViewModel.Step = null;
+            viewModel.FromWeight = null;
+            viewModel.Heuristics.Clear();
+            viewModel.ToWeight = null;
+            viewModel.Step = null;
             Visible = false;
         }
     }

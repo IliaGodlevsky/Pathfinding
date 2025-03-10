@@ -1,4 +1,5 @@
 ﻿using Pathfinding.Domain.Core.Enums;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 namespace Pathfinding.App.Console.ViewModels.Interface
@@ -7,7 +8,7 @@ namespace Pathfinding.App.Console.ViewModels.Interface
     {
         event PropertyChangedEventHandler PropertyChanged;
 
-        HeuristicFunctions? Heuristic { get; set; }
+        ObservableCollection<Heuristics?> Heuristics { get; }
 
         double? FromWeight { get; set; }
 

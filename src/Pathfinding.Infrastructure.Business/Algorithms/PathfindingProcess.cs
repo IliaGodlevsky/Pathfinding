@@ -57,12 +57,12 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
         protected void RaiseVertexProcessed(IPathfindingVertex vertex,
             IEnumerable<IPathfindingVertex> vertices)
         {
-            VertexProcessed?.Invoke(this, new(vertex, vertices));
+            VertexProcessed?.Invoke(new(vertex, vertices));
         }
 
         protected void RaiseSubPathFound(IGraphPath subPath)
         {
-            SubPathFound?.Invoke(this, new(subPath));
+            SubPathFound?.Invoke(new(subPath));
         }
 
         private List<SubRange> GetSubRanges()

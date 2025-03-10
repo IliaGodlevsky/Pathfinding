@@ -6,7 +6,7 @@ namespace Pathfinding.Service.Interface.Models
     {
         Algorithms Algorithm { get; }
 
-        HeuristicFunctions? Heuristics { get; }
+        Heuristics? Heuristics { get; }
 
         double? Weight { get; }
 

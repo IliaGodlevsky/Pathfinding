@@ -16,6 +16,7 @@ using Pathfinding.Service.Interface.Requests.Create;
 using Pathfinding.Shared.Extensions;
 using Pathfinding.Shared.Primitives;
 using ReactiveUI;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive;
 
@@ -29,8 +30,7 @@ namespace Pathfinding.App.Console.ViewModels
     {
         private static readonly InclusiveValueRange<double> WeightRange = (5, 0);
 
-        private sealed record class AlgorithmBuildInfo(Algorithms Algorithm, 
-            HeuristicFunctions? Heuristics,
+        private sealed record class AlgorithmBuildInfo(Algorithms Algorithm, Heuristics? Heuristics,
             double? Weight, StepRules? StepRule) : IAlgorithmBuildInfo;
 
         private readonly IRequestService<GraphVertexModel> service;
@@ -46,12 +46,7 @@ namespace Pathfinding.App.Console.ViewModels
             set => this.RaiseAndSetIfChanged(ref algorithm, value);
         }
 
-        private HeuristicFunctions? heuristic;
-        public HeuristicFunctions? Heuristic
-        {
-            get => heuristic;
-            set => this.RaiseAndSetIfChanged(ref heuristic, value);
-        }
+        public ObservableCollection<Heuristics?> Heuristics { get; } = [];
 
         private double? fromWeight;
         public double? FromWeight
@@ -108,19 +103,23 @@ namespace Pathfinding.App.Console.ViewModels
         {
             return this.WhenAnyValue(
                 x => x.Graph,
-                x => x.Heuristic,
+                x => x.Heuristics.Count,
                 x => x.FromWeight,
                 x => x.ToWeight,
                 x => x.Step,
                 x => x.Algorithm,
-                (graph, heuristic, weight, to, step, algorithm) =>
+                (graph, count, weight, to, step, algorithm) =>
                 {
                     bool canExecute = graph != Graph<GraphVertexModel>.Empty
                         && algorithm != null
                         && Enum.IsDefined(algorithm.Value);
-                    if (heuristic != null)
+                    if (count > 0)
                     {
-                        canExecute = canExecute && weight > 0 && to > 0 && step >= 0;
+                        canExecute = canExecute
+                            && count > 1
+                            && weight > 0
+                            && to > 0
+                            && step >= 0;
                         if (to - weight > 0 && step == 0)
                         {
                             canExecute = false;
@@ -189,6 +188,15 @@ namespace Pathfinding.App.Console.ViewModels
             field = amplitude < value ? amplitude : value;
         }
 
+        private AlgorithmBuildInfo[] GetBuildInfo(double? weight)
+        {
+            return Heuristics.Count == 0
+                ? [new AlgorithmBuildInfo(Algorithm.Value, default, weight, StepRule)]
+                : Heuristics.Where(x => x is not null)
+                    .Select(x => new AlgorithmBuildInfo(Algorithm.Value, x, weight, StepRule))
+                    .ToArray();
+        }
+
         private async Task CreateAlgorithm()
         {
             var pathfindingRange = (await service.ReadRangeAsync(ActivatedGraphId)
@@ -199,7 +207,7 @@ namespace Pathfinding.App.Console.ViewModels
             if (pathfindingRange.Count > 1)
             {
                 int visitedCount = 0;
-                void OnVertexProcessed(object sender, EventArgs e) => visitedCount++;
+                void OnVertexProcessed(EventArgs e) => visitedCount++;
                 var status = RunStatuses.Success;
                 double from = FromWeight ?? 0;
                 double to = ToWeight ?? 0;
@@ -208,48 +216,49 @@ namespace Pathfinding.App.Console.ViewModels
                 var list = new List<CreateStatisticsRequest>();
                 for (int i = 0; i <= limit; i++)
                 {
-                    visitedCount = 0;
                     var val = from + step * i;
                     double? weight = val == 0 ? null : Math.Round(val, 2);
-                    var buildInfo = new AlgorithmBuildInfo(Algorithm.Value, 
-                        Heuristic, weight, StepRule);
-                    var algorithm = buildInfo.ToAlgorithm(pathfindingRange);
-                    algorithm.VertexProcessed += OnVertexProcessed;
-                    var path = NullGraphPath.Interface;
-                    var stopwatch = Stopwatch.StartNew();
-                    try
+                    foreach (var buildInfo in GetBuildInfo(weight))
                     {
-                        path = algorithm.FindPath();
-                    }
-                    catch (PathfindingException ex)
-                    {
-                        status = RunStatuses.Failure;
-                        logger.Warn(ex);
-                    }
-                    catch (Exception ex)
-                    {
-                        status = RunStatuses.Failure;
-                        logger.Error(ex);
-                    }
-                    finally
-                    {
-                        stopwatch.Stop();
-                        algorithm.VertexProcessed -= OnVertexProcessed;
-                    }
+                        visitedCount = 0;
+                        var algorithm = buildInfo.ToAlgorithm(pathfindingRange);
+                        algorithm.VertexProcessed += OnVertexProcessed;
+                        var path = NullGraphPath.Interface;
+                        var stopwatch = Stopwatch.StartNew();
+                        try
+                        {
+                            path = algorithm.FindPath();
+                        }
+                        catch (PathfindingException ex)
+                        {
+                            status = RunStatuses.Failure;
+                            logger.Warn(ex);
+                        }
+                        catch (Exception ex)
+                        {
+                            status = RunStatuses.Failure;
+                            logger.Error(ex);
+                        }
+                        finally
+                        {
+                            stopwatch.Stop();
+                            algorithm.VertexProcessed -= OnVertexProcessed;
+                        }
 
-                    list.Add(new()
-                    {
-                        Algorithm = Algorithm.Value,
-                        Cost = path.Cost,
-                        Steps = path.Count,
-                        StepRule = StepRule,
-                        Heuristics = Heuristic,
-                        Weight = weight,
-                        Visited = visitedCount,
-                        Elapsed = stopwatch.Elapsed,
-                        ResultStatus = status,
-                        GraphId = ActivatedGraphId
-                    });
+                        list.Add(new()
+                        {
+                            Algorithm = buildInfo.Algorithm,
+                            Cost = path.Cost,
+                            Steps = path.Count,
+                            StepRule = buildInfo.StepRule,
+                            Heuristics = buildInfo.Heuristics,
+                            Weight = buildInfo.Weight,
+                            Visited = visitedCount,
+                            Elapsed = stopwatch.Elapsed,
+                            ResultStatus = status,
+                            GraphId = ActivatedGraphId
+                        });
+                    }
                 }
                 await ExecuteSafe(async () =>
                 {

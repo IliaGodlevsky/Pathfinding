@@ -10,7 +10,7 @@ namespace Pathfinding.Service.Interface.Models.Undefined
 
         public Algorithms Algorithm { get; set; }
 
-        public HeuristicFunctions? Heuristics { get; set; } = null;
+        public Heuristics? Heuristics { get; set; } = null;
 
         public double? Weight { get; set; } = null;
 

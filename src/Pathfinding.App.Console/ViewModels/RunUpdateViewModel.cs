@@ -133,7 +133,7 @@ namespace Pathfinding.App.Console.ViewModels
                 foreach (var select in selected)
                 {
                     int visitedCount = 0;
-                    void OnVertexProcessed(object sender, EventArgs e) => visitedCount++;
+                    void OnVertexProcessed(EventArgs e) => visitedCount++;
                     var info = await service.ReadStatisticAsync(select.Id).ConfigureAwait(false);
                     var algorithm = select.ToAlgorithm(range);
                     algorithm.VertexProcessed += OnVertexProcessed;

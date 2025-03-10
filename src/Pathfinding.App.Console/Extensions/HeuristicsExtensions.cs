@@ -5,15 +5,15 @@ namespace Pathfinding.App.Console.Extensions
 {
     internal static class HeuristicsExtensions
     {
-        public static string ToStringRepresentation(this HeuristicFunctions heuristics)
+        public static string ToStringRepresentation(this Heuristics heuristics)
         {
             return heuristics switch
             {
-                HeuristicFunctions.Euclidian => Resource.Euclidian,
-                HeuristicFunctions.Chebyshev => Resource.Chebyshev,
-                HeuristicFunctions.Diagonal => Resource.Diagonal,
-                HeuristicFunctions.Manhattan => Resource.Manhattan,
-                HeuristicFunctions.Cosine => Resource.Cosine,
+                Heuristics.Euclidian => Resource.Euclidian,
+                Heuristics.Chebyshev => Resource.Chebyshev,
+                Heuristics.Diagonal => Resource.Diagonal,
+                Heuristics.Manhattan => Resource.Manhattan,
+                Heuristics.Cosine => Resource.Cosine,
                 _ => string.Empty,
             };
         }

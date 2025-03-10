@@ -42,7 +42,7 @@ namespace Pathfinding.App.Console.Models
 
         public StepRules? StepRule { get; set; }
 
-        public HeuristicFunctions? Heuristics { get; set; }
+        public Heuristics? Heuristics { get; set; }
 
         public double? Weight { get; set; }
 

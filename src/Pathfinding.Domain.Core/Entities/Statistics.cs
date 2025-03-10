@@ -10,7 +10,7 @@ namespace Pathfinding.Domain.Core.Entities
 
         public Algorithms Algorithm { get; set; }
 
-        public HeuristicFunctions? Heuristics { get; set; } = null;
+        public Heuristics? Heuristics { get; set; } = null;
 
         public double? Weight { get; set; } = null;
 

@@ -78,7 +78,7 @@ namespace Pathfinding.App.Console.Views
 
         private static string HeuristicsToString(object heuristic)
         {
-            var heuristics = (HeuristicFunctions?)heuristic;
+            var heuristics = (Heuristics?)heuristic;
             return heuristics?.ToStringRepresentation();
         }
 

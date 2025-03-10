@@ -10,7 +10,7 @@ namespace Pathfinding.Service.Interface.Models.Serialization
     {
         public Algorithms Algorithm { get; set; }
 
-        public HeuristicFunctions? Heuristics { get; set; } = null;
+        public Heuristics? Heuristics { get; set; } = null;
 
         public double? Weight { get; set; } = null;
 
@@ -29,7 +29,7 @@ namespace Pathfinding.Service.Interface.Models.Serialization
         public void Deserialize(BinaryReader reader)
         {
             Algorithm = (Algorithms)reader.ReadInt32();
-            Heuristics = (HeuristicFunctions?)reader.ReadNullableInt32();
+            Heuristics = (Heuristics?)reader.ReadNullableInt32();
             Weight = reader.ReadNullableDouble();
             StepRule = (StepRules?)reader.ReadNullableInt32();
             ResultStatus = (RunStatuses)reader.ReadInt32();
@@ -57,7 +57,7 @@ namespace Pathfinding.Service.Interface.Models.Serialization
         public void ReadXml(XmlReader reader)
         {
             Algorithm = reader.ReadEnumElement<Algorithms>(nameof(Algorithm));
-            Heuristics = reader.ReadNullableEnum<HeuristicFunctions>(nameof(Heuristics));
+            Heuristics = reader.ReadNullableEnum<Heuristics>(nameof(Heuristics));
             Weight = reader.ReadNullableElement<double>(nameof(Weight));
             StepRule = reader.ReadNullableEnum<StepRules>(nameof(StepRule));
             ResultStatus = reader.ReadEnumElement<RunStatuses>(nameof(ResultStatus));

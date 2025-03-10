@@ -52,15 +52,15 @@ public static class AlgorithmBuildInfoExtensions
         };
     }
 
-    private static IHeuristic GetHeuristic(HeuristicFunctions? heuristic, double? weight)
+    private static IHeuristic GetHeuristic(Heuristics? heuristic, double? weight)
     {
         return heuristic switch
         {
-            HeuristicFunctions.Euclidian => new EuclidianDistance().WithWeight(weight),
-            HeuristicFunctions.Chebyshev => new ChebyshevDistance().WithWeight(weight),
-            HeuristicFunctions.Diagonal => new DiagonalDistance().WithWeight(weight),
-            HeuristicFunctions.Manhattan => new ManhattanDistance().WithWeight(weight),
-            HeuristicFunctions.Cosine => new CosineDistance().WithWeight(weight),
+            Heuristics.Euclidian => new EuclidianDistance().WithWeight(weight),
+            Heuristics.Chebyshev => new ChebyshevDistance().WithWeight(weight),
+            Heuristics.Diagonal => new DiagonalDistance().WithWeight(weight),
+            Heuristics.Manhattan => new ManhattanDistance().WithWeight(weight),
+            Heuristics.Cosine => new CosineDistance().WithWeight(weight),
             _ => throw new NotImplementedException($"Unknown heuristic: {heuristic}")
         };
     }

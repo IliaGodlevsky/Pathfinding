@@ -4,12 +4,8 @@ namespace Pathfinding.App.Console.Views
 {
     internal sealed partial class RunHeuristicsView : FrameView
     {
-        private readonly RadioGroup heuristics = new();
-
         private void Initialize()
         {
-            heuristics.X = 1;
-            heuristics.Y = 0;
             X = 0;
             Y = Pos.Percent(20) + 1;
             Height = Dim.Percent(35);
@@ -20,7 +16,6 @@ namespace Pathfinding.App.Console.Views
                 Title = "Heuristics"
             };
             Visible = false;
-            Add(heuristics);
         }
     }
 }

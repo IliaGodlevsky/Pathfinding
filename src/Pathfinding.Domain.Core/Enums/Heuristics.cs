@@ -1,6 +1,6 @@
 ﻿namespace Pathfinding.Domain.Core.Enums
 {
-    public enum HeuristicFunctions
+    public enum Heuristics
     {
         Euclidian,
         Chebyshev,
