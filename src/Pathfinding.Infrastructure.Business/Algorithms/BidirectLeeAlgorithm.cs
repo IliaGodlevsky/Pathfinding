@@ -1,5 +1,4 @@
 ﻿using Pathfinding.Infrastructure.Business.Extensions;
-using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms
@@ -17,22 +16,14 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
         protected override void RelaxForwardVertex(IPathfindingVertex vertex)
         {
             forwardStorage.Enqueue(vertex);
-            if (Intersection == NullPathfindingVertex.Instance
-                && backwardVisited.Contains(vertex))
-            {
-                Intersection = vertex;
-            }
+            SetForwardIntersection(vertex);
             base.RelaxForwardVertex(vertex);
         }
 
         protected override void RelaxBackwardVertex(IPathfindingVertex vertex)
         {
             backwardStorage.Enqueue(vertex);
-            if (Intersection == NullPathfindingVertex.Instance
-                && forwardVisited.Contains(vertex))
-            {
-                Intersection = vertex;
-            }
+            SetBackwardIntersections(vertex);
             base.RelaxBackwardVertex(vertex);
         }
 

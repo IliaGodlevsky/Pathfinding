@@ -2,7 +2,7 @@
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
 using Pathfinding.Shared.Primitives;
-using System.Collections.Immutable;
+using System.Collections.Frozen;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms
 {
@@ -37,8 +37,26 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
         protected override IGraphPath GetSubPath()
         {
             return new BidirectGraphPath(
-                forwardTraces.ToImmutableDictionary(),
-                backwardTraces.ToImmutableDictionary(), Intersection);
+                forwardTraces.ToFrozenDictionary(),
+                backwardTraces.ToFrozenDictionary(), Intersection);
+        }
+
+        protected virtual void SetForwardIntersection(IPathfindingVertex vertex)
+        {
+            if (Intersection == NullPathfindingVertex.Instance
+                && backwardVisited.Contains(vertex))
+            {
+                Intersection = vertex;
+            }
+        }
+
+        protected virtual void SetBackwardIntersections(IPathfindingVertex vertex) 
+        {
+            if (Intersection == NullPathfindingVertex.Instance
+                && forwardVisited.Contains(vertex))
+            {
+                Intersection = vertex;
+            }
         }
 
         protected override void DropState()

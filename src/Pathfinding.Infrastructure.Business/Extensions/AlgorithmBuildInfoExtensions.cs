@@ -19,6 +19,7 @@ public static class AlgorithmBuildInfoExtensions
                 GetStepRule(info.StepRule),
                 GetHeuristic(info.Heuristics, info.Weight)),
             Algorithm.Random => new RandomAlgorithm(range),
+            Algorithm.BidirectRandom => new BidirectRandomAlgorithm(range),
             Algorithm.AStarGreedy => new AStarGreedyAlgorithm(range,
                 GetHeuristic(info.Heuristics, info.Weight), 
                 GetStepRule(info.StepRule)),

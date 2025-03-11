@@ -1,7 +1,6 @@
 ﻿using Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
 using Pathfinding.Infrastructure.Business.Algorithms.StepRules;
 using Pathfinding.Infrastructure.Business.Extensions;
-using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
 using Priority_Queue;
 using System.Collections.Frozen;
@@ -54,11 +53,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
             if (vertexCost > relaxedCost)
             {
                 EnqueueForward(vertex, relaxedCost);
-                if (Intersection == NullPathfindingVertex.Instance
-                    && backwardVisited.Contains(vertex))
-                {
-                    Intersection = vertex;
-                }
+                SetForwardIntersection(vertex);
                 forwardTraces[vertex.Position] = Current.Source;
             }
         }
@@ -70,11 +65,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms
             if (vertexCost > relaxedCost)
             {
                 EnqueueBackward(vertex, relaxedCost);
-                if (Intersection == NullPathfindingVertex.Instance
-                    && forwardVisited.Contains(vertex))
-                {
-                    Intersection = vertex;
-                }
+                SetBackwardIntersections(vertex);
                 backwardTraces[vertex.Position] = Current.Target;
             }
         }

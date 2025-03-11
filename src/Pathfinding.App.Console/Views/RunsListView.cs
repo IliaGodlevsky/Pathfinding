@@ -56,6 +56,7 @@ namespace Pathfinding.App.Console.Views
                         case Algorithms.DepthFirst:
                         case Algorithms.Snake:
                         case Algorithms.Random:
+                        case Algorithms.BidirectRandom:
                             messenger.Send(new CloseStepRulesViewMessage());
                             messenger.Send(new CloseRunPopulateViewMessage());
                             messenger.Send(new CloseHeuristicsViewMessage());

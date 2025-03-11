@@ -5,6 +5,33 @@ namespace Pathfinding.App.Console.Extensions
 {
     internal static class AlgorithmExtensions
     {
+        private static Dictionary<Algorithms, int> OrderMap { get; }
+
+        static AlgorithmExtensions()
+        {
+            Algorithms[] orders = 
+            [
+                Algorithms.Dijkstra,
+                Algorithms.AStar,
+                Algorithms.BidirectDijkstra,
+                Algorithms.BidirectAStar,
+                Algorithms.Random,
+                Algorithms.BidirectRandom,
+                Algorithms.Lee,
+                Algorithms.BidirectLee,
+                Algorithms.AStarLee,
+                Algorithms.DistanceFirst,
+                Algorithms.CostGreedy,
+                Algorithms.AStarGreedy,
+                Algorithms.DepthFirst,
+                Algorithms.Snake
+            ];
+
+            OrderMap = orders
+                .Select((Algorithm, Index) => (Algorithm, Index))
+                .ToDictionary(x => x.Algorithm, x => x.Index);
+        }
+
         public static string ToStringRepresentation(this Algorithms algorithm)
         {
             return algorithm switch
@@ -22,30 +49,14 @@ namespace Pathfinding.App.Console.Extensions
                 Algorithms.DepthFirst => Resource.DepthFirst,
                 Algorithms.Snake => Resource.Snake,
                 Algorithms.Random => Resource.RandomAlgorithm,
+                Algorithms.BidirectRandom => "Bi Random",
                 _ => string.Empty
             };
         }
 
         public static int GetOrder(this Algorithms algorithm)
         {
-            List<Algorithms> orders =
-            [
-                Algorithms.Dijkstra,
-                Algorithms.AStar,
-                Algorithms.BidirectDijkstra,
-                Algorithms.BidirectAStar,
-                Algorithms.Random,
-                Algorithms.Lee,
-                Algorithms.BidirectLee,
-                Algorithms.AStarLee,
-                Algorithms.DistanceFirst,
-                Algorithms.CostGreedy,
-                Algorithms.AStarGreedy,
-                Algorithms.DepthFirst,
-                Algorithms.Snake
-            ];
-            var index = orders.IndexOf(algorithm);
-            return index == -1 ? int.MaxValue : index;
+            return OrderMap.GetValueOrDefault(algorithm, int.MaxValue);
         }
     }
 }
