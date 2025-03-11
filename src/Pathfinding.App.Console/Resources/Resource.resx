@@ -138,6 +138,9 @@
   <data name="BidirectLee" xml:space="preserve">
     <value>Bidirect Lee</value>
   </data>
+  <data name="BidirectRandom" xml:space="preserve">
+    <value>Bi Random</value>
+  </data>
   <data name="Chebyshev" xml:space="preserve">
     <value>Chebyshev</value>
   </data>

@@ -61,7 +61,8 @@ namespace Pathfinding.App.Console.Views
         private static string TimeToMilliseconds(object time)
         {
             var t = (TimeSpan)time;
-            return Math.Round(t.TotalMilliseconds, 2).ToString(CultureInfo.InvariantCulture);
+            return Math.Round(t.TotalMilliseconds, 2)
+                .ToString(CultureInfo.InvariantCulture);
         }
 
         private static string AlgorithmToString(object algorithm)

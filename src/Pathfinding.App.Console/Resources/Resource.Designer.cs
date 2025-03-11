@@ -124,6 +124,15 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bi Random.
+        /// </summary>
+        internal static string BidirectRandom {
+            get {
+                return ResourceManager.GetString("BidirectRandom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Chebyshev.
         /// </summary>
         internal static string Chebyshev {

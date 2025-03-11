@@ -49,7 +49,7 @@ namespace Pathfinding.App.Console.Extensions
                 Algorithms.DepthFirst => Resource.DepthFirst,
                 Algorithms.Snake => Resource.Snake,
                 Algorithms.Random => Resource.RandomAlgorithm,
-                Algorithms.BidirectRandom => "Bi Random",
+                Algorithms.BidirectRandom => Resource.BidirectRandom,
                 _ => string.Empty
             };
         }
