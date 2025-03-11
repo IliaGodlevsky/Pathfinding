@@ -394,6 +394,15 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Random.
+        /// </summary>
+        internal static string RandomAlgorithm {
+            get {
+                return ResourceManager.GetString("RandomAlgorithm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Readonly.
         /// </summary>
         internal static string Readonly {

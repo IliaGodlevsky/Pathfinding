@@ -228,6 +228,9 @@
   <data name="No" xml:space="preserve">
     <value>No</value>
   </data>
+  <data name="RandomAlgorithm" xml:space="preserve">
+    <value>Random</value>
+  </data>
   <data name="Readonly" xml:space="preserve">
     <value>Readonly</value>
   </data>
