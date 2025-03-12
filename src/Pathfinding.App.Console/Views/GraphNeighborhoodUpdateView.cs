@@ -5,7 +5,6 @@ using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -13,8 +12,6 @@ namespace Pathfinding.App.Console.Views
 {
     internal sealed partial class GraphNeighborhoodUpdateView : FrameView
     {
-        private readonly CompositeDisposable disposables = [];
-
         public GraphNeighborhoodUpdateView(GraphUpdateViewModel viewModel)
         {
             Initialize();
@@ -26,18 +23,10 @@ namespace Pathfinding.App.Console.Views
             neighborhoods.Events().SelectedItemChanged
                 .Where(x => x.SelectedItem > -1)
                 .Select(x => values[x.SelectedItem])
-                .BindTo(viewModel, x => x.Neighborhood)
-                .DisposeWith(disposables);
+                .BindTo(viewModel, x => x.Neighborhood);
             viewModel.WhenAnyValue(x => x.Neighborhood)
                 .Select(x => factories.Values.IndexOf(x))
-                .BindTo(neighborhoods, x => x.SelectedItem)
-                .DisposeWith(disposables);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            disposables.Dispose();
-            base.Dispose(disposing);
+                .BindTo(neighborhoods, x => x.SelectedItem);
         }
     }
 }

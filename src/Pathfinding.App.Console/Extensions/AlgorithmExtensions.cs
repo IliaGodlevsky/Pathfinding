@@ -15,16 +15,17 @@ namespace Pathfinding.App.Console.Extensions
                 Algorithms.AStar,
                 Algorithms.BidirectDijkstra,
                 Algorithms.BidirectAStar,
-                Algorithms.Random,
-                Algorithms.BidirectRandom,
+                Algorithms.CostGreedy,
+                Algorithms.AStarGreedy,
                 Algorithms.Lee,
                 Algorithms.BidirectLee,
                 Algorithms.AStarLee,
                 Algorithms.DistanceFirst,
-                Algorithms.CostGreedy,
-                Algorithms.AStarGreedy,
                 Algorithms.DepthFirst,
-                Algorithms.Snake
+                Algorithms.DepthFirstRandom,
+                Algorithms.Snake,
+                Algorithms.Random,
+                Algorithms.BidirectRandom,
             ];
 
             OrderMap = orders
@@ -50,6 +51,7 @@ namespace Pathfinding.App.Console.Extensions
                 Algorithms.Snake => Resource.Snake,
                 Algorithms.Random => Resource.RandomAlgorithm,
                 Algorithms.BidirectRandom => Resource.BidirectRandom,
+                Algorithms.DepthFirstRandom => Resource.DepthRandom,
                 _ => string.Empty
             };
         }

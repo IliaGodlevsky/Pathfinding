@@ -42,12 +42,16 @@ namespace Pathfinding.App.Console.ViewModels
 
         private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
         {
-            SelectedGraphIds = msg.Graphs.Select(x => x.Id).ToArray();
+            SelectedGraphIds = msg.Graphs
+                .Select(x => x.Id)
+                .ToArray();
         }
 
         private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
         {
-            SelectedGraphIds = SelectedGraphIds.Where(x => !msg.GraphIds.Contains(x)).ToArray();
+            SelectedGraphIds = SelectedGraphIds
+                .Where(x => !msg.GraphIds.Contains(x))
+                .ToArray();
         }
 
         private async Task ExecuteCopy()

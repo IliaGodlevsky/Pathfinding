@@ -86,14 +86,17 @@ namespace Pathfinding.App.Console.ViewModels
             await ExecuteSafe(async () =>
             {
                 var graph = SelectedGraphs[0];
-                var info = await service.ReadGraphInfoAsync(graph.Id).ConfigureAwait(false);
+                var info = await service.ReadGraphInfoAsync(graph.Id)
+                    .ConfigureAwait(false);
                 info.Name = Name;
                 info.Neighborhood = Neighborhood;
                 info.SmoothLevel = SmoothLevel;
                 await service.UpdateGraphInfoAsync(info).ConfigureAwait(false);
-                await messenger.SendAsync(new AsyncGraphUpdatedMessage(info), Tokens.GraphTable);
+                await messenger.SendAsync(new AsyncGraphUpdatedMessage(info), Tokens.GraphTable)
+                    .ConfigureAwait(false);
                 messenger.Send(new GraphUpdatedMessage(info));
-                await messenger.SendAsync(new AsyncGraphUpdatedMessage(info), Tokens.AlgorithmUpdate);
+                await messenger.SendAsync(new AsyncGraphUpdatedMessage(info), Tokens.AlgorithmUpdate)
+                    .ConfigureAwait(false);
             }, log.Error).ConfigureAwait(false);
         }
 
@@ -117,7 +120,9 @@ namespace Pathfinding.App.Console.ViewModels
 
         private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
         {
-            SelectedGraphs = SelectedGraphs.Where(x => !msg.GraphIds.Contains(x.Id)).ToArray();
+            SelectedGraphs = SelectedGraphs
+                .Where(x => !msg.GraphIds.Contains(x.Id))
+                .ToArray();
             if (SelectedGraphs.Length == 0)
             {
                 Name = string.Empty;

@@ -20,7 +20,7 @@ namespace Pathfinding.Infrastructure.Business.Extensions
                 SmoothLevels.Low => new(1),
                 SmoothLevels.Medium => new(2),
                 SmoothLevels.High => new(4),
-                SmoothLevels.Extreme => new(7),
+                SmoothLevels.Extreme => new(8),
                 _ => new(0)
             };
             return new Layers.Layers() { neighborhood, smooth };

@@ -133,13 +133,13 @@
     <value>Bidirect A*</value>
   </data>
   <data name="BidirectDijkstra" xml:space="preserve">
-    <value>Bi Dijkstra</value>
+    <value>Bi dijkstra</value>
   </data>
   <data name="BidirectLee" xml:space="preserve">
-    <value>Bidirect Lee</value>
+    <value>Bidirect lee</value>
   </data>
   <data name="BidirectRandom" xml:space="preserve">
-    <value>Bi Random</value>
+    <value>Bi random</value>
   </data>
   <data name="Chebyshev" xml:space="preserve">
     <value>Chebyshev</value>
@@ -167,6 +167,9 @@
   </data>
   <data name="DepthFirst" xml:space="preserve">
     <value>DFS</value>
+  </data>
+  <data name="DepthRandom" xml:space="preserve">
+    <value>DFS random</value>
   </data>
   <data name="Diagonal" xml:space="preserve">
     <value>Diagonal</value>

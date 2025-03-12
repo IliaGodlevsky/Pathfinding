@@ -18,5 +18,6 @@
         Snake,
         Random,
         BidirectRandom,
+        DepthFirstRandom
     }
 }

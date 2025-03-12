@@ -106,7 +106,7 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bi Dijkstra.
+        ///   Looks up a localized string similar to Bi dijkstra.
         /// </summary>
         internal static string BidirectDijkstra {
             get {
@@ -115,7 +115,7 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bidirect Lee.
+        ///   Looks up a localized string similar to Bidirect lee.
         /// </summary>
         internal static string BidirectLee {
             get {
@@ -124,7 +124,7 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bi Random.
+        ///   Looks up a localized string similar to Bi random.
         /// </summary>
         internal static string BidirectRandom {
             get {
@@ -210,6 +210,15 @@ namespace Pathfinding.App.Console.Resources {
         internal static string DepthFirst {
             get {
                 return ResourceManager.GetString("DepthFirst", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DFS random.
+        /// </summary>
+        internal static string DepthRandom {
+            get {
+                return ResourceManager.GetString("DepthRandom", resourceCulture);
             }
         }
         

@@ -1,5 +1,4 @@
 ﻿using Pathfinding.Infrastructure.Business.Extensions;
-using Pathfinding.Infrastructure.Data.Extensions;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
 

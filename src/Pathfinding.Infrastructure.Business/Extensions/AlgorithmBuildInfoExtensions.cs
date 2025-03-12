@@ -34,6 +34,7 @@ public static class AlgorithmBuildInfoExtensions
             Algorithm.CostGreedy => new CostGreedyAlgorithm(range,
                 GetStepRule(info.StepRule)),
             Algorithm.DepthFirst => new DepthFirstAlgorithm(range),
+            Algorithm.DepthFirstRandom => new DepthRandomAlgorithm(range),
             Algorithm.Dijkstra => new DijkstraAlgorithm(range,
                 GetStepRule(info.StepRule)),
             Algorithm.DistanceFirst => new DistanceFirstAlgorithm(range,
