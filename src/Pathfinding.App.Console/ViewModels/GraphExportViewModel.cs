@@ -34,6 +34,10 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
 
     public ReactiveCommand<Func<StreamModel>, Unit> ExportGraphCommand { get; }
 
+    public IReadOnlyList<ExportOptions> AllowedOptions { get; }
+
+    public IReadOnlyCollection<StreamFormat> StreamFormats => serializers.Keys;
+
     public GraphExportViewModel(IRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         IEnumerable<Meta<Serializer>> serializers,
@@ -44,6 +48,7 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
         this.serializers = serializers
             .ToDictionary(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], x => x.Value);
         ExportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(ExportGraph, CanExport());
+        AllowedOptions = Enum.GetValues<ExportOptions>();
         messenger.Register<GraphSelectedMessage>(this, OnGraphSelected);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
     }

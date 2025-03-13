@@ -18,7 +18,7 @@ namespace Pathfinding.App.Console.Views
                 .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
                 .Select(x => new Func<StreamModel>(() =>
                 {
-                    var fileName = GetFileName();
+                    var fileName = GetFileName(viewModel);
                     return string.IsNullOrEmpty(fileName.Path)
                         ? new(Stream.Null, null)
                         : new(File.OpenRead(fileName.Path), fileName.Format);
@@ -26,9 +26,9 @@ namespace Pathfinding.App.Console.Views
                 .InvokeCommand(viewModel, x => x.ImportGraphCommand);
         }
 
-        private static (string Path, StreamFormat? Format) GetFileName()
+        private static (string Path, StreamFormat? Format) GetFileName(IGraphImportViewModel viewModel)
         {
-            var formats = Enum.GetValues<StreamFormat>()
+            var formats = viewModel.StreamFormats
                 .ToDictionary(x => x.ToExtensionRepresentation());
             using var dialog = new OpenDialog(Resource.Import,
                 Resource.ChooseFile, [.. formats.Keys])

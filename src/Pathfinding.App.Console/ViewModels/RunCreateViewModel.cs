@@ -1,5 +1,6 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel;
 using Pathfinding.App.Console.Models;
@@ -26,7 +27,7 @@ namespace Pathfinding.App.Console.ViewModels
         IRunCreateViewModel,
         IRequireHeuristicsViewModel,
         IRequireStepRuleViewModel,
-        IRequireRunNameViewModel
+        IRequirePopulationViewModel
     {
         private static readonly InclusiveValueRange<double> WeightRange = (5, 0);
 
@@ -45,6 +46,10 @@ namespace Pathfinding.App.Console.ViewModels
             get => algorithm;
             set => this.RaiseAndSetIfChanged(ref algorithm, value);
         }
+
+        public IReadOnlyCollection<Heuristics> AllowedHeuristics { get; }
+
+        public IReadOnlyList<Algorithms> AllowedAlgorithms { get; }
 
         public ObservableCollection<Heuristics?> Heuristics { get; } = [];
 
@@ -86,6 +91,8 @@ namespace Pathfinding.App.Console.ViewModels
             set => this.RaiseAndSetIfChanged(ref graph, value);
         }
 
+        
+
         public RunCreateViewModel(IRequestService<GraphVertexModel> service,
             [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
             ILog logger)
@@ -93,8 +100,9 @@ namespace Pathfinding.App.Console.ViewModels
             this.messenger = messenger;
             this.service = service;
             this.logger = logger;
-            CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm,
-                CanCreateAlgorithm());
+            CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm, CanCreateAlgorithm());
+            AllowedAlgorithms = [.. Enum.GetValues<Algorithms>().OrderBy(x => x.GetOrder())];
+            AllowedHeuristics = Enum.GetValues<Heuristics>();
             messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
             messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
         }

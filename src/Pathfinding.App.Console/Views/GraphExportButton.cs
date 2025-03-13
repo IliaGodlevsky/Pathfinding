@@ -35,7 +35,7 @@ namespace Pathfinding.App.Console.Views
 
         private static (string Path, StreamFormat? Format) GetFilePath(IGraphExportViewModel viewModel)
         {
-            var formats = Enum.GetValues<StreamFormat>()
+            var formats = viewModel.StreamFormats
                 .ToDictionary(x => x.ToExtensionRepresentation());
             using var dialog = new SaveDialog(Resource.Export,
                 Resource.ChooseFile, [.. formats.Keys])

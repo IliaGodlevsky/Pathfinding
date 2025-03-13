@@ -4,7 +4,6 @@ using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.ViewModels.Interface;
-using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
 using System.Reactive.Linq;
 using Terminal.Gui;
@@ -14,13 +13,14 @@ namespace Pathfinding.App.Console.Views
     internal sealed partial class RunHeuristicsView : FrameView
     {
         private readonly IRequireHeuristicsViewModel viewModel;
+        private readonly List<CheckBox> checkBoxes = [];
 
         public RunHeuristicsView([KeyFilter(KeyFilters.Views)] IMessenger messenger,
             IRequireHeuristicsViewModel viewModel)
         {
             Initialize();
             int i = 0;
-            foreach (var function in Enum.GetValues<Heuristics>())
+            foreach (var function in viewModel.AllowedHeuristics)
             {
                 var text = function.ToStringRepresentation();
                 var checkBox = new CheckBox(text) { Y = i++ };
@@ -32,6 +32,7 @@ namespace Pathfinding.App.Console.Views
                     })
                     .Subscribe();
                 Add(checkBox);
+                checkBoxes.Add(checkBox);
             }
             messenger.Register<OpenHeuristicsViewMessage>(this, OnHeuristicsViewOpen);
             messenger.Register<CloseHeuristicsViewMessage>(this, OnHeuristicsViewClosed);
@@ -41,6 +42,7 @@ namespace Pathfinding.App.Console.Views
 
         private void OnHeuristicsViewOpen(object recipient, OpenHeuristicsViewMessage msg)
         {
+            Close();
             viewModel.Heuristics.Add(default);
             Visible = true;
         }
@@ -57,10 +59,12 @@ namespace Pathfinding.App.Console.Views
 
         private void Close()
         {
-            viewModel.FromWeight = null;
+            foreach (var checkBox in checkBoxes.Where(x => x.Checked))
+            {
+                checkBox.Checked = false;
+                checkBox.OnToggled(true);
+            }
             viewModel.Heuristics.Clear();
-            viewModel.ToWeight = null;
-            viewModel.Step = null;
             Visible = false;
         }
     }

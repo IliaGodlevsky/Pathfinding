@@ -15,13 +15,10 @@ namespace Pathfinding.App.Console.Views
     internal sealed partial class RunsListView : FrameView
     {
         public RunsListView([KeyFilter(KeyFilters.Views)] IMessenger messenger,
-            IRequireRunNameViewModel viewModel)
+            IRunCreateViewModel viewModel)
         {
             Initialize();
-            var algos = Enum.GetValues<Algorithms>()
-                .OrderBy(x => x.GetOrder())
-                .ToArray();
-            var source = algos
+            var source = viewModel.AllowedAlgorithms
                 .Select(x => x.ToStringRepresentation())
                 .ToArray();
             this.Events().VisibleChanged
@@ -31,7 +28,7 @@ namespace Pathfinding.App.Console.Views
             runList.SetSource(source);
             runList.Events().SelectedItemChanged
                 .Where(x => x.Item > -1)
-                .Select(x => algos[x.Item])
+                .Select(x => viewModel.AllowedAlgorithms[x.Item])
                 .Do(algorithm =>
                 {
                     // Don't change order of the messages

@@ -8,6 +8,10 @@ namespace Pathfinding.App.Console.ViewModels.Interface
     {
         ExportOptions Options { get; set; }
 
+        IReadOnlyList<ExportOptions> AllowedOptions { get; }
+
+        IReadOnlyCollection<StreamFormat> StreamFormats { get; }
+
         ReactiveCommand<Func<StreamModel>, Unit> ExportGraphCommand { get; }
     }
 }

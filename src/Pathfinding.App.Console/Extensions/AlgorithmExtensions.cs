@@ -17,6 +17,7 @@ namespace Pathfinding.App.Console.Extensions
                 Algorithms.BidirectAStar,
                 Algorithms.CostGreedy,
                 Algorithms.AStarGreedy,
+
                 Algorithms.Lee,
                 Algorithms.BidirectLee,
                 Algorithms.AStarLee,
@@ -24,8 +25,9 @@ namespace Pathfinding.App.Console.Extensions
                 Algorithms.DepthFirst,
                 Algorithms.DepthFirstRandom,
                 Algorithms.Snake,
+
                 Algorithms.Random,
-                Algorithms.BidirectRandom,
+                Algorithms.BidirectRandom
             ];
 
             OrderMap = orders

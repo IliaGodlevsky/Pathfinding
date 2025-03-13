@@ -17,14 +17,14 @@ namespace Pathfinding.App.Console.Views
         private const double DefaultWeight = 1;
 
         private readonly CompositeDisposable disposables = [];
-        private readonly IRequireHeuristicsViewModel heuristicsViewModel;
+        private readonly IRequirePopulationViewModel populateViewModel;
 
         public RunsPopulateView(
             [KeyFilter(KeyFilters.Views)] IMessenger messenger,
-            IRequireHeuristicsViewModel heuristicsViewModel)
+            IRequirePopulationViewModel populateViewModel)
         {
             Initialize();
-            this.heuristicsViewModel = heuristicsViewModel;
+            this.populateViewModel = populateViewModel;
 
             BindTo(weightTextField, x => x.FromWeight);
             BindTo(toWeightTextField, x => x.ToWeight);
@@ -33,28 +33,27 @@ namespace Pathfinding.App.Console.Views
             messenger.Register<OpenRunsPopulateViewMessage>(this, OnRunPopulateOpen);
             messenger.Register<CloseRunPopulateViewMessage>(this, OnRunPopulateViewClosed);
             messenger.Register<CloseRunCreateViewMessage>(this, OnRunCreateViewClosed);
-            messenger.Register<OpenHeuristicsViewMessage>(this, OnHeuristicsViewOpen);
         }
 
         private void BindTo(TextField field, 
-            Expression<Func<IRequireHeuristicsViewModel, double?>> expression)
+            Expression<Func<IRequirePopulationViewModel, double?>> expression)
         {
             var compiled = expression.Compile();
             var propertyName = ((MemberExpression)expression.Body).Member.Name;
             field.Events().TextChanging
                 .DistinctUntilChanged()
                 .Select(x => double.TryParse(x.NewText.ToString(), out var value) ? value : default(double?))
-                .BindTo(heuristicsViewModel, expression)
+                .BindTo(populateViewModel, expression)
                 .DisposeWith(disposables);
-            heuristicsViewModel.Events().PropertyChanged
+            populateViewModel.Events().PropertyChanged
                 .Where(x => x.PropertyName == propertyName)
                 .Do(x =>
                 {
                     Application.MainLoop.Invoke(() =>
                     {
-                        var propertyValue = compiled(heuristicsViewModel);
+                        var propertyValue = compiled(populateViewModel);
                         bool parsed = double.TryParse(field.Text.ToString(), out var value);
-                        if (parsed && value != propertyValue)
+                        if (field.Text != propertyValue.ToString())
                         {
                             field.Text = propertyValue.ToString();
                         }
@@ -63,8 +62,6 @@ namespace Pathfinding.App.Console.Views
                 .Subscribe()
                 .DisposeWith(disposables);
         }
-
-        private void OnHeuristicsViewOpen(object recipient, OpenHeuristicsViewMessage msg) => SetDefaults();
 
         private void OnRunPopulateOpen(object recipient, OpenRunsPopulateViewMessage msg)
         {
@@ -78,19 +75,16 @@ namespace Pathfinding.App.Console.Views
 
         private void SetDefaults()
         {
-            weightTextField.Text = DefaultWeight.ToString();
-            toWeightTextField.Text = DefaultWeight.ToString();
-            stepTextField.Text = "0";
-            heuristicsViewModel.FromWeight = DefaultWeight;
-            heuristicsViewModel.ToWeight = DefaultWeight;
-            heuristicsViewModel.Step = 0;
+            populateViewModel.FromWeight = DefaultWeight;
+            populateViewModel.ToWeight = DefaultWeight;
+            populateViewModel.Step = 0;
         }
 
         private void Close()
         {
-            heuristicsViewModel.FromWeight = null;
-            heuristicsViewModel.ToWeight = null;
-            heuristicsViewModel.Step = null;
+            populateViewModel.FromWeight = null;
+            populateViewModel.ToWeight = null;
+            populateViewModel.Step = null;
             Visible = false;
         }
     }

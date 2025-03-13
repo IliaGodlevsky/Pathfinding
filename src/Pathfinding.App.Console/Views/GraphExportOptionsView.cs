@@ -17,8 +17,7 @@ namespace Pathfinding.App.Console.Views
 
         public GraphExportOptionsView(IGraphExportViewModel viewModel)
         {
-            var options = Enum.GetValues<ExportOptions>();
-            var labels = options
+            var labels = viewModel.AllowedOptions
                 .Select(x => ustring.Make(x.ToStringRepresentation()))
                 .ToArray();
             exportOptions.DisplayMode = DisplayModeLayout.Horizontal;
@@ -26,12 +25,12 @@ namespace Pathfinding.App.Console.Views
             Border = new Border();
             exportOptions.Events().SelectedItemChanged
                 .Where(x => x.SelectedItem >= 0)
-                .Select(x => options[x.SelectedItem])
+                .Select(x => viewModel.AllowedOptions[x.SelectedItem])
                 .BindTo(viewModel, x => x.Options)
                 .DisposeWith(disposables);
             exportOptions.X = 1;
             exportOptions.Y = 1;
-            exportOptions.SelectedItem = options.Length - 1;
+            exportOptions.SelectedItem = viewModel.AllowedOptions.Count - 1;
             Add(exportOptions);
         }
 

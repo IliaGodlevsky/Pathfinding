@@ -9,7 +9,6 @@ using Pathfinding.App.Console.Resources;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
-using Pathfinding.Service.Interface.Models.Serialization;
 using ReactiveUI;
 using System.Reactive;
 
@@ -25,6 +24,8 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
     private readonly ILog logger;
 
     public ReactiveCommand<Func<StreamModel>, Unit> ImportGraphCommand { get; }
+
+    public IReadOnlyCollection<StreamFormat> StreamFormats => serializers.Keys;
 
     public GraphImportViewModel(IRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
