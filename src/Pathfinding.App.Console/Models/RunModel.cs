@@ -81,7 +81,7 @@ internal class RunModel : ReactiveObject, IDisposable
         IReadOnlyCollection<SubRunModel> pathfindingResult,
         IReadOnlyCollection<Coordinate> range)
     {
-        algorithm = new(() => CreateAlgorithmRevision(vertices, pathfindingResult, range));
+        algorithm = new(() => CreateAlgorithmRevision(vertices, pathfindingResult, range), true);
         cursorRange = new(() => new InclusiveValueRange<int>(Count - 1, 0));
         this.WhenAnyValue(x => x.Fraction)
             .DistinctUntilChanged().Select(GetCount)

@@ -4,6 +4,7 @@ using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel;
 using Pathfinding.App.Console.Models;
+using Pathfinding.App.Console.Resources;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Business.Algorithms.Exceptions;
@@ -180,7 +181,6 @@ namespace Pathfinding.App.Console.ViewModels
             if (value == null)
             {
                 field = value;
-                
             }
             else
             {
@@ -285,7 +285,7 @@ namespace Pathfinding.App.Console.ViewModels
             }
             else
             {
-                logger.Info("Pathfinding range is not set");
+                logger.Info(Resource.RangeIsNotSetMsg);
             }
         }
     }

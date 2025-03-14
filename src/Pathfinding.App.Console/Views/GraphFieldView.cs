@@ -24,7 +24,6 @@ internal sealed partial class GraphFieldView : FrameView
     private readonly IGraphFieldViewModel graphFieldViewModel;
     private readonly IRunRangeViewModel runRangeViewModel;
 
-    private readonly CompositeDisposable disposables = [];
     private readonly CompositeDisposable vertexDisposables = [];
 
     private readonly View container = new();
@@ -40,8 +39,7 @@ internal sealed partial class GraphFieldView : FrameView
         this.graphFieldViewModel.WhenAnyValue(x => x.Graph)
             .Where(x => x != null)
             .Do(RenderGraph)
-            .Subscribe()
-            .DisposeWith(disposables);
+            .Subscribe();
         messenger.Register<OpenRunFieldMessage>(this, OnOpenAlgorithmRunView);
         messenger.Register<CloseRunFieldMessage>(this, OnCloseAlgorithmRunField);
         container.X = Pos.Center();

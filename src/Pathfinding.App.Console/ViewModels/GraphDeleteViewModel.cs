@@ -9,59 +9,58 @@ using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
 
-namespace Pathfinding.App.Console.ViewModels
+namespace Pathfinding.App.Console.ViewModels;
+
+internal sealed class GraphDeleteViewModel : BaseViewModel, IGraphDeleteViewModel
 {
-    internal sealed class GraphDeleteViewModel : BaseViewModel, IGraphDeleteViewModel
+    private readonly IMessenger messenger;
+    private readonly IRequestService<GraphVertexModel> service;
+    private readonly ILog logger;
+
+    private int[] selectedGraphIds = [];
+    public int[] SelectedGraphIds
     {
-        private readonly IMessenger messenger;
-        private readonly IRequestService<GraphVertexModel> service;
-        private readonly ILog logger;
+        get => selectedGraphIds;
+        set => this.RaiseAndSetIfChanged(ref selectedGraphIds, value);
+    }
 
-        private int[] selectedGraphIds = [];
-        public int[] SelectedGraphIds
+    public ReactiveCommand<Unit, Unit> DeleteGraphCommand { get; }
+
+    public GraphDeleteViewModel(
+        [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
+        IRequestService<GraphVertexModel> service,
+        ILog logger)
+    {
+        DeleteGraphCommand = ReactiveCommand.CreateFromTask(DeleteGraph, CanDelete());
+        this.messenger = messenger;
+        this.service = service;
+        this.logger = logger;
+        messenger.Register<GraphSelectedMessage>(this, OnGraphSelected);
+    }
+
+    private IObservable<bool> CanDelete()
+    {
+        return this.WhenAnyValue(x => x.SelectedGraphIds,
+            ids => ids.Length > 0);
+    }
+
+    private async Task DeleteGraph()
+    {
+        await ExecuteSafe(async () =>
         {
-            get => selectedGraphIds;
-            set => this.RaiseAndSetIfChanged(ref selectedGraphIds, value);
-        }
-
-        public ReactiveCommand<Unit, Unit> DeleteGraphCommand { get; }
-
-        public GraphDeleteViewModel(
-            [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-            IRequestService<GraphVertexModel> service,
-            ILog logger)
-        {
-            DeleteGraphCommand = ReactiveCommand.CreateFromTask(DeleteGraph, CanDelete());
-            this.messenger = messenger;
-            this.service = service;
-            this.logger = logger;
-            messenger.Register<GraphSelectedMessage>(this, OnGraphSelected);
-        }
-
-        private IObservable<bool> CanDelete()
-        {
-            return this.WhenAnyValue(x => x.SelectedGraphIds,
-                ids => ids.Length > 0);
-        }
-
-        private async Task DeleteGraph()
-        {
-            await ExecuteSafe(async () =>
+            var isDeleted = await service.DeleteGraphsAsync(selectedGraphIds)
+                .ConfigureAwait(false);
+            if (isDeleted)
             {
-                var isDeleted = await service.DeleteGraphsAsync(selectedGraphIds)
-                    .ConfigureAwait(false);
-                if (isDeleted)
-                {
-                    var graphs = SelectedGraphIds.ToArray();
-                    SelectedGraphIds = [];
-                    messenger.Send(new GraphsDeletedMessage(graphs));
-                }
-            }, logger.Error).ConfigureAwait(false);
-        }
+                var graphs = SelectedGraphIds.ToArray();
+                SelectedGraphIds = [];
+                messenger.Send(new GraphsDeletedMessage(graphs));
+            }
+        }, logger.Error).ConfigureAwait(false);
+    }
 
-        private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
-        {
-            SelectedGraphIds = msg.Graphs.Select(x => x.Id).ToArray();
-        }
+    private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
+    {
+        SelectedGraphIds = msg.Graphs.Select(x => x.Id).ToArray();
     }
 }

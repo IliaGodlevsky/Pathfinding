@@ -4,7 +4,6 @@ using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -12,8 +11,6 @@ namespace Pathfinding.App.Console.Views
 {
     internal sealed partial class GraphNeighborhoodView : FrameView
     {
-        private readonly CompositeDisposable disposables = [];
-
         public GraphNeighborhoodView(IRequireNeighborhoodNameViewModel viewModel)
         {
             var neighborhoods = Enum.GetValues<Neighborhoods>()
@@ -25,18 +22,11 @@ namespace Pathfinding.App.Console.Views
             this.neighborhoods.Events().SelectedItemChanged
                 .Where(x => x.SelectedItem > -1)
                 .Select(x => values[x.SelectedItem])
-                .BindTo(viewModel, x => x.Neighborhood)
-                .DisposeWith(disposables);
+                .BindTo(viewModel, x => x.Neighborhood);
             this.neighborhoods.SelectedItem = 0;
-            VisibleChanged += OnVisibilityChanged;
-        }
-
-        private void OnVisibilityChanged()
-        {
-            if (Visible)
-            {
-                neighborhoods.SelectedItem = 0;
-            }
+            this.Events().VisibleChanged
+                .Where(x => Visible)
+                .Do(x => this.neighborhoods.SelectedItem = 0);
         }
     }
 }

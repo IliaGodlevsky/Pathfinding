@@ -17,7 +17,6 @@ namespace Pathfinding.App.Console.Views
     internal sealed partial class RunFieldView : FrameView
     {
         private readonly CompositeDisposable vertexDisposables = [];
-        private readonly CompositeDisposable disposables = [];
 
         private readonly View container = new();
 
@@ -41,8 +40,7 @@ namespace Pathfinding.App.Console.Views
                 .DistinctUntilChanged()
                 .Where(x => x is not null)
                 .Do(async x => await RenderGraphState(x))
-                .Subscribe()
-                .DisposeWith(disposables);
+                .Subscribe();
             messenger.Register<OpenRunFieldMessage>(this, OnOpen);
             messenger.Register<CloseRunFieldMessage>(this, OnClose);
             Add(container);

@@ -18,7 +18,6 @@ namespace Pathfinding.App.Console.Views
 {
     internal sealed partial class RunsTableView : TableView
     {
-        private readonly CompositeDisposable disposables = [];
         private readonly Dictionary<int, IDisposable> modelsSubs = [];
         private readonly Dictionary<string, bool> sortOrder = [];
 
@@ -35,43 +34,37 @@ namespace Pathfinding.App.Console.Views
                         .SelectMany(x => (x.Rect.Top, x.Rect.Bottom - 1).Iterate())
                         .Select(GetRunId)
                         .ToArray())
-                .InvokeCommand(viewModel, x => x.SelectRunsCommand)
-                .DisposeWith(disposables);
+                .InvokeCommand(viewModel, x => x.SelectRunsCommand);
             this.Events().SelectedCellChanged
                 .Where(x => x.NewRow > -1 && x.NewRow < Table.Rows.Count)
                 .Select(x => x.NewRow)
                 .DistinctUntilChanged()
                 .Select(x => GetSelectedRows())
-                .InvokeCommand(viewModel, x => x.SelectRunsCommand)
-                .DisposeWith(disposables);
+                .InvokeCommand(viewModel, x => x.SelectRunsCommand);
             this.Events().MouseClick
                 .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
                 .Select(x => x.MouseEvent.Y + RowOffset - headerLinesConsumed)
                 .Where(x => x >= 0 && x < Table.Rows.Count && x == SelectedRow)
                 .Select(x => GetRunId(x).Enumerate().ToArray())
-                .InvokeCommand(viewModel, x => x.SelectRunsCommand)
-                .DisposeWith(disposables);
+                .InvokeCommand(viewModel, x => x.SelectRunsCommand);
             this.Events().KeyPress
                 .Where(args => args.KeyEvent.Key.HasFlag(Key.R)
                     && args.KeyEvent.Key.HasFlag(Key.CtrlMask)
                     && Table.Rows.Count > 1)
                 .Do(x => OrderTable(IdCol, Ascending))
                 .Select(x => GetSelectedRows())
-                .InvokeCommand(viewModel, x => x.SelectRunsCommand)
-                .DisposeWith(disposables);
+                .InvokeCommand(viewModel, x => x.SelectRunsCommand);
             this.Events().MouseClick
                 .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked
                     && Table.Rows.Count > 1
                     && x.MouseEvent.Y < headerLinesConsumed)
                 .Do(OrderOnMouseClick)
                 .Select(x => GetSelectedRows())
-                .InvokeCommand(viewModel, x => x.SelectRunsCommand)
-                .DisposeWith(disposables);
+                .InvokeCommand(viewModel, x => x.SelectRunsCommand);
             this.Events().MouseClick
                 .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
                 .Do(x => messenger.Send(new OpenRunFieldMessage()))
-                .Subscribe()
-                .DisposeWith(disposables);
+                .Subscribe();
         }
 
         private int[] GetSelectedRows()

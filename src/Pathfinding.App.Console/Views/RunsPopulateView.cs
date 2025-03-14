@@ -6,7 +6,6 @@ using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Linq.Expressions;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -16,7 +15,6 @@ namespace Pathfinding.App.Console.Views
     {
         private const double DefaultWeight = 1;
 
-        private readonly CompositeDisposable disposables = [];
         private readonly IRequirePopulationViewModel populateViewModel;
 
         public RunsPopulateView(
@@ -35,7 +33,7 @@ namespace Pathfinding.App.Console.Views
             messenger.Register<CloseRunCreateViewMessage>(this, OnRunCreateViewClosed);
         }
 
-        private void BindTo(TextField field, 
+        private void BindTo(TextField field,
             Expression<Func<IRequirePopulationViewModel, double?>> expression)
         {
             var compiled = expression.Compile();
@@ -43,24 +41,18 @@ namespace Pathfinding.App.Console.Views
             field.Events().TextChanging
                 .DistinctUntilChanged()
                 .Select(x => double.TryParse(x.NewText.ToString(), out var value) ? value : default(double?))
-                .BindTo(populateViewModel, expression)
-                .DisposeWith(disposables);
+                .BindTo(populateViewModel, expression);
             populateViewModel.Events().PropertyChanged
                 .Where(x => x.PropertyName == propertyName)
                 .Do(x =>
                 {
-                    Application.MainLoop.Invoke(() =>
+                    var propertyValue = compiled(populateViewModel).ToString();
+                    if (field.Text != propertyValue)
                     {
-                        var propertyValue = compiled(populateViewModel);
-                        bool parsed = double.TryParse(field.Text.ToString(), out var value);
-                        if (field.Text != propertyValue.ToString())
-                        {
-                            field.Text = propertyValue.ToString();
-                        }
-                    });
+                        Application.MainLoop.Invoke(() => field.Text = propertyValue);
+                    }
                 })
-                .Subscribe()
-                .DisposeWith(disposables);
+                .Subscribe();
         }
 
         private void OnRunPopulateOpen(object recipient, OpenRunsPopulateViewMessage msg)

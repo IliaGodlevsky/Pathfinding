@@ -17,8 +17,12 @@ namespace Pathfinding.App.Console.Views
             Initialize();
             var factories = Enum.GetValues<Neighborhoods>()
                 .ToDictionary(x => x.ToStringRepresentation());
-            var radioLabels = factories.Keys.Select(ustring.Make).ToArray();
-            var values = radioLabels.Select(x => factories[x.ToString()]).ToArray();
+            var radioLabels = factories.Keys
+                .Select(ustring.Make)
+                .ToArray();
+            var values = radioLabels
+                .Select(x => factories[x.ToString()])
+                .ToArray();
             neighborhoods.RadioLabels = radioLabels;
             neighborhoods.Events().SelectedItemChanged
                 .Where(x => x.SelectedItem > -1)

@@ -237,6 +237,9 @@
   <data name="RandomAlgorithm" xml:space="preserve">
     <value>Random</value>
   </data>
+  <data name="RangeIsNotSetMsg" xml:space="preserve">
+    <value>Pathfinding range is not set</value>
+  </data>
   <data name="Readonly" xml:space="preserve">
     <value>Readonly</value>
   </data>

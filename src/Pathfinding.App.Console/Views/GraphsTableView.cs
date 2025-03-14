@@ -18,23 +18,19 @@ namespace Pathfinding.App.Console.Views
 {
     internal sealed partial class GraphsTableView
     {
-        private readonly CompositeDisposable disposables = [];
         private readonly Dictionary<int, IDisposable> modelChangingSubs = [];
 
         public GraphsTableView(IGraphTableViewModel viewModel,
             [KeyFilter(KeyFilters.Views)] IMessenger messenger) : this()
         {
-            viewModel.Graphs.ActOnEveryObject(AddToTable, RemoveFromTable)
-                .DisposeWith(disposables);
+            viewModel.Graphs.ActOnEveryObject(AddToTable, RemoveFromTable);
             this.Events().Initialized
                 .Select(x => Unit.Default)
-                .InvokeCommand(viewModel, x => x.LoadGraphsCommand)
-                .DisposeWith(disposables);
+                .InvokeCommand(viewModel, x => x.LoadGraphsCommand);
             this.Events().CellActivated
                 .Where(x => x.Row < table.Rows.Count)
                 .Select(x => GetGraphId(x.Row))
-                .InvokeCommand(viewModel, x => x.ActivateGraphCommand)
-                .DisposeWith(disposables);
+                .InvokeCommand(viewModel, x => x.ActivateGraphCommand);
             this.Events().KeyPress
                 .Where(x => x.KeyEvent.Key.HasFlag(Key.A)
                     && x.KeyEvent.Key.HasFlag(Key.CtrlMask))
@@ -43,22 +39,19 @@ namespace Pathfinding.App.Console.Views
                         .SelectMany(x => (x.Rect.Top, x.Rect.Bottom - 1).Iterate())
                         .Select(GetGraphId)
                         .ToArray())
-                .InvokeCommand(viewModel, x => x.SelectGraphsCommand)
-                .DisposeWith(disposables);
+                .InvokeCommand(viewModel, x => x.SelectGraphsCommand);
             this.Events().SelectedCellChanged
                 .Where(x => x.NewRow > -1 && x.NewRow < table.Rows.Count)
                 .Select(x => GetAllSelectedCells().Select(x => x.Y)
                     .Distinct().Select(GetGraphId).ToArray())
-                .InvokeCommand(viewModel, x => x.SelectGraphsCommand)
-                .DisposeWith(disposables);
+                .InvokeCommand(viewModel, x => x.SelectGraphsCommand);
             this.Events().MouseClick
                 .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
                 .Do(x => messenger.Send(new CloseRunFieldMessage()))
                 .Select(x => x.MouseEvent.Y + RowOffset - headerLinesConsumed)
                 .Where(x => x >= 0 && x < Table.Rows.Count && x == SelectedRow)
                 .Select(x => GetGraphId(x).Enumerate().ToArray())
-                .InvokeCommand(viewModel, x => x.SelectGraphsCommand)
-                .DisposeWith(disposables);
+                .InvokeCommand(viewModel, x => x.SelectGraphsCommand);
         }
 
         private int GetGraphId(int selectedRow)
@@ -131,13 +124,6 @@ namespace Pathfinding.App.Console.Views
         private static void SetCursorInvisible()
         {
             Application.Driver.SetCursorVisibility(CursorVisibility.Invisible);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            disposables.Dispose();
-            modelChangingSubs.ForEach(x => x.Value.Dispose());
-            base.Dispose(disposing);
         }
     }
 }

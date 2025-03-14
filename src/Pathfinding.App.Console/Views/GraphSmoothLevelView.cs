@@ -12,8 +12,6 @@ namespace Pathfinding.App.Console.Views
 {
     internal sealed partial class GraphSmoothLevelView : FrameView
     {
-        private readonly CompositeDisposable disposables = new();
-
         public GraphSmoothLevelView(IRequireSmoothLevelViewModel viewModel)
         {
             var smoothLevels = Enum.GetValues<SmoothLevels>()
@@ -26,8 +24,7 @@ namespace Pathfinding.App.Console.Views
                 .SelectedItemChanged
                 .Where(x => x.SelectedItem > -1)
                 .Select(x => values[x.SelectedItem])
-                .BindTo(viewModel, x => x.SmoothLevel)
-                .DisposeWith(disposables);
+                .BindTo(viewModel, x => x.SmoothLevel);
             this.smoothLevels.SelectedItem = 0;
             VisibleChanged += OnVisibilityChanged;
         }

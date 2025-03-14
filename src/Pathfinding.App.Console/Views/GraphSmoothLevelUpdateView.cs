@@ -4,7 +4,6 @@ using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -12,8 +11,6 @@ namespace Pathfinding.App.Console.Views
 {
     internal sealed partial class GraphSmoothLevelUpdateView : FrameView
     {
-        private readonly CompositeDisposable disposables = [];
-
         public GraphSmoothLevelUpdateView(GraphUpdateViewModel viewModel)
         {
             var lvls = Enum.GetValues<SmoothLevels>()
@@ -26,12 +23,10 @@ namespace Pathfinding.App.Console.Views
                 .SelectedItemChanged
                 .Where(x => x.SelectedItem > -1)
                 .Select(x => values[x.SelectedItem])
-                .BindTo(viewModel, x => x.SmoothLevel)
-                .DisposeWith(disposables);
+                .BindTo(viewModel, x => x.SmoothLevel);
             viewModel.WhenAnyValue(x => x.SmoothLevel)
                 .Select(x => values.IndexOf(x))
-                .BindTo(smoothLevels, x => x.SelectedItem)
-                .DisposeWith(disposables);
+                .BindTo(smoothLevels, x => x.SelectedItem);
         }
     }
 }

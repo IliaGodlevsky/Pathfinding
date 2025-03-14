@@ -421,6 +421,15 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Pathfinding range is not set.
+        /// </summary>
+        internal static string RangeIsNotSetMsg {
+            get {
+                return ResourceManager.GetString("RangeIsNotSetMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Readonly.
         /// </summary>
         internal static string Readonly {

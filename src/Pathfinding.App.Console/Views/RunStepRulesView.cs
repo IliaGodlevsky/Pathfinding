@@ -17,8 +17,6 @@ namespace Pathfinding.App.Console.Views
 {
     internal sealed partial class RunStepRulesView : FrameView
     {
-        private readonly CompositeDisposable disposables = [];
-
         private readonly IRequireStepRuleViewModel viewModel;
 
         public RunStepRulesView(
@@ -34,8 +32,7 @@ namespace Pathfinding.App.Console.Views
             stepRules.Events().SelectedItemChanged
                .Where(x => x.SelectedItem > -1)
                .Select(x => values[x.SelectedItem])
-               .BindTo(viewModel, x => x.StepRule)
-               .DisposeWith(disposables);
+               .BindTo(viewModel, x => x.StepRule);
             stepRules.SelectedItem = 0;
             messenger.Register<OpenStepRuleViewMessage>(this, OnOpen);
             messenger.Register<CloseStepRulesViewMessage>(this, OnStepRulesViewClose);

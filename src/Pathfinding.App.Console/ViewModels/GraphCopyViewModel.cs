@@ -10,67 +10,66 @@ using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
 
-namespace Pathfinding.App.Console.ViewModels
+namespace Pathfinding.App.Console.ViewModels;
+
+internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel
 {
-    internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel
+    private readonly IMessenger messenger;
+    private readonly IRequestService<GraphVertexModel> service;
+    private readonly ILog log;
+
+    public ReactiveCommand<Unit, Unit> CopyGraphCommand { get; }
+
+    private int[] selectedGraphIds = [];
+    public int[] SelectedGraphIds
     {
-        private readonly IMessenger messenger;
-        private readonly IRequestService<GraphVertexModel> service;
-        private readonly ILog log;
+        get => selectedGraphIds;
+        set => this.RaiseAndSetIfChanged(ref selectedGraphIds, value);
+    }
 
-        public ReactiveCommand<Unit, Unit> CopyGraphCommand { get; }
+    public GraphCopyViewModel(
+        [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
+        IRequestService<GraphVertexModel> service,
+        ILog log)
+    {
+        this.messenger = messenger;
+        this.service = service;
+        this.log = log;
+        messenger.Register<GraphSelectedMessage>(this, OnGraphSelected);
+        messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
+        CopyGraphCommand = ReactiveCommand.CreateFromTask(ExecuteCopy, CanExecute());
+    }
 
-        private int[] selectedGraphIds = [];
-        public int[] SelectedGraphIds
+    private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
+    {
+        SelectedGraphIds = msg.Graphs
+            .Select(x => x.Id)
+            .ToArray();
+    }
+
+    private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
+    {
+        SelectedGraphIds = SelectedGraphIds
+            .Where(x => !msg.GraphIds.Contains(x))
+            .ToArray();
+    }
+
+    private async Task ExecuteCopy()
+    {
+        await ExecuteSafe(async () =>
         {
-            get => selectedGraphIds;
-            set => this.RaiseAndSetIfChanged(ref selectedGraphIds, value);
-        }
+            var copies = await service.ReadSerializationHistoriesAsync(SelectedGraphIds)
+                .ConfigureAwait(false);
+            var histories = await service.CreatePathfindingHistoriesAsync(copies.Histories)
+                .ConfigureAwait(false);
+            var graphs = histories.Select(x => x.Graph).ToGraphInfo();
+            messenger.Send(new GraphCreatedMessage(graphs));
+        }, log.Error).ConfigureAwait(false);
+    }
 
-        public GraphCopyViewModel(
-            [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-            IRequestService<GraphVertexModel> service,
-            ILog log)
-        {
-            this.messenger = messenger;
-            this.service = service;
-            this.log = log;
-            messenger.Register<GraphSelectedMessage>(this, OnGraphSelected);
-            messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
-            CopyGraphCommand = ReactiveCommand.CreateFromTask(ExecuteCopy, CanExecute());
-        }
-
-        private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
-        {
-            SelectedGraphIds = msg.Graphs
-                .Select(x => x.Id)
-                .ToArray();
-        }
-
-        private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
-        {
-            SelectedGraphIds = SelectedGraphIds
-                .Where(x => !msg.GraphIds.Contains(x))
-                .ToArray();
-        }
-
-        private async Task ExecuteCopy()
-        {
-            await ExecuteSafe(async () =>
-            {
-                var copies = await service.ReadSerializationHistoriesAsync(SelectedGraphIds)
-                    .ConfigureAwait(false);
-                var histories = await service.CreatePathfindingHistoriesAsync(copies.Histories)
-                    .ConfigureAwait(false);
-                var graphs = histories.Select(x => x.Graph).ToGraphInfo();
-                messenger.Send(new GraphCreatedMessage(graphs));
-            }, log.Error).ConfigureAwait(false);
-        }
-
-        private IObservable<bool> CanExecute()
-        {
-            return this.WhenAnyValue(x => x.SelectedGraphIds,
-                ids => ids.Length > 0);
-        }
+    private IObservable<bool> CanExecute()
+    {
+        return this.WhenAnyValue(x => x.SelectedGraphIds,
+            ids => ids.Length > 0);
     }
 }

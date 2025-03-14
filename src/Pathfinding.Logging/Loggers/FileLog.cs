@@ -10,6 +10,7 @@ namespace Pathfinding.Logging.Loggers
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
+                .Enrich.FromLogContext()
                 .WriteTo.File(
                     path: "logs\\log-.txt",
                     rollingInterval: RollingInterval.Month,

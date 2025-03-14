@@ -18,119 +18,118 @@ using Pathfinding.Shared.Primitives;
 using ReactiveUI;
 using System.Reactive;
 
-namespace Pathfinding.App.Console.ViewModels
+namespace Pathfinding.App.Console.ViewModels;
+
+internal sealed class GraphAssembleViewModel : BaseViewModel,
+    IGraphAssembleViewModel,
+    IRequireGraphNameViewModel,
+    IRequireGraphParametresViewModel,
+    IRequireSmoothLevelViewModel,
+    IRequireNeighborhoodNameViewModel
 {
-    internal sealed class GraphAssembleViewModel : BaseViewModel,
-        IGraphAssembleViewModel,
-        IRequireGraphNameViewModel,
-        IRequireGraphParametresViewModel,
-        IRequireSmoothLevelViewModel,
-        IRequireNeighborhoodNameViewModel
+    private static readonly InclusiveValueRange<int> WidthRange = (51, 1);
+    private static readonly InclusiveValueRange<int> LengthRange = (48, 1);
+    private static readonly InclusiveValueRange<int> ObstaclesRange = (99, 0);
+    private static readonly InclusiveValueRange<int> CostRange = (9, 1);
+
+    private readonly IRequestService<GraphVertexModel> service;
+    private readonly IGraphAssemble<GraphVertexModel> graphAssemble;
+    private readonly IMessenger messenger;
+    private readonly ILog logger;
+
+    private string name;
+    public string Name
     {
-        private static readonly InclusiveValueRange<int> WidthRange = (51, 1);
-        private static readonly InclusiveValueRange<int> LengthRange = (48, 1);
-        private static readonly InclusiveValueRange<int> ObstaclesRange = (99, 0);
-        private static readonly InclusiveValueRange<int> CostRange = (9, 1);
+        get => name;
+        set => this.RaiseAndSetIfChanged(ref name, value);
+    }
 
-        private readonly IRequestService<GraphVertexModel> service;
-        private readonly IGraphAssemble<GraphVertexModel> graphAssemble;
-        private readonly IMessenger messenger;
-        private readonly ILog logger;
+    private int width;
+    public int Width
+    {
+        get => width;
+        set { width = WidthRange.ReturnInRange(value); this.RaisePropertyChanged(); }
+    }
 
-        private string name;
-        public string Name
-        {
-            get => name;
-            set => this.RaiseAndSetIfChanged(ref name, value);
-        }
+    private int length;
+    public int Length
+    {
+        get => length;
+        set { length = LengthRange.ReturnInRange(value); this.RaisePropertyChanged(); }
+    }
 
-        private int width;
-        public int Width
-        {
-            get => width;
-            set { width = WidthRange.ReturnInRange(value); this.RaisePropertyChanged(); }
-        }
+    private int obstacles;
+    public int Obstacles
+    {
+        get => obstacles;
+        set { obstacles = ObstaclesRange.ReturnInRange(value); this.RaisePropertyChanged(); }
+    }
 
-        private int length;
-        public int Length
-        {
-            get => length;
-            set { length = LengthRange.ReturnInRange(value); this.RaisePropertyChanged(); }
-        }
+    private SmoothLevels level;
+    public SmoothLevels SmoothLevel
+    {
+        get => level;
+        set => this.RaiseAndSetIfChanged(ref level, value);
+    }
 
-        private int obstacles;
-        public int Obstacles
-        {
-            get => obstacles;
-            set { obstacles = ObstaclesRange.ReturnInRange(value); this.RaisePropertyChanged(); }
-        }
+    private Neighborhoods neighborhood;
+    public Neighborhoods Neighborhood
+    {
+        get => neighborhood;
+        set => this.RaiseAndSetIfChanged(ref neighborhood, value);
+    }
 
-        private SmoothLevels level;
-        public SmoothLevels SmoothLevel
-        {
-            get => level;
-            set => this.RaiseAndSetIfChanged(ref level, value);
-        }
+    public ReactiveCommand<Unit, Unit> AssembleGraphCommand { get; }
 
-        private Neighborhoods neighborhood;
-        public Neighborhoods Neighborhood
-        {
-            get => neighborhood;
-            set => this.RaiseAndSetIfChanged(ref neighborhood, value);
-        }
+    public GraphAssembleViewModel(IRequestService<GraphVertexModel> service,
+        IGraphAssemble<GraphVertexModel> graphAssemble,
+        [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
+        ILog logger)
+    {
+        this.service = service;
+        this.messenger = messenger;
+        this.logger = logger;
+        this.graphAssemble = graphAssemble;
+        AssembleGraphCommand = ReactiveCommand.CreateFromTask(CreateGraph, CanExecute());
+    }
 
-        public ReactiveCommand<Unit, Unit> AssembleGraphCommand { get; }
-
-        public GraphAssembleViewModel(IRequestService<GraphVertexModel> service,
-            IGraphAssemble<GraphVertexModel> graphAssemble,
-            [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-            ILog logger)
-        {
-            this.service = service;
-            this.messenger = messenger;
-            this.logger = logger;
-            this.graphAssemble = graphAssemble;
-            AssembleGraphCommand = ReactiveCommand.CreateFromTask(CreateGraph, CanExecute());
-        }
-
-        private IObservable<bool> CanExecute()
-        {
-            return this.WhenAnyValue(
-                x => x.Width,
-                x => x.Length,
-                x => x.Obstacles,
-                x => x.Name,
-                (width, length, obstacles, name) =>
-                {
-                    return width > 0 && length > 0
-                        && obstacles >= 0
-                        && !string.IsNullOrEmpty(name);
-                });
-        }
-
-        private async Task CreateGraph()
-        {
-            await ExecuteSafe(async () =>
+    private IObservable<bool> CanExecute()
+    {
+        return this.WhenAnyValue(
+            x => x.Width,
+            x => x.Length,
+            x => x.Obstacles,
+            x => x.Name,
+            (width, length, obstacles, name) =>
             {
-                var random = Random.Shared;
-                var costLayer = new VertexCostLayer(CostRange, range => new VertexCost(random.Next(
-                    range.LowerValueOfRange, range.UpperValueOfRange + 1), range));
-                var obstacleLayer = new ObstacleLayer(Obstacles);
-                var layers = new Layers(costLayer, obstacleLayer);
-                var graph = await graphAssemble.AssembleGraphAsync(layers, Width, Length)
-                    .ConfigureAwait(false);
-                var request = new CreateGraphRequest<GraphVertexModel>()
-                {
-                    Graph = graph,
-                    Name = Name,
-                    Neighborhood = Neighborhood,
-                    SmoothLevel = SmoothLevel,
-                    Status = GraphStatuses.Editable
-                };
-                var graphModel = await service.CreateGraphAsync(request).ConfigureAwait(false);
-                var info = graphModel.ToGraphInformationModel().ToGraphInfo();
-                messenger.Send(new GraphCreatedMessage([info]));
-            }, logger.Error).ConfigureAwait(false);
-        }
+                return width > 0 && length > 0
+                    && obstacles >= 0
+                    && !string.IsNullOrEmpty(name);
+            });
+    }
+
+    private async Task CreateGraph()
+    {
+        await ExecuteSafe(async () =>
+        {
+            var random = Random.Shared;
+            var costLayer = new VertexCostLayer(CostRange, range => new VertexCost(random.Next(
+                range.LowerValueOfRange, range.UpperValueOfRange + 1), range));
+            var obstacleLayer = new ObstacleLayer(Obstacles);
+            var layers = new Layers(costLayer, obstacleLayer);
+            var graph = await graphAssemble.AssembleGraphAsync(layers, Width, Length)
+                .ConfigureAwait(false);
+            var request = new CreateGraphRequest<GraphVertexModel>()
+            {
+                Graph = graph,
+                Name = Name,
+                Neighborhood = Neighborhood,
+                SmoothLevel = SmoothLevel,
+                Status = GraphStatuses.Editable
+            };
+            var graphModel = await service.CreateGraphAsync(request).ConfigureAwait(false);
+            var info = graphModel.ToGraphInformationModel().ToGraphInfo();
+            messenger.Send(new GraphCreatedMessage([info]));
+        }, logger.Error).ConfigureAwait(false);
     }
 }

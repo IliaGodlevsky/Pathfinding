@@ -1,19 +1,18 @@
 ﻿using ReactiveUI;
 
-namespace Pathfinding.App.Console.ViewModels
+namespace Pathfinding.App.Console.ViewModels;
+
+internal abstract class BaseViewModel : ReactiveObject
 {
-    internal abstract class BaseViewModel : ReactiveObject
+    protected static async Task ExecuteSafe(Func<Task> action, Action<Exception, string> log)
     {
-        protected static async Task ExecuteSafe(Func<Task> action, Action<Exception, string> log)
+        try
         {
-            try
-            {
-                await action().ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                log(ex, ex.Message);
-            }
+            await action().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            log(ex, ex.Message);
         }
     }
 }
