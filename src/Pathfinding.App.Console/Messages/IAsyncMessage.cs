@@ -1,7 +1,6 @@
-﻿namespace Pathfinding.App.Console.Messages
+﻿namespace Pathfinding.App.Console.Messages;
+
+internal interface IAsyncMessage<T>
 {
-    internal interface IAsyncMessage<T>
-    {
-        Action<T> Signal { get; set; }
-    }
+    Action<T> Signal { get; set; }
 }
