@@ -17,7 +17,7 @@ namespace Pathfinding.App.Console.Views;
 
 internal sealed partial class RunProgressView : FrameView
 {
-    private const float FractionPerClick = 0.015f;
+    private const float FractionPerClick = 0.01f;
     private const float ExtraFractionPerClick = FractionPerClick * 3;
 
     private static readonly InclusiveValueRange<float> FractionRange = (1, 0);

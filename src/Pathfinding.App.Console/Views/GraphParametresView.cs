@@ -49,7 +49,7 @@ internal sealed partial class GraphParametresView : FrameView
                     var propertyValue = compiled(viewModel).ToString();
                     if (field.Text != propertyValue)
                     {
-                        Application.MainLoop.Invoke(() => field.Text = propertyValue);
+                         field.Text = propertyValue;
                     }
                 });
             })

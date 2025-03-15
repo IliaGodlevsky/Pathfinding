@@ -32,8 +32,11 @@ namespace Pathfinding.App.Console.ViewModels
     {
         private static readonly InclusiveValueRange<double> WeightRange = (5, 0);
 
-        private sealed record class AlgorithmBuildInfo(Algorithms Algorithm, Heuristics? Heuristics,
-            double? Weight, StepRules? StepRule) : IAlgorithmBuildInfo;
+        private sealed record class AlgorithmBuildInfo(
+            Algorithms Algorithm, 
+            Heuristics? Heuristics,
+            double? Weight, 
+            StepRules? StepRule) : IAlgorithmBuildInfo;
 
         private readonly IRequestService<GraphVertexModel> service;
         private readonly IMessenger messenger;
@@ -91,8 +94,6 @@ namespace Pathfinding.App.Console.ViewModels
             get => graph;
             set => this.RaiseAndSetIfChanged(ref graph, value);
         }
-
-        
 
         public RunCreateViewModel(IRequestService<GraphVertexModel> service,
             [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,

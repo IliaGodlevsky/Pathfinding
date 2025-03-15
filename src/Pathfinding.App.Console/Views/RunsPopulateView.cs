@@ -46,11 +46,14 @@ namespace Pathfinding.App.Console.Views
                 .Where(x => x.PropertyName == propertyName)
                 .Do(x =>
                 {
-                    var propertyValue = compiled(populateViewModel).ToString();
-                    if (field.Text != propertyValue)
+                    Application.MainLoop.Invoke(() =>
                     {
-                        Application.MainLoop.Invoke(() => field.Text = propertyValue);
-                    }
+                        var propertyValue = compiled(populateViewModel).ToString();
+                        if (field.Text != propertyValue)
+                        {
+                            field.Text = propertyValue;
+                        }
+                    });
                 })
                 .Subscribe();
         }

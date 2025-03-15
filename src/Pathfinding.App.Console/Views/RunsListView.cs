@@ -19,16 +19,15 @@ namespace Pathfinding.App.Console.Views
         {
             Initialize();
             var source = viewModel.AllowedAlgorithms
-                .Select(x => x.ToStringRepresentation())
-                .ToArray();
+                .ToDictionary(x => (object)x.ToStringRepresentation());
             this.Events().VisibleChanged
                 .Where(x => Visible)
                 .Do(x => runList.SelectedItem = runList.SelectedItem)
                 .Subscribe();
-            runList.SetSource(source);
+            runList.SetSource(source.Keys.ToList());
             runList.Events().SelectedItemChanged
                 .Where(x => x.Item > -1)
-                .Select(x => viewModel.AllowedAlgorithms[x.Item])
+                .Select(x => source[x.Value])
                 .Do(algorithm =>
                 {
                     // Don't change order of the messages
