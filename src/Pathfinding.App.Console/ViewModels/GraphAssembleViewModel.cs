@@ -27,8 +27,8 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
     IRequireSmoothLevelViewModel,
     IRequireNeighborhoodNameViewModel
 {
-    private static readonly InclusiveValueRange<int> WidthRange = (51, 1);
-    private static readonly InclusiveValueRange<int> LengthRange = (48, 1);
+    private static readonly InclusiveValueRange<int> WidthRange = (52, 1);
+    private static readonly InclusiveValueRange<int> LengthRange = (51, 1);
     private static readonly InclusiveValueRange<int> ObstaclesRange = (99, 0);
     private static readonly InclusiveValueRange<int> CostRange = (9, 1);
 

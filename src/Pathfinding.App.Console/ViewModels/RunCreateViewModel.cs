@@ -61,21 +61,21 @@ namespace Pathfinding.App.Console.ViewModels
         public double? FromWeight
         {
             get => fromWeight;
-            set => SetFromWeight(ref fromWeight, value);
+            set { SetFromWeight(ref fromWeight, value); this.RaisePropertyChanged(); }
         }
 
         private double? toWeight;
         public double? ToWeight
         {
             get => toWeight;
-            set => SetToWeight(ref toWeight, value); 
+            set { SetToWeight(ref toWeight, value); this.RaisePropertyChanged(); } 
         }
 
         private double? step;
         public double? Step
         {
             get => step;
-            set => SetStep(ref step, value);
+            set { SetStep(ref step, value); this.RaisePropertyChanged(); }
         }
 
         private StepRules? stepRule;
@@ -160,21 +160,18 @@ namespace Pathfinding.App.Console.ViewModels
             if (value == null)
             {
                 field = value;
+                return;
             }
-            else
+            field = WeightRange.ReturnInRange(value.Value);
+            if (toWeight < field)
             {
-                field = WeightRange.ReturnInRange(value.Value);
-                if (toWeight < field)
-                {
-                    ToWeight = field;
-                }
-                if (Step == 0 && ToWeight != field
-                    || ToWeight - field < Step)
-                {
-                    Step = ToWeight - field;
-                }
+                ToWeight = field;
             }
-            this.RaisePropertyChanged(nameof(FromWeight));
+            if (Step == 0 && ToWeight != field
+                || ToWeight - field < Step)
+            {
+                Step = ToWeight - field;
+            }
         }
 
         private void SetToWeight(ref double? field, double? value)
@@ -182,27 +179,23 @@ namespace Pathfinding.App.Console.ViewModels
             if (value == null)
             {
                 field = value;
+                return;
             }
-            else
+            field = value > fromWeight ? value : fromWeight;
+            field = WeightRange.ReturnInRange(field.Value);
+            var amplitude = field - fromWeight;
+            if (field == fromWeight && Step != amplitude
+                || amplitude < Step
+                || (Step == 0 && amplitude > 0))
             {
-                field = value > fromWeight ? value : fromWeight;
-                field = WeightRange.ReturnInRange(field.Value);
-                var amplitude = field - fromWeight;
-                if (field == fromWeight && Step != amplitude
-                    || amplitude < Step
-                    || (Step == 0 && amplitude > 0))
-                {
-                    Step = amplitude;
-                }
+                Step = amplitude;
             }
-            this.RaisePropertyChanged(nameof(ToWeight));
         }
 
         private void SetStep(ref double? field, double? value)
         {
             var amplitude = toWeight - fromWeight;
             field = amplitude < value ? amplitude : value;
-            this.RaisePropertyChanged(nameof(Step));
         }
 
         private AlgorithmBuildInfo[] GetBuildInfo(double? weight)

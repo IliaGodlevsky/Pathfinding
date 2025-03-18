@@ -9,7 +9,7 @@ namespace Pathfinding.Infrastructure.Business.Serializers.Decorators
         {
             try
             {
-                using var buffer = new BufferedStream(stream);
+                await using var buffer = new BufferedStream(stream);
                 return await serializer.DeserializeFromAsync(buffer, token).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -22,7 +22,7 @@ namespace Pathfinding.Infrastructure.Business.Serializers.Decorators
         {
             try
             {
-                using var buffer = new BufferedStream(stream);
+                await using var buffer = new BufferedStream(stream);
                 await serializer.SerializeToAsync(graph, buffer, token).ConfigureAwait(false);
             }
             catch (Exception ex)

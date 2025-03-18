@@ -42,16 +42,12 @@ internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel
 
     private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
     {
-        SelectedGraphIds = msg.Graphs
-            .Select(x => x.Id)
-            .ToArray();
+        SelectedGraphIds = [.. msg.Graphs.Select(x => x.Id)];
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
     {
-        SelectedGraphIds = SelectedGraphIds
-            .Where(x => !msg.GraphIds.Contains(x))
-            .ToArray();
+        SelectedGraphIds = [.. SelectedGraphIds.Where(x => !msg.GraphIds.Contains(x))];
     }
 
     private async Task ExecuteCopy()

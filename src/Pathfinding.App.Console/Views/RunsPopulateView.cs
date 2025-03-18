@@ -48,10 +48,11 @@ namespace Pathfinding.App.Console.Views
                 {
                     Application.MainLoop.Invoke(() =>
                     {
-                        var propertyValue = compiled(populateViewModel).ToString();
-                        if (field.Text != propertyValue)
+                        var propertyValue = compiled(populateViewModel);
+                        bool parsed = double.TryParse(field.Text.ToString(), out var value);
+                        if (parsed && value != propertyValue)
                         {
-                            field.Text = propertyValue;
+                            field.Text = propertyValue.ToString();
                         }
                     });
                 })
@@ -70,9 +71,9 @@ namespace Pathfinding.App.Console.Views
 
         private void SetDefaults()
         {
-            populateViewModel.FromWeight = DefaultWeight;
-            populateViewModel.ToWeight = DefaultWeight;
-            populateViewModel.Step = 0;
+            weightTextField.Text = DefaultWeight.ToString();
+            toWeightTextField.Text = DefaultWeight.ToString();
+            stepTextField.Text = "0";
         }
 
         private void Close()

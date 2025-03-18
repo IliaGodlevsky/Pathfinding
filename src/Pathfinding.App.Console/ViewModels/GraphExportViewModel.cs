@@ -89,11 +89,11 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
 
     private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
     {
-        SelectedGraphIds = msg.Graphs.Select(x => x.Id).ToArray();
+        SelectedGraphIds = [.. msg.Graphs.Select(x => x.Id)];
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
     {
-        SelectedGraphIds = SelectedGraphIds.Except(msg.GraphIds).ToArray();
+        SelectedGraphIds = [.. SelectedGraphIds.Except(msg.GraphIds)];
     }
 }
