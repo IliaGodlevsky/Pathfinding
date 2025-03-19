@@ -1,5 +1,4 @@
 ﻿using Pathfinding.App.Console.Models;
-using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface;
 using ReactiveUI;
 using System.Reactive;

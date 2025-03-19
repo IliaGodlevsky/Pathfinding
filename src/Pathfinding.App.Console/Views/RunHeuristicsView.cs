@@ -4,6 +4,7 @@ using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.ViewModels.Interface;
+using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
 using System.Reactive.Linq;
 using Terminal.Gui;
@@ -19,21 +20,20 @@ namespace Pathfinding.App.Console.Views
             IRequireHeuristicsViewModel viewModel)
         {
             Initialize();
-            int i = 0;
-            foreach (var function in viewModel.AllowedHeuristics)
+            var heuristics = viewModel.AppliedHeuristics;
+            foreach (var heuristic in viewModel.AllowedHeuristics)
             {
-                var text = function.ToStringRepresentation();
-                var checkBox = new CheckBox(text) { Y = i++ };
+                var text = heuristic.ToStringRepresentation();
+                var checkBox = new CheckBox(text) { Y = checkBoxes.Count };
                 checkBox.Events().Toggled
-                    .Do(x =>
-                    {
-                        if (x) { viewModel.Heuristics.Remove(function); }
-                        else { viewModel.Heuristics.Add(function); }
-                    })
+                    .Select(x => x
+                        ? (Action<Heuristics?>)(x => heuristics.Remove(x))
+                        : heuristics.Add)
+                    .Do(x => x(heuristic))
                     .Subscribe();
-                Add(checkBox);
                 checkBoxes.Add(checkBox);
             }
+            Add([.. checkBoxes]);
             messenger.Register<OpenHeuristicsViewMessage>(this, OnHeuristicsViewOpen);
             messenger.Register<CloseHeuristicsViewMessage>(this, OnHeuristicsViewClosed);
             messenger.Register<CloseRunCreateViewMessage>(this, OnRunCreationViewClosed);
@@ -43,7 +43,7 @@ namespace Pathfinding.App.Console.Views
         private void OnHeuristicsViewOpen(object recipient, OpenHeuristicsViewMessage msg)
         {
             Close();
-            viewModel.Heuristics.Add(default);
+            viewModel.AppliedHeuristics.Add(default);
             Visible = true;
         }
 
@@ -64,7 +64,7 @@ namespace Pathfinding.App.Console.Views
                 checkBox.Checked = false;
                 checkBox.OnToggled(true);
             }
-            viewModel.Heuristics.Clear();
+            viewModel.AppliedHeuristics.Clear();
             Visible = false;
         }
     }

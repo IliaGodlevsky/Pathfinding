@@ -74,7 +74,9 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
         {
             selected = Empty;
         }
-        var runs = Runs.Where(x => msg.RunIds.Contains(x.Id)).ToArray();
+        var runs = Runs
+            .Where(x => msg.RunIds.Contains(x.Id))
+            .ToArray();
         Runs.Remove(runs);
     }
 

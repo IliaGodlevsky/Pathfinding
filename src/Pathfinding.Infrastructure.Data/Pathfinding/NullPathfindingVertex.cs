@@ -13,7 +13,7 @@ namespace Pathfinding.Infrastructure.Data.Pathfinding
 
         public IVertexCost Cost => NullCost.Interface;
 
-        public IReadOnlyCollection<IPathfindingVertex> Neighbors => Array.Empty<NullPathfindingVertex>();
+        public IReadOnlyCollection<IPathfindingVertex> Neighbors => [];
 
         public Coordinate Position => Coordinate.Empty;
 

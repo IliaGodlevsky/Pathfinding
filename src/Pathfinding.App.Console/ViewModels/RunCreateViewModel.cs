@@ -55,7 +55,7 @@ namespace Pathfinding.App.Console.ViewModels
 
         public IReadOnlyList<Algorithms> AllowedAlgorithms { get; }
 
-        public ObservableCollection<Heuristics?> Heuristics { get; } = [];
+        public ObservableCollection<Heuristics?> AppliedHeuristics { get; } = [];
 
         private double? fromWeight;
         public double? FromWeight
@@ -112,12 +112,9 @@ namespace Pathfinding.App.Console.ViewModels
         private IObservable<bool> CanCreateAlgorithm()
         {
             return this.WhenAnyValue(
-                x => x.Graph,
-                x => x.Heuristics.Count,
-                x => x.FromWeight,
-                x => x.ToWeight,
-                x => x.Step,
-                x => x.Algorithm,
+                x => x.Graph, x => x.AppliedHeuristics.Count,
+                x => x.FromWeight, x => x.ToWeight, 
+                x => x.Step, x => x.Algorithm,
                 (graph, count, weight, to, step, algorithm) =>
                 {
                     bool canExecute = graph != Graph<GraphVertexModel>.Empty
@@ -125,18 +122,22 @@ namespace Pathfinding.App.Console.ViewModels
                         && Enum.IsDefined(algorithm.Value);
                     if (count > 0)
                     {
-                        canExecute = canExecute
-                            && count > 1
-                            && weight > 0
-                            && to > 0
-                            && step >= 0;
-                        if (to - weight > 0 && step == 0)
+                        canExecute = canExecute && count > 1;
+                        if (step != null && weight != null && to != null)
                         {
-                            canExecute = false;
+                            canExecute = canExecute
+                                && weight > 0
+                                && to > 0
+                                && step >= 0;
+                            if (to - weight > 0 && step == 0)
+                            {
+                                canExecute = false;
+                            }
                         }
                     }
                     return canExecute;
-                });
+                }
+            );
         }
 
         private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
@@ -200,9 +201,9 @@ namespace Pathfinding.App.Console.ViewModels
 
         private AlgorithmBuildInfo[] GetBuildInfo(double? weight)
         {
-            return Heuristics.Count == 0
+            return AppliedHeuristics.Count == 0
                 ? [new AlgorithmBuildInfo(Algorithm.Value, default, weight, StepRule)]
-                : Heuristics.Where(x => x is not null)
+                : AppliedHeuristics.Where(x => x is not null)
                     .Select(x => new AlgorithmBuildInfo(Algorithm.Value, x, weight, StepRule))
                     .ToArray();
         }

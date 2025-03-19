@@ -11,6 +11,8 @@ namespace Pathfinding.App.Console.Views
     internal abstract class VertexView<T> : Label
         where T : IVertex
     {
+        private static readonly Color Background = Enum.Parse<Color>(Default.BackgroundColor);
+
         protected static readonly ColorScheme ObstacleColor = Create(Default.BackgroundColor);
         protected static readonly ColorScheme RegularColor = Create(Default.RegularVertexColor);
         protected static readonly ColorScheme VisitedColor = Create(Default.VisitedVertexColor);
@@ -22,7 +24,6 @@ namespace Pathfinding.App.Console.Views
         protected static readonly ColorScheme CrossedPathColor = Create(Default.CrossedPathColor);
 
         protected readonly T model;
-        protected const int LabelWidth = GraphFieldView.DistanceBetweenVertices;
         protected readonly CompositeDisposable disposables = [];
 
         protected VertexView(T model)
@@ -34,17 +35,16 @@ namespace Pathfinding.App.Console.Views
                 .DisposeWith(disposables);
 
             this.model = model;
-            X = model.Position.GetX() * LabelWidth;
+            int labelWidth = GraphFieldView.DistanceBetweenVertices;
+            X = model.Position.GetX() * labelWidth;
             Y = model.Position.GetY();
-            Width = LabelWidth;
+            Width = labelWidth;
         }
 
         private static ColorScheme Create(string foreground)
         {
-            var driver = Application.Driver;
-            var backgroundColor = Enum.Parse<Color>(Default.BackgroundColor);
             var foregroundColor = Enum.Parse<Color>(foreground);
-            var attribute = driver.MakeAttribute(foregroundColor, backgroundColor);
+            var attribute = Application.Driver.MakeAttribute(foregroundColor, Background);
             return new() { Normal = attribute };
         }
 

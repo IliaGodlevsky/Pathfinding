@@ -64,7 +64,7 @@ internal sealed partial class GraphFieldView : FrameView
 
         foreach (var vertex in graph)
         {
-            var view = new GraphVertexView(vertex);
+            var view = new GraphVertexView(vertex).DisposeWith(vertexDisposables);
 
             BindTo(view, vertex, runRangeViewModel.AddToRangeCommand, Button1Pressed);
             BindTo(view, vertex, runRangeViewModel.RemoveFromRangeCommand, Button1Pressed, ButtonCtrl);
@@ -78,7 +78,6 @@ internal sealed partial class GraphFieldView : FrameView
             BindTo(view, vertex, graphFieldViewModel.DecreaseVertexCostCommand, WheeledDown);
             BindTo(view, vertex, graphFieldViewModel.IncreaseVertexCostCommand, WheeledUp);
 
-            view.DisposeWith(vertexDisposables);
             Application.MainLoop.Invoke(() => container.Add(view));
         }
 

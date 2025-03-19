@@ -9,7 +9,7 @@ namespace Pathfinding.Shared.Extensions
             return collection switch
             {
                 ReadOnlyCollection<T> readOnly => readOnly,
-                _ => Array.AsReadOnly(collection.ToArray()),
+                _ => Array.AsReadOnly([..collection]),
             };
         }
 

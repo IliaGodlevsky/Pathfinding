@@ -7,6 +7,6 @@ namespace Pathfinding.App.Console.ViewModels.Interface
     {
         IReadOnlyCollection<Heuristics> AllowedHeuristics { get; }
 
-        ObservableCollection<Heuristics?> Heuristics { get; }
+        ObservableCollection<Heuristics?> AppliedHeuristics { get; }
     }
 }
