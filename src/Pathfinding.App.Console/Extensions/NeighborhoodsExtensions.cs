@@ -11,7 +11,7 @@ namespace Pathfinding.App.Console.Extensions
             {
                 Neighborhoods.Moore => Resource.Moore,
                 Neighborhoods.VonNeumann => Resource.VonNeumann,
-                _ => string.Empty,
+                _ => string.Empty
             };
         }
     }

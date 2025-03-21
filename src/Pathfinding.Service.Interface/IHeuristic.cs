@@ -2,5 +2,7 @@
 
 public interface IHeuristic
 {
-    double Calculate(IPathfindingVertex first, IPathfindingVertex second);
+    double Calculate(
+        IPathfindingVertex first, 
+        IPathfindingVertex second);
 }

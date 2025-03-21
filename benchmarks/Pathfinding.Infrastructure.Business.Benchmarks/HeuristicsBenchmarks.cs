@@ -40,13 +40,5 @@ namespace Pathfinding.Infrastructure.Business.Benchmarks
 
             chebyshev.Calculate(first, second);
         }
-
-        [Benchmark]
-        public static void CosineDistanceBenchmark()
-        {
-            var chebyshev = new CosineDistance();
-
-            chebyshev.Calculate(first, second);
-        }
     }
 }

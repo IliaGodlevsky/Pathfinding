@@ -235,12 +235,12 @@ namespace Pathfinding.Infrastructure.Business
         {
             return await Transaction(async (unitOfWork, t) =>
             {
-                var repo = unitOfWork.VerticesRepository;
-                var vertices = request.Vertices.ToVertexEntities();
-                return await vertices
-                       .ForEach(x => x.GraphId = request.GraphId)
-                       .ToAsync(async (x, tkn) => await repo.UpdateVerticesAsync(x, tkn)
-                            .ConfigureAwait(false), t);
+                var vertices = request.Vertices
+                    .ToVertexEntities()
+                    .ForEach(x => x.GraphId = request.GraphId);
+                return await unitOfWork.VerticesRepository
+                    .UpdateVerticesAsync(vertices, t)
+                    .ConfigureAwait(false);
             }, token).ConfigureAwait(false);
         }
 

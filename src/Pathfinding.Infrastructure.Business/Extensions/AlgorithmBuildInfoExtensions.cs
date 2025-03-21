@@ -63,7 +63,6 @@ public static class AlgorithmBuildInfoExtensions
             Heuristics.Chebyshev => new ChebyshevDistance().WithWeight(weight),
             Heuristics.Diagonal => new DiagonalDistance().WithWeight(weight),
             Heuristics.Manhattan => new ManhattanDistance().WithWeight(weight),
-            Heuristics.Cosine => new CosineDistance().WithWeight(weight),
             _ => throw new NotImplementedException($"Unknown heuristic: {heuristic}")
         };
     }

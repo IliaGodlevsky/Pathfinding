@@ -13,8 +13,7 @@ namespace Pathfinding.App.Console.Extensions
                 Heuristics.Chebyshev => Resource.Chebyshev,
                 Heuristics.Diagonal => Resource.Diagonal,
                 Heuristics.Manhattan => Resource.Manhattan,
-                Heuristics.Cosine => Resource.Cosine,
-                _ => string.Empty,
+                _ => string.Empty
             };
         }
     }

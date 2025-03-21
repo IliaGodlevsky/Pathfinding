@@ -11,7 +11,6 @@ namespace Pathfinding.App.Console.Views;
 internal sealed partial class GraphParametresView : FrameView
 {
     private readonly IRequireGraphParametresViewModel viewModel;
-    private readonly CompositeDisposable disposables = [];
 
     public GraphParametresView(IRequireGraphParametresViewModel viewModel)
     {
@@ -28,8 +27,7 @@ internal sealed partial class GraphParametresView : FrameView
                 graphLengthInput.Text = string.Empty;
                 obstaclesInput.Text = string.Empty;
             })
-            .Subscribe()
-            .DisposeWith(disposables);
+            .Subscribe();
     }
 
     private void BindTo(TextField field, Expression<Func<IRequireGraphParametresViewModel, int>> expression)
@@ -38,8 +36,7 @@ internal sealed partial class GraphParametresView : FrameView
         var propertyName = ((MemberExpression)expression.Body).Member.Name;
         field.Events().TextChanging
             .Select(x => int.TryParse(x.NewText.ToString(), out var value) ? value : default)
-            .BindTo(viewModel, expression)
-            .DisposeWith(disposables);
+            .BindTo(viewModel, expression);
         viewModel.Events().PropertyChanged
             .Where(x => x.PropertyName == propertyName)
             .Do(x =>
@@ -49,11 +46,10 @@ internal sealed partial class GraphParametresView : FrameView
                     var propertyValue = compiled(viewModel).ToString();
                     if (field.Text != propertyValue)
                     {
-                         field.Text = propertyValue;
+                        field.Text = propertyValue;
                     }
                 });
             })
-            .Subscribe()
-            .DisposeWith(disposables);
+            .Subscribe();
     }
 }

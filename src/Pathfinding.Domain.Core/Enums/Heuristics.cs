@@ -5,7 +5,6 @@
         Euclidian,
         Chebyshev,
         Diagonal,
-        Manhattan,
-        Cosine
+        Manhattan
     }
 }

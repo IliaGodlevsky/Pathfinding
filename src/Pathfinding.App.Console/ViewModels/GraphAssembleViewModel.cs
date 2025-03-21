@@ -105,7 +105,8 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
                 return width > 0 && length > 0
                     && obstacles >= 0
                     && !string.IsNullOrEmpty(name);
-            });
+            }
+        );
     }
 
     private async Task CreateGraph()

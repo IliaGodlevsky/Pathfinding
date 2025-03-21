@@ -38,30 +38,12 @@ namespace Pathfinding.Shared.Extensions
             return collection;
         }
 
-        public static IEnumerable<T> TakeOrDefault<T>(this IEnumerable<T> collection, int number, T defaultValue = default)
+        public static IEnumerable<T> TakeOrDefault<T>(this IEnumerable<T> collection, 
+            int number, T defaultValue = default)
         {
-            int count = 0;
-            foreach (var item in collection)
-            {
-                count++;
-                if (count > number)
-                {
-                    break;
-                }
-                yield return item;
-            }
-            int remained = count != number ? number - count : 0;
-            while (remained-- > 0)
-            {
-                yield return defaultValue;
-            }
-        }
-
-        public static async Task<U> ToAsync<T, U>(this IEnumerable<T> items,
-            Func<IEnumerable<T>, CancellationToken, Task<U>> selector,
-            CancellationToken token = default)
-        {
-            return await selector(items, token);
+            return collection
+                .Concat(Enumerable.Repeat(defaultValue, number))
+                .Take(number);
         }
 
         public static U To<T, U>(this IEnumerable<T> items, Func<IEnumerable<T>, U> selector)
