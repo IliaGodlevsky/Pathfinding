@@ -2,17 +2,11 @@
 
 namespace Pathfinding.Service.Interface.Requests.Update
 {
-    public class UpdateVerticesRequest<T>
+    public class UpdateVerticesRequest<T>(int graphId, List<T> vertices)
         where T : IVertex
     {
-        public int GraphId { get; }
+        public int GraphId { get; } = graphId;
 
-        public List<T> Vertices { get; } = new List<T>();
-
-        public UpdateVerticesRequest(int graphId, List<T> vertices)
-        {
-            GraphId = graphId;
-            Vertices = vertices;
-        }
+        public List<T> Vertices { get; } = vertices;
     }
 }

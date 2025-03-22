@@ -178,7 +178,8 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
                 algorithm.VertexProcessed -= OnVertexProcessed;
             }
 
-            run = new RunModel(RunGraph, subRevisions, rangeCoordinates) { Id = model.Id };
+            run = new RunModel(RunGraph, 
+                subRevisions, rangeCoordinates) { Id = model.Id };
             Runs.Add(run);
         }
         SelectedRun = run;

@@ -47,21 +47,16 @@ namespace Pathfinding.App.Console.Views
                             messenger.Send(new CloseRunPopulateViewMessage());
                             messenger.Send(new CloseHeuristicsViewMessage());
                             break;
-                        case Algorithms.Lee:
-                        case Algorithms.BidirectLee:
-                        case Algorithms.DepthFirst:
-                        case Algorithms.Snake:
-                        case Algorithms.Random:
-                        case Algorithms.BidirectRandom:
-                            messenger.Send(new CloseStepRulesViewMessage());
-                            messenger.Send(new CloseRunPopulateViewMessage());
-                            messenger.Send(new CloseHeuristicsViewMessage());
-                            break;
                         case Algorithms.DistanceFirst:
                         case Algorithms.AStarLee:
                             messenger.Send(new CloseStepRulesViewMessage());
                             messenger.Send(new CloseRunPopulateViewMessage());
                             messenger.Send(new OpenHeuristicsViewMessage());
+                            break;
+                        default:
+                            messenger.Send(new CloseStepRulesViewMessage());
+                            messenger.Send(new CloseRunPopulateViewMessage());
+                            messenger.Send(new CloseHeuristicsViewMessage());
                             break;
                     }
                 })

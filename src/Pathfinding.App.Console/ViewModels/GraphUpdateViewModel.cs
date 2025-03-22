@@ -74,11 +74,8 @@ namespace Pathfinding.App.Console.ViewModels
             return this.WhenAnyValue(
                 x => x.SelectedGraphs,
                 x => x.Name,
-                (selected, name) =>
-                {
-                    bool canExecute = selected.Length == 1 && !string.IsNullOrEmpty(name);
-                    return canExecute;
-                });
+                (selected, name) 
+                    => selected.Length == 1 && !string.IsNullOrEmpty(name));
         }
 
         private async Task ExecuteUpdate()

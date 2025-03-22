@@ -203,9 +203,9 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     {
         return AppliedHeuristics.Count == 0
             ? [new AlgorithmBuildInfo(Algorithm.Value, default, weight, StepRule)]
-            : AppliedHeuristics.Where(x => x is not null)
-                .Select(x => new AlgorithmBuildInfo(Algorithm.Value, x, weight, StepRule))
-                .ToArray();
+            : [.. AppliedHeuristics
+                .Where(x => x is not null)
+                .Select(x => new AlgorithmBuildInfo(Algorithm.Value, x, weight, StepRule))];
     }
 
     private async Task CreateAlgorithm()

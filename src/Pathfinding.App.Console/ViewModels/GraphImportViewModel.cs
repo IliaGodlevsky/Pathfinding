@@ -37,10 +37,10 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
             (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], x => x.Value);
         this.service = service;
         this.logger = logger;
-        ImportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(LoadGraph);
+        ImportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(ImportGraphs);
     }
 
-    private async Task LoadGraph(Func<StreamModel> streamFactory)
+    private async Task ImportGraphs(Func<StreamModel> streamFactory)
     {
         await ExecuteSafe(async () =>
         {
