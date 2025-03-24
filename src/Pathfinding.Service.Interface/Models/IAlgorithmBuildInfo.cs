@@ -1,15 +1,14 @@
 ﻿using Pathfinding.Domain.Core.Enums;
 
-namespace Pathfinding.Service.Interface.Models
+namespace Pathfinding.Service.Interface.Models;
+
+public interface IAlgorithmBuildInfo
 {
-    public interface IAlgorithmBuildInfo
-    {
-        Algorithms Algorithm { get; }
+    Algorithms Algorithm { get; }
 
-        Heuristics? Heuristics { get; }
+    Heuristics? Heuristics { get; }
 
-        double? Weight { get; }
+    double? Weight { get; }
 
-        StepRules? StepRule { get; }
-    }
+    StepRules? StepRule { get; }
 }

@@ -9,7 +9,7 @@ namespace Pathfinding.App.Console.Extensions
 
         static AlgorithmExtensions()
         {
-            Algorithms[] orders = 
+            Algorithms[] orders =
             [
                 Algorithms.Dijkstra,
                 Algorithms.AStar,

@@ -20,7 +20,7 @@ namespace Pathfinding.Shared.Primitives
         /// <param name="lowerValueOfRange"></param>
         /// <remarks>No matter which value is greater, 
         /// value are assigned correctly anyway</remarks>
-        public InclusiveValueRange(T upperValueOfRange, 
+        public InclusiveValueRange(T upperValueOfRange,
             T lowerValueOfRange = default)
         {
             if (upperValueOfRange.IsLessThan(lowerValueOfRange))

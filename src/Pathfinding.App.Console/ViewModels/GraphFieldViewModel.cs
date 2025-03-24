@@ -32,7 +32,7 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
     }
 
     private SmoothLevels smoothLevels;
-    private SmoothLevels SmoothLevel 
+    private SmoothLevels SmoothLevel
     {
         get => smoothLevels;
         set => this.RaiseAndSetIfChanged(ref smoothLevels, value);
@@ -88,8 +88,8 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
             x => x.GraphId,
             x => x.Graph,
             x => x.IsReadOnly,
-            (id, graph, isRead) => id > 0 
-                && graph != Graph<GraphVertexModel>.Empty 
+            (id, graph, isRead) => id > 0
+                && graph != Graph<GraphVertexModel>.Empty
                 && !isRead);
     }
 
@@ -100,9 +100,9 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
             x => x.Graph,
             x => x.IsReadOnly,
             x => x.SmoothLevel,
-            (id, graph, isRead, level) => id > 0 
-                && graph != Graph<GraphVertexModel>.Empty 
-                && !isRead 
+            (id, graph, isRead, level) => id > 0
+                && graph != Graph<GraphVertexModel>.Empty
+                && !isRead
                 && level == SmoothLevels.No);
     }
 

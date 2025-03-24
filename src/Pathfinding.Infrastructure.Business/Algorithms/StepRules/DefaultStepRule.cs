@@ -1,14 +1,15 @@
 ﻿using Pathfinding.Service.Interface;
 using System.Runtime.CompilerServices;
 
-namespace Pathfinding.Infrastructure.Business.Algorithms.StepRules
+namespace Pathfinding.Infrastructure.Business.Algorithms.StepRules;
+
+public sealed class DefaultStepRule : IStepRule
 {
-    public sealed class DefaultStepRule : IStepRule
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public double CalculateStepCost(
+        IPathfindingVertex neighbour,
+        IPathfindingVertex current)
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public double CalculateStepCost(IPathfindingVertex neighbour, IPathfindingVertex current)
-        {
-            return neighbour.Cost.CurrentCost;
-        }
+        return neighbour.Cost.CurrentCost;
     }
 }

@@ -1,8 +1,7 @@
-﻿namespace Pathfinding.Domain.Interface.Factories
+﻿namespace Pathfinding.Domain.Interface.Factories;
+
+public interface IGraphAssemble<TVertex>
+    where TVertex : IVertex
 {
-    public interface IGraphAssemble<TVertex>
-        where TVertex : IVertex
-    {
-        IGraph<TVertex> AssembleGraph(IReadOnlyList<int> graphDimensionsSizes);
-    }
+    IGraph<TVertex> AssembleGraph(IReadOnlyList<int> graphDimensionsSizes);
 }

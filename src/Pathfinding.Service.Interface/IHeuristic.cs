@@ -3,6 +3,6 @@
 public interface IHeuristic
 {
     double Calculate(
-        IPathfindingVertex first, 
+        IPathfindingVertex first,
         IPathfindingVertex second);
 }

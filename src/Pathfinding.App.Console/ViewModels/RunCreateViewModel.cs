@@ -33,9 +33,9 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     private static readonly InclusiveValueRange<double> WeightRange = (5, 0);
 
     private sealed record class AlgorithmBuildInfo(
-        Algorithms Algorithm, 
+        Algorithms Algorithm,
         Heuristics? Heuristics,
-        double? Weight, 
+        double? Weight,
         StepRules? StepRule) : IAlgorithmBuildInfo;
 
     private readonly IRequestService<GraphVertexModel> service;
@@ -68,7 +68,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     public double? ToWeight
     {
         get => toWeight;
-        set { SetToWeight(ref toWeight, value); this.RaisePropertyChanged(); } 
+        set { SetToWeight(ref toWeight, value); this.RaisePropertyChanged(); }
     }
 
     private double? step;
@@ -113,7 +113,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     {
         return this.WhenAnyValue(
             x => x.Graph, x => x.AppliedHeuristics.Count,
-            x => x.FromWeight, x => x.ToWeight, 
+            x => x.FromWeight, x => x.ToWeight,
             x => x.Step, x => x.Algorithm,
             (graph, count, weight, to, step, algorithm) =>
             {

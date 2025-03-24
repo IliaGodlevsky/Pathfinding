@@ -19,8 +19,11 @@ internal class RunModel : ReactiveObject, IDisposable
         IReadOnlyCollection<VisitedModel> Visited,
         IReadOnlyCollection<Coordinate> Path);
 
-    private enum RunVertexState { No, Source, Target,
-        Transit, Visited, Enqueued, Path, CrossPath }
+    private enum RunVertexState
+    {
+        No, Source, Target,
+        Transit, Visited, Enqueued, Path, CrossPath
+    }
 
     private readonly record struct RunVertexStateModel(
         RunVertexModel Vertex,

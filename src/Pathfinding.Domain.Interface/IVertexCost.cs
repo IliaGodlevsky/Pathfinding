@@ -1,12 +1,11 @@
 ﻿using Pathfinding.Shared.Interface;
 using Pathfinding.Shared.Primitives;
 
-namespace Pathfinding.Domain.Interface
-{
-    public interface IVertexCost : ICloneable<IVertexCost>
-    {
-        InclusiveValueRange<int> CostRange { get; set; }
+namespace Pathfinding.Domain.Interface;
 
-        int CurrentCost { get; set; }
-    }
+public interface IVertexCost : ICloneable<IVertexCost>
+{
+    InclusiveValueRange<int> CostRange { get; set; }
+
+    int CurrentCost { get; set; }
 }

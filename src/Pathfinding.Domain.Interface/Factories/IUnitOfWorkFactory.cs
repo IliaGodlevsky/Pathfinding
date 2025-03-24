@@ -1,7 +1,6 @@
-﻿namespace Pathfinding.Domain.Interface.Factories
+﻿namespace Pathfinding.Domain.Interface.Factories;
+
+public interface IUnitOfWorkFactory
 {
-    public interface IUnitOfWorkFactory
-    {
-        IUnitOfWork Create();
-    }
+    IUnitOfWork Create();
 }

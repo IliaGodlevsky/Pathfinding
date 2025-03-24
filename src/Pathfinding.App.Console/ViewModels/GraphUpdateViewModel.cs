@@ -74,7 +74,7 @@ namespace Pathfinding.App.Console.ViewModels
             return this.WhenAnyValue(
                 x => x.SelectedGraphs,
                 x => x.Name,
-                (selected, name) 
+                (selected, name)
                     => selected.Length == 1 && !string.IsNullOrEmpty(name));
         }
 

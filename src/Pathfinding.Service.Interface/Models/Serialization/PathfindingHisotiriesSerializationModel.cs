@@ -7,8 +7,7 @@ namespace Pathfinding.Service.Interface.Models.Serialization
 {
     public class PathfindingHisotiriesSerializationModel : IBinarySerializable, IXmlSerializable
     {
-        public IReadOnlyCollection<PathfindingHistorySerializationModel> Histories { get; set; }
-            = Array.Empty<PathfindingHistorySerializationModel>();
+        public IReadOnlyCollection<PathfindingHistorySerializationModel> Histories { get; set; } = [];
 
         public void Deserialize(BinaryReader reader)
         {

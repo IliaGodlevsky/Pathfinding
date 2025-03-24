@@ -1,8 +1,7 @@
-﻿namespace Pathfinding.Domain.Core.Enums
+﻿namespace Pathfinding.Domain.Core.Enums;
+
+public enum GraphStatuses
 {
-    public enum GraphStatuses
-    {
-        Editable = 0,
-        Readonly = 1
-    }
+    Editable = 0,
+    Readonly = 1
 }

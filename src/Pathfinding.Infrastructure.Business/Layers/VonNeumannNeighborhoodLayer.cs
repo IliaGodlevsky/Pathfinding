@@ -2,13 +2,12 @@
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Shared.Primitives;
 
-namespace Pathfinding.Infrastructure.Business.Layers
+namespace Pathfinding.Infrastructure.Business.Layers;
+
+public sealed class VonNeumannNeighborhoodLayer : NeighborhoodLayer
 {
-    public sealed class VonNeumannNeighborhoodLayer : NeighborhoodLayer
+    protected override INeighborhood CreateNeighborhood(Coordinate coordinate)
     {
-        protected override INeighborhood CreateNeighborhood(Coordinate coordinate)
-        {
-            return new VonNeumannNeighborhood(coordinate);
-        }
+        return new VonNeumannNeighborhood(coordinate);
     }
 }

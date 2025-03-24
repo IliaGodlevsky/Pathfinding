@@ -7,7 +7,7 @@ using ReactiveUI;
 
 namespace Pathfinding.App.Console.Models;
 
-public class GraphVertexModel : ReactiveObject, 
+public class GraphVertexModel : ReactiveObject,
     IVertex, IPathfindingVertex, IEntity<long>
 {
     public long Id { get; set; }

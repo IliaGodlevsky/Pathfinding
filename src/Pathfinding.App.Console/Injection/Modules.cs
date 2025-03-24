@@ -2,8 +2,8 @@
 using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Models;
-using Pathfinding.App.Console.Views;
 using Pathfinding.App.Console.ViewModels;
+using Pathfinding.App.Console.Views;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Business;
 using Pathfinding.Infrastructure.Business.Commands;

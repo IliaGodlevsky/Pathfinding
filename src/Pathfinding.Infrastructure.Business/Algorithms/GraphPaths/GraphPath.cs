@@ -6,82 +6,81 @@ using Pathfinding.Shared.Primitives;
 using System.Collections;
 using System.Collections.ObjectModel;
 
-namespace Pathfinding.Infrastructure.Business.Algorithms.GraphPaths
+namespace Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
+
+using Traces = IReadOnlyDictionary<Coordinate, IPathfindingVertex>;
+
+public sealed class GraphPath : IGraphPath
 {
-    using Traces = IReadOnlyDictionary<Coordinate, IPathfindingVertex>;
+    private readonly Traces traces;
+    private readonly IPathfindingVertex target;
+    private readonly IStepRule stepRule;
+    private readonly Lazy<IReadOnlyList<IPathfindingVertex>> path;
+    private readonly Lazy<double> cost;
+    private readonly Lazy<int> count;
 
-    public sealed class GraphPath : IGraphPath
+    private IReadOnlyList<IPathfindingVertex> Path => path.Value;
+
+    public double Cost => cost.Value;
+
+    public int Count => count.Value;
+
+    public GraphPath(Traces traces, IPathfindingVertex target)
+        : this(traces, target, new DefaultStepRule())
     {
-        private readonly Traces traces;
-        private readonly IPathfindingVertex target;
-        private readonly IStepRule stepRule;
-        private readonly Lazy<IReadOnlyList<IPathfindingVertex>> path;
-        private readonly Lazy<double> cost;
-        private readonly Lazy<int> count;
 
-        private IReadOnlyList<IPathfindingVertex> Path => path.Value;
+    }
 
-        public double Cost => cost.Value;
+    public GraphPath(Traces traces, IPathfindingVertex target, IStepRule stepRule)
+    {
+        this.traces = traces;
+        this.target = target;
+        this.stepRule = stepRule;
+        path = new(GetPath);
+        cost = new(GetPathCost);
+        count = new(GetCount);
+    }
 
-        public int Count => count.Value;
-
-        public GraphPath(Traces traces, IPathfindingVertex target)
-            : this(traces, target, new DefaultStepRule())
+    private ReadOnlyCollection<IPathfindingVertex> GetPath()
+    {
+        var vertices = new List<IPathfindingVertex>();
+        var vertex = target;
+        vertices.Add(vertex);
+        var parent = traces.GetOrNullVertex(vertex.Position);
+        while (parent.IsNeighbor(vertex))
         {
-
+            vertices.Add(parent);
+            vertex = parent;
+            parent = traces.GetOrNullVertex(vertex.Position);
         }
+        return vertices.AsReadOnly();
+    }
 
-        public GraphPath(Traces traces, IPathfindingVertex target, IStepRule stepRule)
+    private double GetPathCost()
+    {
+        double totalCost = 0;
+        for (int i = 0; i < Count; i++)
         {
-            this.traces = traces;
-            this.target = target;
-            this.stepRule = stepRule;
-            path = new(GetPath);
-            cost = new(GetPathCost);
-            count = new(GetCount);
+            totalCost += stepRule.CalculateStepCost(Path[i], Path[i + 1]);
         }
+        return totalCost;
+    }
 
-        private ReadOnlyCollection<IPathfindingVertex> GetPath()
-        {
-            var vertices = new List<IPathfindingVertex>();
-            var vertex = target;
-            vertices.Add(vertex);
-            var parent = traces.GetOrNullVertex(vertex.Position);
-            while (parent.IsNeighbor(vertex))
-            {
-                vertices.Add(parent);
-                vertex = parent;
-                parent = traces.GetOrNullVertex(vertex.Position);
-            }
-            return vertices.AsReadOnly();
-        }
+    private int GetCount()
+    {
+        return Path.Count == 0 ? 0 : Path.Count - 1;
+    }
 
-        private double GetPathCost()
+    public IEnumerator<Coordinate> GetEnumerator()
+    {
+        for (int i = 0; i < Path.Count - 1; i++)
         {
-            double totalCost = 0;
-            for (int i = 0; i < Count; i++)
-            {
-                totalCost += stepRule.CalculateStepCost(Path[i], Path[i + 1]);
-            }
-            return totalCost;
+            yield return Path[i].Position;
         }
+    }
 
-        private int GetCount()
-        {
-            return Path.Count == 0 ? 0 : Path.Count - 1;
-        }
-
-        public IEnumerator<Coordinate> GetEnumerator()
-        {
-            for (int i = 0; i < Path.Count - 1; i++)
-            {
-                yield return Path[i].Position;
-            }
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }

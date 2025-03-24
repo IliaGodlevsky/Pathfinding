@@ -1,7 +1,6 @@
-﻿namespace Pathfinding.Domain.Core
+﻿namespace Pathfinding.Domain.Core;
+
+public interface IEntity<TId>
 {
-    public interface IEntity<TId>
-    {
-        TId Id { get; set; }
-    }
+    TId Id { get; set; }
 }

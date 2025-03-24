@@ -20,7 +20,7 @@ namespace Pathfinding.App.Console.Views
             [KeyFilter(KeyFilters.RunCreateView)] View[] children)
         {
             Initialize();
-            
+
             Add(children);
             Add(buttonFrame);
             cancelButton.Events().MouseClick

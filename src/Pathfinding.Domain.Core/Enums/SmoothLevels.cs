@@ -1,11 +1,10 @@
-﻿namespace Pathfinding.Domain.Core.Enums
+﻿namespace Pathfinding.Domain.Core.Enums;
+
+public enum SmoothLevels
 {
-    public enum SmoothLevels
-    {
-        No,
-        Low,
-        Medium,
-        High,
-        Extreme
-    }
+    No,
+    Low,
+    Medium,
+    High,
+    Extreme
 }
