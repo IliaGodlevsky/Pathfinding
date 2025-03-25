@@ -6,22 +6,21 @@ using System.Reactive;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
-namespace Pathfinding.App.Console.Views
+namespace Pathfinding.App.Console.Views;
+
+internal sealed class GraphCopyButton : Button
 {
-    internal sealed class GraphCopyButton : Button
+    public GraphCopyButton(IGraphCopyViewModel viewModel)
     {
-        public GraphCopyButton(IGraphCopyViewModel viewModel)
-        {
-            X = Pos.Percent(33.34f);
-            Y = 0;
-            Width = Dim.Percent(16.67f);
-            Text = Resource.Copy;
-            viewModel.CopyGraphCommand.CanExecute
-                .BindTo(this, x => x.Enabled);
-            this.Events().MouseClick
-                .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-                .Select(x => Unit.Default)
-                .InvokeCommand(viewModel, x => x.CopyGraphCommand);
-        }
+        X = Pos.Percent(33.34f);
+        Y = 0;
+        Width = Dim.Percent(16.67f);
+        Text = Resource.Copy;
+        viewModel.CopyGraphCommand.CanExecute
+            .BindTo(this, x => x.Enabled);
+        this.Events().MouseClick
+            .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
+            .Select(x => Unit.Default)
+            .InvokeCommand(viewModel, x => x.CopyGraphCommand);
     }
 }

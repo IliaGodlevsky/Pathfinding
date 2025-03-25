@@ -1,7 +1,6 @@
-﻿namespace Pathfinding.Domain.Interface
+﻿namespace Pathfinding.Domain.Interface;
+
+public interface ILayer
 {
-    public interface ILayer
-    {
-        void Overlay(IGraph<IVertex> graph);
-    }
+    void Overlay(IGraph<IVertex> graph);
 }

@@ -2,52 +2,51 @@
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
 
-namespace Pathfinding.Infrastructure.Business.Algorithms
+namespace Pathfinding.Infrastructure.Business.Algorithms;
+
+public abstract class DepthAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
+    : PathfindingAlgorithm<Stack<IPathfindingVertex>>(pathfindingRange)
 {
-    public abstract class DepthAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange) 
-        : PathfindingAlgorithm<Stack<IPathfindingVertex>>(pathfindingRange)
+    private IPathfindingVertex PreviousVertex { get; set; } = NullPathfindingVertex.Instance;
+
+    protected abstract IPathfindingVertex GetVertex(IReadOnlyCollection<IPathfindingVertex> neighbors);
+
+    protected override void MoveNextVertex()
     {
-        private IPathfindingVertex PreviousVertex { get; set; } = NullPathfindingVertex.Instance;
+        var neighbours = GetUnvisitedNeighbours(CurrentVertex);
+        RaiseVertexProcessed(CurrentVertex, neighbours);
+        CurrentVertex = GetVertex(neighbours);
+    }
 
-        protected abstract IPathfindingVertex GetVertex(IReadOnlyCollection<IPathfindingVertex> neighbors);
+    protected override void PrepareForSubPathfinding(SubRange range)
+    {
+        base.PrepareForSubPathfinding(range);
+        visited.Add(CurrentVertex);
+        storage.Push(CurrentVertex);
+    }
 
-        protected override void MoveNextVertex()
+    protected override void DropState()
+    {
+        base.DropState();
+        storage.Clear();
+    }
+
+    protected override void VisitCurrentVertex()
+    {
+        if (CurrentVertex.Neighbors.Count == 0)
         {
-            var neighbours = GetUnvisitedNeighbours(CurrentVertex);
-            RaiseVertexProcessed(CurrentVertex, neighbours);
-            CurrentVertex = GetVertex(neighbours);
+            CurrentVertex = storage.PopOrThrowDeadEndVertexException();
         }
-
-        protected override void PrepareForSubPathfinding(SubRange range)
+        else
         {
-            base.PrepareForSubPathfinding(range);
             visited.Add(CurrentVertex);
             storage.Push(CurrentVertex);
+            traces[CurrentVertex.Position] = PreviousVertex;
         }
+    }
 
-        protected override void DropState()
-        {
-            base.DropState();
-            storage.Clear();
-        }
-
-        protected override void VisitCurrentVertex()
-        {
-            if (CurrentVertex.Neighbors.Count == 0)
-            {
-                CurrentVertex = storage.PopOrThrowDeadEndVertexException();
-            }
-            else
-            {
-                visited.Add(CurrentVertex);
-                storage.Push(CurrentVertex);
-                traces[CurrentVertex.Position] = PreviousVertex;
-            }
-        }
-
-        protected override void InspectCurrentVertex()
-        {
-            PreviousVertex = CurrentVertex;
-        }
+    protected override void InspectCurrentVertex()
+    {
+        PreviousVertex = CurrentVertex;
     }
 }

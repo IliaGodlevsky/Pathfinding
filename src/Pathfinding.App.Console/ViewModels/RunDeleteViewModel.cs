@@ -72,7 +72,7 @@ internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel
         ActivatedGraph = msg.Graph.Id;
     }
 
-    private void OnGraphsDeleted(object recipient, GraphsDeletedMessage msg) 
+    private void OnGraphsDeleted(object recipient, GraphsDeletedMessage msg)
     {
         if (msg.GraphIds.Contains(ActivatedGraph))
         {

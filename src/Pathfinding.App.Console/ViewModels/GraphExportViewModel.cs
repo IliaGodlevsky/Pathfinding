@@ -67,7 +67,7 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
             var exportFormat = stream.Format;
             var exportStream = stream.Stream;
             await using (exportStream)
-            { 
+            {
                 if (exportStream != Stream.Null && exportFormat.HasValue)
                 {
                     var serializer = serializers[exportFormat.Value];

@@ -24,7 +24,7 @@ namespace Pathfinding.Infrastructure.Business.Benchmarks.Data
             var neighborhoodLayer = new VonNeumannNeighborhoodLayer();
             var costLayer = new VertexCostLayer(
                 new InclusiveValueRange<int>(9, 1),
-                range => new VertexCost(Random.Shared.Next(range.LowerValueOfRange, 
+                range => new VertexCost(Random.Shared.Next(range.LowerValueOfRange,
                 range.UpperValueOfRange + 1), range));
             var layers = new Layers.Layers(neighborhoodLayer, costLayer);
             graph = assemble.AssembleGraph(layers, 200, 250);

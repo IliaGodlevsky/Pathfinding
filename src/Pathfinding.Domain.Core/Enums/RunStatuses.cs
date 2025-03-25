@@ -1,8 +1,7 @@
-﻿namespace Pathfinding.Domain.Core.Enums
+﻿namespace Pathfinding.Domain.Core.Enums;
+
+public enum RunStatuses
 {
-    public enum RunStatuses
-    {
-        Success,
-        Failure
-    }
+    Success,
+    Failure
 }

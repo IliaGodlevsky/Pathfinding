@@ -1,10 +1,9 @@
-﻿namespace Pathfinding.Domain.Core.Enums
+﻿namespace Pathfinding.Domain.Core.Enums;
+
+public enum Heuristics
 {
-    public enum Heuristics
-    {
-        Euclidian,
-        Chebyshev,
-        Diagonal,
-        Manhattan
-    }
+    Euclidian,
+    Chebyshev,
+    Diagonal,
+    Manhattan
 }

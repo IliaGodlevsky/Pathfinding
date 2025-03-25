@@ -1,8 +1,7 @@
-﻿namespace Pathfinding.Domain.Core.Enums
+﻿namespace Pathfinding.Domain.Core.Enums;
+
+public enum StepRules
 {
-    public enum StepRules
-    {
-        Default,
-        Landscape
-    }
+    Default,
+    Landscape
 }

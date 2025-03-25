@@ -15,7 +15,7 @@ public class AStarAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange,
     public AStarAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
         : this(pathfindingRange, new DefaultStepRule(), new ChebyshevDistance())
     {
-        
+
     }
 
     protected override void DropState()

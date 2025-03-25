@@ -8,7 +8,7 @@ namespace Pathfinding.App.Console.Extensions
         public static string ToExtensionRepresentation(this StreamFormat exportFormat)
         {
             var field = exportFormat.GetType().GetField(exportFormat.ToString());
-            var attribute = Attribute.GetCustomAttribute(field, 
+            var attribute = Attribute.GetCustomAttribute(field,
                 typeof(DescriptionAttribute)) as DescriptionAttribute;
             return attribute?.Description ?? DescriptionAttribute.Default.Description;
         }

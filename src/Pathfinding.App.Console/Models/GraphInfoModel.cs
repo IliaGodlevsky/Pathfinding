@@ -59,7 +59,7 @@ internal sealed class GraphInfoModel : ReactiveObject, IGraphLayersInfo
 
     public object[] GetProperties()
     {
-        return [ Id, Name, Width, Length, Neighborhood, 
+        return [ Id, Name, Width, Length, Neighborhood,
             SmoothLevel, ObstaclesCount, Status ];
     }
 }

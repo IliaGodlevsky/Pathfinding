@@ -2,14 +2,13 @@
 using Pathfinding.App.Console.Injection;
 using Terminal.Gui;
 
-namespace Pathfinding.App.Console.Views
+namespace Pathfinding.App.Console.Views;
+
+internal sealed partial class RunsTableButtonsFrame : FrameView
 {
-    internal sealed partial class RunsTableButtonsFrame : FrameView
+    public RunsTableButtonsFrame([KeyFilter(KeyFilters.RunButtonsFrame)] View[] children)
     {
-        public RunsTableButtonsFrame([KeyFilter(KeyFilters.RunButtonsFrame)] View[] children)
-        {
-            Initialize();
-            Add(children);
-        }
+        Initialize();
+        Add(children);
     }
 }

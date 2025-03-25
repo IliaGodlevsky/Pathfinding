@@ -33,7 +33,7 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
         ILog logger)
     {
         this.messenger = messenger;
-        this.serializers = serializers.ToDictionary(x => 
+        this.serializers = serializers.ToDictionary(x =>
             (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], x => x.Value);
         this.service = service;
         this.logger = logger;

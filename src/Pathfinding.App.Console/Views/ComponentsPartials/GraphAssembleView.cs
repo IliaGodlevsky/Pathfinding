@@ -1,5 +1,4 @@
-﻿using System.Reactive.Disposables;
-using Terminal.Gui;
+﻿using Terminal.Gui;
 
 namespace Pathfinding.App.Console.Views
 {

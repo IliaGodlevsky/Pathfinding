@@ -9,7 +9,7 @@ namespace Pathfinding.Shared.Extensions
             return collection switch
             {
                 ReadOnlyCollection<T> readOnly => readOnly,
-                _ => Array.AsReadOnly([..collection]),
+                _ => Array.AsReadOnly([.. collection]),
             };
         }
 
@@ -38,7 +38,7 @@ namespace Pathfinding.Shared.Extensions
             return collection;
         }
 
-        public static IEnumerable<T> TakeOrDefault<T>(this IEnumerable<T> collection, 
+        public static IEnumerable<T> TakeOrDefault<T>(this IEnumerable<T> collection,
             int number, T defaultValue = default)
         {
             return collection
