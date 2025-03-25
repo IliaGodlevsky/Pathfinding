@@ -21,8 +21,8 @@ internal class RunModel : ReactiveObject, IDisposable
 
     private enum RunVertexState
     {
-        No, Source, Target,
-        Transit, Visited, Enqueued, Path, CrossPath
+        No, Source, Target,Transit, 
+        Visited, Enqueued, Path, CrossPath
     }
 
     private readonly record struct RunVertexStateModel(

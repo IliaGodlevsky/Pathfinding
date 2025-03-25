@@ -12,53 +12,52 @@ using System.Data;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
-namespace Pathfinding.App.Console.Views
+namespace Pathfinding.App.Console.Views;
+
+internal sealed partial class RunStepRulesView : FrameView
 {
-    internal sealed partial class RunStepRulesView : FrameView
+    private readonly IRequireStepRuleViewModel viewModel;
+
+    public RunStepRulesView(
+        [KeyFilter(KeyFilters.Views)] IMessenger messenger,
+        IRequireStepRuleViewModel viewModel)
     {
-        private readonly IRequireStepRuleViewModel viewModel;
+        Initialize();
+        var rules = Enum.GetValues<StepRules>()
+            .ToDictionary(x => x.ToStringRepresentation());
+        var labels = rules.Select(x => ustring.Make(x.Key)).ToArray();
+        var values = labels.Select(x => rules[x.ToString()]).ToList();
+        stepRules.RadioLabels = labels;
+        stepRules.Events().SelectedItemChanged
+           .Where(x => x.SelectedItem > -1)
+           .Select(x => values[x.SelectedItem])
+           .BindTo(viewModel, x => x.StepRule);
+        stepRules.SelectedItem = 0;
+        messenger.Register<OpenStepRuleViewMessage>(this, OnOpen);
+        messenger.Register<CloseStepRulesViewMessage>(this, OnStepRulesViewClose);
+        messenger.Register<CloseRunCreateViewMessage>(this, OnRunCreationViewClosed);
+        this.viewModel = viewModel;
+    }
 
-        public RunStepRulesView(
-            [KeyFilter(KeyFilters.Views)] IMessenger messenger,
-            IRequireStepRuleViewModel viewModel)
-        {
-            Initialize();
-            var rules = Enum.GetValues<StepRules>()
-                .ToDictionary(x => x.ToStringRepresentation());
-            var labels = rules.Select(x => ustring.Make(x.Key)).ToArray();
-            var values = labels.Select(x => rules[x.ToString()]).ToList();
-            stepRules.RadioLabels = labels;
-            stepRules.Events().SelectedItemChanged
-               .Where(x => x.SelectedItem > -1)
-               .Select(x => values[x.SelectedItem])
-               .BindTo(viewModel, x => x.StepRule);
-            stepRules.SelectedItem = 0;
-            messenger.Register<OpenStepRuleViewMessage>(this, OnOpen);
-            messenger.Register<CloseStepRulesViewMessage>(this, OnStepRulesViewClose);
-            messenger.Register<CloseRunCreateViewMessage>(this, OnRunCreationViewClosed);
-            this.viewModel = viewModel;
-        }
+    private void OnOpen(object recipient, OpenStepRuleViewMessage msg)
+    {
+        stepRules.SelectedItem = 0;
+        Visible = true;
+    }
 
-        private void OnOpen(object recipient, OpenStepRuleViewMessage msg)
-        {
-            stepRules.SelectedItem = 0;
-            Visible = true;
-        }
+    private void OnStepRulesViewClose(object recipient, CloseStepRulesViewMessage msg)
+    {
+        Close();
+    }
 
-        private void OnStepRulesViewClose(object recipient, CloseStepRulesViewMessage msg)
-        {
-            Close();
-        }
+    private void OnRunCreationViewClosed(object recipient, CloseRunCreateViewMessage msg)
+    {
+        Close();
+    }
 
-        private void OnRunCreationViewClosed(object recipient, CloseRunCreateViewMessage msg)
-        {
-            Close();
-        }
-
-        private void Close()
-        {
-            viewModel.StepRule = default;
-            Visible = false;
-        }
+    private void Close()
+    {
+        viewModel.StepRule = default;
+        Visible = false;
     }
 }

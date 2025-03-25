@@ -67,12 +67,13 @@ internal sealed partial class GraphFieldView : FrameView
             var view = new GraphVertexView(vertex).DisposeWith(vertexDisposables);
 
             BindTo(view, vertex, runRangeViewModel.AddToRangeCommand, Button1Pressed);
-            BindTo(view, vertex, runRangeViewModel.RemoveFromRangeCommand, Button1Pressed, ButtonCtrl);
-            BindTo(view, Unit.Default, runRangeViewModel.DeletePathfindingRange,
-                Button1DoubleClicked, ButtonCtrl, ButtonAlt);
+            BindTo(view, vertex, runRangeViewModel.RemoveFromRangeCommand,
+                Button1Pressed | ButtonCtrl);
+            BindTo(view, runRangeViewModel.DeletePathfindingRange, 
+                Button1DoubleClicked | ButtonCtrl | ButtonAlt);
 
-            BindTo(view, vertex, graphFieldViewModel.ReverseVertexCommand, Button3Pressed, ButtonCtrl);
-            BindTo(view, vertex, graphFieldViewModel.InverseVertexCommand, Button3Pressed, ButtonAlt);
+            BindTo(view, vertex, graphFieldViewModel.ReverseVertexCommand, Button3Pressed | ButtonCtrl);
+            BindTo(view, vertex, graphFieldViewModel.InverseVertexCommand, Button3Pressed | ButtonAlt);
             BindTo(view, vertex, graphFieldViewModel.ChangeVertexPolarityCommand, Button3Clicked);
 
             BindTo(view, vertex, graphFieldViewModel.DecreaseVertexCostCommand, WheeledDown);
@@ -89,12 +90,20 @@ internal sealed partial class GraphFieldView : FrameView
     }
 
     private void BindTo<T>(GraphVertexView view, T model,
-        ReactiveCommand<T, Unit> command, params MouseFlags[] flags)
+        ReactiveCommand<T, Unit> command, 
+        params MouseFlags[] flags)
     {
         view.Events().MouseClick
-            .Where(x => flags.All(z => x.MouseEvent.Flags.HasFlag(z)))
+            .Where(x => flags.Any(z => x.MouseEvent.Flags.HasFlag(z)))
             .Select(x => model)
             .InvokeCommand(command)
             .DisposeWith(vertexDisposables);
+    }
+
+    private void BindTo(GraphVertexView view,
+        ReactiveCommand<Unit, Unit> command,
+        params MouseFlags[] flags)
+    {
+        BindTo(view, Unit.Default, command, flags);
     }
 }

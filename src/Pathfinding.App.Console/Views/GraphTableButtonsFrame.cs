@@ -2,14 +2,13 @@
 using Pathfinding.App.Console.Injection;
 using Terminal.Gui;
 
-namespace Pathfinding.App.Console.Views
+namespace Pathfinding.App.Console.Views;
+
+internal sealed partial class GraphTableButtonsFrame : FrameView
 {
-    internal sealed partial class GraphTableButtonsFrame : FrameView
+    public GraphTableButtonsFrame([KeyFilter(KeyFilters.GraphTableButtons)] View[] children)
     {
-        public GraphTableButtonsFrame([KeyFilter(KeyFilters.GraphTableButtons)] View[] children)
-        {
-            Initialize();
-            Add(children);
-        }
+        Initialize();
+        Add(children);
     }
 }

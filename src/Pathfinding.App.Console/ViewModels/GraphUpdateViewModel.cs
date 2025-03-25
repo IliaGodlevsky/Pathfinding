@@ -11,119 +11,118 @@ using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
 
-namespace Pathfinding.App.Console.ViewModels
+namespace Pathfinding.App.Console.ViewModels;
+
+internal sealed class GraphUpdateViewModel : BaseViewModel
 {
-    internal sealed class GraphUpdateViewModel : BaseViewModel
+    private readonly IMessenger messenger;
+    private readonly IRequestService<GraphVertexModel> service;
+    private readonly ILog log;
+
+    private GraphInfoModel[] selectedGraph = [];
+    public GraphInfoModel[] SelectedGraphs
     {
-        private readonly IMessenger messenger;
-        private readonly IRequestService<GraphVertexModel> service;
-        private readonly ILog log;
+        get => selectedGraph;
+        set => this.RaiseAndSetIfChanged(ref selectedGraph, value);
+    }
 
-        private GraphInfoModel[] selectedGraph = [];
-        public GraphInfoModel[] SelectedGraphs
+    private SmoothLevels smoothLevel;
+    public SmoothLevels SmoothLevel
+    {
+        get => smoothLevel;
+        set => this.RaiseAndSetIfChanged(ref smoothLevel, value);
+    }
+
+    private Neighborhoods neighborhood;
+    public Neighborhoods Neighborhood
+    {
+        get => neighborhood;
+        set => this.RaiseAndSetIfChanged(ref neighborhood, value);
+    }
+
+    private string name;
+    public string Name
+    {
+        get => name;
+        set => this.RaiseAndSetIfChanged(ref name, value);
+    }
+
+    private GraphStatuses status;
+    public GraphStatuses Status
+    {
+        get => status;
+        set => this.RaiseAndSetIfChanged(ref status, value);
+    }
+
+    public ReactiveCommand<Unit, Unit> UpdateGraphCommand { get; }
+
+    public GraphUpdateViewModel(IRequestService<GraphVertexModel> service,
+        [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
+        ILog log)
+    {
+        this.messenger = messenger;
+        this.service = service;
+        this.log = log;
+        messenger.Register<GraphSelectedMessage>(this, OnGraphSelected);
+        messenger.Register<GraphStateChangedMessage>(this, OnStatusChanged);
+        messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
+        UpdateGraphCommand = ReactiveCommand.CreateFromTask(ExecuteUpdate, CanExecute());
+    }
+
+    private IObservable<bool> CanExecute()
+    {
+        return this.WhenAnyValue(
+            x => x.SelectedGraphs,
+            x => x.Name,
+            (selected, name)
+                => selected.Length == 1 && !string.IsNullOrEmpty(name));
+    }
+
+    private async Task ExecuteUpdate()
+    {
+        await ExecuteSafe(async () =>
         {
-            get => selectedGraph;
-            set => this.RaiseAndSetIfChanged(ref selectedGraph, value);
+            var graph = SelectedGraphs[0];
+            var info = await service.ReadGraphInfoAsync(graph.Id)
+                .ConfigureAwait(false);
+            info.Name = Name;
+            info.Neighborhood = Neighborhood;
+            info.SmoothLevel = SmoothLevel;
+            await service.UpdateGraphInfoAsync(info).ConfigureAwait(false);
+            await messenger.SendAsync(new AsyncGraphUpdatedMessage(info), Tokens.GraphTable)
+                .ConfigureAwait(false);
+            messenger.Send(new GraphUpdatedMessage(info));
+            await messenger.SendAsync(new AsyncGraphUpdatedMessage(info), Tokens.AlgorithmUpdate)
+                .ConfigureAwait(false);
+        }, log.Error).ConfigureAwait(false);
+    }
+
+    private void OnStatusChanged(object recipient, GraphStateChangedMessage msg)
+    {
+        Status = msg.Status;
+    }
+
+    private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
+    {
+        if (msg.Graphs.Length == 1)
+        {
+            SelectedGraphs = msg.Graphs;
+            var graph = SelectedGraphs[0];
+            Name = graph.Name;
+            SmoothLevel = graph.SmoothLevel;
+            Neighborhood = graph.Neighborhood;
+            Status = graph.Status;
         }
+    }
 
-        private SmoothLevels smoothLevel;
-        public SmoothLevels SmoothLevel
+    private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
+    {
+        SelectedGraphs = SelectedGraphs
+            .Where(x => !msg.GraphIds.Contains(x.Id))
+            .ToArray();
+        if (SelectedGraphs.Length == 0)
         {
-            get => smoothLevel;
-            set => this.RaiseAndSetIfChanged(ref smoothLevel, value);
-        }
-
-        private Neighborhoods neighborhood;
-        public Neighborhoods Neighborhood
-        {
-            get => neighborhood;
-            set => this.RaiseAndSetIfChanged(ref neighborhood, value);
-        }
-
-        private string name;
-        public string Name
-        {
-            get => name;
-            set => this.RaiseAndSetIfChanged(ref name, value);
-        }
-
-        private GraphStatuses status;
-        public GraphStatuses Status
-        {
-            get => status;
-            set => this.RaiseAndSetIfChanged(ref status, value);
-        }
-
-        public ReactiveCommand<Unit, Unit> UpdateGraphCommand { get; }
-
-        public GraphUpdateViewModel(IRequestService<GraphVertexModel> service,
-            [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-            ILog log)
-        {
-            this.messenger = messenger;
-            this.service = service;
-            this.log = log;
-            messenger.Register<GraphSelectedMessage>(this, OnGraphSelected);
-            messenger.Register<GraphStateChangedMessage>(this, OnStatusChanged);
-            messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
-            UpdateGraphCommand = ReactiveCommand.CreateFromTask(ExecuteUpdate, CanExecute());
-        }
-
-        private IObservable<bool> CanExecute()
-        {
-            return this.WhenAnyValue(
-                x => x.SelectedGraphs,
-                x => x.Name,
-                (selected, name)
-                    => selected.Length == 1 && !string.IsNullOrEmpty(name));
-        }
-
-        private async Task ExecuteUpdate()
-        {
-            await ExecuteSafe(async () =>
-            {
-                var graph = SelectedGraphs[0];
-                var info = await service.ReadGraphInfoAsync(graph.Id)
-                    .ConfigureAwait(false);
-                info.Name = Name;
-                info.Neighborhood = Neighborhood;
-                info.SmoothLevel = SmoothLevel;
-                await service.UpdateGraphInfoAsync(info).ConfigureAwait(false);
-                await messenger.SendAsync(new AsyncGraphUpdatedMessage(info), Tokens.GraphTable)
-                    .ConfigureAwait(false);
-                messenger.Send(new GraphUpdatedMessage(info));
-                await messenger.SendAsync(new AsyncGraphUpdatedMessage(info), Tokens.AlgorithmUpdate)
-                    .ConfigureAwait(false);
-            }, log.Error).ConfigureAwait(false);
-        }
-
-        private void OnStatusChanged(object recipient, GraphStateChangedMessage msg)
-        {
-            Status = msg.Status;
-        }
-
-        private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
-        {
-            if (msg.Graphs.Length == 1)
-            {
-                SelectedGraphs = msg.Graphs;
-                var graph = SelectedGraphs[0];
-                Name = graph.Name;
-                SmoothLevel = graph.SmoothLevel;
-                Neighborhood = graph.Neighborhood;
-                Status = graph.Status;
-            }
-        }
-
-        private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
-        {
-            SelectedGraphs = SelectedGraphs
-                .Where(x => !msg.GraphIds.Contains(x.Id))
-                .ToArray();
-            if (SelectedGraphs.Length == 0)
-            {
-                Name = string.Empty;
-            }
+            Name = string.Empty;
         }
     }
 }
