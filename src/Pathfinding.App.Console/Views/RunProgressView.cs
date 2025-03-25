@@ -39,25 +39,24 @@ internal sealed partial class RunProgressView : FrameView
         messenger.Register<OpenRunFieldMessage>(this, OnRunFieldOpen);
         this.viewModel = viewModel;
 
-        BindTo(leftLabel, x => Fraction - FractionPerClick, Button1Pressed);
-        BindTo(leftLabel, x => Fraction - ExtraFractionPerClick, Button1Pressed, ButtonCtrl);
-        BindTo(leftLabel, x => Fraction - FractionPerClick, WheeledDown);
+        BindTo(leftLabel, x => Fraction - FractionPerClick, Button1Pressed, WheeledDown);
+        BindTo(leftLabel, x => Fraction - ExtraFractionPerClick, Button1Pressed | ButtonCtrl);
         BindTo(leftLabel, x => Fraction + FractionPerClick, WheeledUp);
         BindTo(leftLabel, x => FractionRange.LowerValueOfRange, Button2Clicked);
-        BindTo(rightLabel, x => Fraction + FractionPerClick, Button1Pressed);
-        BindTo(rightLabel, x => Fraction + ExtraFractionPerClick, Button1Pressed, ButtonCtrl);
+        BindTo(rightLabel, x => Fraction + FractionPerClick, Button1Pressed, WheeledUp);
+        BindTo(rightLabel, x => Fraction + ExtraFractionPerClick, Button1Pressed | ButtonCtrl);
         BindTo(rightLabel, x => Fraction - FractionPerClick, WheeledDown);
-        BindTo(rightLabel, x => Fraction + FractionPerClick, WheeledUp);
         BindTo(rightLabel, x => FractionRange.UpperValueOfRange, Button2Clicked);
         BindTo(bar, x => (float)Math.Round((x.MouseEvent.X + 1f) / bar.Bounds.Width, 3), Button1Clicked);
         viewModel.WhenAnyValue(x => x.SelectedRun.Fraction).BindTo(this, x => x.Fraction);
     }
 
-    private void BindTo(View view, Func<MouseEventArgs, float> function, params MouseFlags[] flags)
+    private void BindTo(View view, Func<MouseEventArgs, float> function,
+        params MouseFlags[] flags)
     {
         view.Events().MouseClick
             .Where(x => viewModel.SelectedRun != RunModel.Empty
-                && flags.All(z => x.MouseEvent.Flags.HasFlag(z)))
+                && flags.Any(z => x.MouseEvent.Flags.HasFlag(z)))
             .Select(function)
             .BindTo(viewModel, x => x.SelectedRun.Fraction);
     }

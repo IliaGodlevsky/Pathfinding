@@ -83,18 +83,12 @@ internal class RunModel : ReactiveObject, IDisposable
     {
         algorithm = new(() => CreateAlgorithmRevision(vertices, pathfindingResult, range), true);
         cursorRange = new(() => new InclusiveValueRange<int>(Count - 1, 0));
-        this.WhenAnyValue(x => x.Fraction)
-            .DistinctUntilChanged().Select(GetCount)
-            .Where(x => x > 0).Do(Next)
-            .Subscribe().DisposeWith(disposables);
-        this.WhenAnyValue(x => x.Fraction)
-            .DistinctUntilChanged().Select(GetCount)
-            .Where(x => x < 0).Do(Previous)
-            .Subscribe().DisposeWith(disposables);
+        this.WhenAnyValue(x => x.Fraction).DistinctUntilChanged()
+            .Select(x => (int)Math.Floor(Count * x - Cursor))
+            .Where(x => x != 0)
+            .Select(x => x > 0 ? new Action(() => Next(x)) : () => Previous(x))
+            .Subscribe(x => x()).DisposeWith(disposables);
     }
-
-    private int GetCount(float fraction)
-        => (int)Math.Floor(Count * fraction - Cursor);
 
     private void Next(int count)
     {
@@ -121,10 +115,16 @@ internal class RunModel : ReactiveObject, IDisposable
         var previousEnqueued = new HashSet<Coordinate>();
         var subAlgorithms = new List<RunVertexStateModel>();
 
+        RunVertexStateModel ToRunVertexModel(Coordinate coordinate,
+            RunVertexState stateType, bool state = true)
+        {
+            return new(graph.Get(coordinate), stateType, state);
+        }
+
         range.Skip(1).Take(range.Count - 2)
-            .Select(x => new RunVertexStateModel(graph.Get(x), RunVertexState.Transit))
-            .Prepend(new RunVertexStateModel(graph.Get(range.First()), RunVertexState.Source))
-            .Append(new RunVertexStateModel(graph.Get(range.Last()), RunVertexState.Target))
+            .Select(x => ToRunVertexModel(x, RunVertexState.Transit))
+            .Prepend(ToRunVertexModel(range.First(), RunVertexState.Source))
+            .Append(ToRunVertexModel(range.Last(), RunVertexState.Target))
             .ForWhole(subAlgorithms.AddRange);
 
         foreach (var subAlgorithm in pathfindingResult)
@@ -134,17 +134,17 @@ internal class RunModel : ReactiveObject, IDisposable
 
             subAlgorithm.Visited.SelectMany(v =>
                  v.Enqueued.Intersect(previousVisited).Except(visitedIgnore)
-                    .Select(x => new RunVertexStateModel(graph.Get(x), RunVertexState.Visited, false))
+                    .Select(x => ToRunVertexModel(x, RunVertexState.Visited, false))
                     .Concat(v.Visited.Enumerate().Except(visitedIgnore)
-                    .Select(x => new RunVertexStateModel(graph.Get(x), RunVertexState.Visited))
+                    .Select(x => ToRunVertexModel(x, RunVertexState.Visited))
                     .Concat(v.Enqueued.Except(visitedIgnore).Except(previousEnqueued)
-                    .Select(x => new RunVertexStateModel(graph.Get(x), RunVertexState.Enqueued)))))
+                    .Select(x => ToRunVertexModel(x, RunVertexState.Enqueued)))))
                     .Distinct().ForWhole(subAlgorithms.AddRange);
 
             exceptRangePath.Intersect(previousPaths)
-                .Select(x => new RunVertexStateModel(graph.Get(x), RunVertexState.CrossPath))
+                .Select(x => ToRunVertexModel(x, RunVertexState.CrossPath))
                 .Concat(exceptRangePath.Except(previousPaths)
-                .Select(x => new RunVertexStateModel(graph.Get(x), RunVertexState.Path)))
+                .Select(x => ToRunVertexModel(x, RunVertexState.Path)))
                 .ForWhole(subAlgorithms.AddRange);
 
             previousVisited.AddRange(subAlgorithm.Visited.Select(x => x.Visited));

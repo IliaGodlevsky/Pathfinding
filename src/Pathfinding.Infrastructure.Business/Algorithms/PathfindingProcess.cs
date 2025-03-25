@@ -3,81 +3,80 @@ using Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
 
-namespace Pathfinding.Infrastructure.Business.Algorithms
+namespace Pathfinding.Infrastructure.Business.Algorithms;
+
+public abstract class PathfindingProcess(IEnumerable<IPathfindingVertex> range) 
+    : IAlgorithm<IGraphPath>
 {
-    public abstract class PathfindingProcess(IEnumerable<IPathfindingVertex> range) 
-        : IAlgorithm<IGraphPath>
+    protected readonly record struct SubRange(
+        IPathfindingVertex Source,
+        IPathfindingVertex Target)
     {
-        protected readonly record struct SubRange(
-            IPathfindingVertex Source,
-            IPathfindingVertex Target)
-        {
-            public static readonly SubRange Default = new(
-                NullPathfindingVertex.Instance, 
-                NullPathfindingVertex.Instance);
-        }
+        public static readonly SubRange Default = new(
+            NullPathfindingVertex.Instance, 
+            NullPathfindingVertex.Instance);
+    }
 
-        public event VertexProcessedEventHandler VertexProcessed;
-        public event SubPathFoundEventHandler SubPathFound;
+    public event VertexProcessedEventHandler VertexProcessed;
+    public event SubPathFoundEventHandler SubPathFound;
 
-        public IGraphPath FindPath()
+    public IGraphPath FindPath()
+    {
+        var subPaths = new List<IGraphPath>();
+        foreach (var range in GetSubRanges())
         {
-            var subPaths = new List<IGraphPath>();
-            foreach (var range in GetSubRanges())
+            PrepareForSubPathfinding(range);
+            while (!IsDestination())
             {
-                PrepareForSubPathfinding(range);
-                while (!IsDestination())
-                {
-                    InspectCurrentVertex();
-                    MoveNextVertex();
-                    VisitCurrentVertex();
-                }
-                var subPath = GetSubPath();
-                subPaths.Add(subPath);
-                RaiseSubPathFound(subPath);
-                DropState();
+                InspectCurrentVertex();
+                MoveNextVertex();
+                VisitCurrentVertex();
             }
-            return CreatePath(subPaths);
+            var subPath = GetSubPath();
+            subPaths.Add(subPath);
+            RaiseSubPathFound(subPath);
+            DropState();
         }
+        return CreatePath(subPaths);
+    }
 
-        protected abstract void MoveNextVertex();
+    protected abstract void MoveNextVertex();
 
-        protected abstract void InspectCurrentVertex();
+    protected abstract void InspectCurrentVertex();
 
-        protected abstract void VisitCurrentVertex();
+    protected abstract void VisitCurrentVertex();
 
-        protected abstract bool IsDestination();
+    protected abstract bool IsDestination();
 
-        protected abstract void DropState();
+    protected abstract void DropState();
 
-        protected abstract void PrepareForSubPathfinding(SubRange range);
+    protected abstract void PrepareForSubPathfinding(SubRange range);
 
-        protected abstract IGraphPath GetSubPath();
+    protected abstract IGraphPath GetSubPath();
 
-        protected void RaiseVertexProcessed(IPathfindingVertex vertex,
-            IEnumerable<IPathfindingVertex> vertices)
+    protected void RaiseVertexProcessed(IPathfindingVertex vertex,
+        IEnumerable<IPathfindingVertex> vertices)
+    {
+        VertexProcessed?.Invoke(new(vertex, vertices));
+    }
+
+    protected void RaiseSubPathFound(IGraphPath subPath)
+    {
+        SubPathFound?.Invoke(new(subPath));
+    }
+
+    private IEnumerable<SubRange> GetSubRanges()
+    {
+        return range.Zip(range.Skip(1), (s, t) => new SubRange(s, t));
+    }
+
+    private static IGraphPath CreatePath(List<IGraphPath> subPaths)
+    {
+        return subPaths.Count switch
         {
-            VertexProcessed?.Invoke(new(vertex, vertices));
-        }
-
-        protected void RaiseSubPathFound(IGraphPath subPath)
-        {
-            SubPathFound?.Invoke(new(subPath));
-        }
-
-        private IEnumerable<SubRange> GetSubRanges()
-        {
-            return range.Zip(range.Skip(1), (s, t) => new SubRange(s, t));
-        }
-
-        private static IGraphPath CreatePath(List<IGraphPath> subPaths)
-        {
-            return subPaths.Count switch
-            {
-                1 => subPaths[0],
-                > 1 => new CompositeGraphPath(subPaths),
-                _ => NullGraphPath.Instance
-            };
-        }
+            1 => subPaths[0],
+            > 1 => new CompositeGraphPath(subPaths),
+            _ => NullGraphPath.Instance
+        };
     }
 }
