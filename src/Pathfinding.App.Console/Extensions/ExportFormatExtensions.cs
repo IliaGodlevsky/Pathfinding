@@ -1,16 +1,17 @@
 ﻿using Pathfinding.App.Console.Models;
-using System.ComponentModel;
 
-namespace Pathfinding.App.Console.Extensions
+namespace Pathfinding.App.Console.Extensions;
+
+internal static class ExportFormatExtensions
 {
-    internal static class ExportFormatExtensions
+    public static string ToExtensionRepresentation(this StreamFormat exportFormat)
     {
-        public static string ToExtensionRepresentation(this StreamFormat exportFormat)
+        return exportFormat switch
         {
-            var field = exportFormat.GetType().GetField(exportFormat.ToString());
-            var attribute = Attribute.GetCustomAttribute(field,
-                typeof(DescriptionAttribute)) as DescriptionAttribute;
-            return attribute?.Description ?? DescriptionAttribute.Default.Description;
-        }
+            StreamFormat.Binary => ".dat",
+            StreamFormat.Json => ".json",
+            StreamFormat.Xml => ".xml",
+            _ => string.Empty
+        };
     }
 }

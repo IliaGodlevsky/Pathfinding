@@ -6,11 +6,11 @@ namespace Pathfinding.App.Console.Models;
 
 internal sealed class RunInfoModel : ReactiveObject, IAlgorithmBuildInfo
 {
-    public int Id { get; set; }
+    public int Id { get; init; }
 
-    public int GraphId { get; set; }
+    public int GraphId { get; init; }
 
-    public Algorithms Algorithm { get; set; }
+    public Algorithms Algorithm { get; init; }
 
     private int visited;
     public int Visited
@@ -40,11 +40,11 @@ internal sealed class RunInfoModel : ReactiveObject, IAlgorithmBuildInfo
         set => this.RaiseAndSetIfChanged(ref elapsed, value);
     }
 
-    public StepRules? StepRule { get; set; }
+    public StepRules? StepRule { get; init; }
 
-    public Heuristics? Heuristics { get; set; }
+    public Heuristics? Heuristics { get; init; }
 
-    public double? Weight { get; set; }
+    public double? Weight { get; init; }
 
     private RunStatuses status;
     public RunStatuses ResultStatus
