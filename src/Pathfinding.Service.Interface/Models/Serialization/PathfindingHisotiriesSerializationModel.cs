@@ -1,11 +1,13 @@
 ﻿using Pathfinding.Service.Interface.Extensions;
+using System.IO.Compression;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
 namespace Pathfinding.Service.Interface.Models.Serialization
 {
-    public class PathfindingHisotiriesSerializationModel : IBinarySerializable, IXmlSerializable
+    public class PathfindingHisotiriesSerializationModel 
+        : IBinarySerializable, IXmlSerializable, ICsvSerializable
     {
         public IReadOnlyCollection<PathfindingHistorySerializationModel> Histories { get; set; } = [];
 
@@ -30,6 +32,16 @@ namespace Pathfinding.Service.Interface.Models.Serialization
         public void WriteXml(XmlWriter writer)
         {
             writer.WriteCollection(nameof(Histories), "Graph", Histories);
+        }
+
+        public void Serialize(ZipArchive archive)
+        {
+            archive.WriteHistory(Histories);
+        }
+
+        public void Deserialize(ZipArchive archive)
+        {
+            Histories = archive.ReadHistory();
         }
     }
 }

@@ -46,7 +46,7 @@ public sealed class RequestService<T> : IRequestService<T>
             foreach (var history in request)
             {
                 var graphModel = history.Graph;
-                var vertices = graphModel.Vertices.ToVertices<T>();
+                var vertices = history.Vertices.ToVertices<T>();
                 var dimensions = graphModel.DimensionSizes;
                 var graph = new Graph<T>(vertices, dimensions);
                 var createGraphRequest = new CreateGraphRequest<T>()
@@ -180,6 +180,7 @@ public sealed class RequestService<T> : IRequestService<T>
                 result.Add(new()
                 {
                     Graph = graph.ToSerializationModel(),
+                    Vertices = graph.Vertices.ToSerializationModels(),
                     Statistics = statistics.ToSerializationModels(),
                     Range = range.ToCoordinates()
                 });
@@ -201,6 +202,7 @@ public sealed class RequestService<T> : IRequestService<T>
                 result.Add(new()
                 {
                     Graph = graph.ToSerializationModel(),
+                    Vertices = graph.Vertices.ToSerializationModels(),
                     Statistics = [],
                     Range = []
                 });
@@ -222,6 +224,7 @@ public sealed class RequestService<T> : IRequestService<T>
                 result.Add(new()
                 {
                     Graph = graph.ToSerializationModel(),
+                    Vertices = graph.Vertices.ToSerializationModels(),
                     Statistics = [],
                     Range = range.ToCoordinates()
                 });

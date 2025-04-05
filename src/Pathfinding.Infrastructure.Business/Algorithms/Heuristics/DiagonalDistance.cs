@@ -4,7 +4,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms.Heuristics;
 
 public sealed class DiagonalDistance : Distance
 {
-    private readonly double DiagonalCost = Math.Sqrt(2);
+    private const double DiagonalCost = 1.4142135623730951;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected override double Aggregate(double a, double b)

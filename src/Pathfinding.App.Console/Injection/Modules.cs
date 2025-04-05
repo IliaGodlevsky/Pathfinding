@@ -61,6 +61,9 @@ internal static class Modules
         builder.RegisterType<XmlSerializer<PathfindingHisotiriesSerializationModel>>()
             .As<ISerializer<PathfindingHisotiriesSerializationModel>>()
             .SingleInstance().WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Xml);
+        builder.RegisterType<CsvSerializer<PathfindingHisotiriesSerializationModel>>()
+            .As<ISerializer<PathfindingHisotiriesSerializationModel>>()
+            .SingleInstance().WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Csv);
         builder.RegisterGenericDecorator(typeof(BufferedSerializer<>), typeof(ISerializer<>));
 
         builder.RegisterType<FileLog>().As<ILog>().SingleInstance();

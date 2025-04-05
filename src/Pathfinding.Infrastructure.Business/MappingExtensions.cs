@@ -205,7 +205,6 @@ internal static class MappingExtensions
         return new GraphSerializationModel()
         {
             DimensionSizes = model.DimensionSizes,
-            Vertices = model.Vertices.ToSerializationModels(),
             Neighborhood = model.Neighborhood,
             SmoothLevel = model.SmoothLevel,
             Status = model.Status,

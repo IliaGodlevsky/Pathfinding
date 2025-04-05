@@ -1,5 +1,4 @@
 ﻿using Pathfinding.App.Console.Models;
-using System.ComponentModel;
 
 namespace Pathfinding.App.Console.Extensions
 {
@@ -7,10 +6,14 @@ namespace Pathfinding.App.Console.Extensions
     {
         public static string ToExtensionRepresentation(this StreamFormat exportFormat)
         {
-            var field = exportFormat.GetType().GetField(exportFormat.ToString());
-            var attribute = Attribute.GetCustomAttribute(field,
-                typeof(DescriptionAttribute)) as DescriptionAttribute;
-            return attribute?.Description ?? DescriptionAttribute.Default.Description;
+            return exportFormat switch
+            {
+                StreamFormat.Binary => ".dat",
+                StreamFormat.Json => ".json",
+                StreamFormat.Xml => ".xml",
+                StreamFormat.Csv => ".zip",
+                _ => string.Empty
+            };
         }
     }
 }
