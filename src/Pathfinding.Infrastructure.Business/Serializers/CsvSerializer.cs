@@ -4,8 +4,8 @@ using System.IO.Compression;
 
 namespace Pathfinding.Infrastructure.Business.Serializers
 {
-    public sealed class CsvSerializer<T> : ISerializer<T>
-        where T : ICsvSerializable, new()
+    public sealed class BundleSerializer<T> : ISerializer<T>
+        where T : IBundleSerializable, new()
     {
         public async Task<T> DeserializeFromAsync(Stream stream, CancellationToken token = default)
         {

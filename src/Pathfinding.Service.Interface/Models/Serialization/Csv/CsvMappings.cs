@@ -163,9 +163,9 @@ namespace Pathfinding.Service.Interface.Models.Serialization.Csv
             return [.. models.Graphs.Select(x => new PathfindingHistorySerializationModel()
             {
                 Graph = x.ToGraph(),
-                Vertices = vertices[x.Id].ToVertices(),
-                Statistics = statistics[x.Id].ToStatisics(),
-                Range = ranges[x.Id].ToRanges()
+                Vertices = vertices.GetValueOrDefault(x.Id, []).ToVertices(),
+                Statistics = statistics.GetValueOrDefault(x.Id, []).ToStatisics(),
+                Range = ranges.GetValueOrDefault(x.Id, []).ToRanges()
             })];
         }
     }

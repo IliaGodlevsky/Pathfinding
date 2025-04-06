@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 namespace Pathfinding.Service.Interface.Models.Serialization
 {
     public class PathfindingHisotiriesSerializationModel 
-        : IBinarySerializable, IXmlSerializable, ICsvSerializable
+        : IBinarySerializable, IXmlSerializable, IBundleSerializable
     {
         public IReadOnlyCollection<PathfindingHistorySerializationModel> Histories { get; set; } = [];
 
