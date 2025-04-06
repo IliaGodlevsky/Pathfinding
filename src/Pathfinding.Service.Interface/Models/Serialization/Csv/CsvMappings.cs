@@ -138,10 +138,10 @@ namespace Pathfinding.Service.Interface.Models.Serialization.Csv
         {
             return [.. models.Select((x, i) => new CsvHistory()
             {
-                Graph = x.Graph.ToGraph(i),
-                Vertices = x.Vertices.ToVertices(i),
-                Statistics = x.Statistics.ToStatisics(i),
-                Range = x.Range.ToRanges(i)
+                Graph = x.Graph.ToGraph(i + 1),
+                Vertices = x.Vertices.ToVertices(i + 1),
+                Statistics = x.Statistics.ToStatisics(i + 1),
+                Range = x.Range.ToRanges(i + 1)
             })];
         }
 

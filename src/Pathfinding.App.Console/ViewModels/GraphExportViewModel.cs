@@ -1,6 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel;
 using Pathfinding.App.Console.Models;
@@ -36,7 +37,7 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
 
     public IReadOnlyList<ExportOptions> AllowedOptions { get; }
 
-    public IReadOnlyCollection<StreamFormat> StreamFormats => serializers.Keys;
+    public IReadOnlyCollection<StreamFormat> StreamFormats { get; }
 
     public GraphExportViewModel(IRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
@@ -47,6 +48,7 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
         this.logger = logger;
         this.serializers = serializers
             .ToDictionary(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], x => x.Value);
+        StreamFormats = [.. this.serializers.Keys.OrderBy(x => x.GetOrder())];
         ExportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(ExportGraph, CanExport());
         AllowedOptions = Enum.GetValues<ExportOptions>();
         messenger.Register<GraphSelectedMessage>(this, OnGraphSelected);
