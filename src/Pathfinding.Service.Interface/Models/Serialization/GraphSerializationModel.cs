@@ -18,8 +18,6 @@ namespace Pathfinding.Service.Interface.Models.Serialization
 
         public IReadOnlyList<int> DimensionSizes { get; set; }
 
-        public IReadOnlyCollection<VertexSerializationModel> Vertices { get; set; }
-
         public void Deserialize(BinaryReader reader)
         {
             Name = reader.ReadString();
@@ -27,7 +25,6 @@ namespace Pathfinding.Service.Interface.Models.Serialization
             Neighborhood = (Neighborhoods)reader.ReadInt32();
             Status = (GraphStatuses)reader.ReadInt32();
             DimensionSizes = reader.ReadArray();
-            Vertices = reader.ReadSerializableArray<VertexSerializationModel>();
         }
 
         public void Serialize(BinaryWriter writer)
@@ -37,7 +34,6 @@ namespace Pathfinding.Service.Interface.Models.Serialization
             writer.Write((int)Neighborhood);
             writer.Write((int)Status);
             writer.Write(DimensionSizes);
-            writer.Write(Vertices);
         }
 
         public XmlSchema GetSchema() => null;
@@ -49,7 +45,6 @@ namespace Pathfinding.Service.Interface.Models.Serialization
             writer.WriteAttribute(nameof(Neighborhood), Neighborhood);
             writer.WriteAttribute(nameof(Status), Status);
             writer.WriteAttribute(nameof(DimensionSizes), string.Join(",", DimensionSizes));
-            writer.WriteCollection(nameof(Vertices), "Vertex", Vertices);
         }
 
         public void ReadXml(XmlReader reader)
@@ -59,8 +54,6 @@ namespace Pathfinding.Service.Interface.Models.Serialization
             Neighborhood = reader.ReadEnumAttribute<Neighborhoods>(nameof(Neighborhood));
             Status = reader.ReadEnumAttribute<GraphStatuses>(nameof(Status));
             DimensionSizes = Array.ConvertAll(reader.ReadAttribute<string>(nameof(DimensionSizes)).Split(','), int.Parse);
-            reader.Read();
-            Vertices = reader.ReadCollection<VertexSerializationModel>(nameof(Vertices), "Vertex");
         }
     }
 }

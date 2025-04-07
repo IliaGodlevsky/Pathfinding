@@ -25,7 +25,7 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
 
     public ReactiveCommand<Func<StreamModel>, Unit> ImportGraphCommand { get; }
 
-    public IReadOnlyCollection<StreamFormat> StreamFormats => serializers.Keys;
+    public IReadOnlyCollection<StreamFormat> StreamFormats { get; }
 
     public GraphImportViewModel(IRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
@@ -35,6 +35,7 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
         this.messenger = messenger;
         this.serializers = serializers.ToDictionary(x =>
             (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], x => x.Value);
+        StreamFormats = [.. this.serializers.Keys.OrderBy(x => x.GetOrder())];
         this.service = service;
         this.logger = logger;
         ImportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(ImportGraphs);

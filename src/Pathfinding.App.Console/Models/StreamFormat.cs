@@ -1,3 +1,3 @@
 ﻿namespace Pathfinding.App.Console.Models;
 
-internal enum StreamFormat { Binary, Json, Xml }
+internal enum StreamFormat { Binary, Json, Xml, Csv }

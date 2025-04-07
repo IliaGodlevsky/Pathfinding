@@ -56,12 +56,20 @@ internal static class Modules
             .As<ISerializer<PathfindingHisotiriesSerializationModel>>()
             .SingleInstance().WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Json);
         builder.RegisterType<BinarySerializer<PathfindingHisotiriesSerializationModel>>()
-            .As<ISerializer<PathfindingHisotiriesSerializationModel>>()
+            .Keyed<ISerializer<PathfindingHisotiriesSerializationModel>>("Compress")
             .SingleInstance().WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Binary);
         builder.RegisterType<XmlSerializer<PathfindingHisotiriesSerializationModel>>()
             .As<ISerializer<PathfindingHisotiriesSerializationModel>>()
             .SingleInstance().WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Xml);
-        builder.RegisterGenericDecorator(typeof(BufferedSerializer<>), typeof(ISerializer<>));
+        builder.RegisterType<BundleSerializer<PathfindingHisotiriesSerializationModel>>()
+            .As<ISerializer<PathfindingHisotiriesSerializationModel>>()
+            .SingleInstance().WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Csv);
+        builder.RegisterDecorator<ISerializer<PathfindingHisotiriesSerializationModel>>(
+            (ctx, inner) => new CompressSerializer<PathfindingHisotiriesSerializationModel>(inner),
+            fromKey: "Compress");
+        builder.RegisterDecorator<ISerializer<PathfindingHisotiriesSerializationModel>>(
+            (ctx, param, inner) => new BufferedSerializer<PathfindingHisotiriesSerializationModel>(inner),
+            condition: ctx => ctx.CurrentInstance is not CompressSerializer<PathfindingHisotiriesSerializationModel>);
 
         builder.RegisterType<FileLog>().As<ILog>().SingleInstance();
         builder.RegisterType<MessageBoxLog>().As<ILog>().SingleInstance();
