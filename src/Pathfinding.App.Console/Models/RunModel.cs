@@ -54,16 +54,12 @@ internal class RunModel : ReactiveObject, IDisposable
     private static readonly InclusiveValueRange<float> FractionRange = new(1, 0);
 
     private readonly CompositeDisposable disposables = [];
-    private readonly Lazy<ReadOnlyCollection<RunVertexStateModel>> algorithm;
-    private readonly Lazy<InclusiveValueRange<int>> cursorRange;
 
-    private ReadOnlyCollection<RunVertexStateModel> Algorithm => algorithm.Value;
+    private ReadOnlyCollection<RunVertexStateModel> Algorithm { get; }
 
-    private InclusiveValueRange<int> CursorRange => cursorRange.Value;
+    private InclusiveValueRange<int> CursorRange { get; }
 
     public int Id { get; set; }
-
-    public int Count => Algorithm.Count;
 
     private float fraction;
     public float Fraction
@@ -84,10 +80,10 @@ internal class RunModel : ReactiveObject, IDisposable
         IReadOnlyCollection<SubRunModel> pathfindingResult,
         IReadOnlyCollection<Coordinate> range)
     {
-        algorithm = new(() => CreateAlgorithmRevision(vertices, pathfindingResult, range), true);
-        cursorRange = new(() => new InclusiveValueRange<int>(Count - 1, 0));
+        Algorithm = CreateAlgorithmRevision(vertices, pathfindingResult, range);
+        CursorRange = new InclusiveValueRange<int>(Algorithm.Count - 1, 0);
         this.WhenAnyValue(x => x.Fraction).DistinctUntilChanged()
-            .Select(x => (int)Math.Floor(Count * x - Cursor))
+            .Select(x => (int)Math.Floor(Algorithm.Count * x - Cursor))
             .Where(x => x != 0)
             .Select(x => x > 0 ? new Action(() => Next(x)) : () => Previous(x))
             .Subscribe(x => x()).DisposeWith(disposables);
