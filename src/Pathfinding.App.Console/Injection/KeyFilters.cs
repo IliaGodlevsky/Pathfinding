@@ -16,5 +16,6 @@
         public const string RunButtonsFrame = nameof(RunButtonsFrame);
         public const string RunCreateView = nameof(RunCreateView);
         public const string RunParametresView = nameof(RunParametresView);
+        public const string Compress = nameof(Compress);
     }
 }

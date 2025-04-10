@@ -15,17 +15,5 @@ namespace Pathfinding.App.Console.Extensions
                 _ => string.Empty
             };
         }
-
-        public static int GetOrder(this StreamFormat exportFormat)
-        {
-            return exportFormat switch
-            {
-                StreamFormat.Binary => 2,
-                StreamFormat.Json => 3,
-                StreamFormat.Xml => 4,
-                StreamFormat.Csv => 1,
-                _ => int.MaxValue
-            };
-        }
     }
 }

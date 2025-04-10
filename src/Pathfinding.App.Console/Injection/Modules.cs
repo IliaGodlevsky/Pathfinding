@@ -52,21 +52,21 @@ internal static class Modules
         builder.RegisterType<ExcludeTransitVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
             .WithMetadata(MetadataKeys.Order, 3).Keyed<IPathfindingRangeCommand<GraphVertexModel>>(KeyFilters.ExcludeCommands);
 
-        builder.RegisterType<JsonSerializer<PathfindingHisotiriesSerializationModel>>()
-            .As<ISerializer<PathfindingHisotiriesSerializationModel>>()
-            .SingleInstance().WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Json);
-        builder.RegisterType<BinarySerializer<PathfindingHisotiriesSerializationModel>>()
-            .Keyed<ISerializer<PathfindingHisotiriesSerializationModel>>("Compress")
-            .SingleInstance().WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Binary);
-        builder.RegisterType<XmlSerializer<PathfindingHisotiriesSerializationModel>>()
-            .As<ISerializer<PathfindingHisotiriesSerializationModel>>()
-            .SingleInstance().WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Xml);
-        builder.RegisterType<BundleSerializer<PathfindingHisotiriesSerializationModel>>()
-            .As<ISerializer<PathfindingHisotiriesSerializationModel>>()
-            .SingleInstance().WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Csv);
+        builder.RegisterType<JsonSerializer<PathfindingHisotiriesSerializationModel>>().SingleInstance()
+            .As<ISerializer<PathfindingHisotiriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 3)
+            .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Json);
+        builder.RegisterType<BinarySerializer<PathfindingHisotiriesSerializationModel>>().SingleInstance()
+            .Keyed<ISerializer<PathfindingHisotiriesSerializationModel>>(KeyFilters.Compress)
+            .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Binary).WithMetadata(MetadataKeys.Order, 2);
+        builder.RegisterType<XmlSerializer<PathfindingHisotiriesSerializationModel>>().SingleInstance()
+            .As<ISerializer<PathfindingHisotiriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 4)
+            .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Xml);
+        builder.RegisterType<BundleSerializer<PathfindingHisotiriesSerializationModel>>().SingleInstance()
+            .As<ISerializer<PathfindingHisotiriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 1)
+            .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Csv);
         builder.RegisterDecorator<ISerializer<PathfindingHisotiriesSerializationModel>>(
             (ctx, inner) => new CompressSerializer<PathfindingHisotiriesSerializationModel>(inner),
-            fromKey: "Compress");
+            fromKey: KeyFilters.Compress);
         builder.RegisterDecorator<ISerializer<PathfindingHisotiriesSerializationModel>>(
             (ctx, param, inner) => new BufferedSerializer<PathfindingHisotiriesSerializationModel>(inner),
             condition: ctx => ctx.CurrentInstance is not CompressSerializer<PathfindingHisotiriesSerializationModel>);

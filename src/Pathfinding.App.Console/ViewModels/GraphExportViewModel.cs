@@ -48,7 +48,9 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
         this.logger = logger;
         this.serializers = serializers
             .ToDictionary(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], x => x.Value);
-        StreamFormats = [.. this.serializers.Keys.OrderBy(x => x.GetOrder())];
+        StreamFormats = [.. serializers
+            .OrderBy(x => x.Metadata[MetadataKeys.Order])
+            .Select(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat])];
         ExportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(ExportGraph, CanExport());
         AllowedOptions = Enum.GetValues<ExportOptions>();
         messenger.Register<GraphSelectedMessage>(this, OnGraphSelected);

@@ -151,14 +151,11 @@ namespace Pathfinding.Service.Interface.Models.Serialization.Csv
             IEnumerable<CsvStatistics> Statistics,
             IEnumerable<CsvRange> Ranges) models)
         {
-            var vertices = models.Vertices
-                .GroupBy(x => x.GraphId)
+            var vertices = models.Vertices.GroupBy(x => x.GraphId)
                 .ToDictionary(x => x.Key, x => x.ToList());
-            var statistics = models.Statistics
-                .GroupBy(x => x.GraphId)
+            var statistics = models.Statistics.GroupBy(x => x.GraphId)
                 .ToDictionary(x => x.Key, x => x.ToList());
-            var ranges = models.Ranges
-                .GroupBy(x => x.GraphId)
+            var ranges = models.Ranges.GroupBy(x => x.GraphId)
                 .ToDictionary(x => x.Key, x => x.ToList());
             return [.. models.Graphs.Select(x => new PathfindingHistorySerializationModel()
             {
