@@ -502,7 +502,7 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Graph was saved.
+        ///   Looks up a localized string similar to Graph was exported.
         /// </summary>
         internal static string WasDeletedMsg {
             get {
@@ -511,7 +511,7 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Graph was loaded.
+        ///   Looks up a localized string similar to Graph was imported.
         /// </summary>
         internal static string WasLoadedMsg {
             get {
@@ -520,7 +520,7 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Graphs were saved.
+        ///   Looks up a localized string similar to Graphs were exported.
         /// </summary>
         internal static string WereDeletedMsg {
             get {
@@ -529,7 +529,7 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Graphs were loaded.
+        ///   Looks up a localized string similar to Graphs were imported.
         /// </summary>
         internal static string WereLoadedMsg {
             get {

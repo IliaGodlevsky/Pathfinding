@@ -16,13 +16,13 @@ internal sealed partial class GraphImportButton : Button
         Initialize();
         this.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-            .Select(x => new Func<StreamModel>(() =>
+            .Select(x =>
             {
                 var fileName = GetFileName(viewModel);
                 return string.IsNullOrEmpty(fileName.Path)
-                    ? new(Stream.Null, null)
-                    : new(File.OpenRead(fileName.Path), fileName.Format);
-            }))
+                    ? StreamModel.Empty
+                    : new (File.OpenRead(fileName.Path), fileName.Format);
+            })
             .InvokeCommand(viewModel, x => x.ImportGraphCommand);
     }
 

@@ -16,13 +16,13 @@ internal sealed partial class GraphExportButton
         Initialize();
         this.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-            .Select(x => new Func<StreamModel>(() =>
+            .Select(x =>
             {
                 var filePath = GetFilePath(viewModel);
                 return string.IsNullOrEmpty(filePath.Path)
-                    ? new(Stream.Null, null)
+                    ? StreamModel.Empty
                     : new(OpenWrite(filePath.Path), filePath.Format);
-            }))
+            })
             .InvokeCommand(viewModel, x => x.ExportGraphCommand);
         viewModel.ExportGraphCommand.CanExecute
             .BindTo(this, x => x.Enabled);
@@ -43,7 +43,7 @@ internal sealed partial class GraphExportButton
             Width = Dim.Percent(45),
             Height = Dim.Percent(55)
         };
-        var export = new GraphExportOptionsView(viewModel)
+        using var export = new GraphExportOptionsView(viewModel)
         {
             ColorScheme = dialog.ColorScheme,
             Width = Dim.Percent(50),

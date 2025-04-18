@@ -8,9 +8,6 @@ namespace Pathfinding.App.Console.Views
         private void Initialize()
         {
             Text = Resource.DeleteGraph;
-            X = Pos.Percent(83.65f);
-            Y = 0;
-            Width = Dim.Percent(16.65f);
         }
     }
 }

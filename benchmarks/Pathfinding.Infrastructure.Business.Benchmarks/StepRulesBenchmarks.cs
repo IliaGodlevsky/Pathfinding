@@ -42,37 +42,5 @@ namespace Pathfinding.Infrastructure.Business.Benchmarks
 
             stepRule.CalculateStepCost(first, second);
         }
-
-        [Benchmark]
-        public void WalkDefaultStepRuleBenchmark()
-        {
-            var stepRule = new WalkStepRule(new DefaultStepRule());
-
-            stepRule.CalculateStepCost(first, second);
-        }
-
-        [Benchmark]
-        public void WalkLandscapeStepRuleBenchmark()
-        {
-            var stepRule = new WalkStepRule(new LandscapeStepRule());
-
-            stepRule.CalculateStepCost(first, second);
-        }
-
-        [Benchmark]
-        public void CardinalDefaultStepRule()
-        {
-            var stepRule = new CardinalStepRule(new DefaultStepRule());
-
-            stepRule.CalculateStepCost(first, second);
-        }
-
-        [Benchmark]
-        public void CardinalLandscapeStepRule()
-        {
-            var stepRule = new CardinalStepRule(new LandscapeStepRule());
-
-            stepRule.CalculateStepCost(first, second);
-        }
     }
 }

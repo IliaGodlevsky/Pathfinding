@@ -10,9 +10,6 @@ internal sealed class GraphUpdateButton : Button
 {
     public GraphUpdateButton(GraphUpdateView view, GraphUpdateViewModel viewModel)
     {
-        X = Pos.Percent(16.67f);
-        Y = 0;
-        Width = Dim.Percent(16.67f);
         Text = "Update";
         viewModel.WhenAnyValue(x => x.SelectedGraphs)
             .Select(x => x.Length > 0)

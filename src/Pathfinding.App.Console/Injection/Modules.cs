@@ -56,8 +56,8 @@ internal static class Modules
             .As<ISerializer<PathfindingHisotiriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 3)
             .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Json);
         builder.RegisterType<BinarySerializer<PathfindingHisotiriesSerializationModel>>().SingleInstance()
-            .Keyed<ISerializer<PathfindingHisotiriesSerializationModel>>(KeyFilters.Compress)
-            .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Binary).WithMetadata(MetadataKeys.Order, 2);
+            .Keyed<ISerializer<PathfindingHisotiriesSerializationModel>>(KeyFilters.Compress).WithMetadata(MetadataKeys.Order, 2)
+            .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Binary);
         builder.RegisterType<XmlSerializer<PathfindingHisotiriesSerializationModel>>().SingleInstance()
             .As<ISerializer<PathfindingHisotiriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 4)
             .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Xml);
@@ -99,12 +99,18 @@ internal static class Modules
         builder.RegisterType<GraphAssembleView>().Keyed<View>(KeyFilters.GraphPanel).AsSelf().WithAttributeFiltering().SingleInstance();
         builder.RegisterType<GraphUpdateView>().Keyed<View>(KeyFilters.GraphPanel).AsSelf().WithAttributeFiltering().SingleInstance();
 
-        builder.RegisterType<GraphAssembleButton>().Keyed<View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
-        builder.RegisterType<GraphUpdateButton>().Keyed<View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
-        builder.RegisterType<GraphCopyButton>().Keyed<View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
-        builder.RegisterType<GraphExportButton>().Keyed<View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
-        builder.RegisterType<GraphImportButton>().Keyed<View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
-        builder.RegisterType<GraphDeleteButton>().Keyed<View>(KeyFilters.GraphTableButtons).WithAttributeFiltering();
+        builder.RegisterType<GraphAssembleButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
+            .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 1);
+        builder.RegisterType<GraphUpdateButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
+            .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 2);
+        builder.RegisterType<GraphCopyButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
+            .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 3);
+        builder.RegisterType<GraphExportButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
+            .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 4);
+        builder.RegisterType<GraphImportButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
+            .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 5);
+        builder.RegisterType<GraphDeleteButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
+            .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 6);
 
         builder.RegisterType<GraphNameView>().Keyed<View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
         builder.RegisterType<GraphParametresView>().Keyed<View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();

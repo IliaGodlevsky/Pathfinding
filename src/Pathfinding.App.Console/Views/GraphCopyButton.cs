@@ -12,9 +12,6 @@ internal sealed class GraphCopyButton : Button
 {
     public GraphCopyButton(IGraphCopyViewModel viewModel)
     {
-        X = Pos.Percent(33.34f);
-        Y = 0;
-        Width = Dim.Percent(16.67f);
         Text = Resource.Copy;
         viewModel.CopyGraphCommand.CanExecute
             .BindTo(this, x => x.Enabled);

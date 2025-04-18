@@ -12,12 +12,17 @@ internal sealed class GraphExportOptionsView : FrameView
 {
     private readonly RadioGroup exportOptions = new();
 
+    public DisplayModeLayout DisplayMode
+    {
+        get => exportOptions.DisplayMode;
+        set => exportOptions.DisplayMode = value;
+    }
+
     public GraphExportOptionsView(IGraphExportViewModel viewModel)
     {
-        exportOptions.RadioLabels = viewModel.AllowedOptions
-            .Select(x => ustring.Make(x.ToStringRepresentation()))
-            .ToArray();
-        exportOptions.DisplayMode = DisplayModeLayout.Horizontal;
+        exportOptions.RadioLabels = [.. viewModel.AllowedOptions
+            .Select(x => ustring.Make(x.ToStringRepresentation()))];
+        DisplayMode = DisplayModeLayout.Horizontal;
         Border = new Border();
         exportOptions.Events().SelectedItemChanged
             .Where(x => x.SelectedItem >= 0)

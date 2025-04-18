@@ -12,6 +12,6 @@ namespace Pathfinding.App.Console.ViewModels.Interface
 
         IReadOnlyCollection<StreamFormat> StreamFormats { get; }
 
-        ReactiveCommand<Func<StreamModel>, Unit> ExportGraphCommand { get; }
+        ReactiveCommand<StreamModel, Unit> ExportGraphCommand { get; }
     }
 }

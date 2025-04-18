@@ -44,7 +44,7 @@ internal static class MappingExtensions
 
     public static GraphInfoModel[] ToGraphInfo(this IEnumerable<GraphInformationModel> models)
     {
-        return models.Select(ToGraphInfo).ToArray();
+        return [.. models.Select(ToGraphInfo)];
     }
 
     public static RunInfoModel ToRunInfo(this RunStatisticsModel model)
@@ -67,6 +67,6 @@ internal static class MappingExtensions
 
     public static IReadOnlyCollection<RunInfoModel> ToRunInfo(this IEnumerable<RunStatisticsModel> models)
     {
-        return models.Select(ToRunInfo).ToArray();
+        return [.. models.Select(ToRunInfo)];
     }
 }

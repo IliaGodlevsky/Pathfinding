@@ -23,7 +23,7 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
     private readonly IMessenger messenger;
     private readonly ILog logger;
 
-    public ReactiveCommand<Func<StreamModel>, Unit> ImportGraphCommand { get; }
+    public ReactiveCommand<StreamModel, Unit> ImportGraphCommand { get; }
 
     public IReadOnlyCollection<StreamFormat> StreamFormats { get; }
 
@@ -33,29 +33,26 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
         ILog logger)
     {
         this.messenger = messenger;
+        this.service = service;
+        this.logger = logger;
         this.serializers = serializers.ToDictionary(x =>
             (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], x => x.Value);
         StreamFormats = [.. serializers
             .OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat])];
-        this.service = service;
-        this.logger = logger;
-        ImportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(ImportGraphs);
+        ImportGraphCommand = ReactiveCommand.CreateFromTask<StreamModel>(ImportGraphs);
     }
 
-    private async Task ImportGraphs(Func<StreamModel> streamFactory)
+    private async Task ImportGraphs(StreamModel stream)
     {
         await ExecuteSafe(async () =>
         {
-            var stream = streamFactory();
-            var importFormat = stream.Format;
-            var importStream = stream.Stream;
-            await using (importStream)
+            await using (stream)
             {
-                if (importStream != Stream.Null && importFormat.HasValue)
+                if (!stream.IsEmpty)
                 {
-                    var serializer = serializers[importFormat.Value];
-                    var histories = await serializer.DeserializeFromAsync(importStream)
+                    var serializer = serializers[stream.Format.Value];
+                    var histories = await serializer.DeserializeFromAsync(stream.Stream)
                         .ConfigureAwait(false);
                     var result = await service.CreatePathfindingHistoriesAsync(histories.Histories)
                         .ConfigureAwait(false);

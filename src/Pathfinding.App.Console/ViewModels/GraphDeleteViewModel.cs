@@ -61,6 +61,6 @@ internal sealed class GraphDeleteViewModel : BaseViewModel, IGraphDeleteViewMode
 
     private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
     {
-        SelectedGraphIds = msg.Graphs.Select(x => x.Id).ToArray();
+        SelectedGraphIds = [.. msg.Graphs.Select(x => x.Id)];
     }
 }

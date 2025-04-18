@@ -57,7 +57,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             var command = viewModel.ExportGraphCommand;
             if (await command.CanExecute.FirstOrDefaultAsync())
             {
-                await command.Execute(() => new(new MemoryStream(), StreamFormat.Binary));
+                await command.Execute(new(new MemoryStream(), StreamFormat.Binary));
             }
 
             Assert.Multiple(() =>
@@ -122,7 +122,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             var command = viewModel.ExportGraphCommand;
             if (await command.CanExecute.FirstOrDefaultAsync())
             {
-                await command.Execute(() => new(Stream.Null, null));
+                await command.Execute(StreamModel.Empty);
             }
 
             Assert.Multiple(() =>
@@ -158,7 +158,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             var viewModel = mock.Create<GraphExportViewModel>();
 
             var command = viewModel.ExportGraphCommand;
-            await command.Execute(() => new(new MemoryStream(), StreamFormat.Binary));
+            await command.Execute(new(new MemoryStream(), StreamFormat.Binary));
 
             mock.Mock<ILog>()
                 .Verify(x => x.Error(

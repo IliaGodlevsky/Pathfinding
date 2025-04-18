@@ -8,6 +8,6 @@ namespace Pathfinding.App.Console.ViewModels.Interface
     {
         IReadOnlyCollection<StreamFormat> StreamFormats { get; }
 
-        ReactiveCommand<Func<StreamModel>, Unit> ImportGraphCommand { get; }
+        ReactiveCommand<StreamModel, Unit> ImportGraphCommand { get; }
     }
 }

@@ -265,16 +265,16 @@
     <value>Neumann</value>
   </data>
   <data name="WasDeletedMsg" xml:space="preserve">
-    <value>Graph was saved</value>
+    <value>Graph was exported</value>
   </data>
   <data name="WasLoadedMsg" xml:space="preserve">
-    <value>Graph was loaded</value>
+    <value>Graph was imported</value>
   </data>
   <data name="WereDeletedMsg" xml:space="preserve">
-    <value>Graphs were saved</value>
+    <value>Graphs were exported</value>
   </data>
   <data name="WereLoadedMsg" xml:space="preserve">
-    <value>Graphs were loaded</value>
+    <value>Graphs were imported</value>
   </data>
   <data name="WithRange" xml:space="preserve">
     <value>With range</value>

@@ -157,8 +157,7 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
         cost += delta;
         cost = vertex.Cost.CostRange.ReturnInRange(cost);
         vertex.Cost = new VertexCost(cost, vertex.Cost.CostRange);
-        var request = new UpdateVerticesRequest<GraphVertexModel>(GraphId,
-            vertex.Enumerate().ToList());
+        var request = new UpdateVerticesRequest<GraphVertexModel>(GraphId, [.. vertex.Enumerate()]);
         await ExecuteSafe(async () => await service.UpdateVerticesAsync(request)
             .ConfigureAwait(false),
             logger.Error).ConfigureAwait(false);
