@@ -2,4 +2,4 @@
 
 namespace Pathfinding.App.Console.Messages.ViewModel;
 
-internal sealed record class GraphStateChangedMessage(int Id, GraphStatuses Status);
+internal sealed record GraphStateChangedMessage(int Id, GraphStatuses Status);

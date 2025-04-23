@@ -165,7 +165,7 @@ public sealed class RequestService<T> : IRequestService<T>
         }, token).ConfigureAwait(false);
     }
 
-    public async Task<PathfindingHisotiriesSerializationModel> ReadSerializationHistoriesAsync(IEnumerable<int> graphIds,
+    public async Task<PathfindingHistoriesSerializationModel> ReadSerializationHistoriesAsync(IEnumerable<int> graphIds,
         CancellationToken token = default)
     {
         return await Transaction(async (unitOfWork, t) =>
@@ -185,11 +185,11 @@ public sealed class RequestService<T> : IRequestService<T>
                     Range = range.ToCoordinates()
                 });
             }
-            return new PathfindingHisotiriesSerializationModel() { Histories = result };
+            return new PathfindingHistoriesSerializationModel() { Histories = result };
         }, token).ConfigureAwait(false);
     }
 
-    public async Task<PathfindingHisotiriesSerializationModel> ReadSerializationGraphsAsync(IEnumerable<int> graphIds, CancellationToken token = default)
+    public async Task<PathfindingHistoriesSerializationModel> ReadSerializationGraphsAsync(IEnumerable<int> graphIds, CancellationToken token = default)
     {
         return await Transaction(async (unitOfWork, t) =>
         {
@@ -207,11 +207,11 @@ public sealed class RequestService<T> : IRequestService<T>
                     Range = []
                 });
             }
-            return new PathfindingHisotiriesSerializationModel() { Histories = result }; ;
+            return new PathfindingHistoriesSerializationModel() { Histories = result }; ;
         }, token).ConfigureAwait(false);
     }
 
-    public async Task<PathfindingHisotiriesSerializationModel> ReadSerializationGraphsWithRangeAsync(IEnumerable<int> graphIds, CancellationToken token = default)
+    public async Task<PathfindingHistoriesSerializationModel> ReadSerializationGraphsWithRangeAsync(IEnumerable<int> graphIds, CancellationToken token = default)
     {
         return await Transaction(async (unitOfWork, t) =>
         {
@@ -229,7 +229,7 @@ public sealed class RequestService<T> : IRequestService<T>
                     Range = range.ToCoordinates()
                 });
             }
-            return new PathfindingHisotiriesSerializationModel() { Histories = result };
+            return new PathfindingHistoriesSerializationModel() { Histories = result };
         }, token).ConfigureAwait(false);
     }
 

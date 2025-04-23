@@ -4,31 +4,30 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public sealed class BidirectRandomAlgorithm(IEnumerable<IPathfindingVertex> range)
+public sealed class BidirectRandomAlgorithm(IReadOnlyCollection<IPathfindingVertex> range)
     : BidirectBreadthFirstAlgorithm<List<IPathfindingVertex>>(range)
 {
-    private readonly Random random = new(range.Count()
-        ^ range.Aggregate(0, (x, y) => x + y.Cost.CurrentCost));
+    private readonly Random random = new(range.Count ^ range.Sum(x => x.Cost.CurrentCost));
 
     protected override void MoveNextVertex()
     {
         var forward = NullPathfindingVertex.Interface;
         var backward = NullPathfindingVertex.Interface;
 
-        if (forwardStorage.Count > 0)
+        if (ForwardStorage.Count > 0)
         {
-            int index = random.Next(forwardStorage.Count);
-            forward = forwardStorage[index];
-            forwardStorage.RemoveAt(index);
+            int index = random.Next(ForwardStorage.Count);
+            forward = ForwardStorage[index];
+            ForwardStorage.RemoveAt(index);
         }
-        if (backwardStorage.Count > 0)
+        if (BackwardStorage.Count > 0)
         {
-            int index = random.Next(backwardStorage.Count);
-            backward = backwardStorage[index];
-            backwardStorage.RemoveAt(index);
+            int index = random.Next(BackwardStorage.Count);
+            backward = BackwardStorage[index];
+            BackwardStorage.RemoveAt(index);
         }
-        if (backward == NullPathfindingVertex.Interface
-            || forward == NullPathfindingVertex.Interface)
+        if (Equals(backward, NullPathfindingVertex.Interface)
+            || Equals(forward, NullPathfindingVertex.Interface))
         {
             throw new DeadendVertexException();
         }
@@ -38,20 +37,20 @@ public sealed class BidirectRandomAlgorithm(IEnumerable<IPathfindingVertex> rang
     protected override void DropState()
     {
         base.DropState();
-        forwardStorage.Clear();
-        backwardStorage.Clear();
+        ForwardStorage.Clear();
+        BackwardStorage.Clear();
     }
 
     protected override void RelaxForwardVertex(IPathfindingVertex vertex)
     {
-        forwardStorage.Add(vertex);
+        ForwardStorage.Add(vertex);
         SetForwardIntersection(vertex);
         base.RelaxForwardVertex(vertex);
     }
 
     protected override void RelaxBackwardVertex(IPathfindingVertex vertex)
     {
-        backwardStorage.Add(vertex);
+        BackwardStorage.Add(vertex);
         SetBackwardIntersections(vertex);
         base.RelaxBackwardVertex(vertex);
     }

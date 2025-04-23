@@ -31,8 +31,8 @@ internal static class AlgorithmExtensions
         ];
 
         OrderMap = orders
-            .Select((Algorithm, Index) => (Algorithm, Index))
-            .ToDictionary(x => x.Algorithm, x => x.Index);
+            .Select((algorithm, index) => (algorithm, index))
+            .ToDictionary(x => x.algorithm, x => x.index);
     }
 
     public static string ToStringRepresentation(this Algorithms algorithm)

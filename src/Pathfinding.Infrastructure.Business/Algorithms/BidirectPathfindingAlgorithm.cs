@@ -6,16 +6,16 @@ using System.Collections.Frozen;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public abstract class BidirectPathfindingAlgorithm<TStorage>(IEnumerable<IPathfindingVertex> pathfindingRange)
+public abstract class BidirectPathfindingAlgorithm<TStorage>(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
     : PathfindingProcess(pathfindingRange)
     where TStorage : new()
 {
-    protected readonly TStorage forwardStorage = new();
-    protected readonly TStorage backwardStorage = new();
-    protected readonly HashSet<IPathfindingVertex> forwardVisited = [];
-    protected readonly HashSet<IPathfindingVertex> backwardVisited = [];
-    protected readonly Dictionary<Coordinate, IPathfindingVertex> forwardTraces = [];
-    protected readonly Dictionary<Coordinate, IPathfindingVertex> backwardTraces = [];
+    protected readonly TStorage ForwardStorage = new();
+    protected readonly TStorage BackwardStorage = new();
+    protected readonly HashSet<IPathfindingVertex> ForwardVisited = [];
+    protected readonly HashSet<IPathfindingVertex> BackwardVisited = [];
+    protected readonly Dictionary<Coordinate, IPathfindingVertex> ForwardTraces = [];
+    protected readonly Dictionary<Coordinate, IPathfindingVertex> BackwardTraces = [];
 
     protected IPathfindingVertex Intersection { get; set; } = NullPathfindingVertex.Interface;
 
@@ -25,7 +25,7 @@ public abstract class BidirectPathfindingAlgorithm<TStorage>(IEnumerable<IPathfi
 
     protected override bool IsDestination()
     {
-        return Intersection != NullPathfindingVertex.Interface;
+        return !Equals(Intersection, NullPathfindingVertex.Interface);
     }
 
     protected override void PrepareForSubPathfinding(SubRange range)
@@ -37,14 +37,14 @@ public abstract class BidirectPathfindingAlgorithm<TStorage>(IEnumerable<IPathfi
     protected override IGraphPath GetSubPath()
     {
         return new BidirectGraphPath(
-            forwardTraces.ToFrozenDictionary(),
-            backwardTraces.ToFrozenDictionary(), Intersection);
+            ForwardTraces.ToFrozenDictionary(),
+            BackwardTraces.ToFrozenDictionary(), Intersection);
     }
 
     protected virtual void SetForwardIntersection(IPathfindingVertex vertex)
     {
-        if (Intersection == NullPathfindingVertex.Instance
-            && backwardVisited.Contains(vertex))
+        if (Equals(Intersection, NullPathfindingVertex.Instance)
+            && BackwardVisited.Contains(vertex))
         {
             Intersection = vertex;
         }
@@ -52,8 +52,8 @@ public abstract class BidirectPathfindingAlgorithm<TStorage>(IEnumerable<IPathfi
 
     protected virtual void SetBackwardIntersections(IPathfindingVertex vertex)
     {
-        if (Intersection == NullPathfindingVertex.Instance
-            && forwardVisited.Contains(vertex))
+        if (Equals(Intersection, NullPathfindingVertex.Instance)
+            && ForwardVisited.Contains(vertex))
         {
             Intersection = vertex;
         }
@@ -61,28 +61,26 @@ public abstract class BidirectPathfindingAlgorithm<TStorage>(IEnumerable<IPathfi
 
     protected override void DropState()
     {
-        forwardVisited.Clear();
-        backwardVisited.Clear();
-        forwardTraces.Clear();
-        backwardTraces.Clear();
+        ForwardVisited.Clear();
+        BackwardVisited.Clear();
+        ForwardTraces.Clear();
+        BackwardTraces.Clear();
         Intersection = NullPathfindingVertex.Interface;
     }
 
     protected virtual IReadOnlyCollection<IPathfindingVertex> GetForwardUnvisitedNeighbours()
     {
-        return GetUnvisitedNeighbours(Current.Source, forwardVisited);
+        return GetUnvisitedNeighbours(Current.Source, ForwardVisited);
     }
 
     protected virtual IReadOnlyCollection<IPathfindingVertex> GetBackwardUnvisitedNeighbours()
     {
-        return GetUnvisitedNeighbours(Current.Target, backwardVisited);
+        return GetUnvisitedNeighbours(Current.Target, BackwardVisited);
     }
 
     private static IPathfindingVertex[] GetUnvisitedNeighbours(IPathfindingVertex vertex,
         HashSet<IPathfindingVertex> visited)
     {
-        return vertex.Neighbors
-            .Where(v => !v.IsObstacle && !visited.Contains(v))
-            .ToArray();
+        return [.. vertex.Neighbors.Where(v => !v.IsObstacle && !visited.Contains(v))];
     }
 }

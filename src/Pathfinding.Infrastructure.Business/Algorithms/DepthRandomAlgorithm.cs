@@ -3,11 +3,10 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public sealed class DepthRandomAlgorithm(IEnumerable<IPathfindingVertex> range)
+public sealed class DepthRandomAlgorithm(IReadOnlyCollection<IPathfindingVertex> range)
     : DepthAlgorithm(range)
 {
-    private readonly Random random = new(range.Count()
-        ^ range.Aggregate(0, (x, y) => x + y.Cost.CurrentCost));
+    private readonly Random random = new(range.Count ^ range.Sum(y => y.Cost.CurrentCost));
 
     protected override IPathfindingVertex GetVertex(IReadOnlyCollection<IPathfindingVertex> neighbors)
     {

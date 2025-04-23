@@ -7,12 +7,12 @@ using System.Collections.Frozen;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public class DijkstraAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange, IStepRule stepRule)
+public class DijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange, IStepRule stepRule)
     : WaveAlgorithm<SimplePriorityQueue<IPathfindingVertex, double>>(pathfindingRange)
 {
-    protected readonly IStepRule stepRule = stepRule;
+    protected readonly IStepRule StepRule = stepRule;
 
-    public DijkstraAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
+    public DijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
         : this(pathfindingRange, new DefaultStepRule())
     {
 
@@ -20,25 +20,25 @@ public class DijkstraAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange,
 
     protected override IGraphPath GetSubPath()
     {
-        return new GraphPath(traces.ToFrozenDictionary(),
-            CurrentRange.Target, stepRule);
+        return new GraphPath(Traces.ToFrozenDictionary(),
+            CurrentRange.Target, StepRule);
     }
 
     protected override void DropState()
     {
         base.DropState();
-        storage.Clear();
+        Storage.Clear();
     }
 
     protected override void MoveNextVertex()
     {
-        CurrentVertex = storage.TryFirstOrThrowDeadEndVertexException();
+        CurrentVertex = Storage.TryFirstOrThrowDeadEndVertexException();
     }
 
     protected override void PrepareForSubPathfinding(SubRange range)
     {
         base.PrepareForSubPathfinding(range);
-        storage.EnqueueOrUpdatePriority(CurrentRange.Source, default);
+        Storage.EnqueueOrUpdatePriority(CurrentRange.Source, default);
     }
 
     protected override void RelaxVertex(IPathfindingVertex vertex)
@@ -48,29 +48,29 @@ public class DijkstraAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange,
         if (vertexCost > relaxedCost)
         {
             Enqueue(vertex, relaxedCost);
-            traces[vertex.Position] = CurrentVertex;
+            Traces[vertex.Position] = CurrentVertex;
         }
     }
 
     protected virtual void Enqueue(IPathfindingVertex vertex, double value)
     {
-        storage.EnqueueOrUpdatePriority(vertex, value);
+        Storage.EnqueueOrUpdatePriority(vertex, value);
     }
 
     protected virtual double GetVertexCurrentCost(IPathfindingVertex vertex)
     {
-        return storage.GetPriorityOrInfinity(vertex);
+        return Storage.GetPriorityOrInfinity(vertex);
     }
 
     protected virtual double GetVertexRelaxedCost(IPathfindingVertex neighbour)
     {
-        return stepRule.CalculateStepCost(neighbour, CurrentVertex)
+        return StepRule.CalculateStepCost(neighbour, CurrentVertex)
                + GetVertexCurrentCost(CurrentVertex);
     }
 
     protected override void RelaxNeighbours(IReadOnlyCollection<IPathfindingVertex> neighbours)
     {
         base.RelaxNeighbours(neighbours);
-        storage.TryRemove(CurrentVertex);
+        Storage.TryRemove(CurrentVertex);
     }
 }

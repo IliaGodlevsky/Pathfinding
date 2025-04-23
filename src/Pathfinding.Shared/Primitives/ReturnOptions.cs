@@ -12,8 +12,7 @@ namespace Pathfinding.Shared.Primitives
             where T : IComparable<T>
         {
             if (value.IsGreaterThan(range.UpperValueOfRange)) return GetIfGreater(range);
-            else if (value.IsLessThan(range.LowerValueOfRange)) return GetIfLess(range);
-            return value;
+            return value.IsLessThan(range.LowerValueOfRange) ? GetIfLess(range) : value;
         }
 
         protected abstract T GetIfGreater<T>(InclusiveValueRange<T> range) where T : IComparable<T>;

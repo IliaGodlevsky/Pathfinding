@@ -22,14 +22,14 @@ namespace Pathfinding.Shared.Primitives
         /// but returns only a main interface of the type
         /// </summary>
         /// <exception cref="SingletonException"> if there is 
-        /// no private parametreless constructor</exception>
+        /// no private parameterless constructor</exception>
         public static TInterface Interface => Instance;
 
         /// <summary>
         /// A property, that contains an instance of type
         /// </summary>
         /// <exception cref="SingletonException"> if there is 
-        /// no private parametreless constructor</exception>
+        /// no private parameterless constructor</exception>
         public static TInstance Instance => instance.Value;
 
         static Singleton()

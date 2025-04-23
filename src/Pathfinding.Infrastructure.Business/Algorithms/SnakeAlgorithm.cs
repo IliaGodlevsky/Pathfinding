@@ -3,10 +3,10 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public sealed class SnakeAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange,
+public sealed class SnakeAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
     IHeuristic heuristic) : GreedyAlgorithm(pathfindingRange)
 {
-    public SnakeAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
+    public SnakeAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
         : this(pathfindingRange, new ManhattanDistance())
     {
 

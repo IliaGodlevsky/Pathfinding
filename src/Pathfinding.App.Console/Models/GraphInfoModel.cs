@@ -15,11 +15,11 @@ internal sealed class GraphInfoModel : ReactiveObject, IGraphLayersInfo
         set => this.RaiseAndSetIfChanged(ref name, value);
     }
 
-    private Neighborhoods neighorhood;
+    private Neighborhoods neighborhood;
     public Neighborhoods Neighborhood
     {
-        get => neighorhood;
-        set => this.RaiseAndSetIfChanged(ref neighorhood, value);
+        get => neighborhood;
+        set => this.RaiseAndSetIfChanged(ref neighborhood, value);
     }
 
     private SmoothLevels smoothLevel;

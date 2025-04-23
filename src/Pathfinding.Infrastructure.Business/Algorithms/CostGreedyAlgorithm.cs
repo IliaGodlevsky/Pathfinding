@@ -5,10 +5,10 @@ using System.Collections.Frozen;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public sealed class CostGreedyAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange,
+public sealed class CostGreedyAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
     IStepRule stepRule) : GreedyAlgorithm(pathfindingRange)
 {
-    public CostGreedyAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
+    public CostGreedyAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
         : this(pathfindingRange, new DefaultStepRule())
     {
 
@@ -16,7 +16,7 @@ public sealed class CostGreedyAlgorithm(IEnumerable<IPathfindingVertex> pathfind
 
     protected override IGraphPath GetSubPath()
     {
-        return new GraphPath(traces.ToFrozenDictionary(),
+        return new GraphPath(Traces.ToFrozenDictionary(),
             CurrentRange.Target, stepRule);
     }
 

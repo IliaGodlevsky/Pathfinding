@@ -10,11 +10,11 @@ namespace Pathfinding.Shared.Primitives
         private readonly string toString;
         private readonly int hashCode;
 
-        public readonly int[] CoordinatesValues { get; }
+        public int[] CoordinatesValues { get; }
 
-        public readonly int Count => CoordinatesValues.Length;
+        public int Count => CoordinatesValues.Length;
 
-        public readonly int this[int index] => CoordinatesValues[index];
+        public int this[int index] => CoordinatesValues[index];
 
         public Coordinate(int numberOfDimensions, IReadOnlyList<int> coordinates)
         {
@@ -45,22 +45,22 @@ namespace Pathfinding.Shared.Primitives
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool Equals(Coordinate other)
+        public bool Equals(Coordinate other)
         {
             return other.GetHashCode().Equals(GetHashCode());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override readonly bool Equals(object pos)
+        public override bool Equals(object pos)
         {
             return pos is Coordinate coord && Equals(coord);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override readonly int GetHashCode() => hashCode;
+        public override int GetHashCode() => hashCode;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override readonly string ToString() => toString;
+        public override string ToString() => toString;
 
         public static bool operator ==(Coordinate left, Coordinate right)
         {

@@ -23,11 +23,11 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
 
             var models = Generators.GenerateGraphInfos(3).ToArray();
 
-            PathfindingHisotiriesSerializationModel histories
+            PathfindingHistoriesSerializationModel histories
                 = Enumerable.Range(1, 5)
                 .Select(x => new PathfindingHistorySerializationModel())
                 .ToArray()
-                .To(x => new PathfindingHisotiriesSerializationModel() { Histories = x.ToList() });
+                .To(x => new PathfindingHistoriesSerializationModel() { Histories = x.ToList() });
             IReadOnlyCollection<PathfindingHistoryModel<GraphVertexModel>> result
                 = Enumerable.Range(1, 5)
                 .Select(x => new PathfindingHistoryModel<GraphVertexModel>()

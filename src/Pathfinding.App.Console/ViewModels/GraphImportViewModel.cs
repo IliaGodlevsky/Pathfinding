@@ -12,7 +12,7 @@ using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
 
-using Serializer = Pathfinding.Service.Interface.ISerializer<Pathfinding.Service.Interface.Models.Serialization.PathfindingHisotiriesSerializationModel>;
+using Serializer = Pathfinding.Service.Interface.ISerializer<Pathfinding.Service.Interface.Models.Serialization.PathfindingHistoriesSerializationModel>;
 
 namespace Pathfinding.App.Console.ViewModels;
 

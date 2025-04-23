@@ -6,12 +6,12 @@ using Priority_Queue;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public sealed class AStarLeeAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange,
+public sealed class AStarLeeAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
     IHeuristic function) : BreadthFirstAlgorithm<SimplePriorityQueue<IPathfindingVertex, double>>(pathfindingRange)
 {
     private readonly Dictionary<Coordinate, double> heuristics = [];
 
-    public AStarLeeAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
+    public AStarLeeAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
         : this(pathfindingRange, new ManhattanDistance())
     {
 
@@ -19,31 +19,31 @@ public sealed class AStarLeeAlgorithm(IEnumerable<IPathfindingVertex> pathfindin
 
     protected override void MoveNextVertex()
     {
-        CurrentVertex = storage.TryFirstOrThrowDeadEndVertexException();
+        CurrentVertex = Storage.TryFirstOrThrowDeadEndVertexException();
     }
 
     protected override void DropState()
     {
         base.DropState();
-        storage.Clear();
+        Storage.Clear();
         heuristics.Clear();
     }
 
     protected override void PrepareForSubPathfinding(SubRange range)
     {
         base.PrepareForSubPathfinding(range);
-        double value = CalculateHeuristic(CurrentRange.Source);
+        var value = CalculateHeuristic(CurrentRange.Source);
         heuristics[CurrentRange.Source.Position] = value;
     }
 
     protected override void RelaxVertex(IPathfindingVertex vertex)
     {
-        if (!heuristics.TryGetValue(vertex.Position, out double cost))
+        if (!heuristics.TryGetValue(vertex.Position, out var cost))
         {
             cost = CalculateHeuristic(vertex);
             heuristics[vertex.Position] = cost;
         }
-        storage.Enqueue(vertex, cost);
+        Storage.Enqueue(vertex, cost);
         base.RelaxVertex(vertex);
     }
 
@@ -55,6 +55,6 @@ public sealed class AStarLeeAlgorithm(IEnumerable<IPathfindingVertex> pathfindin
     protected override void RelaxNeighbours(IReadOnlyCollection<IPathfindingVertex> neighbours)
     {
         base.RelaxNeighbours(neighbours);
-        storage.TryRemove(CurrentVertex);
+        Storage.TryRemove(CurrentVertex);
     }
 }

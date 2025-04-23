@@ -5,7 +5,7 @@ using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public sealed class BidirectAStarAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange,
+public sealed class BidirectAStarAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
     IStepRule stepRule, IHeuristic heuristic) : BidirectDijkstraAlgorithm(pathfindingRange, stepRule)
 {
     private readonly Dictionary<Coordinate, double> forwardAccumulatedCosts = [];
@@ -13,7 +13,7 @@ public sealed class BidirectAStarAlgorithm(IEnumerable<IPathfindingVertex> pathf
     private readonly Dictionary<Coordinate, double> forwardHeuristics = [];
     private readonly Dictionary<Coordinate, double> backwardHeuristics = [];
 
-    public BidirectAStarAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
+    public BidirectAStarAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
         : this(pathfindingRange, new DefaultStepRule(), new ManhattanDistance())
     {
     }
@@ -30,13 +30,13 @@ public sealed class BidirectAStarAlgorithm(IEnumerable<IPathfindingVertex> pathf
     protected override void PrepareForSubPathfinding(SubRange range)
     {
         base.PrepareForSubPathfinding(range);
-        forwardAccumulatedCosts[Range.Source.Position] = default;
-        backwardAccumulatedCosts[Range.Target.Position] = default;
+        forwardAccumulatedCosts[Range.Source.Position] = 0;
+        backwardAccumulatedCosts[Range.Target.Position] = 0;
     }
 
     protected override void EnqueueForward(IPathfindingVertex vertex, double value)
     {
-        if (!forwardHeuristics.TryGetValue(vertex.Position, out double cost))
+        if (!forwardHeuristics.TryGetValue(vertex.Position, out var cost))
         {
             cost = CalculateForwardHeuristic(vertex);
             forwardHeuristics[vertex.Position] = cost;
@@ -58,16 +58,12 @@ public sealed class BidirectAStarAlgorithm(IEnumerable<IPathfindingVertex> pathf
 
     protected override double GetForwardVertexCurrentCost(IPathfindingVertex vertex)
     {
-        return forwardAccumulatedCosts.TryGetValue(vertex.Position, out double cost)
-            ? cost
-            : double.PositiveInfinity;
+        return forwardAccumulatedCosts.GetValueOrDefault(vertex.Position, double.PositiveInfinity);
     }
 
     protected override double GetBackwardVertexCurrentCost(IPathfindingVertex vertex)
     {
-        return backwardAccumulatedCosts.TryGetValue(vertex.Position, out double cost)
-           ? cost
-           : double.PositiveInfinity;
+        return backwardAccumulatedCosts.GetValueOrDefault(vertex.Position, double.PositiveInfinity);
     }
 
     private double CalculateForwardHeuristic(IPathfindingVertex vertex)

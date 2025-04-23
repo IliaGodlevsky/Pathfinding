@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Messages;
 using System.Reactive;
+// ReSharper disable AsyncVoidLambda
 
 namespace Pathfinding.App.Console.Extensions;
 

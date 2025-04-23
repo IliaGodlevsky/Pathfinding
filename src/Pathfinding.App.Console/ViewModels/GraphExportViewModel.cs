@@ -1,4 +1,5 @@
-﻿using Autofac.Features.AttributeFilters;
+﻿using System.Diagnostics.CodeAnalysis;
+using Autofac.Features.AttributeFilters;
 using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Injection;
@@ -13,7 +14,7 @@ using System.Reactive;
 
 using Serializer = Pathfinding.Service.Interface
     .ISerializer<Pathfinding.Service.Interface.Models.Serialization
-        .PathfindingHisotiriesSerializationModel>;
+        .PathfindingHistoriesSerializationModel>;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -40,7 +41,7 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
 
     public GraphExportViewModel(IRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        IEnumerable<Meta<Serializer>> serializers,
+        Meta<Serializer>[] serializers,
         ILog logger)
     {
         this.service = service;
@@ -62,6 +63,7 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
             graphIds => graphIds.Length > 0);
     }
 
+    [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
     private async Task ExportGraph(StreamModel stream)
     {
         await ExecuteSafe(async () =>
@@ -80,8 +82,10 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
                     };
                     var histories = await historiesTask.ConfigureAwait(false);
                     await serializer.SerializeToAsync(histories, stream.Stream).ConfigureAwait(false);
-                    int count = histories.Histories.Count;
-                    logger.Info(count == 1 ? Resource.WasDeletedMsg : Resource.WereDeletedMsg);
+                    var count = histories.Histories.Count;
+                    logger.Info(count == 1 
+                        ? Resource.WasDeletedMsg 
+                        : Resource.WereDeletedMsg);
                 }
             }
         }, logger.Error).ConfigureAwait(false);

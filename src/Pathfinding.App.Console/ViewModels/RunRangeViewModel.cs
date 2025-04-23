@@ -65,7 +65,7 @@ internal sealed class RunRangeViewModel : BaseViewModel,
             {
                 value.IsSource = true;
             }
-            this.RaisePropertyChanged(nameof(Source));
+            this.RaisePropertyChanged();
         }
     }
 
@@ -85,7 +85,7 @@ internal sealed class RunRangeViewModel : BaseViewModel,
             {
                 value.IsTarget = true;
             }
-            this.RaisePropertyChanged(nameof(Target));
+            this.RaisePropertyChanged();
         }
     }
 
@@ -247,12 +247,13 @@ internal sealed class RunRangeViewModel : BaseViewModel,
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add:
-                var added = (GraphVertexModel)e.NewItems[0];
-                added.IsTransit = true;
+                var added = (GraphVertexModel)e.NewItems?[0];
+                if (added != null) added.IsTransit = true;
+
                 break;
             case NotifyCollectionChangedAction.Remove:
-                var removed = (GraphVertexModel)e.OldItems[0];
-                removed.IsTransit = false;
+                var removed = (GraphVertexModel)e.OldItems?[0];
+                if (removed != null) removed.IsTransit = false;
                 break;
         }
     }

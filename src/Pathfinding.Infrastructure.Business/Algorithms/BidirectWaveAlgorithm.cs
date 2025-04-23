@@ -3,7 +3,7 @@ using Pathfinding.Shared.Extensions;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public abstract class BidirectWaveAlgorithm<TStorage>(IEnumerable<IPathfindingVertex> pathfindingRange)
+public abstract class BidirectWaveAlgorithm<TStorage>(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
     : BidirectPathfindingAlgorithm<TStorage>(pathfindingRange)
     where TStorage : new()
 {
@@ -19,8 +19,8 @@ public abstract class BidirectWaveAlgorithm<TStorage>(IEnumerable<IPathfindingVe
 
     protected override void VisitCurrentVertex()
     {
-        forwardVisited.Add(Current.Source);
-        backwardVisited.Add(Current.Target);
+        ForwardVisited.Add(Current.Source);
+        BackwardVisited.Add(Current.Target);
     }
 
     protected virtual void RelaxForwardNeighbours(IReadOnlyCollection<IPathfindingVertex> vertices)

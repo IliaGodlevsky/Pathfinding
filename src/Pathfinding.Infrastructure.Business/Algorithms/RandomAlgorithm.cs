@@ -3,19 +3,18 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public sealed class RandomAlgorithm(IEnumerable<IPathfindingVertex> range)
+public sealed class RandomAlgorithm(IReadOnlyCollection<IPathfindingVertex> range)
     : BreadthFirstAlgorithm<List<IPathfindingVertex>>(range)
 {
-    private readonly Random random = new(range.Count()
-        ^ range.Aggregate(0, (x, y) => x + y.Cost.CurrentCost));
+    private readonly Random random = new(range.Count ^ range.Sum(y => y.Cost.CurrentCost));
 
     protected override void MoveNextVertex()
     {
-        if (storage.Count > 0)
+        if (Storage.Count > 0)
         {
-            int index = random.Next(storage.Count);
-            CurrentVertex = storage[index];
-            storage.RemoveAt(index);
+            int index = random.Next(Storage.Count);
+            CurrentVertex = Storage[index];
+            Storage.RemoveAt(index);
             return;
         }
         throw new DeadendVertexException();
@@ -24,12 +23,12 @@ public sealed class RandomAlgorithm(IEnumerable<IPathfindingVertex> range)
     protected override void DropState()
     {
         base.DropState();
-        storage.Clear();
+        Storage.Clear();
     }
 
     protected override void RelaxVertex(IPathfindingVertex vertex)
     {
-        storage.Add(vertex);
+        Storage.Add(vertex);
         base.RelaxVertex(vertex);
     }
 }

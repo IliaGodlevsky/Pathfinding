@@ -59,7 +59,7 @@ namespace Pathfinding.Shared.Extensions
 
         public static RangeEnumerator GetEnumerator(this InclusiveValueRange<int> range)
         {
-            return new RangeEnumerator(range);
+            return new(range);
         }
 
         public static T ReturnInRange<T>(this InclusiveValueRange<T> self, T value, ReturnOptions options)

@@ -8,6 +8,6 @@ namespace Pathfinding.App.Console.Messages.ViewModel
     {
         public GraphModel<GraphVertexModel> Graph { get; } = graph;
 
-        public Action<Unit> Signal { get; set; } = unit => throw new InvalidOperationException();
+        public Action<Unit> Signal { get; set; } = _ => throw new InvalidOperationException();
     }
 }

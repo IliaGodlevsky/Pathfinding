@@ -3,7 +3,7 @@ using Pathfinding.Shared.Extensions;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public abstract class WaveAlgorithm<TStorage>(IEnumerable<IPathfindingVertex> pathfindingRange)
+public abstract class WaveAlgorithm<TStorage>(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
     : PathfindingAlgorithm<TStorage>(pathfindingRange)
     where TStorage : new()
 {
@@ -17,7 +17,7 @@ public abstract class WaveAlgorithm<TStorage>(IEnumerable<IPathfindingVertex> pa
 
     protected override void VisitCurrentVertex()
     {
-        visited.Add(CurrentVertex);
+        Visited.Add(CurrentVertex);
     }
 
     protected virtual void RelaxNeighbours(IReadOnlyCollection<IPathfindingVertex> vertices)

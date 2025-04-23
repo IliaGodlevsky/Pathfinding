@@ -5,7 +5,7 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public abstract class PathfindingProcess(IEnumerable<IPathfindingVertex> range) 
+public abstract class PathfindingProcess(IReadOnlyCollection<IPathfindingVertex> range) 
     : IAlgorithm<IGraphPath>
 {
     protected readonly record struct SubRange(
@@ -23,9 +23,9 @@ public abstract class PathfindingProcess(IEnumerable<IPathfindingVertex> range)
     public IGraphPath FindPath()
     {
         var subPaths = new List<IGraphPath>();
-        foreach (var range in GetSubRanges())
+        foreach (var subRange in GetSubRanges())
         {
-            PrepareForSubPathfinding(range);
+            PrepareForSubPathfinding(subRange);
             while (!IsDestination())
             {
                 InspectCurrentVertex();

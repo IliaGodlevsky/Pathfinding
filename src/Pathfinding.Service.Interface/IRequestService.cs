@@ -12,13 +12,13 @@ public interface IRequestService<T>
     where T : IVertex, IEntity<long>
 {
     #region Vertices
-    Task<PathfindingHisotiriesSerializationModel> ReadSerializationHistoriesAsync(IEnumerable<int> graphIds,
+    Task<PathfindingHistoriesSerializationModel> ReadSerializationHistoriesAsync(IEnumerable<int> graphIds,
         CancellationToken token = default);
 
-    Task<PathfindingHisotiriesSerializationModel> ReadSerializationGraphsAsync(IEnumerable<int> graphIds,
+    Task<PathfindingHistoriesSerializationModel> ReadSerializationGraphsAsync(IEnumerable<int> graphIds,
         CancellationToken token = default);
 
-    Task<PathfindingHisotiriesSerializationModel> ReadSerializationGraphsWithRangeAsync(IEnumerable<int> graphIds,
+    Task<PathfindingHistoriesSerializationModel> ReadSerializationGraphsWithRangeAsync(IEnumerable<int> graphIds,
         CancellationToken token = default);
 
     Task<GraphModel<T>> ReadGraphAsync(int graphId, CancellationToken token = default);

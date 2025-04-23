@@ -5,14 +5,14 @@ using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public class AStarAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange,
+public class AStarAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
     IStepRule stepRule, IHeuristic function) : DijkstraAlgorithm(pathfindingRange, stepRule)
 {
-    protected readonly Dictionary<Coordinate, double> accumulatedCosts = [];
-    protected readonly Dictionary<Coordinate, double> heuristics = [];
-    protected readonly IHeuristic heuristic = function;
+    protected readonly Dictionary<Coordinate, double> AccumulatedCosts = [];
+    protected readonly Dictionary<Coordinate, double> Heuristics = [];
+    protected readonly IHeuristic Heuristic = function;
 
-    public AStarAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
+    public AStarAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
         : this(pathfindingRange, new DefaultStepRule(), new ChebyshevDistance())
     {
 
@@ -21,36 +21,34 @@ public class AStarAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange,
     protected override void DropState()
     {
         base.DropState();
-        heuristics.Clear();
-        accumulatedCosts.Clear();
+        Heuristics.Clear();
+        AccumulatedCosts.Clear();
     }
 
     protected override void PrepareForSubPathfinding(SubRange range)
     {
         base.PrepareForSubPathfinding(range);
-        accumulatedCosts[CurrentRange.Source.Position] = default;
+        AccumulatedCosts[CurrentRange.Source.Position] = 0;
     }
 
     protected override void Enqueue(IPathfindingVertex vertex, double value)
     {
-        if (!heuristics.TryGetValue(vertex.Position, out double cost))
+        if (!Heuristics.TryGetValue(vertex.Position, out var cost))
         {
             cost = CalculateHeuristic(vertex);
-            heuristics[vertex.Position] = cost;
+            Heuristics[vertex.Position] = cost;
         }
         base.Enqueue(vertex, value + cost);
-        accumulatedCosts[vertex.Position] = value;
+        AccumulatedCosts[vertex.Position] = value;
     }
 
     protected override double GetVertexCurrentCost(IPathfindingVertex vertex)
     {
-        return accumulatedCosts.TryGetValue(vertex.Position, out double cost)
-            ? cost
-            : double.PositiveInfinity;
+        return AccumulatedCosts.GetValueOrDefault(vertex.Position, double.PositiveInfinity);
     }
 
     protected virtual double CalculateHeuristic(IPathfindingVertex vertex)
     {
-        return heuristic.Calculate(vertex, CurrentRange.Target);
+        return Heuristic.Calculate(vertex, CurrentRange.Target);
     }
 }

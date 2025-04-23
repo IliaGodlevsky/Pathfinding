@@ -7,12 +7,12 @@ using System.Collections.Frozen;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public class BidirectDijkstraAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange,
+public class BidirectDijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
     IStepRule stepRule) : BidirectWaveAlgorithm<SimplePriorityQueue<IPathfindingVertex, double>>(pathfindingRange)
 {
-    protected readonly IStepRule stepRule = stepRule;
+    protected readonly IStepRule StepRule = stepRule;
 
-    public BidirectDijkstraAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
+    public BidirectDijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
         : this(pathfindingRange, new DefaultStepRule())
     {
 
@@ -21,40 +21,40 @@ public class BidirectDijkstraAlgorithm(IEnumerable<IPathfindingVertex> pathfindi
     protected override void PrepareForSubPathfinding(SubRange range)
     {
         base.PrepareForSubPathfinding(range);
-        forwardStorage.EnqueueOrUpdatePriority(Range.Source, default);
-        backwardStorage.EnqueueOrUpdatePriority(Range.Target, default);
+        ForwardStorage.EnqueueOrUpdatePriority(Range.Source, 0);
+        BackwardStorage.EnqueueOrUpdatePriority(Range.Target, 0);
     }
 
     protected override IGraphPath GetSubPath()
     {
         return new BidirectGraphPath(
-            forwardTraces.ToFrozenDictionary(),
-            backwardTraces.ToFrozenDictionary(), Intersection, stepRule);
+            ForwardTraces.ToFrozenDictionary(),
+            BackwardTraces.ToFrozenDictionary(), Intersection, StepRule);
     }
 
     protected override void DropState()
     {
         base.DropState();
-        forwardStorage.Clear();
-        backwardStorage.Clear();
+        ForwardStorage.Clear();
+        BackwardStorage.Clear();
     }
 
     protected override void MoveNextVertex()
     {
-        var forward = forwardStorage.TryFirstOrThrowDeadEndVertexException();
-        var backward = backwardStorage.TryFirstOrThrowDeadEndVertexException();
+        var forward = ForwardStorage.TryFirstOrThrowDeadEndVertexException();
+        var backward = BackwardStorage.TryFirstOrThrowDeadEndVertexException();
         Current = new(forward, backward);
     }
 
     protected override void RelaxForwardVertex(IPathfindingVertex vertex)
     {
-        double relaxedCost = GetForwardVertexRelaxedCost(vertex);
-        double vertexCost = GetForwardVertexCurrentCost(vertex);
+        var relaxedCost = GetForwardVertexRelaxedCost(vertex);
+        var vertexCost = GetForwardVertexCurrentCost(vertex);
         if (vertexCost > relaxedCost)
         {
             EnqueueForward(vertex, relaxedCost);
             SetForwardIntersection(vertex);
-            forwardTraces[vertex.Position] = Current.Source;
+            ForwardTraces[vertex.Position] = Current.Source;
         }
     }
 
@@ -66,51 +66,51 @@ public class BidirectDijkstraAlgorithm(IEnumerable<IPathfindingVertex> pathfindi
         {
             EnqueueBackward(vertex, relaxedCost);
             SetBackwardIntersections(vertex);
-            backwardTraces[vertex.Position] = Current.Target;
+            BackwardTraces[vertex.Position] = Current.Target;
         }
     }
 
     protected virtual void EnqueueForward(IPathfindingVertex vertex, double value)
     {
-        forwardStorage.EnqueueOrUpdatePriority(vertex, value);
+        ForwardStorage.EnqueueOrUpdatePriority(vertex, value);
     }
 
     protected virtual void EnqueueBackward(IPathfindingVertex vertex, double value)
     {
-        backwardStorage.EnqueueOrUpdatePriority(vertex, value);
+        BackwardStorage.EnqueueOrUpdatePriority(vertex, value);
     }
 
     protected virtual double GetForwardVertexCurrentCost(IPathfindingVertex vertex)
     {
-        return forwardStorage.GetPriorityOrInfinity(vertex);
+        return ForwardStorage.GetPriorityOrInfinity(vertex);
     }
 
     protected virtual double GetBackwardVertexCurrentCost(IPathfindingVertex vertex)
     {
-        return backwardStorage.GetPriorityOrInfinity(vertex);
+        return BackwardStorage.GetPriorityOrInfinity(vertex);
     }
 
     protected virtual double GetForwardVertexRelaxedCost(IPathfindingVertex neighbour)
     {
-        return stepRule.CalculateStepCost(neighbour, Current.Source)
+        return StepRule.CalculateStepCost(neighbour, Current.Source)
                + GetForwardVertexCurrentCost(Current.Source);
     }
 
     protected virtual double GetBackwardVertexRelaxedCost(IPathfindingVertex neighbour)
     {
-        return stepRule.CalculateStepCost(neighbour, Current.Target)
+        return StepRule.CalculateStepCost(neighbour, Current.Target)
                + GetBackwardVertexCurrentCost(Current.Target);
     }
 
     protected override void RelaxForwardNeighbours(IReadOnlyCollection<IPathfindingVertex> neighbours)
     {
         base.RelaxForwardNeighbours(neighbours);
-        forwardStorage.TryRemove(Current.Source);
+        ForwardStorage.TryRemove(Current.Source);
     }
 
     protected override void RelaxBackwardNeighbours(IReadOnlyCollection<IPathfindingVertex> vertices)
     {
         base.RelaxBackwardNeighbours(vertices);
-        backwardStorage.TryRemove(Current.Target);
+        BackwardStorage.TryRemove(Current.Target);
     }
 }

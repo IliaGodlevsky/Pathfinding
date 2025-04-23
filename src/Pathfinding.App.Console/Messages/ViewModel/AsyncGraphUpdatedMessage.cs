@@ -7,6 +7,6 @@ namespace Pathfinding.App.Console.Messages.ViewModel
     {
         public GraphInformationModel Model { get; } = model;
 
-        public Action<Unit> Signal { get; set; } = unit => throw new InvalidOperationException();
+        public Action<Unit> Signal { get; set; } = _ => throw new InvalidOperationException();
     }
 }

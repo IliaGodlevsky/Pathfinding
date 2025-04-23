@@ -1,4 +1,4 @@
 ﻿namespace Pathfinding.App.Console.Messages.View
 {
-    internal sealed record class CloseHeuristicsViewMessage;
+    internal sealed record CloseHeuristicsViewMessage;
 }

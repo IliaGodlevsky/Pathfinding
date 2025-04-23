@@ -3,11 +3,11 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public sealed class DistanceFirstAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange,
+public sealed class DistanceFirstAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
     IHeuristic heuristic) : GreedyAlgorithm(pathfindingRange)
 {
-    public DistanceFirstAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
-        : this(pathfindingRange, new EuclidianDistance())
+    public DistanceFirstAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
+        : this(pathfindingRange, new EuclideanDistance())
     {
 
     }

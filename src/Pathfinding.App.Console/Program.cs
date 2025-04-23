@@ -7,4 +7,4 @@ Application.Init();
 await using var scope = Modules.Build();
 using var main = scope.Resolve<MainView>();
 Application.Top.Add(main);
-Application.Run(x => true);
+Application.Run(_ => true);

@@ -21,8 +21,13 @@ internal class RunModel : ReactiveObject, IDisposable
 
     private enum RunVertexState
     {
-        No, Source, Target,Transit, 
-        Visited, Enqueued, Path, CrossPath
+        Source, 
+        Target,
+        Transit, 
+        Visited, 
+        Enqueued, 
+        Path, 
+        CrossPath
     }
 
     private readonly record struct RunVertexStateModel(
@@ -30,11 +35,11 @@ internal class RunModel : ReactiveObject, IDisposable
         RunVertexState State,
         bool Value = true)
     {
-        public readonly void Set() => Set(Value);
+        public void Set() => Set(Value);
 
-        public readonly void SetInverse() => Set(!Value);
+        public void SetInverse() => Set(!Value);
 
-        private readonly void Set(bool value)
+        private void Set(bool value)
         {
             switch (State)
             {
@@ -51,7 +56,7 @@ internal class RunModel : ReactiveObject, IDisposable
 
     public static readonly RunModel Empty = new(Graph<RunVertexModel>.Empty, [], []);
 
-    private static readonly InclusiveValueRange<float> FractionRange = new(1, 0);
+    private static readonly InclusiveValueRange<float> FractionRange = new(1);
 
     private readonly CompositeDisposable disposables = [];
 
@@ -81,7 +86,7 @@ internal class RunModel : ReactiveObject, IDisposable
         IReadOnlyCollection<Coordinate> range)
     {
         Algorithm = CreateAlgorithmRevision(vertices, pathfindingResult, range);
-        CursorRange = new InclusiveValueRange<int>(Algorithm.Count - 1, 0);
+        CursorRange = new(Algorithm.Count - 1);
         this.WhenAnyValue(x => x.Fraction).DistinctUntilChanged()
             .Select(x => (int)Math.Floor(Algorithm.Count * x - Cursor))
             .Where(x => x != 0)

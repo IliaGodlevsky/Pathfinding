@@ -9,7 +9,7 @@ namespace Pathfinding.App.Console.Views;
 
 internal sealed partial class RunParametresView : FrameView
 {
-    public RunParametresView([KeyFilter(KeyFilters.RunParametresView)]
+    public RunParametresView([KeyFilter(KeyFilters.RunParametersView)]
         View[] children)
     {
         X = Pos.Percent(25);

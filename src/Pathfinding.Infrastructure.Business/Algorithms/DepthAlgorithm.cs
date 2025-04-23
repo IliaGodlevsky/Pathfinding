@@ -4,7 +4,7 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public abstract class DepthAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
+public abstract class DepthAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
     : PathfindingAlgorithm<Stack<IPathfindingVertex>>(pathfindingRange)
 {
     private IPathfindingVertex PreviousVertex { get; set; } = NullPathfindingVertex.Instance;
@@ -21,27 +21,27 @@ public abstract class DepthAlgorithm(IEnumerable<IPathfindingVertex> pathfinding
     protected override void PrepareForSubPathfinding(SubRange range)
     {
         base.PrepareForSubPathfinding(range);
-        visited.Add(CurrentVertex);
-        storage.Push(CurrentVertex);
+        Visited.Add(CurrentVertex);
+        Storage.Push(CurrentVertex);
     }
 
     protected override void DropState()
     {
         base.DropState();
-        storage.Clear();
+        Storage.Clear();
     }
 
     protected override void VisitCurrentVertex()
     {
         if (CurrentVertex.Neighbors.Count == 0)
         {
-            CurrentVertex = storage.PopOrThrowDeadEndVertexException();
+            CurrentVertex = Storage.PopOrThrowDeadEndVertexException();
         }
         else
         {
-            visited.Add(CurrentVertex);
-            storage.Push(CurrentVertex);
-            traces[CurrentVertex.Position] = PreviousVertex;
+            Visited.Add(CurrentVertex);
+            Storage.Push(CurrentVertex);
+            Traces[CurrentVertex.Position] = PreviousVertex;
         }
     }
 

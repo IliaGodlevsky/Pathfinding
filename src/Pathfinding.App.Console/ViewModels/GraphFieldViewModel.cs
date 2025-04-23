@@ -14,7 +14,6 @@ using Pathfinding.Service.Interface.Requests.Update;
 using Pathfinding.Shared.Extensions;
 using ReactiveUI;
 using System.Reactive;
-using System.Reactive.Linq;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -125,9 +124,9 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
     {
         if (vertex.IsObstacle != polarity)
         {
-            var inRangeRquest = new IsVertexInRangeRequest(vertex);
-            messenger.Send(inRangeRquest);
-            if (!inRangeRquest.IsInRange)
+            var inRangeRequest = new IsVertexInRangeRequest(vertex);
+            messenger.Send(inRangeRequest);
+            if (!inRangeRequest.IsInRange)
             {
                 vertex.IsObstacle = polarity;
                 messenger.Send(new ObstaclesCountChangedMessage(graphId, vertex.IsObstacle ? 1 : -1));

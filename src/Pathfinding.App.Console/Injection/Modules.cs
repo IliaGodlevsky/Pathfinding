@@ -52,24 +52,24 @@ internal static class Modules
         builder.RegisterType<ExcludeTransitVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
             .WithMetadata(MetadataKeys.Order, 3).Keyed<IPathfindingRangeCommand<GraphVertexModel>>(KeyFilters.ExcludeCommands);
 
-        builder.RegisterType<JsonSerializer<PathfindingHisotiriesSerializationModel>>().SingleInstance()
-            .As<ISerializer<PathfindingHisotiriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 3)
+        builder.RegisterType<JsonSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
+            .As<ISerializer<PathfindingHistoriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 3)
             .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Json);
-        builder.RegisterType<BinarySerializer<PathfindingHisotiriesSerializationModel>>().SingleInstance()
-            .Keyed<ISerializer<PathfindingHisotiriesSerializationModel>>(KeyFilters.Compress).WithMetadata(MetadataKeys.Order, 2)
+        builder.RegisterType<BinarySerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
+            .Keyed<ISerializer<PathfindingHistoriesSerializationModel>>(KeyFilters.Compress).WithMetadata(MetadataKeys.Order, 2)
             .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Binary);
-        builder.RegisterType<XmlSerializer<PathfindingHisotiriesSerializationModel>>().SingleInstance()
-            .As<ISerializer<PathfindingHisotiriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 4)
+        builder.RegisterType<XmlSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
+            .As<ISerializer<PathfindingHistoriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 4)
             .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Xml);
-        builder.RegisterType<BundleSerializer<PathfindingHisotiriesSerializationModel>>().SingleInstance()
-            .As<ISerializer<PathfindingHisotiriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 1)
+        builder.RegisterType<BundleSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
+            .As<ISerializer<PathfindingHistoriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 1)
             .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Csv);
-        builder.RegisterDecorator<ISerializer<PathfindingHisotiriesSerializationModel>>(
-            (ctx, inner) => new CompressSerializer<PathfindingHisotiriesSerializationModel>(inner),
+        builder.RegisterDecorator<ISerializer<PathfindingHistoriesSerializationModel>>(
+            (_, inner) => new CompressSerializer<PathfindingHistoriesSerializationModel>(inner),
             fromKey: KeyFilters.Compress);
-        builder.RegisterDecorator<ISerializer<PathfindingHisotiriesSerializationModel>>(
-            (ctx, param, inner) => new BufferedSerializer<PathfindingHisotiriesSerializationModel>(inner),
-            condition: ctx => ctx.CurrentInstance is not CompressSerializer<PathfindingHisotiriesSerializationModel>);
+        builder.RegisterDecorator<ISerializer<PathfindingHistoriesSerializationModel>>(
+            (_, _, inner) => new BufferedSerializer<PathfindingHistoriesSerializationModel>(inner),
+            condition: ctx => ctx.CurrentInstance is not CompressSerializer<PathfindingHistoriesSerializationModel>);
 
         builder.RegisterType<FileLog>().As<ILog>().SingleInstance();
         builder.RegisterType<MessageBoxLog>().As<ILog>().SingleInstance();
@@ -132,9 +132,9 @@ internal static class Modules
         builder.RegisterType<RunsListView>().Keyed<View>(KeyFilters.RunCreateView).WithAttributeFiltering();
         builder.RegisterType<RunParametresView>().Keyed<View>(KeyFilters.RunCreateView).WithAttributeFiltering();
 
-        builder.RegisterType<RunStepRulesView>().Keyed<View>(KeyFilters.RunParametresView).WithAttributeFiltering();
-        builder.RegisterType<RunHeuristicsView>().Keyed<View>(KeyFilters.RunParametresView).WithAttributeFiltering();
-        builder.RegisterType<RunsPopulateView>().Keyed<View>(KeyFilters.RunParametresView).WithAttributeFiltering();
+        builder.RegisterType<RunStepRulesView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
+        builder.RegisterType<RunHeuristicsView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
+        builder.RegisterType<RunsPopulateView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
 
         return builder.Build();
     }

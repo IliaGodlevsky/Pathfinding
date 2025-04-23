@@ -6,10 +6,10 @@ using System.Collections.Frozen;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public sealed class AStarGreedyAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange,
+public sealed class AStarGreedyAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
     IHeuristic heuristic, IStepRule stepRule) : GreedyAlgorithm(pathfindingRange)
 {
-    public AStarGreedyAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
+    public AStarGreedyAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
         : this(pathfindingRange, new ChebyshevDistance(), new DefaultStepRule())
     {
 
@@ -17,14 +17,14 @@ public sealed class AStarGreedyAlgorithm(IEnumerable<IPathfindingVertex> pathfin
 
     protected override IGraphPath GetSubPath()
     {
-        return new GraphPath(traces.ToFrozenDictionary(),
+        return new GraphPath(Traces.ToFrozenDictionary(),
             CurrentRange.Target, stepRule);
     }
 
     protected override double CalculateGreed(IPathfindingVertex vertex)
     {
-        double heuristicResult = heuristic.Calculate(vertex, CurrentRange.Target);
-        double stepCost = stepRule.CalculateStepCost(vertex, CurrentVertex);
+        var heuristicResult = heuristic.Calculate(vertex, CurrentRange.Target);
+        var stepCost = stepRule.CalculateStepCost(vertex, CurrentVertex);
         return heuristicResult + stepCost;
     }
 }

@@ -2,4 +2,4 @@
 
 namespace Pathfinding.App.Console.Messages.ViewModel;
 
-internal sealed record class RunCreatedMessaged(IReadOnlyCollection<RunStatisticsModel> Models);
+internal sealed record RunCreatedMessaged(IReadOnlyCollection<RunStatisticsModel> Models);

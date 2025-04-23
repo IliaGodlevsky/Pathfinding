@@ -6,13 +6,13 @@ using System.Collections.Frozen;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public abstract class PathfindingAlgorithm<TStorage>(IEnumerable<IPathfindingVertex> pathfindingRange)
+public abstract class PathfindingAlgorithm<TStorage>(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
     : PathfindingProcess(pathfindingRange)
     where TStorage : new()
 {
-    protected readonly HashSet<IPathfindingVertex> visited = [];
-    protected readonly Dictionary<Coordinate, IPathfindingVertex> traces = [];
-    protected readonly TStorage storage = new();
+    protected readonly HashSet<IPathfindingVertex> Visited = [];
+    protected readonly Dictionary<Coordinate, IPathfindingVertex> Traces = [];
+    protected readonly TStorage Storage = new();
 
     protected SubRange CurrentRange { get; set; } = SubRange.Default;
 
@@ -31,21 +31,21 @@ public abstract class PathfindingAlgorithm<TStorage>(IEnumerable<IPathfindingVer
 
     protected override IGraphPath GetSubPath()
     {
-        return new GraphPath(traces.ToFrozenDictionary(),
+        return new GraphPath(Traces.ToFrozenDictionary(),
             CurrentRange.Target);
     }
 
     protected override void DropState()
     {
-        visited.Clear();
-        traces.Clear();
+        Visited.Clear();
+        Traces.Clear();
     }
 
     protected virtual IReadOnlyCollection<IPathfindingVertex> GetUnvisitedNeighbours(
         IPathfindingVertex vertex)
     {
         return vertex.Neighbors
-            .Where(v => !v.IsObstacle && !visited.Contains(v))
+            .Where(v => !v.IsObstacle && !Visited.Contains(v))
             .ToArray();
     }
 }

@@ -259,7 +259,7 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Euclidian.
+        ///   Looks up a localized string similar to Euclidean.
         /// </summary>
         internal static string Euclidian {
             get {

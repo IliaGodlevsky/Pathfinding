@@ -2,7 +2,7 @@
 
 public enum Heuristics
 {
-    Euclidian,
+    Euclidean,
     Chebyshev,
     Diagonal,
     Manhattan

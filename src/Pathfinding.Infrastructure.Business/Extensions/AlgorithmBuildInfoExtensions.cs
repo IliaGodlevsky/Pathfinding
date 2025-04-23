@@ -11,7 +11,7 @@ namespace Pathfinding.Infrastructure.Business.Extensions;
 public static class AlgorithmBuildInfoExtensions
 {
     public static PathfindingProcess ToAlgorithm(this IAlgorithmBuildInfo info,
-        IEnumerable<IPathfindingVertex> range)
+        IReadOnlyCollection<IPathfindingVertex> range)
     {
         return info.Algorithm switch
         {
@@ -41,7 +41,7 @@ public static class AlgorithmBuildInfoExtensions
                 GetHeuristic(info.Heuristics, info.Weight)),
             Algorithm.Lee => new LeeAlgorithm(range),
             Algorithm.Snake => new SnakeAlgorithm(range, new ManhattanDistance()),
-            _ => throw new NotImplementedException($"Uknown algorithm: {info.Algorithm}")
+            _ => throw new NotImplementedException($"Unknown algorithm: {info.Algorithm}")
         };
     }
 
@@ -59,7 +59,7 @@ public static class AlgorithmBuildInfoExtensions
     {
         return heuristic switch
         {
-            Heuristics.Euclidian => new EuclidianDistance().WithWeight(weight),
+            Heuristics.Euclidean => new EuclideanDistance().WithWeight(weight),
             Heuristics.Chebyshev => new ChebyshevDistance().WithWeight(weight),
             Heuristics.Diagonal => new DiagonalDistance().WithWeight(weight),
             Heuristics.Manhattan => new ManhattanDistance().WithWeight(weight),

@@ -4,9 +4,9 @@ namespace Pathfinding.App.Console.Models
 {
     internal class StreamModel(Stream stream, 
         StreamFormat? format,
-        params IDisposable[] disposables)
+        params IDisposable[] disposables) : IDisposable, IAsyncDisposable
     {
-        public static readonly StreamModel Empty = new(Stream.Null, default);
+        public static readonly StreamModel Empty = new(Stream.Null, null);
 
         private readonly CompositeDisposable disposables = [.. disposables.Append(stream)];
 

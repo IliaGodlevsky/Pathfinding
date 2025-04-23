@@ -20,18 +20,18 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
     [Category("Unit")]
     internal class GraphExportViewModelTests
     {
-        private static async Task ExportGraphCommand_HasGraphs_ShouldExport(Expression<Func<IRequestService<GraphVertexModel>, Task<PathfindingHisotiriesSerializationModel>>> expression,
+        private static async Task ExportGraphCommand_HasGraphs_ShouldExport(Expression<Func<IRequestService<GraphVertexModel>, Task<PathfindingHistoriesSerializationModel>>> expression,
             ExportOptions options)
         {
             using var mock = AutoMock.GetLoose();
 
             var models = Generators.GenerateGraphInfos(3).ToArray();
 
-            PathfindingHisotiriesSerializationModel histories
+            PathfindingHistoriesSerializationModel histories
                = Enumerable.Range(1, 5)
                .Select(x => new PathfindingHistorySerializationModel())
                .ToArray()
-               .To(x => new PathfindingHisotiriesSerializationModel() { Histories = x.ToList() });
+               .To(x => new PathfindingHistoriesSerializationModel() { Histories = x.ToList() });
 
             mock.Mock<IRequestService<GraphVertexModel>>()
                 .Setup(expression)
@@ -44,12 +44,12 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                .Callback<object, object, MessageHandler<object, GraphSelectedMessage>>((r, t, handler)
                     => handler(r, new GraphSelectedMessage(models)));
 
-            var serializer = mock.Mock<ISerializer<PathfindingHisotiriesSerializationModel>>();
-            var meta = new Meta<ISerializer<PathfindingHisotiriesSerializationModel>>(serializer.Object, new Dictionary<string, object>()
+            var serializer = mock.Mock<ISerializer<PathfindingHistoriesSerializationModel>>();
+            var meta = new Meta<ISerializer<PathfindingHistoriesSerializationModel>>(serializer.Object, new Dictionary<string, object>()
             {
                 { MetadataKeys.ExportFormat, StreamFormat.Binary }
             });
-            var typedParam = new TypedParameter(typeof(IEnumerable<Meta<ISerializer<PathfindingHisotiriesSerializationModel>>>), new[] { meta });
+            var typedParam = new TypedParameter(typeof(IEnumerable<Meta<ISerializer<PathfindingHistoriesSerializationModel>>>), new[] { meta });
 
             var viewModel = mock.Create<GraphExportViewModel>(typedParam);
             viewModel.Options = options;
@@ -72,7 +72,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                         It.IsAny<MessageHandler<object, GraphSelectedMessage>>()), Times.Once);
 
                 serializer.Verify(x => x.SerializeToAsync(
-                    It.IsAny<PathfindingHisotiriesSerializationModel>(),
+                    It.IsAny<PathfindingHistoriesSerializationModel>(),
                     It.IsAny<Stream>(),
                     It.IsAny<CancellationToken>()), Times.Once);
             });
@@ -110,12 +110,12 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
         {
             using var mock = AutoMock.GetLoose();
 
-            var serializer = mock.Mock<ISerializer<PathfindingHisotiriesSerializationModel>>();
-            var meta = new Meta<ISerializer<PathfindingHisotiriesSerializationModel>>(serializer.Object, new Dictionary<string, object>()
+            var serializer = mock.Mock<ISerializer<PathfindingHistoriesSerializationModel>>();
+            var meta = new Meta<ISerializer<PathfindingHistoriesSerializationModel>>(serializer.Object, new Dictionary<string, object>()
             {
                 { MetadataKeys.ExportFormat, StreamFormat.Binary }
             });
-            var typedParam = new TypedParameter(typeof(IEnumerable<Meta<ISerializer<PathfindingHisotiriesSerializationModel>>>), new[] { meta });
+            var typedParam = new TypedParameter(typeof(IEnumerable<Meta<ISerializer<PathfindingHistoriesSerializationModel>>>), new[] { meta });
 
             var viewModel = mock.Create<GraphExportViewModel>(typedParam);
 
@@ -133,7 +133,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                         It.IsAny<CancellationToken>()), Times.Never);
 
                 serializer.Verify(x => x.SerializeToAsync(
-                    It.IsAny<PathfindingHisotiriesSerializationModel>(),
+                    It.IsAny<PathfindingHistoriesSerializationModel>(),
                     It.IsAny<Stream>(),
                     It.IsAny<CancellationToken>()), Times.Never);
             });
@@ -144,8 +144,8 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
         {
             using var mock = AutoMock.GetLoose(builder =>
             {
-                builder.RegisterType<BinarySerializer<PathfindingHisotiriesSerializationModel>>()
-                    .As<ISerializer<PathfindingHisotiriesSerializationModel>>()
+                builder.RegisterType<BinarySerializer<PathfindingHistoriesSerializationModel>>()
+                    .As<ISerializer<PathfindingHistoriesSerializationModel>>()
                     .SingleInstance().WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Binary);
             });
 

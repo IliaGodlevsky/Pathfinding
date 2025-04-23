@@ -3,23 +3,23 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public sealed class LeeAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
+public sealed class LeeAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
     : BreadthFirstAlgorithm<Queue<IPathfindingVertex>>(pathfindingRange)
 {
     protected override void DropState()
     {
         base.DropState();
-        storage.Clear();
+        Storage.Clear();
     }
 
     protected override void MoveNextVertex()
     {
-        CurrentVertex = storage.DequeueOrThrowDeadEndVertexException();
+        CurrentVertex = Storage.DequeueOrThrowDeadEndVertexException();
     }
 
     protected override void RelaxVertex(IPathfindingVertex vertex)
     {
-        storage.Enqueue(vertex);
+        Storage.Enqueue(vertex);
         base.RelaxVertex(vertex);
     }
 }

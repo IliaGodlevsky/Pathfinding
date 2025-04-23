@@ -36,7 +36,7 @@ namespace Pathfinding.Infrastructure.Business.Benchmarks
         [Benchmark]
         public static void EuclidianDistanceBenchmark()
         {
-            var chebyshev = new EuclidianDistance();
+            var chebyshev = new EuclideanDistance();
 
             chebyshev.Calculate(first, second);
         }

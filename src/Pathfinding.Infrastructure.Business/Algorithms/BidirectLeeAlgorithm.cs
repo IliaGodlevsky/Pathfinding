@@ -3,40 +3,40 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public sealed class BidirectLeeAlgorithm(IEnumerable<IPathfindingVertex> pathfindingRange)
+public sealed class BidirectLeeAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
     : BidirectBreadthFirstAlgorithm<Queue<IPathfindingVertex>>(pathfindingRange)
 {
     protected override void DropState()
     {
         base.DropState();
-        backwardStorage.Clear();
-        forwardStorage.Clear();
+        BackwardStorage.Clear();
+        ForwardStorage.Clear();
     }
 
     protected override void RelaxForwardVertex(IPathfindingVertex vertex)
     {
-        forwardStorage.Enqueue(vertex);
+        ForwardStorage.Enqueue(vertex);
         SetForwardIntersection(vertex);
         base.RelaxForwardVertex(vertex);
     }
 
     protected override void RelaxBackwardVertex(IPathfindingVertex vertex)
     {
-        backwardStorage.Enqueue(vertex);
+        BackwardStorage.Enqueue(vertex);
         SetBackwardIntersections(vertex);
         base.RelaxBackwardVertex(vertex);
     }
 
     protected override void MoveNextVertex()
     {
-        var forward = forwardStorage.DequeueOrThrowDeadEndVertexException();
-        var backward = backwardStorage.DequeueOrThrowDeadEndVertexException();
+        var forward = ForwardStorage.DequeueOrThrowDeadEndVertexException();
+        var backward = BackwardStorage.DequeueOrThrowDeadEndVertexException();
         Current = new(forward, backward);
     }
 
     protected override void VisitCurrentVertex()
     {
-        forwardVisited.Add(Current.Source);
-        backwardVisited.Add(Current.Target);
+        ForwardVisited.Add(Current.Source);
+        BackwardVisited.Add(Current.Target);
     }
 }

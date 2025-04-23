@@ -2,4 +2,4 @@
 
 namespace Pathfinding.App.Console.Messages.ViewModel;
 
-internal sealed record class GraphUpdatedMessage(GraphInformationModel Model);
+internal sealed record GraphUpdatedMessage(GraphInformationModel Model);

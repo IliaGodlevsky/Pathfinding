@@ -2,4 +2,4 @@
 
 namespace Pathfinding.App.Console.Messages.ViewModel;
 
-internal record class RunsUpdatedMessage(IReadOnlyCollection<RunStatisticsModel> Updated);
+internal record RunsUpdatedMessage(IReadOnlyCollection<RunStatisticsModel> Updated);

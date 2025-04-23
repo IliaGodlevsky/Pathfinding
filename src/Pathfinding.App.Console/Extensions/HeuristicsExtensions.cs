@@ -9,7 +9,7 @@ internal static class HeuristicsExtensions
     {
         return heuristics switch
         {
-            Heuristics.Euclidian => Resource.Euclidian,
+            Heuristics.Euclidean => Resource.Euclidian,
             Heuristics.Chebyshev => Resource.Chebyshev,
             Heuristics.Diagonal => Resource.Diagonal,
             Heuristics.Manhattan => Resource.Manhattan,
