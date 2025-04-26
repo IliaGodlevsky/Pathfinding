@@ -2,7 +2,7 @@
 
 public interface IBinarySerializable
 {
-    void Serialize(BinaryWriter writer);
+    Task SerializeAsync(Stream stream, CancellationToken token = default);
 
-    void Deserialize(BinaryReader reader);
+    Task DeserializeAsync(Stream stream, CancellationToken token = default);
 }

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Autofac.Features.AttributeFilters;
+﻿using Autofac.Features.AttributeFilters;
 using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Injection;
@@ -15,6 +14,7 @@ using System.Reactive;
 using Serializer = Pathfinding.Service.Interface
     .ISerializer<Pathfinding.Service.Interface.Models.Serialization
         .PathfindingHistoriesSerializationModel>;
+// ReSharper disable PossibleInvalidOperationException
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -63,7 +63,6 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
             graphIds => graphIds.Length > 0);
     }
 
-    [SuppressMessage("ReSharper", "PossibleInvalidOperationException")]
     private async Task ExportGraph(StreamModel stream)
     {
         await ExecuteSafe(async () =>

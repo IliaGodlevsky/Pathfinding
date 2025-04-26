@@ -39,7 +39,7 @@ namespace Pathfinding.Service.Interface.Extensions
         public static T ReadEnumAttribute<T>(this XmlReader reader, string attributeName)
             where T : struct, Enum
         {
-            var value = reader.GetAttribute(attributeName);
+            var value = reader.GetAttribute(attributeName)!;
             return Enum.Parse<T>(value);
         }
 

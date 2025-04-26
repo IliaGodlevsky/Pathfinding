@@ -12,12 +12,10 @@ public sealed class JsonSerializer<T> : ISerializer<T>
     {
         try
         {
-            using var reader = new StreamReader(stream,
+            using var reader = new StreamReader(stream, 
                 Encoding.Default, false, 1024, leaveOpen: true);
-            string deserialized = await reader.ReadToEndAsync(token)
-                .ConfigureAwait(false);
-            return await Task.Run(() => JsonConvert.DeserializeObject<T>(deserialized), token)
-                .ConfigureAwait(false);
+            var json = await reader.ReadToEndAsync(token).ConfigureAwait(false);
+            return JsonConvert.DeserializeObject<T>(json);
         }
         catch (Exception ex)
         {
@@ -30,11 +28,10 @@ public sealed class JsonSerializer<T> : ISerializer<T>
     {
         try
         {
-            using var writer = new StreamWriter(stream,
+            await using var writer = new StreamWriter(stream,
                 Encoding.Default, 1024, leaveOpen: true);
-            string serialized = await Task.Run(() => JsonConvert.SerializeObject(item), token)
-                .ConfigureAwait(false);
-            await writer.WriteAsync(serialized).ConfigureAwait(false);
+            var json = JsonConvert.SerializeObject(item);
+            await writer.WriteAsync(json).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

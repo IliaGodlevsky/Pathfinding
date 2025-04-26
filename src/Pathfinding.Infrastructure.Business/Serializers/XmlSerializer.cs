@@ -8,17 +8,18 @@ namespace Pathfinding.Infrastructure.Business.Serializers;
 public sealed class XmlSerializer<T> : ISerializer<T>
     where T : IXmlSerializable, new()
 {
-    public async Task<T> DeserializeFromAsync(Stream stream,
+    public async Task<T> DeserializeFromAsync(Stream stream, 
         CancellationToken token = default)
     {
         try
         {
-            var serializer = new XmlSerializer(typeof(T));
-            using var reader = new StreamReader(stream,
-                Encoding.Default, false, 1024, leaveOpen: true);
-            var result = await Task.Run(() => serializer.Deserialize(reader), token)
-                .ConfigureAwait(false);
-            return (T)result;
+            using var reader = new StreamReader(stream, 
+                Encoding.UTF8, leaveOpen: true);
+            var xml = await reader.ReadToEndAsync(token).ConfigureAwait(false);
+            var xmlSerializer = new XmlSerializer(typeof(T));
+            using var stringReader = new StringReader(xml);
+            return (T)xmlSerializer.Deserialize(stringReader);
+
         }
         catch (Exception ex)
         {
@@ -31,11 +32,14 @@ public sealed class XmlSerializer<T> : ISerializer<T>
     {
         try
         {
-            var serializer = new XmlSerializer(typeof(T));
-            using var writer = new StreamWriter(stream,
-                Encoding.Default, 1024, leaveOpen: true);
-            await Task.Run(() => serializer.Serialize(writer, item), token)
-                .ConfigureAwait(false);
+            var xmlSerializer = new XmlSerializer(typeof(T));
+            await using var stringWriter = new StringWriter();
+            xmlSerializer.Serialize(stringWriter, item);
+            var xml = stringWriter.ToString();
+            await using var writer = new StreamWriter(stream, 
+                Encoding.UTF8, leaveOpen: true);
+            await writer.WriteAsync(xml.AsMemory(), token).ConfigureAwait(false);
+            await writer.FlushAsync(token).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

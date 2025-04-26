@@ -131,7 +131,7 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
                 vertex.IsObstacle = polarity;
                 messenger.Send(new ObstaclesCountChangedMessage(graphId, vertex.IsObstacle ? 1 : -1));
                 var request = new UpdateVerticesRequest<GraphVertexModel>(graphId,
-                    vertex.Enumerate().ToList());
+                    [.. vertex.Enumerate()]);
                 await ExecuteSafe(async () =>
                 {
                     await service.UpdateVerticesAsync(request).ConfigureAwait(false);

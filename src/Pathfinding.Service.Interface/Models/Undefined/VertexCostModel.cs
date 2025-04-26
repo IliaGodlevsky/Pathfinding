@@ -13,18 +13,18 @@ namespace Pathfinding.Service.Interface.Models.Undefined
 
         public int LowerValueOfRange { get; set; }
 
-        public void Deserialize(BinaryReader reader)
+        public async Task DeserializeAsync(Stream stream, CancellationToken token = default)
         {
-            Cost = reader.ReadInt32();
-            UpperValueOfRange = reader.ReadInt32();
-            LowerValueOfRange = reader.ReadInt32();
+            Cost = await stream.ReadInt32Async(token).ConfigureAwait(false);
+            UpperValueOfRange = await stream.ReadInt32Async(token).ConfigureAwait(false);
+            LowerValueOfRange = await stream.ReadInt32Async(token).ConfigureAwait(false);
         }
 
-        public void Serialize(BinaryWriter writer)
+        public async Task SerializeAsync(Stream stream, CancellationToken token = default)
         {
-            writer.Write(Cost);
-            writer.Write(UpperValueOfRange);
-            writer.Write(LowerValueOfRange);
+            await stream.WriteInt32Async(Cost, token).ConfigureAwait(false);
+            await stream.WriteInt32Async(UpperValueOfRange, token).ConfigureAwait(false);
+            await stream.WriteInt32Async(LowerValueOfRange, token).ConfigureAwait(false);
         }
 
         public XmlSchema GetSchema() => null;

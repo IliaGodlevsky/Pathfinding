@@ -54,7 +54,7 @@ public class GraphVertexModel : ReactiveObject,
     IReadOnlyCollection<IVertex> IVertex.Neighbors
     {
         get => Neighbors;
-        set => Neighbors = value.Cast<GraphVertexModel>().ToHashSet();
+        set => Neighbors = [.. value.Cast<GraphVertexModel>()];
     }
 
     IReadOnlyCollection<IPathfindingVertex> IPathfindingVertex.Neighbors => Neighbors;

@@ -14,18 +14,18 @@ namespace Pathfinding.Service.Interface.Models.Serialization
 
         public bool IsObstacle { get; set; }
 
-        public void Deserialize(BinaryReader reader)
+        public async Task DeserializeAsync(Stream stream, CancellationToken token = default)
         {
-            Position = reader.ReadSerializable<CoordinateModel>();
-            Cost = reader.ReadSerializable<VertexCostModel>();
-            IsObstacle = reader.ReadBoolean();
+            Position = await stream.ReadSerializableAsync<CoordinateModel>(token).ConfigureAwait(false);
+            Cost = await stream.ReadSerializableAsync<VertexCostModel>(token).ConfigureAwait(false);
+            IsObstacle = await stream.ReadBoolAsync(token).ConfigureAwait(false);
         }
 
-        public void Serialize(BinaryWriter writer)
+        public async Task SerializeAsync(Stream stream, CancellationToken token = default)
         {
-            writer.Write(Position);
-            writer.Write(Cost);
-            writer.Write(IsObstacle);
+            await stream.WriteAsync(Position, token).ConfigureAwait(false);
+            await stream.WriteAsync(Cost, token).ConfigureAwait(false);
+            await stream.WriteBoolAsync(IsObstacle, token).ConfigureAwait(false);
         }
 
         public XmlSchema GetSchema() => null;

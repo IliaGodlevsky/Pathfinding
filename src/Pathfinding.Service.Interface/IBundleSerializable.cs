@@ -4,7 +4,7 @@ namespace Pathfinding.Service.Interface;
 
 public interface IBundleSerializable
 {
-    void Serialize(ZipArchive bundle);
+    Task SerializeAsync(ZipArchive bundle, CancellationToken token = default);
 
-    void Deserialize(ZipArchive bundle);
+    Task DeserializeAsync(ZipArchive bundle, CancellationToken token = default);
 }

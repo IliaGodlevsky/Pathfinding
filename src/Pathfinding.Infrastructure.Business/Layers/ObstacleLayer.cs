@@ -13,7 +13,7 @@ public sealed class ObstacleLayer(int obstaclePercent) : ILayer
         int regularsCount = graph.Count - obstaclesCount;
         Repeat(true, obstaclesCount)
            .Concat(Repeat(false, regularsCount))
-           .OrderBy(item => Random.Shared.NextDouble()) // shuffle
+           .OrderBy(_ => Random.Shared.NextDouble()) // shuffle
            .Zip(graph, (o, v) => (Vertex: v, Obstacle: o))
            .ForEach(item => item.Vertex.IsObstacle = item.Obstacle);
     }

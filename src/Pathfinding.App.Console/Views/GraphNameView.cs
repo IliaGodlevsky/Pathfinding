@@ -15,8 +15,8 @@ internal sealed partial class GraphNameView : FrameView
             .Select(_ => nameField.Text)
             .BindTo(viewModel, x => x.Name);
         this.Events().VisibleChanged
-            .Where(x => Visible)
-            .Do(x => nameField.Text = string.Empty)
+            .Where(_ => Visible)
+            .Do(_ => nameField.Text = string.Empty)
             .Subscribe();
     }
 }

@@ -11,14 +11,15 @@ namespace Pathfinding.Service.Interface.Models.Serialization
     {
         public IReadOnlyCollection<PathfindingHistorySerializationModel> Histories { get; set; } = [];
 
-        public void Deserialize(BinaryReader reader)
+        public async Task DeserializeAsync(Stream stream, CancellationToken token = default)
         {
-            Histories = reader.ReadSerializableArray<PathfindingHistorySerializationModel>();
+            Histories = await stream.ReadSerializableArrayAsync<PathfindingHistorySerializationModel>(token)
+                .ConfigureAwait(false);
         }
 
-        public void Serialize(BinaryWriter writer)
+        public async Task SerializeAsync(Stream stream, CancellationToken token = default)
         {
-            writer.Write(Histories);
+            await stream.WriteAsync(Histories, token).ConfigureAwait(false);
         }
 
         public XmlSchema GetSchema() => null;
@@ -34,14 +35,14 @@ namespace Pathfinding.Service.Interface.Models.Serialization
             writer.WriteCollection(nameof(Histories), "Graph", Histories);
         }
 
-        public void Serialize(ZipArchive archive)
+        public async Task SerializeAsync(ZipArchive archive, CancellationToken token = default)
         {
-            archive.WriteHistory(Histories);
+            await archive.WriteHistoryAsync(Histories, token).ConfigureAwait(false);
         }
 
-        public void Deserialize(ZipArchive archive)
+        public async Task DeserializeAsync(ZipArchive archive, CancellationToken token = default)
         {
-            Histories = archive.ReadHistory();
+            Histories = await archive.ReadHistoryAsync(token).ConfigureAwait(false);
         }
     }
 }

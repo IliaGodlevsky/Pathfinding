@@ -44,8 +44,7 @@ public abstract class PathfindingAlgorithm<TStorage>(IReadOnlyCollection<IPathfi
     protected virtual IReadOnlyCollection<IPathfindingVertex> GetUnvisitedNeighbours(
         IPathfindingVertex vertex)
     {
-        return vertex.Neighbors
-            .Where(v => !v.IsObstacle && !Visited.Contains(v))
-            .ToArray();
+        return [.. vertex.Neighbors
+            .Where(v => !v.IsObstacle && !Visited.Contains(v))];
     }
 }

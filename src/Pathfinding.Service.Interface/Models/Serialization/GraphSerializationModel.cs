@@ -18,22 +18,22 @@ namespace Pathfinding.Service.Interface.Models.Serialization
 
         public IReadOnlyList<int> DimensionSizes { get; set; }
 
-        public void Deserialize(BinaryReader reader)
+        public async Task DeserializeAsync(Stream stream, CancellationToken token = default)
         {
-            Name = reader.ReadString();
-            SmoothLevel = (SmoothLevels)reader.ReadInt32();
-            Neighborhood = (Neighborhoods)reader.ReadInt32();
-            Status = (GraphStatuses)reader.ReadInt32();
-            DimensionSizes = reader.ReadArray();
+            Name = await stream.ReadStringAsync(token).ConfigureAwait(false);
+            SmoothLevel = (SmoothLevels)await stream.ReadInt32Async(token).ConfigureAwait(false);
+            Neighborhood = (Neighborhoods)await stream.ReadInt32Async(token).ConfigureAwait(false);
+            Status = (GraphStatuses)await stream.ReadInt32Async(token).ConfigureAwait(false);
+            DimensionSizes = await stream.ReadArrayAsync(token).ConfigureAwait(false);
         }
 
-        public void Serialize(BinaryWriter writer)
+        public async Task SerializeAsync(Stream stream, CancellationToken token = default)
         {
-            writer.Write(Name);
-            writer.Write((int)SmoothLevel);
-            writer.Write((int)Neighborhood);
-            writer.Write((int)Status);
-            writer.Write(DimensionSizes);
+            await stream.WriteStringAsync(Name, token).ConfigureAwait(false);
+            await stream.WriteInt32Async((int)SmoothLevel, token).ConfigureAwait(false);
+            await stream.WriteInt32Async((int)Neighborhood, token).ConfigureAwait(false);
+            await stream.WriteInt32Async((int)Status, token).ConfigureAwait(false);
+            await stream.WriteInt32ArrayAsync(DimensionSizes, token).ConfigureAwait(false);
         }
 
         public XmlSchema GetSchema() => null;

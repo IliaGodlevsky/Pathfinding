@@ -18,7 +18,7 @@ namespace Pathfinding.Shared.Primitives
 
         public Coordinate(int numberOfDimensions, IReadOnlyList<int> coordinates)
         {
-            CoordinatesValues = coordinates.TakeOrDefault(numberOfDimensions).ToArray();
+            CoordinatesValues = [.. coordinates.TakeOrDefault(numberOfDimensions)];
             toString = $"({string.Join(",", CoordinatesValues)})";
             hashCode = CoordinatesValues.AggregateOrDefault(HashCode.Combine);
         }
@@ -32,7 +32,7 @@ namespace Pathfinding.Shared.Primitives
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Coordinate(IEnumerable<int> coordinates)
-            : this(coordinates.ToArray())
+            : this([.. coordinates])
         {
 
         }

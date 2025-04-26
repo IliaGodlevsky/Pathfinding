@@ -9,14 +9,14 @@ namespace Pathfinding.Service.Interface.Models.Undefined
     {
         public IReadOnlyCollection<int> Coordinate { get; set; }
 
-        public void Deserialize(BinaryReader reader)
+        public async Task DeserializeAsync(Stream stream, CancellationToken token = default)
         {
-            Coordinate = reader.ReadArray();
+            Coordinate = await stream.ReadArrayAsync(token).ConfigureAwait(false);
         }
 
-        public void Serialize(BinaryWriter writer)
+        public async Task SerializeAsync(Stream stream, CancellationToken token = default)
         {
-            writer.Write(Coordinate);
+            await stream.WriteInt32ArrayAsync(Coordinate, token).ConfigureAwait(false);
         }
 
         public XmlSchema GetSchema() => null;

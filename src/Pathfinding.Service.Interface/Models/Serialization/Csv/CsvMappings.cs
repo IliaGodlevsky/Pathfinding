@@ -119,7 +119,7 @@ namespace Pathfinding.Service.Interface.Models.Serialization.Csv
             };
         }
 
-        private static List<RunStatisticsSerializationModel> ToStatisics(this IEnumerable<CsvStatistics> models)
+        private static List<RunStatisticsSerializationModel> ToStatistics(this IEnumerable<CsvStatistics> models)
         {
             return [.. models.Select(x => x.ToStatistics())];
         }
@@ -161,7 +161,7 @@ namespace Pathfinding.Service.Interface.Models.Serialization.Csv
             {
                 Graph = x.ToGraph(),
                 Vertices = vertices.GetValueOrDefault(x.Id, []).ToVertices(),
-                Statistics = statistics.GetValueOrDefault(x.Id, []).ToStatisics(),
+                Statistics = statistics.GetValueOrDefault(x.Id, []).ToStatistics(),
                 Range = ranges.GetValueOrDefault(x.Id, []).ToRanges()
             })];
         }

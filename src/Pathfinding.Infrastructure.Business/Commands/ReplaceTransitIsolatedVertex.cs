@@ -11,7 +11,7 @@ public sealed class ReplaceTransitIsolatedVertex<TVertex> : IPathfindingRangeCom
     {
         var isolated = range.Transit.First(IsIsolated);
         int isolatedIndex = range.Transit.IndexOf(isolated);
-        range.Transit.Remove(isolated);
+        range.Transit.RemoveAt(isolatedIndex);
         range.Transit.Insert(isolatedIndex, vertex);
     }
 

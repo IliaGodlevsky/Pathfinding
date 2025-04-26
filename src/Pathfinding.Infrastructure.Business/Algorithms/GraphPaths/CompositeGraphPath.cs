@@ -27,7 +27,7 @@ public sealed class CompositeGraphPath : IGraphPath
 
     private Coordinate[] GetPath()
     {
-        return paths.SelectMany(p => p.Reverse()).ToArray();
+        return [.. paths.SelectMany(p => p.Reverse())];
     }
 
     private int GetCount()

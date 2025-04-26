@@ -26,7 +26,6 @@ public abstract class NeighborhoodLayer : ILayer
                 .Zip(graph.DimensionsSizes, (x, y) => (Position: x, Dimension: y))
                 .All(z => z.Position < z.Dimension && z.Position >= 0);
         }
-        return self.Where(IsInRange).Distinct()
-            .Select(graph.Get).ToList();
+        return [.. self.Where(IsInRange).Distinct().Select(graph.Get)];
     }
 }

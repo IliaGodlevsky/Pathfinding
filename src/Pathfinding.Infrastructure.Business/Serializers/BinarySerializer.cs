@@ -1,7 +1,5 @@
 ﻿using Pathfinding.Infrastructure.Business.Serializers.Exceptions;
 using Pathfinding.Service.Interface;
-using Pathfinding.Service.Interface.Extensions;
-using System.Text;
 
 namespace Pathfinding.Infrastructure.Business.Serializers;
 
@@ -13,10 +11,9 @@ public sealed class BinarySerializer<T> : ISerializer<T>
     {
         try
         {
-            using var reader = new BinaryReader(stream,
-                Encoding.Default, leaveOpen: true);
-            return await Task.Run(reader.ReadSerializable<T>, token)
-                .ConfigureAwait(false);
+            var item = new T();
+            await item.DeserializeAsync(stream, token).ConfigureAwait(false);
+            return item;
         }
         catch (Exception ex)
         {
@@ -29,9 +26,7 @@ public sealed class BinarySerializer<T> : ISerializer<T>
     {
         try
         {
-            using var writer = new BinaryWriter(stream,
-                Encoding.Default, leaveOpen: true);
-            await Task.Run(() => writer.Write(item), token).ConfigureAwait(false);
+            await item.SerializeAsync(stream, token).ConfigureAwait(false);
         }
         catch (Exception ex)
         {

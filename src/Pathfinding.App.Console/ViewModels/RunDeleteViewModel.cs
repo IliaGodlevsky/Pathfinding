@@ -64,7 +64,7 @@ internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel
 
     private void OnRunsSelected(object recipient, RunSelectedMessage msg)
     {
-        SelectedRunsIds = msg.SelectedRuns.Select(x => x.Id).ToArray();
+        SelectedRunsIds = [.. msg.SelectedRuns.Select(x => x.Id)];
     }
 
     private void OnGraphActivated(object recipient, GraphActivatedMessage msg)

@@ -16,20 +16,20 @@ namespace Pathfinding.Service.Interface.Models.Serialization
 
         public IReadOnlyCollection<CoordinateModel> Range { get; set; }
 
-        public void Deserialize(BinaryReader reader)
+        public async Task DeserializeAsync(Stream stream, CancellationToken token = default)
         {
-            Graph = reader.ReadSerializable<GraphSerializationModel>();
-            Vertices = reader.ReadSerializableArray<VertexSerializationModel>();
-            Statistics = reader.ReadSerializableArray<RunStatisticsSerializationModel>();
-            Range = reader.ReadSerializableArray<CoordinateModel>();
+            Graph = await stream.ReadSerializableAsync<GraphSerializationModel>(token).ConfigureAwait(false);
+            Vertices = await stream.ReadSerializableArrayAsync<VertexSerializationModel>(token).ConfigureAwait(false);
+            Statistics = await stream.ReadSerializableArrayAsync<RunStatisticsSerializationModel>(token).ConfigureAwait(false);
+            Range = await stream.ReadSerializableArrayAsync<CoordinateModel>(token).ConfigureAwait(false);
         }
 
-        public void Serialize(BinaryWriter writer)
+        public async Task SerializeAsync(Stream stream, CancellationToken token = default)
         {
-            writer.Write(Graph);
-            writer.Write(Vertices);
-            writer.Write(Statistics);
-            writer.Write(Range);
+            await stream.WriteAsync(Graph, token).ConfigureAwait(false);
+            await stream.WriteAsync(Vertices, token).ConfigureAwait(false);
+            await stream.WriteAsync(Statistics, token).ConfigureAwait(false);
+            await stream.WriteAsync(Range, token).ConfigureAwait(false);
         }
 
         public XmlSchema GetSchema() => null;

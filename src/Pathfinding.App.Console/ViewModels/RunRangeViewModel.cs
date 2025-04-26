@@ -18,6 +18,7 @@ using ReactiveUI;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -28,6 +29,8 @@ using Command = Pathfinding.Service.Interface
 
 namespace Pathfinding.App.Console.ViewModels;
 
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
+[SuppressMessage("ReSharper", "AsyncVoidLambda")]
 internal sealed class RunRangeViewModel : BaseViewModel,
     IPathfindingRange<GraphVertexModel>, IRunRangeViewModel
 {
@@ -149,11 +152,11 @@ internal sealed class RunRangeViewModel : BaseViewModel,
             .Do(async _ => await AddRangeToStorage(model))
             .Subscribe().DisposeWith(disposables);
         model.WhenAnyValue(expression).Skip(1).Where(x => !x)
-            .Do(async x => await RemoveVertexFromStorage(model))
+            .Do(async _ => await RemoveVertexFromStorage(model))
             .Subscribe().DisposeWith(disposables);
     }
 
-    private void SubcribeToEvents(GraphVertexModel vertex)
+    private void SubscribeToEvents(GraphVertexModel vertex)
     {
         BindTo(x => x.IsSource, vertex);
         BindTo(x => x.IsTarget, vertex);
@@ -206,8 +209,7 @@ internal sealed class RunRangeViewModel : BaseViewModel,
             disposables.Clear();
             Transit.CollectionChanged -= OnCollectionChanged;
             ClearRange();
-            Graph = new Graph<GraphVertexModel>(msg.Graph.Vertices,
-                msg.Graph.DimensionSizes);
+            Graph = new (msg.Graph.Vertices, msg.Graph.DimensionSizes);
             GraphId = msg.Graph.Id;
             IsReadOnly = msg.Graph.Status == GraphStatuses.Readonly;
             var range = await service.ReadRangeAsync(GraphId).ConfigureAwait(false);
@@ -220,7 +222,7 @@ internal sealed class RunRangeViewModel : BaseViewModel,
                 .ToList();
             Transit.CollectionChanged += OnCollectionChanged;
             Transit.AddRange(transit);
-            Graph.ForEach(SubcribeToEvents);
+            Graph.ForEach(SubscribeToEvents);
         }, logger.Error).ConfigureAwait(false);
         msg.Signal(Unit.Default);
     }

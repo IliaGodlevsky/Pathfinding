@@ -26,30 +26,30 @@ namespace Pathfinding.Service.Interface.Models.Serialization
 
         public int Visited { get; set; }
 
-        public void Deserialize(BinaryReader reader)
+        public async Task DeserializeAsync(Stream stream, CancellationToken token = default)
         {
-            Algorithm = (Algorithms)reader.ReadInt32();
-            Heuristics = (Heuristics?)reader.ReadNullableInt32();
-            Weight = reader.ReadNullableDouble();
-            StepRule = (StepRules?)reader.ReadNullableInt32();
-            ResultStatus = (RunStatuses)reader.ReadInt32();
-            Elapsed = TimeSpan.FromMilliseconds(reader.ReadDouble());
-            Steps = reader.ReadInt32();
-            Cost = reader.ReadDouble();
-            Visited = reader.ReadInt32();
+            Algorithm = (Algorithms)await stream.ReadInt32Async(token).ConfigureAwait(false);
+            Heuristics = (Heuristics?)await stream.ReadNullableInt32Async(token).ConfigureAwait(false);
+            Weight = await stream.ReadNullableDoubleAsync(token).ConfigureAwait(false);
+            StepRule = (StepRules?)await stream.ReadNullableInt32Async(token).ConfigureAwait(false);
+            ResultStatus = (RunStatuses)await stream.ReadInt32Async(token).ConfigureAwait(false);
+            Elapsed = TimeSpan.FromMilliseconds(await stream.ReadDoubleAsync(token).ConfigureAwait(false));
+            Steps = await stream.ReadInt32Async(token).ConfigureAwait(false);
+            Cost = await stream.ReadDoubleAsync(token).ConfigureAwait(false);
+            Visited = await stream.ReadInt32Async(token).ConfigureAwait(false);
         }
 
-        public void Serialize(BinaryWriter writer)
+        public async Task SerializeAsync(Stream stream, CancellationToken token = default)
         {
-            writer.Write((int)Algorithm);
-            writer.WriteNullableInt32((int?)Heuristics);
-            writer.Write(Weight);
-            writer.WriteNullableInt32((int?)StepRule);
-            writer.Write((int)ResultStatus);
-            writer.Write(Elapsed.TotalMilliseconds);
-            writer.Write(Steps);
-            writer.Write(Cost);
-            writer.Write(Visited);
+            await stream.WriteInt32Async((int)Algorithm, token).ConfigureAwait(false);
+            await stream.WriteNullableInt32Async((int?)Heuristics, token).ConfigureAwait(false);
+            await stream.WriteNullableDoubleAsync(Weight, token).ConfigureAwait(false);
+            await stream.WriteNullableInt32Async((int?)StepRule, token).ConfigureAwait(false);
+            await stream.WriteInt32Async((int)ResultStatus, token).ConfigureAwait(false);
+            await stream.WriteDoubleAsync(Elapsed.TotalMilliseconds, token).ConfigureAwait(false);
+            await stream.WriteInt32Async(Steps, token).ConfigureAwait(false);
+            await stream.WriteDoubleAsync(Cost, token).ConfigureAwait(false);
+            await stream.WriteInt32Async(Visited, token).ConfigureAwait(false);
         }
 
         public XmlSchema GetSchema() => null;

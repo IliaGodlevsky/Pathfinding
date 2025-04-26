@@ -13,6 +13,7 @@ using ReactiveUI;
 using System.Reactive;
 
 using Serializer = Pathfinding.Service.Interface.ISerializer<Pathfinding.Service.Interface.Models.Serialization.PathfindingHistoriesSerializationModel>;
+// ReSharper disable PossibleInvalidOperationException
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -29,7 +30,7 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
 
     public GraphImportViewModel(IRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        IEnumerable<Meta<Serializer>> serializers,
+        Meta<Serializer>[] serializers,
         ILog logger)
     {
         this.messenger = messenger;
