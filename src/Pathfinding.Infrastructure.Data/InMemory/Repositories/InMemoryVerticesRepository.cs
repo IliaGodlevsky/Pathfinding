@@ -6,11 +6,12 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
 {
     internal sealed class InMemoryVerticesRepository : IVerticesRepository
     {
-        private long id = 0;
+        private long id;
 
         private readonly HashSet<Vertex> set = new(EntityComparer<long>.Instance);
 
-        public async Task<IEnumerable<Vertex>> CreateAsync(IEnumerable<Vertex> vertices,
+        public async Task<IReadOnlyCollection<Vertex>> CreateAsync(
+            IReadOnlyCollection<Vertex> vertices,
             CancellationToken token = default)
         {
             var result = vertices
@@ -20,8 +21,7 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
             return await Task.FromResult(result);
         }
 
-        public async Task<bool> DeleteVerticesByGraphIdAsync(int graphId,
-            CancellationToken token = default)
+        public async Task<bool> DeleteVerticesByGraphIdAsync(int graphId)
         {
             var result = set.RemoveWhere(x => x.GraphId == graphId);
             return await Task.FromResult(result > 0);
@@ -35,14 +35,15 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
             return await Task.FromResult(result);
         }
 
-        public async Task<IEnumerable<Vertex>> ReadVerticesByGraphIdAsync(int graphId,
-            CancellationToken token = default)
+        public IAsyncEnumerable<Vertex> ReadVerticesByGraphIdAsync(int graphId)
         {
-            var vertices = set.Where(x => x.GraphId == graphId).ToList();
-            return await Task.FromResult(vertices);
+            return set
+                .Where(x => x.GraphId == graphId)
+                .ToAsyncEnumerable();
         }
 
-        public Task<bool> UpdateVerticesAsync(IEnumerable<Vertex> vertices,
+        public Task<bool> UpdateVerticesAsync(
+            IReadOnlyCollection<Vertex> vertices,
             CancellationToken token = default)
         {
             foreach (var vertex in vertices)

@@ -27,17 +27,17 @@ namespace Pathfinding.Infrastructure.Business.Tests
             var graphs = faker.Generate(10);
             var obstaclesCount = (IReadOnlyDictionary<int, int>)graphs.ToDictionary(x => x.Id, x => 25);
             var mock = AutoMock.GetLoose();
-            mock.Mock<IGraphParametresRepository>()
-                .Setup(x => x.GetAll(It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(graphs.AsEnumerable()));
-            mock.Mock<IGraphParametresRepository>()
+            mock.Mock<IGraphParametersRepository>()
+                .Setup(x => x.GetAll())
+                .Returns(graphs.ToAsyncEnumerable());
+            mock.Mock<IGraphParametersRepository>()
                 .Setup(x => x.ReadObstaclesCountAsync(
-                    It.Is<IEnumerable<int>>(x => x.SequenceEqual(graphs.Select(x => x.Id))),
+                    It.IsAny<IReadOnlyCollection<int>>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(obstaclesCount));
             mock.Mock<IUnitOfWork>()
                 .Setup(x => x.GraphRepository)
-                .Returns(mock.Container.Resolve<IGraphParametresRepository>());
+                .Returns(mock.Container.Resolve<IGraphParametersRepository>());
             mock.Mock<IUnitOfWorkFactory>()
                 .Setup(x => x.Create())
                 .Returns(mock.Container.Resolve<IUnitOfWork>());
@@ -50,12 +50,7 @@ namespace Pathfinding.Infrastructure.Business.Tests
             {
                 mock.Mock<IUnitOfWorkFactory>().Verify(x => x.Create(), Times.Once());
                 mock.Mock<IUnitOfWork>().Verify(x => x.GraphRepository, Times.Exactly(2));
-                mock.Mock<IGraphParametresRepository>()
-                    .Verify(x => x.GetAll(It.IsAny<CancellationToken>()), Times.Once());
-                mock.Mock<IGraphParametresRepository>()
-                    .Verify(x => x.ReadObstaclesCountAsync(
-                        It.Is<IEnumerable<int>>(x => x.SequenceEqual(graphs.Select(x => x.Id))),
-                        It.IsAny<CancellationToken>()), Times.Once());
+                mock.Mock<IGraphParametersRepository>().Verify(x => x.GetAll(), Times.Once());
                 Assert.That(result.All(x => graphs.Any(y => y.Id == x.Id)
                     && result.First(y => y.Id == x.Id).ObstaclesCount == obstaclesCount[x.Id]));
                 Assert.That(result, Has.Count.EqualTo(graphs.Count));

@@ -7,12 +7,12 @@ namespace Pathfinding.Infrastructure.Business.Benchmarks
     [MemoryDiagnoser]
     public class WaveAlgorithmsBenchmarks
     {
-        private static IEnumerable<BenchmarkVertex> range;
+        private static List<BenchmarkVertex> range;
 
         [GlobalSetup]
         public static void Setup()
         {
-            range = BenchmarkRange.Interface;
+            range = [.. BenchmarkRange.Interface];
         }
 
         [Benchmark(Baseline = true)]

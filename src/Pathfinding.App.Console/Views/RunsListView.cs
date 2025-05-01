@@ -21,7 +21,7 @@ internal sealed partial class RunsListView : FrameView
         var source = viewModel.AllowedAlgorithms
             .ToDictionary(x => (object)x.ToStringRepresentation());
         this.Events().VisibleChanged
-            .Where(x => Visible)
+            .Where(_ => Visible)
             .Do(x => runList.SelectedItem = runList.SelectedItem)
             .Subscribe();
         runList.SetSource(source.Keys.ToList());

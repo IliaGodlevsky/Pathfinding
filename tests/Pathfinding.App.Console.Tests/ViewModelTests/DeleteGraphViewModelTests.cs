@@ -7,6 +7,7 @@ using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using System.Reactive.Linq;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests
 {
@@ -28,9 +29,9 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             mock.Mock<IMessenger>().Setup(x => x.Register(
                     It.IsAny<object>(),
                     It.IsAny<IsAnyToken>(),
-                    It.IsAny<MessageHandler<object, GraphSelectedMessage>>()))
-               .Callback<object, object, MessageHandler<object, GraphSelectedMessage>>((r, t, handler)
-                    => handler(r, new GraphSelectedMessage(models)));
+                    It.IsAny<MessageHandler<object, GraphsSelectedMessage>>()))
+               .Callback<object, object, MessageHandler<object, GraphsSelectedMessage>>((r, t, handler)
+                    => handler(r, new GraphsSelectedMessage(models)));
 
             var viewModel = mock.Create<GraphDeleteViewModel>();
 
@@ -52,10 +53,10 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                     .Verify(x => x.Register(
                         It.IsAny<GraphDeleteViewModel>(),
                         It.IsAny<IsAnyToken>(),
-                        It.IsAny<MessageHandler<object, GraphSelectedMessage>>()), Times.Once);
+                        It.IsAny<MessageHandler<object, GraphsSelectedMessage>>()), Times.Once);
                 mock.Mock<IMessenger>()
                     .Verify(x => x.Send(
-                        It.Is<GraphsDeletedMessage>(x => models.Select(x => x.Id).SequenceEqual(x.GraphIds)),
+                        It.Is<GraphsDeletedMessage>(x => models.Select(x => x.Id).SequenceEqual(x.Value)),
                         It.IsAny<IsAnyToken>()), Times.Once);
             });
         }

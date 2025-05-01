@@ -16,7 +16,7 @@ internal sealed partial class GraphImportButton : Button
         Initialize();
         this.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-            .Select(x =>
+            .Select(_ =>
             {
                 var fileName = GetFileName(viewModel);
                 return string.IsNullOrEmpty(fileName.Path)
@@ -31,15 +31,14 @@ internal sealed partial class GraphImportButton : Button
         var formats = viewModel.StreamFormats
             .ToDictionary(x => x.ToExtensionRepresentation());
         using var dialog = new OpenDialog(Resource.Import,
-            Resource.ChooseFile, [.. formats.Keys])
-        {
-            Width = Dim.Percent(45),
-            Height = Dim.Percent(55)
-        };
+            Resource.ChooseFile, [.. formats.Keys]);
+        dialog.Width = Dim.Percent(45);
+        dialog.Height = Dim.Percent(55);
         Application.Run(dialog);
-        string filePath = dialog.FilePath.ToString();
-        string extension = Path.GetExtension(filePath);
-        return !dialog.Canceled && dialog.FilePath != null
+        var filePath = dialog.FilePath.ToString();
+        var extension = Path.GetExtension(filePath);
+        return !dialog.Canceled && dialog.FilePath != null 
+                                && !string.IsNullOrEmpty(extension)
             ? (filePath, formats[extension])
             : (string.Empty, null);
     }

@@ -10,7 +10,7 @@ namespace Pathfinding.Infrastructure.Data.Sqlite
         private readonly SqliteConnection connection;
         private SqliteTransaction transaction;
 
-        public IGraphParametresRepository GraphRepository
+        public IGraphParametersRepository GraphRepository
             => new SqliteGraphRepository(connection, transaction);
 
         public IVerticesRepository VerticesRepository
@@ -24,7 +24,7 @@ namespace Pathfinding.Infrastructure.Data.Sqlite
 
         public SqliteUnitOfWork(string connectionString)
         {
-            connection = new SqliteConnection(connectionString);
+            connection = new(connectionString);
             connection.Open();
         }
 

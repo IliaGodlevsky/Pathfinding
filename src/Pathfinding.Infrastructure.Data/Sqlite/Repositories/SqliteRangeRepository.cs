@@ -21,7 +21,9 @@ namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
             CREATE INDEX IF NOT EXISTS idx_range_vertexid ON {DbTables.Ranges}(VertexId);
             CREATE INDEX IF NOT EXISTS idx_range_graphid ON {DbTables.Ranges}(GraphId);";
 
-        public async Task<IEnumerable<PathfindingRange>> CreateAsync(IEnumerable<PathfindingRange> entities, CancellationToken token = default)
+        public async Task<IReadOnlyCollection<PathfindingRange>> CreateAsync(
+            IReadOnlyCollection<PathfindingRange> entities,
+            CancellationToken token = default)
         {
             const string query = @$"
                 INSERT INTO {DbTables.Ranges} (IsSource, IsTarget, GraphId, VertexId, ""Order"")
@@ -39,7 +41,8 @@ namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
             return entities;
         }
 
-        public async Task<bool> DeleteByGraphIdAsync(int graphId, CancellationToken token = default)
+        public async Task<bool> DeleteByGraphIdAsync(int graphId,
+            CancellationToken token = default)
         {
             const string query = $"DELETE FROM {DbTables.Ranges} WHERE GraphId = @GraphId";
 
@@ -50,7 +53,9 @@ namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
             return affectedRows > 0;
         }
 
-        public async Task<bool> DeleteByVerticesIdsAsync(IEnumerable<long> verticesIds, CancellationToken token = default)
+        public async Task<bool> DeleteByVerticesIdsAsync(
+            IReadOnlyCollection<long> verticesIds, 
+            CancellationToken token = default)
         {
             const string query = $"DELETE FROM {DbTables.Ranges} WHERE VertexId IN @VerticesIds";
 
@@ -61,16 +66,17 @@ namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
             return affectedRows > 0;
         }
 
-        public async Task<IEnumerable<PathfindingRange>> ReadByGraphIdAsync(int graphId, CancellationToken token = default)
+        public IAsyncEnumerable<PathfindingRange> ReadByGraphIdAsync(int graphId)
         {
             const string query = $"SELECT * FROM {DbTables.Ranges} WHERE GraphId = @GraphId ORDER BY \"Order\"";
-
-            return await connection.QueryAsync<PathfindingRange>(
-                new(query, new { GraphId = graphId }, transaction, cancellationToken: token))
-                .ConfigureAwait(false);
+            var parameters = new { GraphId = graphId };
+            return connection.QueryUnbufferedAsync<PathfindingRange>(query, 
+                parameters, transaction);
         }
 
-        public async Task<IEnumerable<PathfindingRange>> UpsertAsync(IEnumerable<PathfindingRange> entities, CancellationToken token = default)
+        public async Task<IReadOnlyCollection<PathfindingRange>> UpsertAsync(
+            IReadOnlyCollection<PathfindingRange> entities, 
+            CancellationToken token = default)
         {
             const string updateQuery = @$"
                 UPDATE {DbTables.Ranges}

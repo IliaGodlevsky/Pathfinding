@@ -12,7 +12,7 @@ namespace Pathfinding.Infrastructure.Data.Pathfinding
         {
             int graphSize = graphDimensionsSizes.AggregateOrDefault((x, y) => x * y);
             var vertices = Enumerable.Range(0, graphSize)
-                .Select(i => new TVertex() { Position = ToCoordinates(graphDimensionsSizes, i) })
+                .Select(i => new TVertex { Position = ToCoordinates(graphDimensionsSizes, i) })
                 .ToArray();
             return new Graph<TVertex>(vertices, graphDimensionsSizes);
         }

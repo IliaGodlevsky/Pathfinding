@@ -9,7 +9,7 @@ namespace Pathfinding.Infrastructure.Data.LiteDb
     {
         private readonly ILiteDatabase database;
 
-        public IGraphParametresRepository GraphRepository { get; }
+        public IGraphParametersRepository GraphRepository { get; }
 
         public IVerticesRepository VerticesRepository { get; }
 

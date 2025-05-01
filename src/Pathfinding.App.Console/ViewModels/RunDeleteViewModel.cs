@@ -1,7 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Logging.Interface;
@@ -24,7 +24,7 @@ internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel
         set => this.RaiseAndSetIfChanged(ref selectedRunsIds, value);
     }
 
-    private int ActivatedGraph { get; set; } = 0;
+    private int ActivatedGraph { get; set; }
 
     public ReactiveCommand<Unit, Unit> DeleteRunsCommand { get; }
 
@@ -36,7 +36,7 @@ internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel
         this.messenger = messenger;
         this.service = service;
         this.logger = logger;
-        messenger.Register<RunSelectedMessage>(this, OnRunsSelected);
+        messenger.Register<RunsSelectedMessage>(this, OnRunsSelected);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphsDeleted);
         messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
         DeleteRunsCommand = ReactiveCommand.CreateFromTask(DeleteRuns, CanDelete());
@@ -62,19 +62,19 @@ internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel
         }, logger.Error).ConfigureAwait(false);
     }
 
-    private void OnRunsSelected(object recipient, RunSelectedMessage msg)
+    private void OnRunsSelected(object recipient, RunsSelectedMessage msg)
     {
-        SelectedRunsIds = [.. msg.SelectedRuns.Select(x => x.Id)];
+        SelectedRunsIds = [.. msg.Value.Select(x => x.Id)];
     }
 
     private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
     {
-        ActivatedGraph = msg.Graph.Id;
+        ActivatedGraph = msg.Value.Id;
     }
 
     private void OnGraphsDeleted(object recipient, GraphsDeletedMessage msg)
     {
-        if (msg.GraphIds.Contains(ActivatedGraph))
+        if (msg.Value.Contains(ActivatedGraph))
         {
             ActivatedGraph = 0;
             SelectedRunsIds = [];

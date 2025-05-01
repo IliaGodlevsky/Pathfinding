@@ -15,7 +15,7 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
         {
             if (x is not null && y is not null)
             {
-                return x.Id.Equals(y.Id) == true;
+                return x.Id.Equals(y.Id);
             }
             return false;
         }

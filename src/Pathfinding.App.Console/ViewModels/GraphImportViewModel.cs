@@ -3,7 +3,7 @@ using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.Resources;
 using Pathfinding.App.Console.ViewModels.Interface;
@@ -11,8 +11,6 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
-
-using Serializer = Pathfinding.Service.Interface.ISerializer<Pathfinding.Service.Interface.Models.Serialization.PathfindingHistoriesSerializationModel>;
 // ReSharper disable PossibleInvalidOperationException
 
 namespace Pathfinding.App.Console.ViewModels;
@@ -58,7 +56,7 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
                     var result = await service.CreatePathfindingHistoriesAsync(histories.Histories)
                         .ConfigureAwait(false);
                     var graphs = result.Select(x => x.Graph).ToGraphInfo();
-                    messenger.Send(new GraphCreatedMessage(graphs));
+                    messenger.Send(new GraphsCreatedMessage(graphs));
                     logger.Info(graphs.Length > 0
                         ? Resource.WasLoadedMsg
                         : Resource.WereLoadedMsg);

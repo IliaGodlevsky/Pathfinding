@@ -1,7 +1,7 @@
 ﻿using Autofac.Extras.Moq;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Logging.Interface;
@@ -33,9 +33,9 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             mock.Mock<IMessenger>().Setup(x => x.Register(
                     It.IsAny<object>(),
                     It.IsAny<IsAnyToken>(),
-                    It.IsAny<MessageHandler<object, RunSelectedMessage>>()))
-               .Callback<object, object, MessageHandler<object, RunSelectedMessage>>((r, t, handler)
-                    => handler(r, new RunSelectedMessage(runModels)));
+                    It.IsAny<MessageHandler<object, RunsSelectedMessage>>()))
+               .Callback<object, object, MessageHandler<object, RunsSelectedMessage>>((r, t, handler)
+                    => handler(r, new RunsSelectedMessage(runModels)));
 
             var viewModel = mock.Create<RunDeleteViewModel>();
 
@@ -57,10 +57,10 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                     .Verify(x => x.Register(
                         It.IsAny<RunDeleteViewModel>(),
                         It.IsAny<IsAnyToken>(),
-                        It.IsAny<MessageHandler<object, RunSelectedMessage>>()), Times.Once);
+                        It.IsAny<MessageHandler<object, RunsSelectedMessage>>()), Times.Once);
                 mock.Mock<IMessenger>()
                     .Verify(x => x.Send(
-                        It.Is<RunsDeletedMessage>(x => runModels.Select(x => x.Id).SequenceEqual(x.RunIds)),
+                        It.Is<RunsDeletedMessage>(x => runModels.Select(x => x.Id).SequenceEqual(x.Value)),
                         It.IsAny<IsAnyToken>()), Times.Once);
             });
         }

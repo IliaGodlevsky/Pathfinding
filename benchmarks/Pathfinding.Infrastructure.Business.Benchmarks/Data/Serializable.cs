@@ -11,30 +11,31 @@ namespace Pathfinding.Infrastructure.Business.Benchmarks.Data
 
         public double Cost { get; set; }
 
-        public float Strength { get; set; }
+        public double Strength { get; set; }
 
-        public List<int> Values { get; set; } = new List<int>();
+        public List<int> Values { get; set; } = [];
 
-        public List<Serializable> Serializables { get; set; } = new List<Serializable>();
+        public List<Serializable> Serializables { get; set; } = [];
 
-        public void Deserialize(BinaryReader reader)
+        public async Task DeserializeAsync(Stream stream, CancellationToken token = default)
         {
-            Size = reader.ReadInt32();
-            Cost = reader.ReadDouble();
-            Name = reader.ReadString();
-            Strength = reader.ReadSingle();
-            Values = reader.ReadArray().ToList();
-            Serializables = reader.ReadSerializableArray<Serializable>().ToList();
+            Size = await stream.ReadInt32Async(token).ConfigureAwait(false);
+            Cost = await stream.ReadDoubleAsync(token).ConfigureAwait(false);
+            Name = await stream.ReadStringAsync(token).ConfigureAwait(false);
+            Strength = await stream.ReadDoubleAsync(token).ConfigureAwait(false);
+            Values = [.. await stream.ReadArrayAsync(token).ConfigureAwait(false)];
+            Serializables = [.. await stream.ReadSerializableArrayAsync<Serializable>(token).ConfigureAwait(false)];
         }
 
-        public void Serialize(BinaryWriter writer)
+        public async Task SerializeAsync(Stream stream, CancellationToken token = default)
         {
-            writer.Write(Size);
-            writer.Write(Cost);
-            writer.Write(Name);
-            writer.Write(Strength);
-            writer.Write(Values);
-            writer.Write(Serializables);
+            await stream.WriteInt32Async(Size, token).ConfigureAwait(false);
+            await stream.WriteDoubleAsync(Cost, token).ConfigureAwait(false);
+            await stream.WriteStringAsync(Name, token).ConfigureAwait(false);
+            await stream.WriteDoubleAsync(Strength, token).ConfigureAwait(false);
+            await stream.WriteInt32ArrayAsync(Values, token).ConfigureAwait(false);
+            await stream.WriteInt32Async(Size, token).ConfigureAwait(false);
+            await stream.WriteAsync(Serializables, token).ConfigureAwait(false);
         }
     }
 }

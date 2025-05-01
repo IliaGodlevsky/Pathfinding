@@ -5,17 +5,13 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
 {
     internal sealed class InMemoryStatisicsRepository : IStatisticsRepository
     {
-        private int id = 0;
+        private int id;
         private readonly HashSet<Statistics> set = new(EntityComparer<int>.Instance);
 
-        public Task<Statistics> CreateAsync(Statistics entity, CancellationToken token = default)
-        {
-            entity.Id = ++id;
-            set.Add(entity);
-            return Task.FromResult(entity);
-        }
 
-        public Task<IEnumerable<Statistics>> CreateAsync(IEnumerable<Statistics> statistics, CancellationToken token = default)
+        public Task<IReadOnlyCollection<Statistics>> CreateAsync(
+            IReadOnlyCollection<Statistics> statistics, 
+            CancellationToken token = default)
         {
             foreach (var entity in statistics)
             {
@@ -25,38 +21,37 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
             return Task.FromResult(statistics);
         }
 
-        public Task<IEnumerable<Statistics>> ReadByGraphIdAsync(int graphId, CancellationToken token = default)
+        public IAsyncEnumerable<Statistics> ReadByGraphIdAsync(int graphId)
         {
-            var results = set.Where(s => s.GraphId == graphId).ToList();
-            return Task.FromResult((IEnumerable<Statistics>)results);
+            return set.Where(s => s.GraphId == graphId).ToAsyncEnumerable();
         }
 
-        public Task<int> ReadStatisticsCountAsync(int graphId, CancellationToken token = default)
-        {
-            var count = set.Count(s => s.GraphId == graphId);
-            return Task.FromResult(count);
-        }
-
-        public Task<bool> DeleteByGraphId(int graphId, CancellationToken token = default)
+        public Task<bool> DeleteByGraphId(int graphId)
         {
             var removed = set.RemoveWhere(s => s.GraphId == graphId) > 0;
             return Task.FromResult(removed);
         }
 
-        public Task<bool> DeleteByIdsAsync(IEnumerable<int> ids, CancellationToken token = default)
+        public Task<bool> DeleteByIdsAsync(
+            IReadOnlyCollection<int> ids, 
+            CancellationToken token = default)
         {
             var removed = set.RemoveWhere(s => ids.Contains(s.Id)) > 0;
             return Task.FromResult(removed);
         }
 
-        public async Task<Statistics> ReadByIdAsync(int id, CancellationToken token = default)
+        public async Task<Statistics> ReadByIdAsync(
+            int statId,
+            CancellationToken token = default)
         {
-            var tracking = new Statistics() { Id = id };
+            var tracking = new Statistics { Id = statId };
             set.TryGetValue(tracking, out var statistics);
             return await Task.FromResult(statistics);
         }
 
-        public async Task<bool> UpdateAsync(IEnumerable<Statistics> entities, CancellationToken token = default)
+        public async Task<bool> UpdateAsync(
+            IReadOnlyCollection<Statistics> entities,
+            CancellationToken token = default)
         {
             foreach (var entity in entities)
             {
@@ -76,11 +71,12 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
             return await Task.FromResult(true);
         }
 
-        public async Task<IEnumerable<Statistics>> ReadByIdsAsync(IEnumerable<int> runIds, CancellationToken token = default)
+        public IAsyncEnumerable<Statistics> ReadByIdsAsync(
+            IReadOnlyCollection<int> runIds)
         {
-            var ids = runIds.ToHashSet();
-            var statistics = set.Where(x => runIds.Contains(x.Id)).ToList();
-            return await Task.FromResult(statistics);
+            return set
+                .Where(x => runIds.Contains(x.Id))
+                .ToAsyncEnumerable();
         }
     }
 }

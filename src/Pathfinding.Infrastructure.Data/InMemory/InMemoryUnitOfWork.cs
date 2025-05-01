@@ -6,7 +6,7 @@ namespace Pathfinding.Infrastructure.Data.InMemory
 {
     public sealed class InMemoryUnitOfWork : IUnitOfWork
     {
-        public IGraphParametresRepository GraphRepository { get; }
+        public IGraphParametersRepository GraphRepository { get; }
 
         public IVerticesRepository VerticesRepository { get; }
 
@@ -22,7 +22,7 @@ namespace Pathfinding.Infrastructure.Data.InMemory
             VerticesRepository = vertices;
             RangeRepository = range;
             StatisticsRepository = statistics;
-            GraphRepository = new InMemoryGraphParametresRepository(range, vertices, statistics);
+            GraphRepository = new InMemoryGraphParametersRepository(range, vertices, statistics);
         }
 
         public async Task BeginTransactionAsync(CancellationToken token = default)

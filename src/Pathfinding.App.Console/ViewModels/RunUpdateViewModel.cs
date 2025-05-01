@@ -4,6 +4,7 @@ using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
@@ -51,27 +52,27 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
         this.service = service;
         this.log = log;
         UpdateRunsCommand = ReactiveCommand.CreateFromTask(ExecuteUpdate, CanUpdate());
-        messenger.Register<RunSelectedMessage>(this, OnRunsSelected);
+        messenger.Register<RunsSelectedMessage>(this, OnRunsSelected);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
         messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
         messenger.RegisterAsyncHandler<AsyncGraphUpdatedMessage, int>(this,
             Tokens.AlgorithmUpdate, OnGraphUpdated);
     }
 
-    private void OnRunsSelected(object recipient, RunSelectedMessage msg)
+    private void OnRunsSelected(object recipient, RunsSelectedMessage msg)
     {
-        Selected = msg.SelectedRuns;
+        Selected = msg.Value;
     }
 
     private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
     {
-        Graph = new Graph<GraphVertexModel>(msg.Graph.Vertices, msg.Graph.DimensionSizes);
-        ActivatedGraphId = msg.Graph.Id;
+        Graph = new (msg.Value.Vertices, msg.Value.DimensionSizes);
+        ActivatedGraphId = msg.Value.Id;
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
     {
-        if (Graph != null && msg.GraphIds.Contains(ActivatedGraphId))
+        if (Graph != null && msg.Value.Contains(ActivatedGraphId))
         {
             Selected = [];
             Graph = Graph<GraphVertexModel>.Empty;
@@ -100,14 +101,13 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
     {
         var graph = Graph;
         int id = ActivatedGraphId;
-        if ((graph != Graph<GraphVertexModel>.Empty && msg.Model.Id != ActivatedGraphId)
+        if ((graph != Graph<GraphVertexModel>.Empty && msg.Value.Id != ActivatedGraphId)
             || graph == Graph<GraphVertexModel>.Empty)
         {
-            var model = await service.ReadGraphAsync(msg.Model.Id).ConfigureAwait(false);
-            graph = new Graph<GraphVertexModel>(model.Vertices, model.DimensionSizes);
+            var model = await service.ReadGraphAsync(msg.Value.Id).ConfigureAwait(false);
+            graph = new(model.Vertices, model.DimensionSizes);
             id = model.Id;
-            var layers = model.ToLayers();
-            await layers.OverlayAsync(graph).ConfigureAwait(false);
+            await model.ToLayers().OverlayAsync(graph).ConfigureAwait(false);
         }
         if (graph != Graph<GraphVertexModel>.Empty)
         {
@@ -118,10 +118,11 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
                 messenger.Send(new RunsUpdatedMessage(updated));
             }, log.Error).ConfigureAwait(false);
         }
-        msg.Signal(Unit.Default);
+
+        msg.SetCompleted(true);
     }
 
-    private async Task<IReadOnlyCollection<RunStatisticsModel>> UpdateRunsAsync(
+    private async Task<RunStatisticsModel[]> UpdateRunsAsync(
         IEnumerable<RunStatisticsModel> selected, Graph<GraphVertexModel> graph, int graphId)
     {
         var range = (await service.ReadRangeAsync(graphId).ConfigureAwait(false))
@@ -169,6 +170,6 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
                 updatedRuns.Clear();
             });
         }
-        return updatedRuns;
+        return [.. updatedRuns];
     }
 }

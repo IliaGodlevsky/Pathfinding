@@ -5,7 +5,7 @@ using Pathfinding.Domain.Interface.Repositories;
 
 namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
 {
-    internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParametresRepository
+    internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParametersRepository
     {
         protected override string CreateTableScript { get; } = @$"
             CREATE TABLE IF NOT EXISTS {DbTables.Graphs} (
@@ -32,39 +32,29 @@ namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
                 SELECT last_insert_rowid();";
 
             var id = await connection.ExecuteScalarAsync<int>(
-                new CommandDefinition(query, graph, transaction, cancellationToken: token))
+                new(query, graph, transaction, cancellationToken: token))
                 .ConfigureAwait(false);
             graph.Id = id;
             return graph;
         }
 
-        public async Task<bool> DeleteAsync(int graphId, CancellationToken token = default)
-        {
-            const string query = $"DELETE FROM {DbTables.Graphs} WHERE Id = @Id";
-
-            var affectedRows = await connection.ExecuteAsync(
-                new CommandDefinition(query, new { Id = graphId }, transaction, cancellationToken: token))
-                .ConfigureAwait(false);
-            return affectedRows > 0;
-        }
-
-        public async Task<bool> DeleteAsync(IEnumerable<int> graphIds, CancellationToken token = default)
+        public async Task<bool> DeleteAsync(
+            IReadOnlyCollection<int> graphIds, 
+            CancellationToken token = default)
         {
             const string query = $"DELETE FROM {DbTables.Graphs} WHERE Id IN @Ids";
 
             var affectedRows = await connection.ExecuteAsync(
-                new CommandDefinition(query, new { Ids = graphIds.ToArray() }, transaction, cancellationToken: token))
+                new(query, new { Ids = graphIds }, transaction, cancellationToken: token))
                 .ConfigureAwait(false);
             return affectedRows > 0;
         }
 
-        public async Task<IEnumerable<Graph>> GetAll(CancellationToken token = default)
+        public IAsyncEnumerable<Graph> GetAll()
         {
             const string query = $"SELECT * FROM {DbTables.Graphs}";
 
-            return await connection.QueryAsync<Graph>(
-                new CommandDefinition(query, transaction: transaction, cancellationToken: token))
-                .ConfigureAwait(false);
+            return connection.QueryUnbufferedAsync<Graph>(query, transaction: transaction);
         }
 
         public async Task<Graph> ReadAsync(int graphId, CancellationToken token = default)
@@ -72,7 +62,7 @@ namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
             const string query = $"SELECT * FROM {DbTables.Graphs} WHERE Id = @Id";
 
             return await connection.QuerySingleOrDefaultAsync<Graph>(
-                new CommandDefinition(query, new { Id = graphId }, transaction, cancellationToken: token))
+                new(query, new { Id = graphId }, transaction, cancellationToken: token))
                 .ConfigureAwait(false);
         }
 
@@ -88,13 +78,15 @@ namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
                 WHERE Id = @Id";
 
             var affectedRows = await connection.ExecuteAsync(
-                new CommandDefinition(query, graph, transaction, cancellationToken: token))
+                new(query, graph, transaction, cancellationToken: token))
                 .ConfigureAwait(false);
 
             return affectedRows > 0;
         }
 
-        public async Task<IReadOnlyDictionary<int, int>> ReadObstaclesCountAsync(IEnumerable<int> graphIds, CancellationToken token = default)
+        public async Task<IReadOnlyDictionary<int, int>> ReadObstaclesCountAsync(
+            IReadOnlyCollection<int> graphIds,
+            CancellationToken token = default)
         {
             const string query = $@"
                 SELECT g.GraphId, COALESCE(SUM(v.IsObstacle), 0) AS ObstacleCount
@@ -103,7 +95,7 @@ namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
                 GROUP BY g.GraphId;";
 
             var result = await connection.QueryAsync<(int GraphId, int ObstacleCount)>(
-                new CommandDefinition(query, new { GraphIds = graphIds.ToArray() }, transaction, cancellationToken: token))
+                new(query, new { GraphIds = graphIds }, transaction, cancellationToken: token))
                 .ConfigureAwait(false);
 
             return result.ToDictionary(x => x.GraphId, x => x.ObstacleCount);

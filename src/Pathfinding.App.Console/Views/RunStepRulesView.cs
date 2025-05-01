@@ -8,7 +8,6 @@ using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
-using System.Data;
 using System.Reactive.Linq;
 using Terminal.Gui;
 

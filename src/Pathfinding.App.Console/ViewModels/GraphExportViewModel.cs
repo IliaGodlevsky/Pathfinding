@@ -2,7 +2,7 @@
 using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.Resources;
 using Pathfinding.App.Console.ViewModels.Interface;
@@ -10,10 +10,6 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
-
-using Serializer = Pathfinding.Service.Interface
-    .ISerializer<Pathfinding.Service.Interface.Models.Serialization
-        .PathfindingHistoriesSerializationModel>;
 // ReSharper disable PossibleInvalidOperationException
 
 namespace Pathfinding.App.Console.ViewModels;
@@ -53,7 +49,7 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
             .Select(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat])];
         ExportGraphCommand = ReactiveCommand.CreateFromTask<StreamModel>(ExportGraph, CanExport());
         AllowedOptions = Enum.GetValues<ExportOptions>();
-        messenger.Register<GraphSelectedMessage>(this, OnGraphSelected);
+        messenger.Register<GraphsSelectedMessage>(this, OnGraphSelected);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
     }
 
@@ -82,21 +78,19 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
                     var histories = await historiesTask.ConfigureAwait(false);
                     await serializer.SerializeToAsync(histories, stream.Stream).ConfigureAwait(false);
                     var count = histories.Histories.Count;
-                    logger.Info(count == 1 
-                        ? Resource.WasDeletedMsg 
-                        : Resource.WereDeletedMsg);
+                    logger.Info(count == 1 ? Resource.WasDeletedMsg : Resource.WereDeletedMsg);
                 }
             }
         }, logger.Error).ConfigureAwait(false);
     }
 
-    private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
+    private void OnGraphSelected(object recipient, GraphsSelectedMessage msg)
     {
-        SelectedGraphIds = [.. msg.Graphs.Select(x => x.Id)];
+        SelectedGraphIds = [.. msg.Value.Select(x => x.Id)];
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
     {
-        SelectedGraphIds = [.. SelectedGraphIds.Except(msg.GraphIds)];
+        SelectedGraphIds = [.. SelectedGraphIds.Except(msg.Value)];
     }
 }

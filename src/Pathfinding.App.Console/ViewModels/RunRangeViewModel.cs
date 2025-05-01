@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.Requests;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
@@ -18,19 +18,17 @@ using ReactiveUI;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
-using Command = Pathfinding.Service.Interface
-    .IPathfindingRangeCommand<Pathfinding.App.Console.Models.GraphVertexModel>;
+// ReSharper disable AsyncVoidLambda
 
 namespace Pathfinding.App.Console.ViewModels;
 
-[SuppressMessage("ReSharper", "UnusedMember.Global")]
-[SuppressMessage("ReSharper", "AsyncVoidLambda")]
+// ReSharper disable once UnusedMember.Global
 internal sealed class RunRangeViewModel : BaseViewModel,
     IPathfindingRange<GraphVertexModel>, IRunRangeViewModel
 {
@@ -120,8 +118,8 @@ internal sealed class RunRangeViewModel : BaseViewModel,
             .Select(x => x.Value)
             .ToReadOnly();
         this.logger = logger;
-        messenger.Register<IsVertexInRangeRequest>(this, OnVertexIsInRangeRecieved);
-        messenger.Register<QueryPathfindingRangeMessage>(this, OnGetPathfindingRangeRecieved);
+        messenger.Register<IsVertexInRangeRequestMessage>(this, OnVertexIsInRangeReceived);
+        messenger.Register<PathfindingRangeRequestMessage>(this, OnGetPathfindingRangeReceived);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
         messenger.Register<GraphStateChangedMessage>(this, OnGraphBecameReadonly);
         messenger.RegisterAsyncHandler<AsyncGraphActivatedMessage, int>(this, Tokens.PathfindingRange, OnGraphActivated);
@@ -209,9 +207,9 @@ internal sealed class RunRangeViewModel : BaseViewModel,
             disposables.Clear();
             Transit.CollectionChanged -= OnCollectionChanged;
             ClearRange();
-            Graph = new (msg.Graph.Vertices, msg.Graph.DimensionSizes);
-            GraphId = msg.Graph.Id;
-            IsReadOnly = msg.Graph.Status == GraphStatuses.Readonly;
+            Graph = new(msg.Value.Vertices, msg.Value.DimensionSizes);
+            GraphId = msg.Value.Id;
+            IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
             var range = await service.ReadRangeAsync(GraphId).ConfigureAwait(false);
             var src = range.FirstOrDefault(x => x.IsSource);
             Source = src != null ? Graph.Get(src.Position) : null;
@@ -223,18 +221,22 @@ internal sealed class RunRangeViewModel : BaseViewModel,
             Transit.CollectionChanged += OnCollectionChanged;
             Transit.AddRange(transit);
             Graph.ForEach(SubscribeToEvents);
-        }, logger.Error).ConfigureAwait(false);
-        msg.Signal(Unit.Default);
+            msg.SetCompleted(true);
+        }, (ex, message) =>
+        {
+            logger.Error(ex, message);
+            msg.SetCompleted(false);
+        }).ConfigureAwait(false);
     }
 
     private void OnGraphBecameReadonly(object recipient, GraphStateChangedMessage msg)
     {
-        IsReadOnly = msg.Status == GraphStatuses.Readonly;
+        IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
     {
-        if (msg.GraphIds.Contains(GraphId))
+        if (msg.Value.Contains(GraphId))
         {
             disposables.Clear();
             ClearRange();
@@ -260,18 +262,19 @@ internal sealed class RunRangeViewModel : BaseViewModel,
         }
     }
 
-    private void OnVertexIsInRangeRecieved(object recipient, IsVertexInRangeRequest request)
+    private void OnVertexIsInRangeReceived(object recipient, IsVertexInRangeRequestMessage request)
     {
-        request.IsInRange = pathfindingRange.Contains(request.Vertex);
+        var contains = pathfindingRange.Contains(request.Vertex);
+        request.Reply(contains);
     }
 
-    private void OnGetPathfindingRangeRecieved(object recipient, QueryPathfindingRangeMessage msg)
+    private void OnGetPathfindingRangeReceived(object recipient, PathfindingRangeRequestMessage msg)
     {
-        msg.PathfindingRange = pathfindingRange
+        var range = pathfindingRange
             .Where(x => x is not null)
             .Select(x => x.Position)
-            .ToList()
-            .AsReadOnly();
+            .ToArray();
+        msg.Reply(range);
     }
 
     IEnumerator IEnumerable.GetEnumerator()

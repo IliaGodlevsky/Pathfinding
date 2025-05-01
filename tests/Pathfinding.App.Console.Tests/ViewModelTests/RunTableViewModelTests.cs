@@ -1,7 +1,7 @@
 ﻿using Autofac.Extras.Moq;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Domain.Core.Enums;
@@ -26,8 +26,8 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             mock.Mock<IMessenger>().Setup(x => x.Register(
                 It.IsAny<object>(),
                 It.IsAny<IsAnyToken>(),
-                It.IsAny<MessageHandler<object, RunCreatedMessaged>>()))
-                .Callback<object, object, MessageHandler<object, RunCreatedMessaged>>((r, t, handler) => handler(r, new(run)));
+                It.IsAny<MessageHandler<object, RunsCreatedMessaged>>()))
+                .Callback<object, object, MessageHandler<object, RunsCreatedMessaged>>((r, t, handler) => handler(r, new(run)));
 
             var viewModel = mock.Create<RunsTableViewModel>();
 
@@ -40,9 +40,8 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             using var mock = AutoMock.GetLoose();
 
             var graph = new GraphModel<GraphVertexModel>() { Id = 1 };
-            IReadOnlyCollection<RunStatisticsModel> runs = Enumerable.Range(1, 5)
-                .Select(x => new RunStatisticsModel { Id = x })
-                .ToList();
+            IReadOnlyCollection<RunStatisticsModel> runs = [.. Enumerable.Range(1, 5)
+                .Select(x => new RunStatisticsModel { Id = x })];
 
             mock.Mock<IMessenger>()
                 .Setup(x => x.Register(
@@ -77,7 +76,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
 
             mock.Mock<IMessenger>()
                 .Verify(x => x.Send(
-                    It.IsAny<RunSelectedMessage>(),
+                    It.IsAny<RunsSelectedMessage>(),
                     It.IsAny<IsAnyToken>()), Times.Once);
         }
 
@@ -87,9 +86,8 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             using var mock = AutoMock.GetLoose();
 
             var graph = new GraphModel<GraphVertexModel>() { Id = 1 };
-            IReadOnlyCollection<RunStatisticsModel> runs = Enumerable.Range(1, 5)
-                .Select(x => new RunStatisticsModel { Id = x })
-                .ToList();
+            IReadOnlyCollection<RunStatisticsModel> runs = [.. Enumerable.Range(1, 5)
+                .Select(x => new RunStatisticsModel { Id = x })];
 
             mock.Mock<IMessenger>()
                 .Setup(x => x.Register(
@@ -144,9 +142,8 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             using var mock = AutoMock.GetLoose();
 
             var graph = new GraphModel<GraphVertexModel>() { Id = 1 };
-            IReadOnlyCollection<RunStatisticsModel> runs = Enumerable.Range(1, 5)
-                .Select(x => new RunStatisticsModel { Id = x })
-                .ToList();
+            IReadOnlyCollection<RunStatisticsModel> runs = [.. Enumerable.Range(1, 5)
+                .Select(x => new RunStatisticsModel { Id = x })];
 
             mock.Mock<IMessenger>()
                 .Setup(x => x.Register(
@@ -168,7 +165,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                     It.IsAny<IsAnyToken>(),
                     It.IsAny<MessageHandler<object, RunsDeletedMessage>>()))
                 .Callback<object, object, MessageHandler<object, RunsDeletedMessage>>((r, t, handler)
-                => handler(r, new(runs.Select(x => x.Id).ToArray())));
+                => handler(r, new([.. runs.Select(x => x.Id)])));
 
             var viewModel = mock.Create<RunsTableViewModel>();
 
@@ -193,7 +190,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
 
                 mock.Mock<IMessenger>()
                     .Verify(x => x.Send(
-                        It.Is<GraphStateChangedMessage>(x => x.Id == 1 && x.Status == GraphStatuses.Editable),
+                        It.Is<GraphStateChangedMessage>(x => x.Value.Id == 1 && x.Value.Status == GraphStatuses.Editable),
                         It.IsAny<IsAnyToken>()), Times.Once);
 
                 Assert.That(viewModel.Runs, Is.Empty);

@@ -2,6 +2,7 @@
 using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface;
+using Pathfinding.Domain.Interface.Extensions;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Data.InMemory;
 using Pathfinding.Infrastructure.Data.Pathfinding;
@@ -16,31 +17,19 @@ using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Infrastructure.Business;
 
-public sealed class RequestService<T> : IRequestService<T>
+public sealed class RequestService<T>(IUnitOfWorkFactory factory) : IRequestService<T>
     where T : IVertex, IEntity<long>, new()
 {
-    private readonly Func<IUnitOfWork> factory;
-
-    public RequestService(IUnitOfWorkFactory factory)
-        : this(factory.Create)
-    {
-    }
-
     public RequestService()
         : this(new InMemoryUnitOfWorkFactory())
     {
-    }
-
-    private RequestService(Func<IUnitOfWork> factory)
-    {
-        this.factory = factory;
     }
 
     public async Task<IReadOnlyCollection<PathfindingHistoryModel<T>>> CreatePathfindingHistoriesAsync(
         IEnumerable<PathfindingHistorySerializationModel> request,
         CancellationToken token = default)
     {
-        return await Transaction(async (unitOfWork, t) =>
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
         {
             var models = new List<PathfindingHistoryModel<T>>();
             foreach (var history in request)
@@ -67,7 +56,7 @@ public sealed class RequestService<T> : IRequestService<T>
                 var rangeVertices = range
                     .Select((x, i) => (Order: i, Vertex: graph.Get(x)))
                     .ToList();
-                var entities = rangeVertices.Select((x, i) => new PathfindingRange
+                var entities = rangeVertices.Select(x => new PathfindingRange
                 {
                     GraphId = model.Id,
                     VertexId = x.Vertex.Id,
@@ -76,7 +65,7 @@ public sealed class RequestService<T> : IRequestService<T>
                     IsTarget = x.Order == rangeVertices.Count - 1 && rangeVertices.Count > 1
                 }).ToReadOnly();
                 await unitOfWork.RangeRepository.CreateAsync(entities, t).ConfigureAwait(false);
-                models.Add(new PathfindingHistoryModel<T>()
+                models.Add(new()
                 {
                     Graph = new()
                     {
@@ -99,9 +88,9 @@ public sealed class RequestService<T> : IRequestService<T>
     public async Task<bool> DeleteRangeAsync(IEnumerable<T> request,
         CancellationToken token = default)
     {
-        return await Transaction(async (unitOfWork, t) =>
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
         {
-            var verticesIds = request.Select(x => x.Id);
+            var verticesIds = request.Select(x => x.Id).ToList();
             return await unitOfWork.RangeRepository.DeleteByVerticesIdsAsync(verticesIds, t)
                 .ConfigureAwait(false);
         }, token).ConfigureAwait(false);
@@ -110,19 +99,21 @@ public sealed class RequestService<T> : IRequestService<T>
     public async Task<bool> DeleteRangeAsync(int graphId,
         CancellationToken token = default)
     {
-        return await Transaction(async (unitOfWork, t)
+        return await factory.TransactionAsync(async (unitOfWork, t)
             => await unitOfWork.RangeRepository.DeleteByGraphIdAsync(graphId, t)
             .ConfigureAwait(false), token).ConfigureAwait(false);
     }
 
     public async Task<IReadOnlyCollection<GraphInformationModel>> ReadAllGraphInfoAsync(CancellationToken token = default)
     {
-        return await Transaction(async (unitOfWork, t) =>
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
         {
-            var result = (await unitOfWork.GraphRepository.GetAll(t)
-                .ConfigureAwait(false)).ToList();
-            var ids = result.Select(x => x.Id).ToList();
-            var obstaclesCount = await unitOfWork.GraphRepository.ReadObstaclesCountAsync(ids, token)
+            var result = await unitOfWork.GraphRepository
+                .GetAll()
+                .ToListAsync(t)
+                .ConfigureAwait(false);
+            var ids = result.Select(x => x.Id).ToHashSet();
+            var obstaclesCount = await unitOfWork.GraphRepository.ReadObstaclesCountAsync(ids, t)
                 .ConfigureAwait(false);
             var infos = result.ToInformationModels();
             infos.ForEach(x => x.ObstaclesCount = obstaclesCount[x.Id]);
@@ -133,7 +124,7 @@ public sealed class RequestService<T> : IRequestService<T>
     public async Task<GraphModel<T>> ReadGraphAsync(int graphId,
         CancellationToken token = default)
     {
-        return await Transaction(async (unitOfWork, t)
+        return await factory.TransactionAsync(async (unitOfWork, t)
             => await ReadGraphInternalAsync(unitOfWork, graphId, t).ConfigureAwait(false), token)
             .ConfigureAwait(false);
     }
@@ -141,7 +132,7 @@ public sealed class RequestService<T> : IRequestService<T>
     public async Task<GraphModel<T>> CreateGraphAsync(CreateGraphRequest<T> graph,
         CancellationToken token = default)
     {
-        return await Transaction(async (unit, t)
+        return await factory.TransactionAsync(async (unit, t)
             => await CreateGraphAsyncInternal(unit, graph, t).ConfigureAwait(false), token)
             .ConfigureAwait(false);
     }
@@ -149,7 +140,7 @@ public sealed class RequestService<T> : IRequestService<T>
     public async Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeAsync(int graphId,
         CancellationToken token = default)
     {
-        return await Transaction(async (unit, t)
+        return await factory.TransactionAsync(async (unit, t)
             => await ReadRangeAsyncInternal(unit, graphId, t).ConfigureAwait(false), token)
             .ConfigureAwait(false);
     }
@@ -157,10 +148,12 @@ public sealed class RequestService<T> : IRequestService<T>
     public async Task<IReadOnlyCollection<RunStatisticsModel>> ReadStatisticsAsync(int graphId,
         CancellationToken token = default)
     {
-        return await Transaction(async (unit, t) =>
+        return await factory.TransactionAsync(async (unit, t) =>
         {
             var result = await unit.StatisticsRepository
-                .ReadByGraphIdAsync(graphId, t).ConfigureAwait(false);
+                .ReadByGraphIdAsync(graphId)
+                .ToListAsync(t)
+                .ConfigureAwait(false);
             return result.ToRunStatisticsModels();
         }, token).ConfigureAwait(false);
     }
@@ -168,7 +161,7 @@ public sealed class RequestService<T> : IRequestService<T>
     public async Task<PathfindingHistoriesSerializationModel> ReadSerializationHistoriesAsync(IEnumerable<int> graphIds,
         CancellationToken token = default)
     {
-        return await Transaction(async (unitOfWork, t) =>
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
         {
             var result = new List<PathfindingHistorySerializationModel>();
             foreach (var graphId in graphIds)
@@ -176,7 +169,9 @@ public sealed class RequestService<T> : IRequestService<T>
                 var graph = await ReadGraphInternalAsync(unitOfWork, graphId, t).ConfigureAwait(false);
                 var range = await ReadRangeAsyncInternal(unitOfWork, graphId, t).ConfigureAwait(false);
                 var statistics = await unitOfWork.StatisticsRepository
-                    .ReadByGraphIdAsync(graphId, t).ConfigureAwait(false);
+                    .ReadByGraphIdAsync(graphId)
+                    .ToListAsync(t)
+                    .ConfigureAwait(false);
                 result.Add(new()
                 {
                     Graph = graph.ToSerializationModel(),
@@ -185,13 +180,13 @@ public sealed class RequestService<T> : IRequestService<T>
                     Range = range.ToCoordinates()
                 });
             }
-            return new PathfindingHistoriesSerializationModel() { Histories = result };
+            return new PathfindingHistoriesSerializationModel { Histories = result };
         }, token).ConfigureAwait(false);
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadSerializationGraphsAsync(IEnumerable<int> graphIds, CancellationToken token = default)
     {
-        return await Transaction(async (unitOfWork, t) =>
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
         {
             var result = new List<PathfindingHistorySerializationModel>();
             foreach (var graphId in graphIds)
@@ -207,13 +202,13 @@ public sealed class RequestService<T> : IRequestService<T>
                     Range = []
                 });
             }
-            return new PathfindingHistoriesSerializationModel() { Histories = result }; ;
+            return new PathfindingHistoriesSerializationModel { Histories = result };
         }, token).ConfigureAwait(false);
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadSerializationGraphsWithRangeAsync(IEnumerable<int> graphIds, CancellationToken token = default)
     {
-        return await Transaction(async (unitOfWork, t) =>
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
         {
             var result = new List<PathfindingHistorySerializationModel>();
             foreach (var graphId in graphIds)
@@ -229,20 +224,20 @@ public sealed class RequestService<T> : IRequestService<T>
                     Range = range.ToCoordinates()
                 });
             }
-            return new PathfindingHistoriesSerializationModel() { Histories = result };
+            return new PathfindingHistoriesSerializationModel { Histories = result };
         }, token).ConfigureAwait(false);
     }
 
     public async Task<bool> UpdateVerticesAsync(UpdateVerticesRequest<T> request,
         CancellationToken token = default)
     {
-        return await Transaction(async (unitOfWork, t) =>
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
         {
             var vertices = request.Vertices
                 .ToVertexEntities()
                 .ForEach(x => x.GraphId = request.GraphId);
             return await unitOfWork.VerticesRepository
-                .UpdateVerticesAsync(vertices, t)
+                .UpdateVerticesAsync([.. vertices], t)
                 .ConfigureAwait(false);
         }, token).ConfigureAwait(false);
     }
@@ -250,8 +245,8 @@ public sealed class RequestService<T> : IRequestService<T>
     public async Task<bool> DeleteGraphsAsync(IEnumerable<int> ids,
         CancellationToken token = default)
     {
-        return await Transaction(async (unitOfWork, t)
-            => await unitOfWork.GraphRepository.DeleteAsync(ids, t)
+        return await factory.TransactionAsync(async (unitOfWork, t)
+            => await unitOfWork.GraphRepository.DeleteAsync([.. ids], t)
                 .ConfigureAwait(false), token)
             .ConfigureAwait(false);
     }
@@ -259,7 +254,7 @@ public sealed class RequestService<T> : IRequestService<T>
     public async Task<bool> UpdateStatisticsAsync(IEnumerable<RunStatisticsModel> models,
         CancellationToken token = default)
     {
-        return await Transaction(async (unit, t) =>
+        return await factory.TransactionAsync(async (unit, t) =>
         {
             var entities = models.ToStatistics();
             return await unit.StatisticsRepository.UpdateAsync(entities, t)
@@ -269,20 +264,20 @@ public sealed class RequestService<T> : IRequestService<T>
 
     public async Task<bool> DeleteRunsAsync(IEnumerable<int> runIds, CancellationToken token = default)
     {
-        return await Transaction(async (unit, t) =>
-        {
-            return await unit.StatisticsRepository.DeleteByIdsAsync(runIds, t)
-                .ConfigureAwait(false);
-        }, token).ConfigureAwait(false);
+        return await factory.TransactionAsync(async (unit, t) => await unit.StatisticsRepository
+            .DeleteByIdsAsync([.. runIds], t)
+            .ConfigureAwait(false), token).ConfigureAwait(false);
     }
 
     public async Task<bool> CreatePathfindingVertexAsync(int graphId,
         long vertexId, int index, CancellationToken token = default)
     {
-        return await Transaction(async (unit, t) =>
+        return await factory.TransactionAsync(async (unit, t) =>
         {
-            var range = (await unit.RangeRepository
-                .ReadByGraphIdAsync(graphId, t).ConfigureAwait(false)).ToList();
+            var range = await unit.RangeRepository
+                .ReadByGraphIdAsync(graphId)
+                .ToListAsync(t)
+                .ConfigureAwait(false);
             var pathfindingRange = new PathfindingRange()
             {
                 GraphId = graphId,
@@ -303,7 +298,7 @@ public sealed class RequestService<T> : IRequestService<T>
 
     public async Task<RunStatisticsModel> ReadStatisticAsync(int runId, CancellationToken token = default)
     {
-        return await Transaction(async (unit, t) =>
+        return await factory.TransactionAsync(async (unit, t) =>
         {
             var statistic = await unit.StatisticsRepository
                 .ReadByIdAsync(runId, t).ConfigureAwait(false);
@@ -313,7 +308,7 @@ public sealed class RequestService<T> : IRequestService<T>
 
     public async Task<GraphInformationModel> ReadGraphInfoAsync(int graphId, CancellationToken token = default)
     {
-        using var unitOfWork = factory.Invoke();
+        await using var unitOfWork = factory.Create();
         var result = await unitOfWork.GraphRepository.ReadAsync(graphId, token)
             .ConfigureAwait(false);
         return result.ToGraphInformationModel();
@@ -321,7 +316,7 @@ public sealed class RequestService<T> : IRequestService<T>
 
     public async Task<bool> UpdateGraphInfoAsync(GraphInformationModel graph, CancellationToken token = default)
     {
-        return await Transaction(async (unit, t) =>
+        return await factory.TransactionAsync(async (unit, t) =>
         {
             var graphInfo = graph.ToGraphEntity();
             return await unit.GraphRepository.UpdateAsync(graphInfo, t)
@@ -329,33 +324,16 @@ public sealed class RequestService<T> : IRequestService<T>
         }, token).ConfigureAwait(false);
     }
 
-    private async Task<TParam> Transaction<TParam>(
-        Func<IUnitOfWork, CancellationToken, Task<TParam>> action,
-        CancellationToken token)
-    {
-        await using var unitOfWork = factory();
-        try
-        {
-            await unitOfWork.BeginTransactionAsync(token).ConfigureAwait(false);
-            var result = await action(unitOfWork, token).ConfigureAwait(false);
-            await unitOfWork.CommitTransactionAsync(token).ConfigureAwait(false);
-            return result;
-        }
-        catch (Exception)
-        {
-            await unitOfWork.RollbackTransactionAsync(token).ConfigureAwait(false);
-            throw;
-        }
-    }
-
     private static async Task<GraphModel<T>> ReadGraphInternalAsync(IUnitOfWork unit, int graphId,
         CancellationToken token = default)
     {
         var graphEntity = await unit.GraphRepository.ReadAsync(graphId, token).ConfigureAwait(false);
-        var vertexEntities = (await unit.VerticesRepository
-            .ReadVerticesByGraphIdAsync(graphId, token).ConfigureAwait(false)).ToList();
-        var vertices = await Task.Run(vertexEntities.ToVertices<T>, token).ConfigureAwait(false);
-        return new GraphModel<T>()
+        var vertexEntities = await unit.VerticesRepository
+            .ReadVerticesByGraphIdAsync(graphId)
+            .ToListAsync(token)
+            .ConfigureAwait(false);
+        var vertices = vertexEntities.ToVertices<T>();
+        return new()
         {
             Vertices = vertices,
             DimensionSizes = graphEntity.Dimensions.ToDimensionSizes(),
@@ -363,8 +341,30 @@ public sealed class RequestService<T> : IRequestService<T>
             Name = graphEntity.Name,
             Neighborhood = graphEntity.Neighborhood,
             SmoothLevel = graphEntity.SmoothLevel,
-            Status = graphEntity.Status,
+            Status = graphEntity.Status
         };
+    }
+
+    public async Task<IReadOnlyCollection<RunStatisticsModel>> ReadStatisticsAsync(IEnumerable<int> runIds, CancellationToken token = default)
+    {
+        return await factory.TransactionAsync(async (unit, t) =>
+        {
+            var result = await unit.StatisticsRepository
+                .ReadByIdsAsync([.. runIds])
+                .ToListAsync(t)
+                .ConfigureAwait(false);
+            return result.ToRunStatisticsModels();
+        }, token);
+    }
+
+    public async Task<IReadOnlyCollection<RunStatisticsModel>> CreateStatisticsAsync(IEnumerable<CreateStatisticsRequest> request, CancellationToken token = default)
+    {
+        return await factory.TransactionAsync(async (unit, t) =>
+        {
+            var entities = request.Select(x => x.ToStatistics()).ToArray();
+            var result = await unit.StatisticsRepository.CreateAsync(entities, t).ConfigureAwait(false);
+            return result.ToRunStatisticsModels();
+        }, token).ConfigureAwait(false);
     }
 
     private static async Task<GraphModel<T>> CreateGraphAsyncInternal(IUnitOfWork unit,
@@ -377,7 +377,6 @@ public sealed class RequestService<T> : IRequestService<T>
         await unit.VerticesRepository.CreateAsync(vertices, token).ConfigureAwait(false);
         vertices.Zip(request.Graph, (x, y) => (Entity: x, Vertex: y))
             .ForEach(x => x.Vertex.Id = x.Entity.Id);
-        var info = graph.ToGraphInformationModel();
         return new()
         {
             DimensionSizes = request.Graph.DimensionsSizes,
@@ -394,7 +393,10 @@ public sealed class RequestService<T> : IRequestService<T>
         IUnitOfWork unit, int graphId, CancellationToken token = default)
     {
         var result = new List<PathfindingRangeModel>();
-        var range = await unit.RangeRepository.ReadByGraphIdAsync(graphId, token).ConfigureAwait(false);
+        var range = await unit.RangeRepository
+            .ReadByGraphIdAsync(graphId)
+            .ToListAsync(token)
+            .ConfigureAwait(false);
         foreach (var rangeVertex in range)
         {
             var vertex = await unit.VerticesRepository.ReadAsync(rangeVertex.VertexId, token)
@@ -404,24 +406,5 @@ public sealed class RequestService<T> : IRequestService<T>
             result.Add(model);
         }
         return result.AsReadOnly();
-    }
-
-    public async Task<IReadOnlyCollection<RunStatisticsModel>> ReadStatisticsAsync(IEnumerable<int> runIds, CancellationToken token = default)
-    {
-        return await Transaction(async (unit, t) =>
-        {
-            var result = await unit.StatisticsRepository.ReadByIdsAsync(runIds, t).ConfigureAwait(false);
-            return result.ToRunStatisticsModels();
-        }, token);
-    }
-
-    public async Task<IReadOnlyCollection<RunStatisticsModel>> CreateStatisticsAsync(IEnumerable<CreateStatisticsRequest> request, CancellationToken token = default)
-    {
-        return await Transaction(async (unit, t) =>
-        {
-            var entities = request.Select(x => x.ToStatistics()).ToArray();
-            var result = await unit.StatisticsRepository.CreateAsync(entities, t).ConfigureAwait(false);
-            return result.ToRunStatisticsModels();
-        }, token).ConfigureAwait(false);
     }
 }

@@ -1,6 +1,4 @@
-﻿using Terminal.Gui;
-
-namespace Pathfinding.App.Console.Views
+﻿namespace Pathfinding.App.Console.Views
 {
     internal sealed partial class GraphAssembleButton
     {

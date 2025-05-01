@@ -39,14 +39,14 @@ internal sealed partial class RunProgressView : FrameView
         messenger.Register<OpenRunFieldMessage>(this, OnRunFieldOpen);
         this.viewModel = viewModel;
 
-        BindTo(leftLabel, x => Fraction - FractionPerClick, Button1Pressed, WheeledDown);
-        BindTo(leftLabel, x => Fraction - ExtraFractionPerClick, Button1Pressed | ButtonCtrl);
-        BindTo(leftLabel, x => Fraction + FractionPerClick, WheeledUp);
-        BindTo(leftLabel, x => FractionRange.LowerValueOfRange, Button2Clicked);
-        BindTo(rightLabel, x => Fraction + FractionPerClick, Button1Pressed, WheeledUp);
-        BindTo(rightLabel, x => Fraction + ExtraFractionPerClick, Button1Pressed | ButtonCtrl);
-        BindTo(rightLabel, x => Fraction - FractionPerClick, WheeledDown);
-        BindTo(rightLabel, x => FractionRange.UpperValueOfRange, Button2Clicked);
+        BindTo(leftLabel, _ => Fraction - FractionPerClick, Button1Pressed, WheeledDown);
+        BindTo(leftLabel, _ => Fraction - ExtraFractionPerClick, Button1Pressed | ButtonCtrl);
+        BindTo(leftLabel, _ => Fraction + FractionPerClick, WheeledUp);
+        BindTo(leftLabel, _ => FractionRange.LowerValueOfRange, Button2Clicked);
+        BindTo(rightLabel, _ => Fraction + FractionPerClick, Button1Pressed, WheeledUp);
+        BindTo(rightLabel, _ => Fraction + ExtraFractionPerClick, Button1Pressed | ButtonCtrl);
+        BindTo(rightLabel, _ => Fraction - FractionPerClick, WheeledDown);
+        BindTo(rightLabel, _ => FractionRange.UpperValueOfRange, Button2Clicked);
         BindTo(bar, x => (float)Math.Round((x.MouseEvent.X + 1f) / bar.Bounds.Width, 3), Button1Clicked);
         viewModel.WhenAnyValue(x => x.SelectedRun.Fraction).BindTo(this, x => x.Fraction);
     }

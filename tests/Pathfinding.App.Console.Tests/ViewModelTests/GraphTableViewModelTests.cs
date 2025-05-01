@@ -8,6 +8,7 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using System.Reactive.Linq;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests
 {
@@ -20,11 +21,11 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             using var mock = AutoMock.GetLoose();
 
             IReadOnlyCollection<GraphInformationModel> graphs =
-                Enumerable.Range(1, 5).Select(x => new GraphInformationModel
+                [.. Enumerable.Range(1, 5).Select(x => new GraphInformationModel
                 {
                     Id = x,
                     Dimensions = []
-                }).ToList();
+                })];
             mock.Mock<IRequestService<GraphVertexModel>>()
                 .Setup(x => x.ReadAllGraphInfoAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(graphs));
@@ -62,7 +63,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
         }
 
         [Test]
-        public async Task ActvateGraphCommand_ShouldSendMessage()
+        public async Task ActivateGraphCommand_ShouldSendMessage()
         {
             using var mock = AutoMock.GetLoose();
 
@@ -76,13 +77,14 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
 
             mock.Mock<IRequestService<GraphVertexModel>>()
                 .Setup(x => x.ReadGraphAsync(
-                    It.Is<int>(x => x == 1),
+                    It.Is<int>(z => z == 1),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(graph));
             mock.Mock<IMessenger>()
                 .Setup(x => x.Send(It.IsAny<AsyncGraphActivatedMessage>(),
                     It.IsAny<IsAnyToken>()))
-                .Callback<AsyncGraphActivatedMessage, object>((m, t) => m.Signal(default));
+                .Returns<AsyncGraphActivatedMessage, object>((x, o) => x)
+                .Callback<AsyncGraphActivatedMessage, object>((m, t) => m.SetCompleted(true));
 
             var viewModel = mock.Create<GraphTableViewModel>();
 
@@ -92,12 +94,12 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             {
                 mock.Mock<IRequestService<GraphVertexModel>>()
                     .Verify(x => x.ReadGraphAsync(
-                        It.Is<int>(x => x == 1),
+                        It.Is<int>(z => z == 1),
                         It.IsAny<CancellationToken>()), Times.Once);
                 mock.Mock<IMessenger>()
                     .Verify(x => x.Send(
                         It.IsAny<AsyncGraphActivatedMessage>(),
-                        It.IsAny<int>()), Times.Exactly(2));
+                        It.IsAny<IsAnyToken>()), Times.Exactly(2));
                 mock.Mock<IMessenger>()
                     .Verify(x => x.Send(
                         It.IsAny<GraphActivatedMessage>(),
@@ -139,7 +141,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
 
             mock.Mock<IMessenger>()
                 .Verify(x => x.Send(
-                    It.IsAny<GraphSelectedMessage>(),
+                    It.IsAny<GraphsSelectedMessage>(),
                     It.IsAny<IsAnyToken>()), Times.Once);
         }
     }

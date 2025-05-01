@@ -6,11 +6,12 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
 {
     internal sealed class InMemoryRangeRepository : IRangeRepository
     {
-        private int id = 0;
+        private int id;
 
         private readonly HashSet<PathfindingRange> set = new(EntityComparer<int>.Instance);
 
-        public async Task<IEnumerable<PathfindingRange>> CreateAsync(IEnumerable<PathfindingRange> entities,
+        public async Task<IReadOnlyCollection<PathfindingRange>> CreateAsync(
+            IReadOnlyCollection<PathfindingRange> entities,
             CancellationToken token = default)
         {
             var result = entities
@@ -27,23 +28,23 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
             return await Task.FromResult(result > 0);
         }
 
-        public async Task<bool> DeleteByVerticesIdsAsync(IEnumerable<long> verticesIds,
+        public async Task<bool> DeleteByVerticesIdsAsync(IReadOnlyCollection<long> verticesIds,
             CancellationToken token = default)
         {
             var result = set.RemoveWhere(x => verticesIds.Contains(x.VertexId));
             return await Task.FromResult(result > 0);
         }
 
-        public async Task<IEnumerable<PathfindingRange>> ReadByGraphIdAsync(int graphId,
-            CancellationToken token = default)
+        public IAsyncEnumerable<PathfindingRange> ReadByGraphIdAsync(int graphId)
         {
-            var result = set.Where(x => x.GraphId == graphId)
+            return set.Where(x => x.GraphId == graphId)
                 .OrderBy(x => x.Order)
-                .ToList();
-            return await Task.FromResult(result);
+                .ToAsyncEnumerable();
         }
 
-        public async Task<IEnumerable<PathfindingRange>> UpsertAsync(IEnumerable<PathfindingRange> entities, CancellationToken token = default)
+        public async Task<IReadOnlyCollection<PathfindingRange>> UpsertAsync(
+            IReadOnlyCollection<PathfindingRange> entities,
+            CancellationToken token = default)
         {
             foreach (var entity in entities)
             {

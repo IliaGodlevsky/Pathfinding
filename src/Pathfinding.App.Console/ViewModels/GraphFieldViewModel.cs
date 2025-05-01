@@ -14,6 +14,8 @@ using Pathfinding.Service.Interface.Requests.Update;
 using Pathfinding.Shared.Extensions;
 using ReactiveUI;
 using System.Reactive;
+using Pathfinding.App.Console.Messages.ViewModel.Requests;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -124,12 +126,12 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
     {
         if (vertex.IsObstacle != polarity)
         {
-            var inRangeRequest = new IsVertexInRangeRequest(vertex);
+            var inRangeRequest = new IsVertexInRangeRequestMessage(vertex);
             messenger.Send(inRangeRequest);
-            if (!inRangeRequest.IsInRange)
+            if (!inRangeRequest.Response)
             {
                 vertex.IsObstacle = polarity;
-                messenger.Send(new ObstaclesCountChangedMessage(graphId, vertex.IsObstacle ? 1 : -1));
+                messenger.Send(new ObstaclesCountChangedMessage((graphId, vertex.IsObstacle ? 1 : -1)));
                 var request = new UpdateVerticesRequest<GraphVertexModel>(graphId,
                     [.. vertex.Enumerate()]);
                 await ExecuteSafe(async () =>
@@ -164,20 +166,20 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
 
     private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
     {
-        Graph = new Graph<GraphVertexModel>(msg.Graph.Vertices, msg.Graph.DimensionSizes);
-        GraphId = msg.Graph.Id;
-        IsReadOnly = msg.Graph.Status == GraphStatuses.Readonly;
-        SmoothLevel = msg.Graph.SmoothLevel;
+        Graph = new Graph<GraphVertexModel>(msg.Value.Vertices, msg.Value.DimensionSizes);
+        GraphId = msg.Value.Id;
+        IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
+        SmoothLevel = msg.Value.SmoothLevel;
     }
 
     private void OnGraphBecameReadonly(object recipient, GraphStateChangedMessage msg)
     {
-        IsReadOnly = msg.Status == GraphStatuses.Readonly;
+        IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
     {
-        if (msg.GraphIds.Contains(GraphId))
+        if (msg.Value.Contains(GraphId))
         {
             GraphId = 0;
             Graph = Graph<GraphVertexModel>.Empty;

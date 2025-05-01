@@ -11,7 +11,7 @@ using Terminal.Gui;
 
 namespace Pathfinding.App.Console.Views;
 
-internal sealed partial class RunHeuristicsView : FrameView
+internal sealed partial class RunHeuristicsView
 {
     private readonly IRequireHeuristicsViewModel viewModel;
     private readonly List<CheckBox> checkBoxes = [];
@@ -27,7 +27,7 @@ internal sealed partial class RunHeuristicsView : FrameView
             var checkBox = new CheckBox(text) { Y = checkBoxes.Count };
             checkBox.Events().Toggled
                 .Select(x => x
-                    ? (Action<Heuristics?>)(x => heuristics.Remove(x))
+                    ? (Action<Heuristics?>)(z => heuristics.Remove(z))
                     : heuristics.Add)
                 .Do(x => x(heuristic))
                 .Subscribe();
@@ -43,7 +43,7 @@ internal sealed partial class RunHeuristicsView : FrameView
     private void OnHeuristicsViewOpen(object recipient, OpenHeuristicsViewMessage msg)
     {
         Close();
-        viewModel.AppliedHeuristics.Add(default);
+        viewModel.AppliedHeuristics.Add(null);
         Visible = true;
     }
 

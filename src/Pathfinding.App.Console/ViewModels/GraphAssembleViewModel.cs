@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
@@ -130,7 +130,7 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
             };
             var graphModel = await service.CreateGraphAsync(request).ConfigureAwait(false);
             var info = graphModel.ToGraphInformationModel().ToGraphInfo();
-            messenger.Send(new GraphCreatedMessage([info]));
+            messenger.Send(new GraphsCreatedMessage([info]));
         }, logger.Error).ConfigureAwait(false);
     }
 }

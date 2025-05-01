@@ -95,7 +95,7 @@ internal sealed partial class GraphFieldView : FrameView
     {
         view.Events().MouseClick
             .Where(x => flags.Any(z => x.MouseEvent.Flags.HasFlag(z)))
-            .Select(x => model)
+            .Select(_ => model)
             .InvokeCommand(command)
             .DisposeWith(vertexDisposables);
     }

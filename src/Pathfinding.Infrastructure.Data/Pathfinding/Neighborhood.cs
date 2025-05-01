@@ -30,7 +30,7 @@ namespace Pathfinding.Infrastructure.Data.Pathfinding
                 resultCoordinatesValues[depth] = selfCoordinate[depth] + offset;
                 var neighbours = IsBottom(depth)
                     ? CollectNeighbors(depth + 1).AsEnumerable()
-                    : Filter(new Coordinate(resultCoordinatesValues));
+                    : Filter(new(resultCoordinatesValues));
                 neighborhood.AddRange(neighbours);
             }
             return neighborhood;

@@ -1,9 +1,11 @@
 ﻿using Autofac;
 using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.App.Console.Views;
+using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Business;
 using Pathfinding.Infrastructure.Business.Commands;
@@ -34,43 +36,43 @@ internal static class Modules
         builder.RegisterType<RequestService<GraphVertexModel>>().As<IRequestService<GraphVertexModel>>().SingleInstance();
 
         builder.RegisterType<IncludeSourceVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 2).Keyed<IPathfindingRangeCommand<GraphVertexModel>>(KeyFilters.IncludeCommands);
+            .WithMetadata(MetadataKeys.Order, 2).Keyed<Command>(KeyFilters.IncludeCommands);
         builder.RegisterType<IncludeTargetVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 4).Keyed<IPathfindingRangeCommand<GraphVertexModel>>(KeyFilters.IncludeCommands);
+            .WithMetadata(MetadataKeys.Order, 4).Keyed<Command>(KeyFilters.IncludeCommands);
         builder.RegisterType<ReplaceIsolatedSourceVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 3).Keyed<IPathfindingRangeCommand<GraphVertexModel>>(KeyFilters.IncludeCommands);
+            .WithMetadata(MetadataKeys.Order, 3).Keyed<Command>(KeyFilters.IncludeCommands);
         builder.RegisterType<ReplaceIsolatedTargetVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 5).Keyed<IPathfindingRangeCommand<GraphVertexModel>>(KeyFilters.IncludeCommands);
+            .WithMetadata(MetadataKeys.Order, 5).Keyed<Command>(KeyFilters.IncludeCommands);
         builder.RegisterType<ExcludeSourceVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 1).Keyed<IPathfindingRangeCommand<GraphVertexModel>>(KeyFilters.ExcludeCommands);
+            .WithMetadata(MetadataKeys.Order, 1).Keyed<Command>(KeyFilters.ExcludeCommands);
         builder.RegisterType<ExcludeTargetVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 2).Keyed<IPathfindingRangeCommand<GraphVertexModel>>(KeyFilters.ExcludeCommands);
+            .WithMetadata(MetadataKeys.Order, 2).Keyed<Command>(KeyFilters.ExcludeCommands);
         builder.RegisterType<IncludeTransitVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 6).Keyed<IPathfindingRangeCommand<GraphVertexModel>>(KeyFilters.IncludeCommands);
+            .WithMetadata(MetadataKeys.Order, 6).Keyed<Command>(KeyFilters.IncludeCommands);
         builder.RegisterType<ReplaceTransitIsolatedVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 1).Keyed<IPathfindingRangeCommand<GraphVertexModel>>(KeyFilters.IncludeCommands);
+            .WithMetadata(MetadataKeys.Order, 1).Keyed<Command>(KeyFilters.IncludeCommands);
         builder.RegisterType<ExcludeTransitVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 3).Keyed<IPathfindingRangeCommand<GraphVertexModel>>(KeyFilters.ExcludeCommands);
+            .WithMetadata(MetadataKeys.Order, 3).Keyed<Command>(KeyFilters.ExcludeCommands);
 
         builder.RegisterType<JsonSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
-            .As<ISerializer<PathfindingHistoriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 3)
+            .As<Serializer>().WithMetadata(MetadataKeys.Order, 3)
             .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Json);
         builder.RegisterType<BinarySerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
-            .Keyed<ISerializer<PathfindingHistoriesSerializationModel>>(KeyFilters.Compress).WithMetadata(MetadataKeys.Order, 2)
+            .Keyed<Serializer>(KeyFilters.Compress).WithMetadata(MetadataKeys.Order, 2)
             .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Binary);
         builder.RegisterType<XmlSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
-            .As<ISerializer<PathfindingHistoriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 4)
+            .As<Serializer>().WithMetadata(MetadataKeys.Order, 4)
             .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Xml);
         builder.RegisterType<BundleSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
-            .As<ISerializer<PathfindingHistoriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 1)
+            .As<Serializer>().WithMetadata(MetadataKeys.Order, 1)
             .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Csv);
         builder.RegisterType<BsonSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
-            .As<ISerializer<PathfindingHistoriesSerializationModel>>().WithMetadata(MetadataKeys.Order, 5)
+            .As<Serializer>().WithMetadata(MetadataKeys.Order, 5)
             .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Bson);
-        builder.RegisterDecorator<ISerializer<PathfindingHistoriesSerializationModel>>(
+        builder.RegisterDecorator<Serializer>(
             (_, inner) => new CompressSerializer<PathfindingHistoriesSerializationModel>(inner),
             fromKey: KeyFilters.Compress);
-        builder.RegisterDecorator<ISerializer<PathfindingHistoriesSerializationModel>>(
+        builder.RegisterDecorator<Serializer>(
             (_, _, inner) => new BufferedSerializer<PathfindingHistoriesSerializationModel>(inner),
             condition: ctx => ctx.CurrentInstance is not CompressSerializer<PathfindingHistoriesSerializationModel>);
 
@@ -86,6 +88,10 @@ internal static class Modules
         builder.RegisterAssemblyTypes(typeof(BaseViewModel).Assembly)
             .SingleInstance().Where(x => x.Name.EndsWith("ViewModel")).AsSelf()
             .AsImplementedInterfaces().WithAttributeFiltering();
+
+        var algorithms = Enum.GetValues<Algorithms>()
+            .OrderBy(x => x.GetOrder()).ToArray();
+        builder.RegisterInstance(algorithms).AsSelf().SingleInstance();
 
         builder.RegisterType<MainView>().AsSelf().WithAttributeFiltering();
 

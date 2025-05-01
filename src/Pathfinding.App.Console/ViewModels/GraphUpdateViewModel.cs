@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Logging.Interface;
@@ -63,7 +63,7 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
         this.messenger = messenger;
         this.service = service;
         this.log = log;
-        messenger.Register<GraphSelectedMessage>(this, OnGraphSelected);
+        messenger.Register<GraphsSelectedMessage>(this, OnGraphSelected);
         messenger.Register<GraphStateChangedMessage>(this, OnStatusChanged);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
         UpdateGraphCommand = ReactiveCommand.CreateFromTask(ExecuteUpdate, CanExecute());
@@ -89,24 +89,22 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
             info.Neighborhood = Neighborhood;
             info.SmoothLevel = SmoothLevel;
             await service.UpdateGraphInfoAsync(info).ConfigureAwait(false);
-            await messenger.SendAsync(new AsyncGraphUpdatedMessage(info), Tokens.GraphTable)
-                .ConfigureAwait(false);
+            await messenger.Send(new AsyncGraphUpdatedMessage(info), Tokens.GraphTable);
             messenger.Send(new GraphUpdatedMessage(info));
-            await messenger.SendAsync(new AsyncGraphUpdatedMessage(info), Tokens.AlgorithmUpdate)
-                .ConfigureAwait(false);
+            await messenger.Send(new AsyncGraphUpdatedMessage(info), Tokens.AlgorithmUpdate);
         }, log.Error).ConfigureAwait(false);
     }
 
     private void OnStatusChanged(object recipient, GraphStateChangedMessage msg)
     {
-        Status = msg.Status;
+        Status = msg.Value.Status;
     }
 
-    private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
+    private void OnGraphSelected(object recipient, GraphsSelectedMessage msg)
     {
-        if (msg.Graphs.Length == 1)
+        if (msg.Value.Length == 1)
         {
-            SelectedGraphs = msg.Graphs;
+            SelectedGraphs = msg.Value;
             var graph = SelectedGraphs[0];
             Name = graph.Name;
             SmoothLevel = graph.SmoothLevel;
@@ -117,9 +115,8 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
     {
-        SelectedGraphs = SelectedGraphs
-            .Where(x => !msg.GraphIds.Contains(x.Id))
-            .ToArray();
+        SelectedGraphs = [.. SelectedGraphs
+            .Where(x => !msg.Value.Contains(x.Id))];
         if (SelectedGraphs.Length == 0)
         {
             Name = string.Empty;

@@ -10,6 +10,7 @@ using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Serialization;
 using Pathfinding.Shared.Extensions;
 using System.Reactive.Linq;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests
 {
@@ -27,9 +28,9 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                 = Enumerable.Range(1, 5)
                 .Select(x => new PathfindingHistorySerializationModel())
                 .ToArray()
-                .To(x => new PathfindingHistoriesSerializationModel() { Histories = x.ToList() });
+                .To(x => new PathfindingHistoriesSerializationModel() { Histories = [.. x] });
             IReadOnlyCollection<PathfindingHistoryModel<GraphVertexModel>> result
-                = Enumerable.Range(1, 5)
+                = [.. Enumerable.Range(1, 5)
                 .Select(x => new PathfindingHistoryModel<GraphVertexModel>()
                 {
                     Graph = new()
@@ -39,7 +40,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                         DimensionSizes = [],
                         Name = string.Empty
                     }
-                }).ToList();
+                })];
 
             mock.Mock<IRequestService<GraphVertexModel>>()
                 .Setup(x => x.ReadSerializationHistoriesAsync(
@@ -56,9 +57,9 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             mock.Mock<IMessenger>().Setup(x => x.Register(
                     It.IsAny<object>(),
                     It.IsAny<IsAnyToken>(),
-                    It.IsAny<MessageHandler<object, GraphSelectedMessage>>()))
-               .Callback<object, object, MessageHandler<object, GraphSelectedMessage>>((r, t, handler)
-                    => handler(r, new GraphSelectedMessage(models)));
+                    It.IsAny<MessageHandler<object, GraphsSelectedMessage>>()))
+               .Callback<object, object, MessageHandler<object, GraphsSelectedMessage>>((r, t, handler)
+                    => handler(r, new GraphsSelectedMessage(models)));
 
             var viewModel = mock.Create<GraphCopyViewModel>();
 
@@ -83,7 +84,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
 
                 mock.Mock<IMessenger>()
                     .Verify(x => x.Send(
-                        It.IsAny<GraphCreatedMessage>(),
+                        It.IsAny<GraphsCreatedMessage>(),
                         It.IsAny<IsAnyToken>()), Times.Once);
             });
         }

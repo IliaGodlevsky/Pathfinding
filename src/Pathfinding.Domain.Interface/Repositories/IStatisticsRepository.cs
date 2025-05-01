@@ -4,23 +4,21 @@ namespace Pathfinding.Domain.Interface.Repositories;
 
 public interface IStatisticsRepository
 {
-    Task<IEnumerable<Statistics>> ReadByGraphIdAsync(int graphId,
+    IAsyncEnumerable<Statistics> ReadByGraphIdAsync(int graphId);
+
+    Task<Statistics> ReadByIdAsync(
+        int runId, CancellationToken token = default);
+
+    IAsyncEnumerable<Statistics> ReadByIdsAsync(IReadOnlyCollection<int> runIds);
+
+    Task<IReadOnlyCollection<Statistics>> CreateAsync(
+        IReadOnlyCollection<Statistics> statistics, 
         CancellationToken token = default);
 
-    Task<Statistics> ReadByIdAsync(int runId, CancellationToken token = default);
+    Task<bool> DeleteByIdsAsync(
+        IReadOnlyCollection<int> ids, CancellationToken token = default);
 
-    Task<IEnumerable<Statistics>> ReadByIdsAsync(IEnumerable<int> runIds,
+    Task<bool> UpdateAsync(
+        IReadOnlyCollection<Statistics> entities, 
         CancellationToken token = default);
-
-    Task<int> ReadStatisticsCountAsync(int graphId, CancellationToken token = default);
-
-    Task<Statistics> CreateAsync(Statistics entity, CancellationToken token = default);
-
-    Task<IEnumerable<Statistics>> CreateAsync(IEnumerable<Statistics> statistics, CancellationToken token = default);
-
-    Task<bool> DeleteByGraphId(int graphId, CancellationToken token = default);
-
-    Task<bool> DeleteByIdsAsync(IEnumerable<int> ids, CancellationToken token = default);
-
-    Task<bool> UpdateAsync(IEnumerable<Statistics> entities, CancellationToken token = default);
 }

@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Interface;
@@ -16,7 +16,9 @@ using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using Pathfinding.App.Console.Messages.ViewModel.Requests;
 using static Pathfinding.App.Console.Models.RunModel;
+// ReSharper disable AccessToModifiedClosure
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -57,25 +59,25 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
         messenger.Register<RunsDeletedMessage>(this, OnRunsDeleted);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
         messenger.Register<GraphUpdatedMessage>(this, OnGraphUpdated);
-        messenger.Register<RunSelectedMessage>(this, OnRunActivated);
+        messenger.Register<RunsSelectedMessage>(this, OnRunActivated);
     }
 
-    private void OnRunActivated(object recipient, RunSelectedMessage msg)
+    private void OnRunActivated(object recipient, RunsSelectedMessage msg)
     {
-        if (msg.SelectedRuns.Length > 0)
+        if (msg.Value.Length > 0)
         {
-            ActivateRun(msg.SelectedRuns[0]);
+            ActivateRun(msg.Value[0]);
         }
     }
 
     private void OnRunsDeleted(object recipient, RunsDeletedMessage msg)
     {
-        if (msg.RunIds.Contains(SelectedRun.Id))
+        if (msg.Value.Contains(SelectedRun.Id))
         {
             selected = Empty;
         }
         var runs = Runs
-            .Where(x => msg.RunIds.Contains(x.Id))
+            .Where(x => msg.Value.Contains(x.Id))
             .ToArray();
         Runs.Remove(runs);
     }
@@ -95,7 +97,7 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
     {
-        if (msg.GraphIds.Contains(graphId))
+        if (msg.Value.Contains(graphId))
         {
             graphId = 0;
             RunGraph = Graph<RunVertexModel>.Empty;
@@ -106,9 +108,9 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
 
     private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
     {
-        graphId = msg.Graph.Id;
-        var graphVertices = msg.Graph.Vertices;
-        var dimensions = msg.Graph.DimensionSizes;
+        graphId = msg.Value.Id;
+        var graphVertices = msg.Value.Vertices;
+        var dimensions = msg.Value.DimensionSizes;
         var graph = new Graph<GraphVertexModel>(graphVertices, dimensions);
         var runGraph = graphAssemble.AssembleGraph(graph, dimensions);
         RunGraph = Graph<RunVertexModel>.Empty;
@@ -139,9 +141,9 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
         {
             this.RaisePropertyChanged(nameof(RunGraph));
 
-            var rangeMsg = new QueryPathfindingRangeMessage();
+            var rangeMsg = new PathfindingRangeRequestMessage();
             messenger.Send(rangeMsg);
-            var rangeCoordinates = rangeMsg.PathfindingRange;
+            var rangeCoordinates = rangeMsg.Response;
             var range = rangeCoordinates.Select(RunGraph.Get).ToArray();
 
             var subRevisions = new List<SubRunModel>();

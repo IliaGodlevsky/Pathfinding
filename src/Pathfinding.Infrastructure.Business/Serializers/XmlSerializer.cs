@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 namespace Pathfinding.Infrastructure.Business.Serializers;
 
 public sealed class XmlSerializer<T> : ISerializer<T>
-    where T : IXmlSerializable, new()
+    where T : new()
 {
     public async Task<T> DeserializeFromAsync(Stream stream, 
         CancellationToken token = default)

@@ -1,7 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Logging.Interface;
@@ -35,7 +35,7 @@ internal sealed class GraphDeleteViewModel : BaseViewModel, IGraphDeleteViewMode
         this.messenger = messenger;
         this.service = service;
         this.logger = logger;
-        messenger.Register<GraphSelectedMessage>(this, OnGraphSelected);
+        messenger.Register<GraphsSelectedMessage>(this, OnGraphSelected);
     }
 
     private IObservable<bool> CanDelete()
@@ -59,8 +59,8 @@ internal sealed class GraphDeleteViewModel : BaseViewModel, IGraphDeleteViewMode
         }, logger.Error).ConfigureAwait(false);
     }
 
-    private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
+    private void OnGraphSelected(object recipient, GraphsSelectedMessage msg)
     {
-        SelectedGraphIds = [.. msg.Graphs.Select(x => x.Id)];
+        SelectedGraphIds = [.. msg.Value.Select(x => x.Id)];
     }
 }

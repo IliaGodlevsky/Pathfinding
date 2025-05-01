@@ -7,7 +7,6 @@ using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Shared.Extensions;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
-using System.Data;
 using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -25,7 +24,7 @@ internal sealed partial class GraphsTableView
     {
         viewModel.Graphs.ActOnEveryObject(AddToTable, RemoveFromTable);
         this.Events().Initialized
-            .Select(x => Unit.Default)
+            .Select(_ => Unit.Default)
             .InvokeCommand(viewModel, x => x.LoadGraphsCommand);
         this.Events().CellActivated
             .Where(x => x.Row < table.Rows.Count)
@@ -35,19 +34,19 @@ internal sealed partial class GraphsTableView
             .Where(x => x.KeyEvent.Key.HasFlag(Key.A)
                 && x.KeyEvent.Key.HasFlag(Key.CtrlMask))
             .Throttle(TimeSpan.FromMilliseconds(150))
-            .Select(x => MultiSelectedRegions
+            .Select(_ => MultiSelectedRegions
                     .SelectMany(x => (x.Rect.Top, x.Rect.Bottom - 1).Iterate())
                     .Select(GetGraphId)
                     .ToArray())
             .InvokeCommand(viewModel, x => x.SelectGraphsCommand);
         this.Events().SelectedCellChanged
             .Where(x => x.NewRow > -1 && x.NewRow < table.Rows.Count)
-            .Select(x => GetAllSelectedCells().Select(x => x.Y)
+            .Select(_ => GetAllSelectedCells().Select(x => x.Y)
                 .Distinct().Select(GetGraphId).ToArray())
             .InvokeCommand(viewModel, x => x.SelectGraphsCommand);
         this.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-            .Do(x => messenger.Send(new CloseRunFieldMessage()))
+            .Do(_ => messenger.Send(new CloseRunFieldMessage()))
             .Select(x => x.MouseEvent.Y + RowOffset - headerLinesConsumed)
             .Where(x => x >= 0 && x < Table.Rows.Count && x == SelectedRow)
             .Select(x => GetGraphId(x).Enumerate().ToArray())
@@ -90,10 +89,13 @@ internal sealed partial class GraphsTableView
         Application.MainLoop.Invoke(() =>
         {
             var row = table.Rows.Find(id);
-            row[column] = value;
-            table.AcceptChanges();
-            SetNeedsDisplay();
-            SetCursorInvisible();
+            if (row is not null)
+            {
+                row[column] = value;
+                table.AcceptChanges();
+                SetNeedsDisplay();
+                SetCursorInvisible();
+            }
         });
     }
 
@@ -102,22 +104,25 @@ internal sealed partial class GraphsTableView
         Application.MainLoop.Invoke(() =>
         {
             var row = table.Rows.Find(model.Id);
-            var index = table.Rows.IndexOf(row);
-            row.Delete();
-            table.AcceptChanges();
-            modelChangingSubs[model.Id].Dispose();
-            modelChangingSubs.Remove(model.Id);
-            MultiSelectedRegions.Clear();
-            if (table.Rows.Count > 0)
+            if (row is not null)
             {
-                SelectedCellChangedEventArgs args = index == table.Rows.Count
-                    ? new(table, 0, 0, index, index - 1)
-                    : new(table, 0, 0, index, index);
-                OnSelectedCellChanged(args);
-                SetSelection(0, args.NewRow, false);
+                var index = table.Rows.IndexOf(row);
+                row.Delete();
+                table.AcceptChanges();
+                modelChangingSubs[model.Id].Dispose();
+                modelChangingSubs.Remove(model.Id);
+                MultiSelectedRegions.Clear();
+                if (table.Rows.Count > 0)
+                {
+                    SelectedCellChangedEventArgs args = index == table.Rows.Count
+                        ? new(table, 0, 0, index, index - 1)
+                        : new(table, 0, 0, index, index);
+                    OnSelectedCellChanged(args);
+                    SetSelection(0, args.NewRow, false);
+                }
+                SetNeedsDisplay();
+                SetCursorInvisible();
             }
-            SetNeedsDisplay();
-            SetCursorInvisible();
         });
     }
 

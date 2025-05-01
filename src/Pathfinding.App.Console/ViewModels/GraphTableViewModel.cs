@@ -4,7 +4,7 @@ using DynamicData;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Infrastructure.Business.Extensions;
@@ -14,7 +14,6 @@ using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Reactive;
-using System.Reactive.Linq;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -32,7 +31,7 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
 
     public ObservableCollection<GraphInfoModel> Graphs { get; } = [];
 
-    private int ActivatedGraphId { get; set; } = 0;
+    private int ActivatedGraphId { get; set; }
 
     public GraphTableViewModel(
         IRequestService<GraphVertexModel> service,
@@ -43,7 +42,7 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
         this.messenger = messenger;
         this.logger = logger;
         messenger.RegisterAsyncHandler<AsyncGraphUpdatedMessage, int>(this, Tokens.GraphTable, OnGraphUpdated);
-        messenger.Register<GraphCreatedMessage>(this, OnGraphCreated);
+        messenger.Register<GraphsCreatedMessage>(this, OnGraphCreated);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
         messenger.Register<ObstaclesCountChangedMessage>(this, OnObstaclesCountChanged);
         messenger.Register<GraphStateChangedMessage>(this, GraphStateChanged);
@@ -55,7 +54,7 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
     private void SelectGraphs(int[] selected)
     {
         var graphs = Graphs.Where(x => selected.Contains(x.Id)).ToArray();
-        messenger.Send(new GraphSelectedMessage(graphs));
+        messenger.Send(new GraphsSelectedMessage(graphs));
     }
 
     private async Task ActivatedGraph(int model)
@@ -64,13 +63,13 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
         {
             var graphModel = await service.ReadGraphAsync(model).ConfigureAwait(false);
             var graph = new Graph<GraphVertexModel>(graphModel.Vertices, graphModel.DimensionSizes);
-            var layers = graphModel.ToLayers();
-            await layers.OverlayAsync(graph).ConfigureAwait(false);
+            await graphModel.ToLayers().OverlayAsync(graph).ConfigureAwait(false);
             ActivatedGraphId = graphModel.Id;
-            messenger.Send(new GraphActivatedMessage(graphModel), Tokens.GraphField);
-            await messenger.SendAsync(new AsyncGraphActivatedMessage(graphModel), Tokens.PathfindingRange);
-            await messenger.SendAsync(new AsyncGraphActivatedMessage(graphModel), Tokens.RunsTable);
-            messenger.Send(new GraphActivatedMessage(graphModel));
+            var message = new GraphActivatedMessage(graphModel);
+            messenger.Send(message, Tokens.GraphField);
+            await messenger.Send(new AsyncGraphActivatedMessage(graphModel), Tokens.RunsTable);
+            await messenger.Send(new AsyncGraphActivatedMessage(graphModel), Tokens.PathfindingRange);
+            messenger.Send(message);
         }, logger.Error).ConfigureAwait(false);
     }
 
@@ -87,48 +86,48 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
 
     private void OnObstaclesCountChanged(object recipient, ObstaclesCountChangedMessage msg)
     {
-        var graph = Graphs.FirstOrDefault(x => x.Id == msg.GraphId);
+        var graph = Graphs.FirstOrDefault(x => x.Id == msg.Value.GraphId);
         if (graph != null)
         {
-            graph.ObstaclesCount += msg.Delta;
+            graph.ObstaclesCount += msg.Value.Delta;
         }
     }
 
     private void GraphStateChanged(object recipient, GraphStateChangedMessage msg)
     {
-        var graph = Graphs.FirstOrDefault(x => x.Id == msg.Id);
+        var graph = Graphs.FirstOrDefault(x => x.Id == msg.Value.Id);
         if (graph != null)
         {
-            graph.Status = msg.Status;
+            graph.Status = msg.Value.Status;
         }
     }
 
     private async Task OnGraphUpdated(object recipient, AsyncGraphUpdatedMessage msg)
     {
-        var model = Graphs.FirstOrDefault(x => x.Id == msg.Model.Id);
+        var model = Graphs.FirstOrDefault(x => x.Id == msg.Value.Id);
         if (model != null)
         {
-            model.Name = msg.Model.Name;
-            model.Neighborhood = msg.Model.Neighborhood;
-            model.SmoothLevel = msg.Model.SmoothLevel;
+            model.Name = msg.Value.Name;
+            model.Neighborhood = msg.Value.Neighborhood;
+            model.SmoothLevel = msg.Value.SmoothLevel;
             if (ActivatedGraphId == model.Id)
             {
                 await ActivatedGraph(ActivatedGraphId);
             }
         }
 
-        msg.Signal(Unit.Default);
+        msg.SetCompleted(true);
     }
 
-    private void OnGraphCreated(object recipient, GraphCreatedMessage msg)
+    private void OnGraphCreated(object recipient, GraphsCreatedMessage msg)
     {
-        Graphs.Add(msg.Models);
+        Graphs.Add(msg.Value);
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
     {
         var graphs = Graphs
-            .Where(x => msg.GraphIds.Contains(x.Id))
+            .Where(x => msg.Value.Contains(x.Id))
             .ToList();
         Graphs.Remove(graphs);
     }

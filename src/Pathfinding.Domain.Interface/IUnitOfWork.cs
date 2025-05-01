@@ -4,7 +4,7 @@ namespace Pathfinding.Domain.Interface;
 
 public interface IUnitOfWork : IDisposable, IAsyncDisposable
 {
-    IGraphParametresRepository GraphRepository { get; }
+    IGraphParametersRepository GraphRepository { get; }
 
     IVerticesRepository VerticesRepository { get; }
 

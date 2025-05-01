@@ -1,8 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
-using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.Resources;
 using Pathfinding.App.Console.ViewModels.Interface;
@@ -21,6 +20,10 @@ using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive;
+// ReSharper disable PossibleInvalidOperationException
+// ReSharper disable RedundantAssignment
+// ReSharper disable CompareOfFloatsByEqualityOperator
+// ReSharper disable UnusedMember.Global
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -32,7 +35,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
 {
     private static readonly InclusiveValueRange<double> WeightRange = (5, 0);
 
-    private sealed record class AlgorithmBuildInfo(
+    private sealed record AlgorithmBuildInfo(
         Algorithms Algorithm,
         Heuristics? Heuristics,
         double? Weight,
@@ -97,13 +100,14 @@ internal sealed class RunCreateViewModel : BaseViewModel,
 
     public RunCreateViewModel(IRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
+        Algorithms[] allowedAlgorithms,
         ILog logger)
     {
         this.messenger = messenger;
         this.service = service;
         this.logger = logger;
         CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm, CanCreateAlgorithm());
-        AllowedAlgorithms = [.. Enum.GetValues<Algorithms>().OrderBy(x => x.GetOrder())];
+        AllowedAlgorithms = allowedAlgorithms;
         AllowedHeuristics = Enum.GetValues<Heuristics>();
         messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
@@ -115,21 +119,21 @@ internal sealed class RunCreateViewModel : BaseViewModel,
             x => x.Graph, x => x.AppliedHeuristics.Count,
             x => x.FromWeight, x => x.ToWeight,
             x => x.Step, x => x.Algorithm,
-            (graph, count, weight, to, step, algorithm) =>
+            (g, count, weight, to, s, algo) =>
             {
-                bool canExecute = graph != Graph<GraphVertexModel>.Empty
-                    && algorithm != null
-                    && Enum.IsDefined(algorithm.Value);
+                var canExecute = g != Graph<GraphVertexModel>.Empty
+                    && algo != null
+                    && Enum.IsDefined(algo.Value);
                 if (count > 0)
                 {
                     canExecute = canExecute && count > 1;
-                    if (step != null && weight != null && to != null)
+                    if (s != null && weight != null && to != null)
                     {
                         canExecute = canExecute
                             && weight > 0
                             && to > 0
-                            && step >= 0;
-                        if (to - weight > 0 && step == 0)
+                            && s >= 0;
+                        if (to - weight > 0 && s == 0)
                         {
                             canExecute = false;
                         }
@@ -142,14 +146,13 @@ internal sealed class RunCreateViewModel : BaseViewModel,
 
     private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
     {
-        Graph = new Graph<GraphVertexModel>(msg.Graph.Vertices,
-            msg.Graph.DimensionSizes);
-        ActivatedGraphId = msg.Graph.Id;
+        Graph = new (msg.Value.Vertices, msg.Value.DimensionSizes);
+        ActivatedGraphId = msg.Value.Id;
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
     {
-        if (msg.GraphIds.Contains(ActivatedGraphId))
+        if (msg.Value.Contains(ActivatedGraphId))
         {
             Graph = Graph<GraphVertexModel>.Empty;
             ActivatedGraphId = 0;
@@ -160,7 +163,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     {
         if (value == null)
         {
-            field = value;
+            field = null;
             return;
         }
         field = WeightRange.ReturnInRange(value.Value);
@@ -179,11 +182,14 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     {
         if (value == null)
         {
-            field = value;
+            field = null;
             return;
         }
         field = value > fromWeight ? value : fromWeight;
-        field = WeightRange.ReturnInRange(field.Value);
+        if (field != null)
+        {
+            field = WeightRange.ReturnInRange(field.Value);
+        }
         var amplitude = field - fromWeight;
         if (field == fromWeight && Step != amplitude
             || amplitude < Step
@@ -202,7 +208,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     private AlgorithmBuildInfo[] GetBuildInfo(double? weight)
     {
         return AppliedHeuristics.Count == 0
-            ? [new AlgorithmBuildInfo(Algorithm.Value, default, weight, StepRule)]
+            ? [new (Algorithm.Value, null, weight, StepRule)]
             : [.. AppliedHeuristics
                 .Where(x => x is not null)
                 .Select(x => new AlgorithmBuildInfo(Algorithm.Value, x, weight, StepRule))];
@@ -217,28 +223,28 @@ internal sealed class RunCreateViewModel : BaseViewModel,
 
         if (pathfindingRange.Count > 1)
         {
-            int visitedCount = 0;
+            var visitedCount = 0;
             void OnVertexProcessed(EventArgs e) => visitedCount++;
             var status = RunStatuses.Success;
-            double from = FromWeight ?? 0;
-            double to = ToWeight ?? 0;
-            double step = Step ?? 1;
-            int limit = Step == 0 ? 0 : (int)Math.Ceiling((to - from) / step);
+            var from = FromWeight ?? 0;
+            var to = ToWeight ?? 0;
+            var weightStep = Step ?? 1;
+            var limit = Step == 0 ? 0 : (int)Math.Ceiling((to - from) / weightStep);
             var list = new List<CreateStatisticsRequest>();
-            for (int i = 0; i <= limit; i++)
+            for (var i = 0; i <= limit; i++)
             {
-                var val = from + step * i;
+                var val = from + weightStep * i;
                 double? weight = val == 0 ? null : Math.Round(val, 2);
                 foreach (var buildInfo in GetBuildInfo(weight))
                 {
                     visitedCount = 0;
-                    var algorithm = buildInfo.ToAlgorithm(pathfindingRange);
-                    algorithm.VertexProcessed += OnVertexProcessed;
+                    var algo = buildInfo.ToAlgorithm(pathfindingRange);
+                    algo.VertexProcessed += OnVertexProcessed;
                     var path = NullGraphPath.Interface;
                     var stopwatch = Stopwatch.StartNew();
                     try
                     {
-                        path = algorithm.FindPath();
+                        path = algo.FindPath();
                     }
                     catch (PathfindingException ex)
                     {
@@ -253,7 +259,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
                     finally
                     {
                         stopwatch.Stop();
-                        algorithm.VertexProcessed -= OnVertexProcessed;
+                        algo.VertexProcessed -= OnVertexProcessed;
                     }
 
                     list.Add(new()
@@ -275,7 +281,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
             {
                 var result = await service.CreateStatisticsAsync(list)
                     .ConfigureAwait(false);
-                messenger.Send(new RunCreatedMessaged(result));
+                messenger.Send(new RunsCreatedMessaged([.. result]));
             }, logger.Error).ConfigureAwait(false);
         }
         else

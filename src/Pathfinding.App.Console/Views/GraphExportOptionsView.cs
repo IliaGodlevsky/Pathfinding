@@ -23,7 +23,7 @@ internal sealed class GraphExportOptionsView : FrameView
         exportOptions.RadioLabels = [.. viewModel.AllowedOptions
             .Select(x => ustring.Make(x.ToStringRepresentation()))];
         DisplayMode = DisplayModeLayout.Horizontal;
-        Border = new Border();
+        Border = new();
         exportOptions.Events().SelectedItemChanged
             .Where(x => x.SelectedItem >= 0)
             .Select(x => viewModel.AllowedOptions[x.SelectedItem])

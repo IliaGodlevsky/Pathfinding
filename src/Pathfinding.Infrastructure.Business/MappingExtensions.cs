@@ -13,7 +13,7 @@ namespace Pathfinding.Infrastructure.Business;
 
 internal static class MappingExtensions
 {
-    public static Statistics ToStatisitcs(this RunStatisticsSerializationModel model)
+    public static Statistics ToStatistics(this RunStatisticsSerializationModel model)
     {
         return new()
         {
@@ -31,7 +31,7 @@ internal static class MappingExtensions
 
     public static IReadOnlyCollection<Statistics> ToStatistics(this IEnumerable<RunStatisticsSerializationModel> models)
     {
-        return models.Select(x => x.ToStatisitcs()).ToList().AsReadOnly();
+        return models.Select(x => x.ToStatistics()).ToList().AsReadOnly();
     }
 
     public static IReadOnlyCollection<Statistics> ToStatistics(this IEnumerable<RunStatisticsModel> models)
@@ -39,7 +39,7 @@ internal static class MappingExtensions
         return models.Select(x => x.ToStatistics()).ToList().AsReadOnly();
     }
 
-    public static RunStatisticsSerializationModel ToSerializionModel(this Statistics model)
+    public static RunStatisticsSerializationModel ToSerializationModel(this Statistics model)
     {
         return new()
         {
@@ -57,12 +57,12 @@ internal static class MappingExtensions
 
     public static IReadOnlyCollection<RunStatisticsSerializationModel> ToSerializationModels(this IEnumerable<Statistics> models)
     {
-        return models.Select(x => x.ToSerializionModel()).ToList().AsReadOnly();
+        return models.Select(x => x.ToSerializationModel()).ToList().AsReadOnly();
     }
 
     public static IReadOnlyCollection<CoordinateModel> ToCoordinates(this IEnumerable<PathfindingRangeModel> models)
     {
-        return models.Select(x => new CoordinateModel() { Coordinate = [.. x.Position.CoordinatesValues] }).ToList();
+        return [.. models.Select(x => new CoordinateModel { Coordinate = [.. x.Position.CoordinatesValues] })];
     }
 
     public static Statistics ToStatistics(this RunStatisticsModel model)
@@ -103,7 +103,7 @@ internal static class MappingExtensions
     public static T ToVertex<T>(this Vertex vertexEntity)
         where T : IVertex, IEntity<long>, new()
     {
-        return new T()
+        return new()
         {
             Id = vertexEntity.Id,
             IsObstacle = vertexEntity.IsObstacle,
@@ -189,7 +189,7 @@ internal static class MappingExtensions
         return new()
         {
             IsObstacle = vertex.IsObstacle,
-            Cost = new VertexCostModel()
+            Cost = new()
             {
                 Cost = cost.CurrentCost,
                 UpperValueOfRange = cost.CostRange.UpperValueOfRange,
@@ -202,7 +202,7 @@ internal static class MappingExtensions
     public static GraphSerializationModel ToSerializationModel<T>(this GraphModel<T> model)
         where T : IVertex
     {
-        return new GraphSerializationModel()
+        return new()
         {
             DimensionSizes = model.DimensionSizes,
             Neighborhood = model.Neighborhood,
@@ -215,7 +215,7 @@ internal static class MappingExtensions
     public static IReadOnlyCollection<VertexSerializationModel> ToSerializationModels<T>(this IEnumerable<T> vertices)
         where T : IVertex
     {
-        return vertices.Select(x => x.ToSerializationModel<T>()).ToList().AsReadOnly();
+        return vertices.Select(x => x.ToSerializationModel()).ToList().AsReadOnly();
     }
 
     public static IReadOnlyCollection<Vertex> ToVertexEntities<T>(this IEnumerable<T> vertices)
@@ -259,11 +259,11 @@ internal static class MappingExtensions
         where T : IVertex, new()
     {
         var cost = model.Cost;
-        return new T()
+        return new()
         {
             Cost = new VertexCost(cost.Cost, new(cost.UpperValueOfRange, cost.LowerValueOfRange)),
             IsObstacle = model.IsObstacle,
-            Position = new Coordinate(model.Position.Coordinate)
+            Position = new(model.Position.Coordinate)
         };
     }
 
@@ -282,7 +282,7 @@ internal static class MappingExtensions
     public static Coordinate ToCoordinates(this string coordinate)
     {
         var deserialized = JsonConvert.DeserializeObject<List<int>>(coordinate);
-        return new Coordinate(deserialized);
+        return new(deserialized);
     }
 
     public static int[] ToDimensionSizes(this string dimensions)

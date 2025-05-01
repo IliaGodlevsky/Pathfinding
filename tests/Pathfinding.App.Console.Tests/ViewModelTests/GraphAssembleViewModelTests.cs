@@ -1,7 +1,7 @@
 ﻿using Autofac.Extras.Moq;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Domain.Core.Enums;
@@ -63,7 +63,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                         It.IsAny<CreateGraphRequest<GraphVertexModel>>(),
                         It.IsAny<CancellationToken>()), Times.Once);
                 mock.Mock<IMessenger>().Verify(x => x.Send(
-                    It.IsAny<GraphCreatedMessage>(),
+                    It.IsAny<GraphsCreatedMessage>(),
                     It.IsAny<IsAnyToken>()), Times.Once);
                 mock.Mock<IGraphAssemble<GraphVertexModel>>()
                     .Verify(x => x.AssembleGraph(

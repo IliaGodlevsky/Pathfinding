@@ -16,7 +16,7 @@ internal sealed partial class GraphDeleteButton : Button
             .BindTo(this, x => x.Enabled);
         this.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-            .Select(x => Unit.Default)
+            .Select(_ => Unit.Default)
             .InvokeCommand(viewModel, x => x.DeleteGraphCommand);
     }
 }

@@ -4,16 +4,14 @@ namespace Pathfinding.Domain.Interface.Repositories;
 
 public interface IVerticesRepository
 {
-    Task<IEnumerable<Vertex>> ReadVerticesByGraphIdAsync(int graphId,
+    IAsyncEnumerable<Vertex> ReadVerticesByGraphIdAsync(int graphId);
+
+    Task<IReadOnlyCollection<Vertex>> CreateAsync(
+        IReadOnlyCollection<Vertex> vertices,
         CancellationToken token = default);
 
-    Task<IEnumerable<Vertex>> CreateAsync(IEnumerable<Vertex> vertices,
-        CancellationToken token = default);
-
-    Task<bool> DeleteVerticesByGraphIdAsync(int graphId,
-        CancellationToken token = default);
-
-    Task<bool> UpdateVerticesAsync(IEnumerable<Vertex> vertices,
+    Task<bool> UpdateVerticesAsync(
+        IReadOnlyCollection<Vertex> vertices,
         CancellationToken token = default);
 
     Task<Vertex> ReadAsync(long vertexId, CancellationToken token = default);

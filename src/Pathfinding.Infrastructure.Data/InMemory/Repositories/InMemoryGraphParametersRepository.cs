@@ -3,12 +3,12 @@ using Pathfinding.Domain.Interface.Repositories;
 
 namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
 {
-    internal sealed class InMemoryGraphParametresRepository(
+    internal sealed class InMemoryGraphParametersRepository(
         InMemoryRangeRepository rangeRepository,
         InMemoryVerticesRepository verticesRepository,
-        InMemoryStatisicsRepository statisticsRepository) : IGraphParametresRepository
+        InMemoryStatisicsRepository statisticsRepository) : IGraphParametersRepository
     {
-        private int id = 0;
+        private int id;
 
         private readonly HashSet<Graph> set = new(EntityComparer<int>.Interface);
 
@@ -26,13 +26,14 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
             // Order sensitive. Do not change the order of deleting
             // Reason: some repositories need the presence of values in the database
             await rangeRepository.DeleteByGraphIdAsync(graphId, token);
-            await verticesRepository.DeleteVerticesByGraphIdAsync(graphId, token);
-            await statisticsRepository.DeleteByGraphId(graphId, token);
+            await verticesRepository.DeleteVerticesByGraphIdAsync(graphId);
+            await statisticsRepository.DeleteByGraphId(graphId);
             var deleted = set.RemoveWhere(x => x.Id == graphId);
             return await Task.FromResult(deleted == 1);
         }
 
-        public async Task<bool> DeleteAsync(IEnumerable<int> graphIds,
+        public async Task<bool> DeleteAsync(
+            IReadOnlyCollection<int> graphIds,
             CancellationToken token = default)
         {
             foreach (var graphId in graphIds)
@@ -42,15 +43,15 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
             return true;
         }
 
-        public async Task<IEnumerable<Graph>> GetAll(CancellationToken token = default)
+        public IAsyncEnumerable<Graph> GetAll()
         {
-            return await Task.FromResult(set);
+            return set.ToAsyncEnumerable();
         }
 
         public async Task<Graph> ReadAsync(int graphId,
             CancellationToken token = default)
         {
-            var equal = new Graph() { Id = graphId };
+            var equal = new Graph { Id = graphId };
             set.TryGetValue(equal, out var result);
             return await Task.FromResult(result);
         }
@@ -70,14 +71,18 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
             return false;
         }
 
-        public async Task<IReadOnlyDictionary<int, int>> ReadObstaclesCountAsync(IEnumerable<int> graphIds,
+        public async Task<IReadOnlyDictionary<int, int>> ReadObstaclesCountAsync(
+            IReadOnlyCollection<int> graphIds,
             CancellationToken token = default)
         {
             var result = new Dictionary<int, int>();
             foreach (var graph in graphIds)
             {
-                var vertices = await verticesRepository.ReadVerticesByGraphIdAsync(graph, token);
-                int obstacles = vertices.Where(x => x.IsObstacle).Count();
+                var vertices = await verticesRepository
+                    .ReadVerticesByGraphIdAsync(graph)
+                    .ToListAsync(token)
+                    .ConfigureAwait(false);
+                int obstacles = vertices.Count(x => x.IsObstacle);
                 result.Add(graph, obstacles);
             }
             return result;

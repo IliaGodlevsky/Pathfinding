@@ -2,7 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Logging.Interface;
@@ -35,19 +35,19 @@ internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel
         this.messenger = messenger;
         this.service = service;
         this.log = log;
-        messenger.Register<GraphSelectedMessage>(this, OnGraphSelected);
+        messenger.Register<GraphsSelectedMessage>(this, OnGraphSelected);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
         CopyGraphCommand = ReactiveCommand.CreateFromTask(ExecuteCopy, CanExecute());
     }
 
-    private void OnGraphSelected(object recipient, GraphSelectedMessage msg)
+    private void OnGraphSelected(object recipient, GraphsSelectedMessage msg)
     {
-        SelectedGraphIds = [.. msg.Graphs.Select(x => x.Id)];
+        SelectedGraphIds = [.. msg.Value.Select(x => x.Id)];
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
     {
-        SelectedGraphIds = [.. SelectedGraphIds.Where(x => !msg.GraphIds.Contains(x))];
+        SelectedGraphIds = [.. SelectedGraphIds.Where(x => !msg.Value.Contains(x))];
     }
 
     private async Task ExecuteCopy()
@@ -59,7 +59,7 @@ internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel
             var histories = await service.CreatePathfindingHistoriesAsync(copies.Histories)
                 .ConfigureAwait(false);
             var graphs = histories.Select(x => x.Graph).ToGraphInfo();
-            messenger.Send(new GraphCreatedMessage(graphs));
+            messenger.Send(new GraphsCreatedMessage(graphs));
         }, log.Error).ConfigureAwait(false);
     }
 

@@ -8,9 +8,9 @@ namespace Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
 [DebuggerDisplay("Null")]
 public sealed class NullGraphPath : Singleton<NullGraphPath, IGraphPath>, IGraphPath
 {
-    public double Cost => default;
+    public double Cost => 0;
 
-    public int Count => default;
+    public int Count => 0;
 
     private NullGraphPath()
     {

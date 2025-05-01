@@ -1,23 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
-using Pathfinding.App.Console.Messages;
-using System.Reactive;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
+using System.Runtime.CompilerServices;
+
 // ReSharper disable AsyncVoidLambda
 
 namespace Pathfinding.App.Console.Extensions;
 
 internal static class MessengerExtensions
 {
-    public static async Task SendAsync<TMessage, TToken>(this IMessenger messenger,
-        TMessage message, TToken token)
-        where TMessage : class, IAsyncMessage<Unit>
-        where TToken : IEquatable<TToken>
+    public static TaskAwaiter<bool> GetAwaiter<T>(this AsyncValueChangedMessage<T> message)
     {
-        var tcs = new TaskCompletionSource<Unit>();
-        void Signal(Unit unit) => tcs.TrySetResult(unit);
-        message.Signal = Signal;
-        var timeout = Task.Delay(TimeSpan.FromSeconds(100));
-        messenger.Send(message, token);
-        await Task.WhenAny(timeout, tcs.Task).ConfigureAwait(false);
+        return message.Task.GetAwaiter();
     }
 
     public static void RegisterAsyncHandler<TMessage, TToken>(this IMessenger messenger,
