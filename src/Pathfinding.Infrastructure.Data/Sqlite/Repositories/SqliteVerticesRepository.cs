@@ -52,6 +52,12 @@ namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
                 .ConfigureAwait(false);
         }
 
+        public IAsyncEnumerable<Vertex> ReadAsync(IReadOnlyCollection<long> verticesIds)
+        {
+            const string query = $"SELECT * FROM {DbTables.Vertices} WHERE Id IN @Ids";
+            return connection.QueryUnbufferedAsync<Vertex>(query, new { Ids = verticesIds });
+        }
+
         public IAsyncEnumerable<Vertex> ReadVerticesByGraphIdAsync(int graphId)
         {
             const string query = $"SELECT * FROM {DbTables.Vertices} WHERE GraphId = @GraphId";

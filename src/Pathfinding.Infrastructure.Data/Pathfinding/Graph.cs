@@ -21,9 +21,7 @@ namespace Pathfinding.Infrastructure.Data.Pathfinding
              IReadOnlyCollection<TVertex> vertices,
              IReadOnlyList<int> dimensionSizes)
         {
-            DimensionsSizes = dimensionSizes
-                .TakeOrDefault(requiredNumberOfDimensions, 1)
-                .ToArray();
+            DimensionsSizes = [.. dimensionSizes.TakeOrDefault(requiredNumberOfDimensions, 1)];
             Count = DimensionsSizes.AggregateOrDefault((x, y) => x * y);
             this.vertices = vertices.Take(Count)
                 .ToDictionary(vertex => vertex.Position);
@@ -65,10 +63,9 @@ namespace Pathfinding.Infrastructure.Data.Pathfinding
                 var vert = graph.Get(vertex.Position);
                 vert.IsObstacle = vertex.IsObstacle;
                 vert.Cost = vertex.Cost.DeepClone();
-                vert.Neighbors = vertex.Neighbors
+                vert.Neighbors = [.. vertex.Neighbors
                     .GetCoordinates()
-                    .Select(graph.Get)
-                    .ToArray();
+                    .Select(graph.Get)];
             }
         }
 

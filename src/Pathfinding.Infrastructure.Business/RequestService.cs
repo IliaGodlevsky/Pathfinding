@@ -38,7 +38,7 @@ public sealed class RequestService<T>(IUnitOfWorkFactory factory) : IRequestServ
                 var vertices = history.Vertices.ToVertices<T>();
                 var dimensions = graphModel.DimensionSizes;
                 var graph = new Graph<T>(vertices, dimensions);
-                var createGraphRequest = new CreateGraphRequest<T>()
+                var createGraphRequest = new CreateGraphRequest<T>
                 {
                     Graph = graph,
                     Neighborhood = graphModel.Neighborhood,
@@ -399,7 +399,8 @@ public sealed class RequestService<T>(IUnitOfWorkFactory factory) : IRequestServ
             .ConfigureAwait(false);
         foreach (var rangeVertex in range)
         {
-            var vertex = await unit.VerticesRepository.ReadAsync(rangeVertex.VertexId, token)
+            var vertex = await unit.VerticesRepository
+                .ReadAsync(rangeVertex.VertexId, token)
                 .ConfigureAwait(false);
             var model = rangeVertex.ToRangeModel();
             model.Position = vertex.Coordinates.ToCoordinates();

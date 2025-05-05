@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages;
-using Pathfinding.App.Console.Messages.ViewModel;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
@@ -66,8 +65,8 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
 
     private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
     {
-        Graph = new (msg.Value.Vertices, msg.Value.DimensionSizes);
-        ActivatedGraphId = msg.Value.Id;
+        Graph = msg.Value.Graph;
+        ActivatedGraphId = msg.Value.GraphId;
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)

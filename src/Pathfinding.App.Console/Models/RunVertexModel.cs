@@ -78,7 +78,7 @@ public class RunVertexModel : ReactiveObject, IVertex, IPathfindingVertex
     IReadOnlyCollection<IVertex> IVertex.Neighbors
     {
         get => Neighbors;
-        set => Neighbors = value.Cast<RunVertexModel>().ToHashSet();
+        set => Neighbors = [.. value.Cast<RunVertexModel>()];
     }
 
     IReadOnlyCollection<IPathfindingVertex> IPathfindingVertex.Neighbors => Neighbors;

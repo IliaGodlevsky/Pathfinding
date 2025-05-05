@@ -146,8 +146,8 @@ internal sealed class RunCreateViewModel : BaseViewModel,
 
     private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
     {
-        Graph = new (msg.Value.Vertices, msg.Value.DimensionSizes);
-        ActivatedGraphId = msg.Value.Id;
+        Graph = msg.Value.Graph;
+        ActivatedGraphId = msg.Value.GraphId;
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)

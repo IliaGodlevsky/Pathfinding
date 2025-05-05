@@ -2,9 +2,9 @@
 using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Infrastructure.Data.Extensions;
 using Pathfinding.Service.Interface;
-using Pathfinding.Shared.Extensions;
 using Pathfinding.Shared.Primitives;
 using System.Collections;
+using System.Collections.ObjectModel;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
 
@@ -49,7 +49,7 @@ public sealed class BidirectGraphPath : IGraphPath
 
     }
 
-    private IReadOnlyList<IPathfindingVertex> GetPath()
+    private ReadOnlyCollection<IPathfindingVertex> GetPath()
     {
         var vertices = new HashSet<IPathfindingVertex>();
         var vertex = intersection;
@@ -71,11 +71,8 @@ public sealed class BidirectGraphPath : IGraphPath
             parent = backwardTraces.GetOrNullVertex(vertex.Position);
         }
         backward.Add(vertex);
-        var result = backward
-            .Reverse()
-            .Concat(vertices)
-            .ToReadOnly();
-        return result;
+        return backward.Reverse()
+            .Concat(vertices).ToList().AsReadOnly();
     }
 
     private double GetCost()

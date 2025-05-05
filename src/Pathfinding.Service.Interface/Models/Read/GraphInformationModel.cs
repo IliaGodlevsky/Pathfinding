@@ -1,21 +1,20 @@
 ﻿using Pathfinding.Domain.Core.Enums;
 
-namespace Pathfinding.Service.Interface.Models.Read
+namespace Pathfinding.Service.Interface.Models.Read;
+
+public record GraphInformationModel : IGraphLayersInfo
 {
-    public record GraphInformationModel : IGraphLayersInfo
-    {
-        public int Id { get; set; }
+    public int Id { get; set; }
 
-        public string Name { get; set; }
+    public string Name { get; set; }
 
-        public Neighborhoods Neighborhood { get; set; }
+    public Neighborhoods Neighborhood { get; set; }
 
-        public SmoothLevels SmoothLevel { get; set; }
+    public SmoothLevels SmoothLevel { get; set; }
 
-        public GraphStatuses Status { get; set; }
+    public GraphStatuses Status { get; set; }
 
-        public IReadOnlyList<int> Dimensions { get; set; }
+    public IReadOnlyList<int> Dimensions { get; set; }
 
-        public int ObstaclesCount { get; set; }
-    }
+    public int ObstaclesCount { get; set; }
 }

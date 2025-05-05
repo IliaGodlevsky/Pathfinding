@@ -30,7 +30,7 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
         public async Task<Vertex> ReadAsync(long vertexId,
             CancellationToken token = default)
         {
-            var vertex = new Vertex() { Id = vertexId };
+            var vertex = new Vertex { Id = vertexId };
             set.TryGetValue(vertex, out var result);
             return await Task.FromResult(result);
         }
@@ -40,6 +40,22 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories
             return set
                 .Where(x => x.GraphId == graphId)
                 .ToAsyncEnumerable();
+        }
+
+        public IAsyncEnumerable<Vertex> ReadAsync(
+            IReadOnlyCollection<long> verticesIds)
+        {
+            var vertices = verticesIds
+                .Select(x => new Vertex { Id = x })
+                .ToArray();
+            var range = vertices.Select(x =>
+                {
+                    set.TryGetValue(x, out var got);
+                    return got;
+                })
+                .Where(x => x is not null)
+                .ToList();
+            return range.ToAsyncEnumerable();
         }
 
         public Task<bool> UpdateVerticesAsync(

@@ -63,13 +63,17 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
         {
             var graphModel = await service.ReadGraphAsync(model).ConfigureAwait(false);
             var graph = new Graph<GraphVertexModel>(graphModel.Vertices, graphModel.DimensionSizes);
+            var activated = new ActivatedGraphModel(graph,
+                graphModel.Neighborhood,
+                graphModel.SmoothLevel,
+                graphModel.Status,
+                graphModel.Id);
             await graphModel.ToLayers().OverlayAsync(graph).ConfigureAwait(false);
+            messenger.Send(new GraphActivatedMessage(activated), Tokens.GraphField);
+            await messenger.Send(new AsyncGraphActivatedMessage(activated), Tokens.RunsTable);
+            await messenger.Send(new AsyncGraphActivatedMessage(activated), Tokens.PathfindingRange);
+            messenger.Send(new GraphActivatedMessage(activated));
             ActivatedGraphId = graphModel.Id;
-            var message = new GraphActivatedMessage(graphModel);
-            messenger.Send(message, Tokens.GraphField);
-            await messenger.Send(new AsyncGraphActivatedMessage(graphModel), Tokens.RunsTable);
-            await messenger.Send(new AsyncGraphActivatedMessage(graphModel), Tokens.PathfindingRange);
-            messenger.Send(message);
         }, logger.Error).ConfigureAwait(false);
     }
 

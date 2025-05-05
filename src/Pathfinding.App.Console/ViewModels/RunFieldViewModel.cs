@@ -108,16 +108,14 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
 
     private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
     {
-        graphId = msg.Value.Id;
-        var graphVertices = msg.Value.Vertices;
-        var dimensions = msg.Value.DimensionSizes;
-        var graph = new Graph<GraphVertexModel>(graphVertices, dimensions);
-        var runGraph = graphAssemble.AssembleGraph(graph, dimensions);
+        graphId = msg.Value.GraphId;
+        var runGraph = graphAssemble.AssembleGraph(msg.Value.Graph,
+            msg.Value.Graph.DimensionsSizes);
         RunGraph = Graph<RunVertexModel>.Empty;
         this.RaisePropertyChanged(nameof(RunGraph));
         RunGraph = runGraph;
         Clear();
-        foreach (var vertex in graphVertices)
+        foreach (var vertex in msg.Value.Graph)
         {
             var runVertex = runGraph.Get(vertex.Position);
             vertex.WhenAnyValue(x => x.IsObstacle)
@@ -130,9 +128,9 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
         }
     }
 
-    private void OnAdded(RunModel model) { }
+    private static void OnAdded(RunModel model) { }
 
-    private void OnRemoved(RunModel model) => model.Dispose();
+    private static void OnRemoved(RunModel model) => model.Dispose();
 
     private void ActivateRun(RunInfoModel model)
     {
@@ -180,9 +178,10 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
                 algorithm.VertexProcessed -= OnVertexProcessed;
             }
 
-            run = new RunModel(RunGraph,
-                subRevisions, rangeCoordinates)
-            { Id = model.Id };
+            run = new(RunGraph, subRevisions, rangeCoordinates)
+            {
+                Id = model.Id
+            };
             Runs.Add(run);
         }
         SelectedRun = run;

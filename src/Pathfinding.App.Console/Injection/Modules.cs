@@ -66,9 +66,6 @@ internal static class Modules
         builder.RegisterType<BundleSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
             .As<Serializer>().WithMetadata(MetadataKeys.Order, 1)
             .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Csv);
-        builder.RegisterType<BsonSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
-            .As<Serializer>().WithMetadata(MetadataKeys.Order, 5)
-            .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Bson);
         builder.RegisterDecorator<Serializer>(
             (_, inner) => new CompressSerializer<PathfindingHistoriesSerializationModel>(inner),
             fromKey: KeyFilters.Compress);

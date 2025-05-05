@@ -207,8 +207,8 @@ internal sealed class RunRangeViewModel : BaseViewModel,
             disposables.Clear();
             Transit.CollectionChanged -= OnCollectionChanged;
             ClearRange();
-            Graph = new(msg.Value.Vertices, msg.Value.DimensionSizes);
-            GraphId = msg.Value.Id;
+            Graph = msg.Value.Graph;
+            GraphId = msg.Value.GraphId;
             IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
             var range = await service.ReadRangeAsync(GraphId).ConfigureAwait(false);
             var src = range.FirstOrDefault(x => x.IsSource);
@@ -246,14 +246,13 @@ internal sealed class RunRangeViewModel : BaseViewModel,
         }
     }
 
-    private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private static void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
     {
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add:
                 var added = (GraphVertexModel)e.NewItems?[0];
                 if (added != null) added.IsTransit = true;
-
                 break;
             case NotifyCollectionChangedAction.Remove:
                 var removed = (GraphVertexModel)e.OldItems?[0];

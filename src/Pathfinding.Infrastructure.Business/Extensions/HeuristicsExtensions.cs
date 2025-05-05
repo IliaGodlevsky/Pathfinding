@@ -7,6 +7,6 @@ public static class HeuristicsExtensions
 {
     public static IHeuristic WithWeight(this IHeuristic heuristic, double? weight)
     {
-        return new WeightedHeuristic(heuristic, weight ?? 0);
+        return new WeightedHeuristic(heuristic, weight ?? 1);
     }
 }

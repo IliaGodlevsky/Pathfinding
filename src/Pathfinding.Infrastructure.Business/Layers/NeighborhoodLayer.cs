@@ -17,15 +17,16 @@ public abstract class NeighborhoodLayer : ILayer
 
     protected abstract INeighborhood CreateNeighborhood(Coordinate coordinate);
 
-    private List<IVertex> GetNeighboursWithinGraph(INeighborhood self,
+    private static List<IVertex> GetNeighboursWithinGraph(INeighborhood self,
         IGraph<IVertex> graph)
     {
+        return [.. self.Where(IsInRange).Distinct().Select(graph.Get)];
+
         bool IsInRange(Coordinate coordinate)
         {
             return coordinate.CoordinatesValues
                 .Zip(graph.DimensionsSizes, (x, y) => (Position: x, Dimension: y))
                 .All(z => z.Position < z.Dimension && z.Position >= 0);
         }
-        return [.. self.Where(IsInRange).Distinct().Select(graph.Get)];
     }
 }

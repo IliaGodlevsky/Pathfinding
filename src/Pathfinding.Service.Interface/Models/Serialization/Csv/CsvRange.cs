@@ -1,9 +1,8 @@
-﻿namespace Pathfinding.Service.Interface.Models.Serialization.Csv
-{
-    internal class CsvRange
-    {
-        public int GraphId { get; set; }
+﻿namespace Pathfinding.Service.Interface.Models.Serialization.Csv;
 
-        public string Coordinate { get; set; }
-    }
+internal class CsvRange
+{
+    public int GraphId { get; set; }
+
+    public string Coordinate { get; set; }
 }

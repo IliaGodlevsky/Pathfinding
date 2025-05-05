@@ -60,8 +60,8 @@ public class BidirectDijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> p
 
     protected override void RelaxBackwardVertex(IPathfindingVertex vertex)
     {
-        double relaxedCost = GetBackwardVertexRelaxedCost(vertex);
-        double vertexCost = GetBackwardVertexCurrentCost(vertex);
+        var relaxedCost = GetBackwardVertexRelaxedCost(vertex);
+        var vertexCost = GetBackwardVertexCurrentCost(vertex);
         if (vertexCost > relaxedCost)
         {
             EnqueueBackward(vertex, relaxedCost);

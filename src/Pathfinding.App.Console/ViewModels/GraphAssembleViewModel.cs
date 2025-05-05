@@ -120,7 +120,7 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
             var layers = new Layers(costLayer, obstacleLayer);
             var graph = await graphAssemble.AssembleGraphAsync(layers, Width, Length)
                 .ConfigureAwait(false);
-            var request = new CreateGraphRequest<GraphVertexModel>()
+            var request = new CreateGraphRequest<GraphVertexModel>
             {
                 Graph = graph,
                 Name = Name,

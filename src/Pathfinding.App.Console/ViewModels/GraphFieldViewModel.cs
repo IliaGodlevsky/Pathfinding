@@ -2,7 +2,8 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.Requests;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
@@ -14,8 +15,6 @@ using Pathfinding.Service.Interface.Requests.Update;
 using Pathfinding.Shared.Extensions;
 using ReactiveUI;
 using System.Reactive;
-using Pathfinding.App.Console.Messages.ViewModel.Requests;
-using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -166,8 +165,8 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
 
     private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
     {
-        Graph = new Graph<GraphVertexModel>(msg.Value.Vertices, msg.Value.DimensionSizes);
-        GraphId = msg.Value.Id;
+        Graph = msg.Value.Graph;
+        GraphId = msg.Value.GraphId;
         IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
         SmoothLevel = msg.Value.SmoothLevel;
     }
