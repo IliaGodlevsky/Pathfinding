@@ -67,10 +67,8 @@ internal sealed partial class GraphFieldView : FrameView
             var view = new GraphVertexView(vertex).DisposeWith(vertexDisposables);
 
             BindTo(view, vertex, runRangeViewModel.AddToRangeCommand, Button1Pressed);
-            BindTo(view, vertex, runRangeViewModel.RemoveFromRangeCommand,
-                Button1Pressed | ButtonCtrl);
-            BindTo(view, runRangeViewModel.DeletePathfindingRange, 
-                Button1DoubleClicked | ButtonCtrl | ButtonAlt);
+            BindTo(view, vertex, runRangeViewModel.RemoveFromRangeCommand, Button1Pressed | ButtonCtrl);
+            BindTo(view, runRangeViewModel.DeletePathfindingRange, Button1DoubleClicked | ButtonCtrl | ButtonAlt);
 
             BindTo(view, vertex, graphFieldViewModel.ReverseVertexCommand, Button3Pressed | ButtonCtrl);
             BindTo(view, vertex, graphFieldViewModel.InverseVertexCommand, Button3Pressed | ButtonAlt);
