@@ -5,6 +5,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 using static Pathfinding.App.Console.Settings;
+// ReSharper disable StaticMemberInGenericType
 
 namespace Pathfinding.App.Console.Views;
 
@@ -34,8 +35,8 @@ internal abstract class VertexView<T> : Label
             .Subscribe()
             .DisposeWith(disposables);
 
-        this.model = model;
-        int labelWidth = GraphFieldView.DistanceBetweenVertices;
+        this.model = model; 
+        var labelWidth = GraphFieldView.DistanceBetweenVertices;
         X = model.Position.GetX() * labelWidth;
         Y = model.Position.GetY();
         Width = labelWidth;

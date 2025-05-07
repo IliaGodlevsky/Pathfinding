@@ -113,10 +113,14 @@ internal static class MappingExtensions
         };
     }
 
-    public static IReadOnlyCollection<T> ToVertices<T>(this IEnumerable<Vertex> entities)
+    public static async ValueTask<List<T>> ToVerticesAsync<T>(this IAsyncEnumerable<Vertex> vertices,
+        CancellationToken token = default)
         where T : IVertex, IEntity<long>, new()
     {
-        return entities.Select(x => x.ToVertex<T>()).ToList().AsReadOnly();
+        return await vertices
+            .Select(x => x.ToVertex<T>())
+            .ToListAsync(token)
+            .ConfigureAwait(false);
     }
 
     public static PathfindingRangeModel ToRangeModel(this PathfindingRange entity)

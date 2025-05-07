@@ -10,7 +10,6 @@ namespace Pathfinding.App.Console.Extensions
             {
                 StreamFormat.Binary => ".dat",
                 StreamFormat.Json => ".json",
-                StreamFormat.Bson => ".bson",
                 StreamFormat.Xml => ".xml",
                 StreamFormat.Csv => ".zip",
                 _ => string.Empty

@@ -74,8 +74,8 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
         return this.WhenAnyValue(
             x => x.SelectedGraphs,
             x => x.Name,
-            (selected, name)
-                => selected.Length == 1 && !string.IsNullOrEmpty(name));
+            (selected, x)
+                => selected.Length == 1 && !string.IsNullOrEmpty(x));
     }
 
     private async Task ExecuteUpdate()

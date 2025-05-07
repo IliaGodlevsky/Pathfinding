@@ -1,4 +1,5 @@
-﻿using Autofac.Features.AttributeFilters;
+﻿using System.Globalization;
+using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
@@ -44,12 +45,12 @@ internal sealed partial class RunsPopulateView : FrameView
             .BindTo(populateViewModel, expression);
         populateViewModel.Events().PropertyChanged
             .Where(x => x.PropertyName == propertyName)
-            .Do(x =>
+            .Do(_ =>
             {
                 Application.MainLoop.Invoke(() =>
                 {
                     var propertyValue = compiled(populateViewModel);
-                    bool parsed = double.TryParse(field.Text.ToString(), out var value);
+                    var parsed = double.TryParse(field.Text.ToString(), out var value);
                     if (parsed && value != propertyValue)
                     {
                         field.Text = propertyValue.ToString();
@@ -71,8 +72,8 @@ internal sealed partial class RunsPopulateView : FrameView
 
     private void SetDefaults()
     {
-        weightTextField.Text = DefaultWeight.ToString();
-        toWeightTextField.Text = DefaultWeight.ToString();
+        weightTextField.Text = DefaultWeight.ToString(CultureInfo.InvariantCulture);
+        toWeightTextField.Text = DefaultWeight.ToString(CultureInfo.InvariantCulture);
         stepTextField.Text = "0";
     }
 

@@ -278,7 +278,7 @@ public sealed class RequestService<T>(IUnitOfWorkFactory factory) : IRequestServ
                 .ReadByGraphIdAsync(graphId)
                 .ToListAsync(t)
                 .ConfigureAwait(false);
-            var pathfindingRange = new PathfindingRange()
+            var pathfindingRange = new PathfindingRange
             {
                 GraphId = graphId,
                 Order = index,
@@ -327,12 +327,12 @@ public sealed class RequestService<T>(IUnitOfWorkFactory factory) : IRequestServ
     private static async Task<GraphModel<T>> ReadGraphInternalAsync(IUnitOfWork unit, int graphId,
         CancellationToken token = default)
     {
-        var graphEntity = await unit.GraphRepository.ReadAsync(graphId, token).ConfigureAwait(false);
-        var vertexEntities = await unit.VerticesRepository
+        var graphEntity = await unit.GraphRepository
+            .ReadAsync(graphId, token).ConfigureAwait(false);
+        var vertices = await unit.VerticesRepository
             .ReadVerticesByGraphIdAsync(graphId)
-            .ToListAsync(token)
+            .ToVerticesAsync<T>(token)
             .ConfigureAwait(false);
-        var vertices = vertexEntities.ToVertices<T>();
         return new()
         {
             Vertices = vertices,

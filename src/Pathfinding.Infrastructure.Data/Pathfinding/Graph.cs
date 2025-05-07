@@ -65,6 +65,7 @@ namespace Pathfinding.Infrastructure.Data.Pathfinding
                 vert.Cost = vertex.Cost.DeepClone();
                 vert.Neighbors = [.. vertex.Neighbors
                     .GetCoordinates()
+                    .OrderBy(x => x.ToString())
                     .Select(graph.Get)];
             }
         }

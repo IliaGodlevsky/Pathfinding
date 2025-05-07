@@ -1,40 +1,39 @@
 ﻿using System.Reactive.Disposables;
 
-namespace Pathfinding.App.Console.Models
+namespace Pathfinding.App.Console.Models;
+
+internal class StreamModel(Stream stream, 
+    StreamFormat? format,
+    params IDisposable[] disposables) : IDisposable, IAsyncDisposable
 {
-    internal class StreamModel(Stream stream, 
-        StreamFormat? format,
-        params IDisposable[] disposables) : IDisposable, IAsyncDisposable
+    public static readonly StreamModel Empty = new(Stream.Null, null);
+
+    private readonly CompositeDisposable disposables = [.. disposables.Append(stream)];
+
+    public Stream Stream { get; } = stream;
+
+    public StreamFormat? Format { get; } = format;
+
+    public bool IsEmpty => Stream == Stream.Null || !Format.HasValue;
+
+    public void Dispose()
     {
-        public static readonly StreamModel Empty = new(Stream.Null, null);
+        disposables.Dispose();
+    }
 
-        private readonly CompositeDisposable disposables = [.. disposables.Append(stream)];
-
-        public Stream Stream { get; } = stream;
-
-        public StreamFormat? Format { get; } = format;
-
-        public bool IsEmpty => Stream == Stream.Null || !Format.HasValue;
-
-        public void Dispose()
+    public async ValueTask DisposeAsync()
+    {
+        foreach (var disposable in disposables)
         {
-            disposables.Dispose();
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            foreach (var disposable in disposables)
+            if (disposable is IAsyncDisposable async)
             {
-                if (disposable is IAsyncDisposable async)
-                {
-                    await async.DisposeAsync();
-                }
-                else
-                {
-                    disposable.Dispose();
-                }
+                await async.DisposeAsync();
             }
-            disposables.Dispose();
+            else
+            {
+                disposable.Dispose();
+            }
         }
+        disposables.Dispose();
     }
 }

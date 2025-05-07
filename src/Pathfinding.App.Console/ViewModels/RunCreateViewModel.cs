@@ -20,6 +20,8 @@ using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive;
+using Pathfinding.App.Console.Messages.ViewModel.Requests;
+
 // ReSharper disable PossibleInvalidOperationException
 // ReSharper disable RedundantAssignment
 // ReSharper disable CompareOfFloatsByEqualityOperator
@@ -216,12 +218,10 @@ internal sealed class RunCreateViewModel : BaseViewModel,
 
     private async Task CreateAlgorithm()
     {
-        var pathfindingRange = (await service.ReadRangeAsync(ActivatedGraphId)
-            .ConfigureAwait(false))
-            .Select(x => Graph.Get(x.Position))
-            .ToList();
+        var rangeMessage = new PathfindingRangeRequestMessage();
+        messenger.Send(rangeMessage);
 
-        if (pathfindingRange.Count > 1)
+        if (rangeMessage.Response.Length > 1)
         {
             var visitedCount = 0;
             void OnVertexProcessed(EventArgs e) => visitedCount++;
@@ -238,7 +238,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
                 foreach (var buildInfo in GetBuildInfo(weight))
                 {
                     visitedCount = 0;
-                    var algo = buildInfo.ToAlgorithm(pathfindingRange);
+                    var algo = buildInfo.ToAlgorithm(rangeMessage.Response);
                     algo.VertexProcessed += OnVertexProcessed;
                     var path = NullGraphPath.Interface;
                     var stopwatch = Stopwatch.StartNew();

@@ -16,6 +16,7 @@ using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Security.Cryptography.X509Certificates;
 using Pathfinding.App.Console.Messages.ViewModel.Requests;
 using static Pathfinding.App.Console.Models.RunModel;
 // ReSharper disable AccessToModifiedClosure
@@ -141,8 +142,6 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
 
             var rangeMsg = new PathfindingRangeRequestMessage();
             messenger.Send(rangeMsg);
-            var rangeCoordinates = rangeMsg.Response;
-            var range = rangeCoordinates.Select(RunGraph.Get).ToArray();
 
             var subRevisions = new List<SubRunModel>();
             var visitedVertices = new List<VisitedModel>();
@@ -161,7 +160,7 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
                 AddSubAlgorithm(args.SubPath);
             }
 
-            var algorithm = model.ToAlgorithm(range);
+            var algorithm = model.ToAlgorithm(rangeMsg.Response);
             algorithm.SubPathFound += OnSubPathFound;
             algorithm.VertexProcessed += OnVertexProcessed;
             try
@@ -178,6 +177,7 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
                 algorithm.VertexProcessed -= OnVertexProcessed;
             }
 
+            var rangeCoordinates = rangeMsg.Response.Select(x => x.Position).ToArray();
             run = new(RunGraph, subRevisions, rangeCoordinates)
             {
                 Id = model.Id

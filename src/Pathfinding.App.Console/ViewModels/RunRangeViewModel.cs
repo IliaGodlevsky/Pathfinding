@@ -271,7 +271,6 @@ internal sealed class RunRangeViewModel : BaseViewModel,
     {
         var range = pathfindingRange
             .Where(x => x is not null)
-            .Select(x => x.Position)
             .ToArray();
         msg.Reply(range);
     }

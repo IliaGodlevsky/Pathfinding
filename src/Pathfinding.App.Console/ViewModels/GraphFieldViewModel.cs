@@ -88,8 +88,8 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
             x => x.GraphId,
             x => x.Graph,
             x => x.IsReadOnly,
-            (id, graph, isRead) => id > 0
-                && graph != Graph<GraphVertexModel>.Empty
+            (id, x, isRead) => id > 0
+                && x != Graph<GraphVertexModel>.Empty
                 && !isRead);
     }
 
@@ -100,8 +100,8 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
             x => x.Graph,
             x => x.IsReadOnly,
             x => x.SmoothLevel,
-            (id, graph, isRead, level) => id > 0
-                && graph != Graph<GraphVertexModel>.Empty
+            (id, x, isRead, level) => id > 0
+                && x != Graph<GraphVertexModel>.Empty
                 && !isRead
                 && level == SmoothLevels.No);
     }
