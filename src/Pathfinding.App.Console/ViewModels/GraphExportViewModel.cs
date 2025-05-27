@@ -29,7 +29,7 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
 
     public ExportOptions Options { get; set; }
 
-    public ReactiveCommand<StreamModel, Unit> ExportGraphCommand { get; }
+    public ReactiveCommand<Func<StreamModel>, Unit> ExportGraphCommand { get; }
 
     public IReadOnlyList<ExportOptions> AllowedOptions { get; }
 
@@ -47,7 +47,7 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
         StreamFormats = [.. serializers
             .OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat])];
-        ExportGraphCommand = ReactiveCommand.CreateFromTask<StreamModel>(ExportGraph, CanExport());
+        ExportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(ExportGraph, CanExport());
         AllowedOptions = Enum.GetValues<ExportOptions>();
         messenger.Register<GraphsSelectedMessage>(this, OnGraphSelected);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
@@ -59,27 +59,25 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
             graphIds => graphIds.Length > 0);
     }
 
-    private async Task ExportGraph(StreamModel stream)
+    private async Task ExportGraph(Func<StreamModel> streamFactory)
     {
         await ExecuteSafe(async () =>
         {
-            await using (stream)
+            await using var stream = streamFactory();
+            if (!stream.IsEmpty)
             {
-                if (!stream.IsEmpty)
+                var serializer = serializers[stream.Format.Value];
+                var historiesTask = Options switch
                 {
-                    var serializer = serializers[stream.Format.Value];
-                    var historiesTask = Options switch
-                    {
-                        ExportOptions.GraphOnly => service.ReadSerializationGraphsAsync(SelectedGraphIds),
-                        ExportOptions.WithRange => service.ReadSerializationGraphsWithRangeAsync(SelectedGraphIds),
-                        ExportOptions.WithRuns => service.ReadSerializationHistoriesAsync(SelectedGraphIds),
-                        _ => throw new InvalidOperationException(Resource.InvalidExportOptions)
-                    };
-                    var histories = await historiesTask.ConfigureAwait(false);
-                    await serializer.SerializeToAsync(histories, stream.Stream).ConfigureAwait(false);
-                    var count = histories.Histories.Count;
-                    logger.Info(count == 1 ? Resource.WasDeletedMsg : Resource.WereDeletedMsg);
-                }
+                    ExportOptions.GraphOnly => service.ReadSerializationGraphsAsync(SelectedGraphIds),
+                    ExportOptions.WithRange => service.ReadSerializationGraphsWithRangeAsync(SelectedGraphIds),
+                    ExportOptions.WithRuns => service.ReadSerializationHistoriesAsync(SelectedGraphIds),
+                    _ => throw new InvalidOperationException(Resource.InvalidExportOptions)
+                };
+                var histories = await historiesTask.ConfigureAwait(false);
+                await serializer.SerializeToAsync(histories, stream.Stream).ConfigureAwait(false);
+                var count = histories.Histories.Count;
+                logger.Info(count == 1 ? Resource.WasDeletedMsg : Resource.WereDeletedMsg);
             }
         }, logger.Error).ConfigureAwait(false);
     }

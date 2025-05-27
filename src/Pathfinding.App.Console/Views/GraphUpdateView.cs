@@ -12,7 +12,7 @@ namespace Pathfinding.App.Console.Views;
 internal sealed partial class GraphUpdateView : FrameView
 {
     public GraphUpdateView(
-        [KeyFilter(KeyFilters.GraphUpdateView)] Terminal.Gui.View[] children,
+        [KeyFilter(KeyFilters.GraphUpdateView)] View[] children,
         GraphUpdateViewModel viewModel)
     {
         Initialize();

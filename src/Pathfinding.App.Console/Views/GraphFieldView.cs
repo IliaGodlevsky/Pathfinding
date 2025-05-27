@@ -25,6 +25,7 @@ internal sealed partial class GraphFieldView : FrameView
     private readonly IRunRangeViewModel runRangeViewModel;
 
     private readonly CompositeDisposable vertexDisposables = [];
+    private readonly MainLoop mainLoop;
 
     private readonly View container = new();
 
@@ -33,6 +34,7 @@ internal sealed partial class GraphFieldView : FrameView
         IRunRangeViewModel runRangeViewModel,
         [KeyFilter(KeyFilters.Views)] IMessenger messenger)
     {
+        mainLoop = Application.MainLoop;
         this.graphFieldViewModel = graphFieldViewModel;
         this.runRangeViewModel = runRangeViewModel;
         Initialize();
@@ -49,17 +51,17 @@ internal sealed partial class GraphFieldView : FrameView
 
     private void OnOpenAlgorithmRunView(object recipient, OpenRunFieldMessage msg)
     {
-        Application.MainLoop.Invoke(() => Visible = false);
+        mainLoop.Invoke(() => Visible = false);
     }
 
     private void OnCloseAlgorithmRunField(object recipient, CloseRunFieldMessage msg)
     {
-        Application.MainLoop.Invoke(() => Visible = true);
+        mainLoop.Invoke(() => Visible = true);
     }
 
     private void RenderGraph(IGraph<GraphVertexModel> graph)
     {
-        Application.MainLoop.Invoke(container.RemoveAll);
+        mainLoop.Invoke(container.RemoveAll);
         vertexDisposables.Clear();
 
         foreach (var vertex in graph)
@@ -77,10 +79,10 @@ internal sealed partial class GraphFieldView : FrameView
             BindTo(view, vertex, graphFieldViewModel.DecreaseVertexCostCommand, WheeledDown);
             BindTo(view, vertex, graphFieldViewModel.IncreaseVertexCostCommand, WheeledUp);
 
-            Application.MainLoop.Invoke(() => container.Add(view));
+            mainLoop.Invoke(() => container.Add(view));
         }
 
-        Application.MainLoop.Invoke(() =>
+        mainLoop.Invoke(() =>
         {
             container.Width = graph.GetWidth() * DistanceBetweenVertices;
             container.Height = graph.GetLength();

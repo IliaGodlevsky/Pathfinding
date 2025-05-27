@@ -124,7 +124,6 @@ internal static class Modules
         builder.RegisterType<GraphSmoothLevelView>().Keyed<View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
 
         builder.RegisterType<GraphNameUpdateView>().Keyed<View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
-        builder.RegisterType<GraphSmoothLevelUpdateView>().Keyed<View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
         builder.RegisterType<GraphNeighborhoodUpdateView>().Keyed<View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
 
         builder.RegisterType<RunsTableView>().Keyed<View>(KeyFilters.RunsPanel).WithAttributeFiltering();

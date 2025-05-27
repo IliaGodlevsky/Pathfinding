@@ -1,19 +1,18 @@
 ﻿using Pathfinding.App.Console.Models;
 
-namespace Pathfinding.App.Console.Extensions
+namespace Pathfinding.App.Console.Extensions;
+
+internal static class ExportFormatExtensions
 {
-    internal static class ExportFormatExtensions
+    public static string ToExtensionRepresentation(this StreamFormat exportFormat)
     {
-        public static string ToExtensionRepresentation(this StreamFormat exportFormat)
+        return exportFormat switch
         {
-            return exportFormat switch
-            {
-                StreamFormat.Binary => ".dat",
-                StreamFormat.Json => ".json",
-                StreamFormat.Xml => ".xml",
-                StreamFormat.Csv => ".zip",
-                _ => string.Empty
-            };
-        }
+            StreamFormat.Binary => ".dat",
+            StreamFormat.Json => ".json",
+            StreamFormat.Xml => ".xml",
+            StreamFormat.Csv => ".zip",
+            _ => string.Empty
+        };
     }
 }

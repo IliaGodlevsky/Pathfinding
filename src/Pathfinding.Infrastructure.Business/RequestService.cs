@@ -392,11 +392,11 @@ public sealed class RequestService<T>(IUnitOfWorkFactory factory) : IRequestServ
     private static async Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeAsyncInternal(
         IUnitOfWork unit, int graphId, CancellationToken token = default)
     {
-        var result = new List<PathfindingRangeModel>();
         var range = await unit.RangeRepository
             .ReadByGraphIdAsync(graphId)
             .ToListAsync(token)
             .ConfigureAwait(false);
+        var result = new List<PathfindingRangeModel>(range.Count);
         foreach (var rangeVertex in range)
         {
             var vertex = await unit.VerticesRepository

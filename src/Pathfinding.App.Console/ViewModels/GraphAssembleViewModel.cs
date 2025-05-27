@@ -6,6 +6,7 @@ using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
+using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Business.Layers;
 using Pathfinding.Infrastructure.Data.Extensions;
@@ -100,12 +101,8 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
             x => x.Length,
             x => x.Obstacles,
             x => x.Name,
-            (width, length, obstacles, name) =>
-            {
-                return width > 0 && length > 0
-                    && obstacles >= 0
-                    && !string.IsNullOrEmpty(name);
-            }
+            (x, y, z, a) => x > 0 && y > 0
+                && z >= 0 && !string.IsNullOrEmpty(a)
         );
     }
 
@@ -113,11 +110,7 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
     {
         await ExecuteSafe(async () =>
         {
-            var random = Random.Shared;
-            var costLayer = new VertexCostLayer(CostRange, range => new VertexCost(random.Next(
-                range.LowerValueOfRange, range.UpperValueOfRange + 1), range));
-            var obstacleLayer = new ObstacleLayer(Obstacles);
-            var layers = new Layers(costLayer, obstacleLayer);
+            var layers = GetLayers();
             var graph = await graphAssemble.AssembleGraphAsync(layers, Width, Length)
                 .ConfigureAwait(false);
             var request = new CreateGraphRequest<GraphVertexModel>
@@ -132,5 +125,28 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
             var info = graphModel.ToGraphInformationModel().ToGraphInfo();
             messenger.Send(new GraphsCreatedMessage([info]));
         }, logger.Error).ConfigureAwait(false);
+    }
+
+    private Layers GetLayers()
+    {
+        var random = Random.Shared;
+        var costLayer = new VertexCostLayer(CostRange, range => new VertexCost(random.Next(
+            range.LowerValueOfRange, range.UpperValueOfRange + 1), range));
+        var obstacleLayer = new ObstacleLayer(Obstacles);
+        SmoothLayer smoothLayer = SmoothLevel switch
+        {
+            SmoothLevels.Low => new(1),
+            SmoothLevels.Medium => new(2),
+            SmoothLevels.High => new(4),
+            SmoothLevels.Extreme => new(8),
+            _ => new(0)
+        };
+        ILayer neighborhoodLayer = Neighborhood switch
+        {
+            Neighborhoods.Moore => new MooreNeighborhoodLayer(),
+            Neighborhoods.VonNeumann => new VonNeumannNeighborhoodLayer(),
+            _ => Layers.Empty
+        };
+        return new (neighborhoodLayer, costLayer, obstacleLayer, smoothLayer);
     }
 }

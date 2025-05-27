@@ -31,13 +31,6 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
         set => this.RaiseAndSetIfChanged(ref graphId, value);
     }
 
-    private SmoothLevels smoothLevels;
-    private SmoothLevels SmoothLevel
-    {
-        get => smoothLevels;
-        set => this.RaiseAndSetIfChanged(ref smoothLevels, value);
-    }
-
     private bool isReadOnly;
     private bool IsReadOnly
     {
@@ -99,11 +92,9 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
             x => x.GraphId,
             x => x.Graph,
             x => x.IsReadOnly,
-            x => x.SmoothLevel,
-            (id, x, isRead, level) => id > 0
+            (id, x, isRead) => id > 0
                 && x != Graph<GraphVertexModel>.Empty
-                && !isRead
-                && level == SmoothLevels.No);
+                && !isRead);
     }
 
     private async Task ReverseVertex(GraphVertexModel vertex)
@@ -168,7 +159,6 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
         Graph = msg.Value.Graph;
         GraphId = msg.Value.GraphId;
         IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
-        SmoothLevel = msg.Value.SmoothLevel;
     }
 
     private void OnGraphBecameReadonly(object recipient, GraphStateChangedMessage msg)

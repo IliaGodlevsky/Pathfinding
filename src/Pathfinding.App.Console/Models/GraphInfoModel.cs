@@ -1,10 +1,9 @@
 ﻿using Pathfinding.Domain.Core.Enums;
-using Pathfinding.Service.Interface.Models;
 using ReactiveUI;
 
 namespace Pathfinding.App.Console.Models;
 
-internal sealed class GraphInfoModel : ReactiveObject, IGraphLayersInfo
+internal sealed class GraphInfoModel : ReactiveObject
 {
     public int Id { get; set; }
 

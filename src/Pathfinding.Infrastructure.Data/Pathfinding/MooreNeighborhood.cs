@@ -1,14 +1,13 @@
 ﻿using Pathfinding.Shared.Primitives;
 using System.Diagnostics;
 
-namespace Pathfinding.Infrastructure.Data.Pathfinding
+namespace Pathfinding.Infrastructure.Data.Pathfinding;
+
+[DebuggerDisplay("Count = {Neighbours.Count}")]
+public sealed class MooreNeighborhood(Coordinate coordinate) : Neighborhood(coordinate)
 {
-    [DebuggerDisplay("Count = {Neighbours.Count}")]
-    public sealed class MooreNeighborhood(Coordinate coordinate) : Neighborhood(coordinate)
+    protected override Coordinate[] Filter(Coordinate coordinate)
     {
-        protected override Coordinate[] Filter(Coordinate coordinate)
-        {
-            return [coordinate];
-        }
+        return [coordinate];
     }
 }

@@ -98,22 +98,24 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
 
     private async Task OnGraphUpdated(object recipient, AsyncGraphUpdatedMessage msg)
     {
-        var graph = Graph;
-        int id = ActivatedGraphId;
-        if ((graph != Graph<GraphVertexModel>.Empty && msg.Value.Id != ActivatedGraphId)
-            || graph == Graph<GraphVertexModel>.Empty)
+        var id = ActivatedGraphId;
+        var local = Graph;
+        if ((local != Graph<GraphVertexModel>.Empty 
+             && msg.Value.Id != ActivatedGraphId)
+            || local == Graph<GraphVertexModel>.Empty)
         {
             var model = await service.ReadGraphAsync(msg.Value.Id).ConfigureAwait(false);
-            graph = new(model.Vertices, model.DimensionSizes);
+            local = new (model.Vertices, model.DimensionSizes);
             id = model.Id;
-            await model.ToLayers().OverlayAsync(graph).ConfigureAwait(false);
+            await model.Neighborhood.ToNeighborhoodLayer()
+                .OverlayAsync(local).ConfigureAwait(false);
         }
-        if (graph != Graph<GraphVertexModel>.Empty)
+        if (local != Graph<GraphVertexModel>.Empty)
         {
             await ExecuteSafe(async () =>
             {
                 var models = await service.ReadStatisticsAsync(id).ConfigureAwait(false);
-                var updated = await UpdateRunsAsync(models, graph, id);
+                var updated = await UpdateRunsAsync(models, local, id);
                 messenger.Send(new RunsUpdatedMessage(updated));
             }, log.Error).ConfigureAwait(false);
         }
@@ -122,17 +124,19 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
     }
 
     private async Task<RunStatisticsModel[]> UpdateRunsAsync(
-        IEnumerable<RunStatisticsModel> selected, Graph<GraphVertexModel> graph, int graphId)
+        IReadOnlyCollection<RunStatisticsModel> selectedStatistics,
+        Graph<GraphVertexModel> graphToUpdate,
+        int graphId)
     {
         var range = (await service.ReadRangeAsync(graphId).ConfigureAwait(false))
-            .Select(x => graph.Get(x.Position))
+            .Select(x => graphToUpdate.Get(x.Position))
             .ToList();
         var updatedRuns = new List<RunStatisticsModel>();
         if (range.Count > 1)
         {
-            foreach (var select in selected)
+            foreach (var select in selectedStatistics)
             {
-                int visitedCount = 0;
+                var visitedCount = 0;
                 void OnVertexProcessed(EventArgs e) => visitedCount++;
                 var info = await service.ReadStatisticAsync(select.Id).ConfigureAwait(false);
                 var algorithm = select.ToAlgorithm(range);

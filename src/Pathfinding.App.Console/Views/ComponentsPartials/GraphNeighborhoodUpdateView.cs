@@ -8,10 +8,10 @@ namespace Pathfinding.App.Console.Views
 
         private void Initialize()
         {
-            X = Pos.Percent(15) + 1;
-            Y = Pos.Percent(25) + 1;
+            X = Pos.Percent(33);
+            Y = Pos.Percent(33);
             Width = Dim.Percent(25);
-            Height = Dim.Percent(40);
+            Height = Dim.Percent(25);
             Border = new Border()
             {
                 BorderStyle = BorderStyle.Rounded,

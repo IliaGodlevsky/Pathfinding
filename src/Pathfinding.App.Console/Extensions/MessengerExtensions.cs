@@ -8,7 +8,7 @@ namespace Pathfinding.App.Console.Extensions;
 
 internal static class MessengerExtensions
 {
-    public static TaskAwaiter<bool> GetAwaiter<T>(this AsyncValueChangedMessage<T> message)
+    public static TaskAwaiter<U> GetAwaiter<T, U>(this AsyncValueChangedMessage<T, U> message)
     {
         return message.Task.GetAwaiter();
     }

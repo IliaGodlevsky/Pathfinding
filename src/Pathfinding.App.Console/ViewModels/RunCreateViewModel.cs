@@ -1,6 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Injection;
+using Pathfinding.App.Console.Messages.ViewModel.Requests;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.Resources;
@@ -20,7 +21,6 @@ using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive;
-using Pathfinding.App.Console.Messages.ViewModel.Requests;
 
 // ReSharper disable PossibleInvalidOperationException
 // ReSharper disable RedundantAssignment

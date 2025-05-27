@@ -20,8 +20,8 @@ internal sealed partial class GraphImportButton : Button
             {
                 var fileName = GetFileName(viewModel);
                 return string.IsNullOrEmpty(fileName.Path)
-                    ? StreamModel.Empty
-                    : new (File.OpenRead(fileName.Path), fileName.Format);
+                    ? new Func<StreamModel>(() => StreamModel.Empty)
+                    : () => new StreamModel(File.OpenRead(fileName.Path), fileName.Format);
             })
             .InvokeCommand(viewModel, x => x.ImportGraphCommand);
     }

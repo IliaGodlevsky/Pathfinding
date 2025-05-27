@@ -4,7 +4,7 @@ using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Infrastructure.Business.Serializers;
@@ -14,7 +14,6 @@ using Pathfinding.Service.Interface.Models.Serialization;
 using Pathfinding.Shared.Extensions;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
-using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests
 {
@@ -28,11 +27,11 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
 
             var models = Generators.GenerateGraphInfos(3).ToArray();
 
-            PathfindingHistoriesSerializationModel histories
+            var histories
                = Enumerable.Range(1, 5)
-               .Select(x => new PathfindingHistorySerializationModel())
+               .Select(_ => new PathfindingHistorySerializationModel())
                .ToArray()
-               .To(x => new PathfindingHistoriesSerializationModel() { Histories = [.. x] });
+               .To(x => new PathfindingHistoriesSerializationModel { Histories = [.. x] });
 
             mock.Mock<IRequestService<GraphVertexModel>>()
                 .Setup(expression)
@@ -42,8 +41,8 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                     It.IsAny<object>(),
                     It.IsAny<IsAnyToken>(),
                     It.IsAny<MessageHandler<object, GraphsSelectedMessage>>()))
-               .Callback<object, object, MessageHandler<object, GraphsSelectedMessage>>((r, t, handler)
-                    => handler(r, new GraphsSelectedMessage(models)));
+               .Callback<object, object, MessageHandler<object, GraphsSelectedMessage>>((r, _, handler)
+                    => handler(r, new(models)));
 
             var serializer = mock.Mock<ISerializer<PathfindingHistoriesSerializationModel>>();
             var meta = new Meta<ISerializer<PathfindingHistoriesSerializationModel>>(serializer.Object, new Dictionary<string, object>()
@@ -59,7 +58,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             var command = viewModel.ExportGraphCommand;
             if (await command.CanExecute.FirstOrDefaultAsync())
             {
-                await command.Execute(new(new MemoryStream(), StreamFormat.Binary));
+                await command.Execute(() => new(new MemoryStream(), StreamFormat.Binary));
             }
 
             Assert.Multiple(() =>
@@ -126,7 +125,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             var command = viewModel.ExportGraphCommand;
             if (await command.CanExecute.FirstOrDefaultAsync())
             {
-                await command.Execute(StreamModel.Empty);
+                await command.Execute(() => StreamModel.Empty);
             }
 
             Assert.Multiple(() =>
@@ -163,7 +162,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
             var viewModel = mock.Create<GraphExportViewModel>();
 
             var command = viewModel.ExportGraphCommand;
-            await command.Execute(new(new MemoryStream(), StreamFormat.Binary));
+            await command.Execute(() => new(new MemoryStream(), StreamFormat.Binary));
 
             mock.Mock<ILog>()
                 .Verify(x => x.Error(

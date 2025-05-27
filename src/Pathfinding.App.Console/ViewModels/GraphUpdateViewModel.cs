@@ -26,13 +26,6 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
         set => this.RaiseAndSetIfChanged(ref selectedGraph, value);
     }
 
-    private SmoothLevels smoothLevel;
-    public SmoothLevels SmoothLevel
-    {
-        get => smoothLevel;
-        set => this.RaiseAndSetIfChanged(ref smoothLevel, value);
-    }
-
     private Neighborhoods neighborhood;
     public Neighborhoods Neighborhood
     {
@@ -87,7 +80,6 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
                 .ConfigureAwait(false);
             info.Name = Name;
             info.Neighborhood = Neighborhood;
-            info.SmoothLevel = SmoothLevel;
             await service.UpdateGraphInfoAsync(info).ConfigureAwait(false);
             await messenger.Send(new AsyncGraphUpdatedMessage(info), Tokens.GraphTable);
             messenger.Send(new GraphUpdatedMessage(info));
@@ -107,7 +99,6 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
             SelectedGraphs = msg.Value;
             var graph = SelectedGraphs[0];
             Name = graph.Name;
-            SmoothLevel = graph.SmoothLevel;
             Neighborhood = graph.Neighborhood;
             Status = graph.Status;
         }

@@ -91,7 +91,8 @@ internal class RunModel : ReactiveObject, IDisposable
             .Select(x => (int)Math.Floor(Algorithm.Count * x - Cursor))
             .Where(x => x != 0)
             .Select(x => x > 0 ? new Action(() => Next(x)) : () => Previous(x))
-            .Subscribe(x => x()).DisposeWith(disposables);
+            .Subscribe(x => x())
+            .DisposeWith(disposables);
     }
 
     private void Next(int count)
@@ -118,12 +119,6 @@ internal class RunModel : ReactiveObject, IDisposable
         var previousPaths = new HashSet<Coordinate>();
         var previousEnqueued = new HashSet<Coordinate>();
         var subAlgorithms = new List<RunVertexStateModel>();
-
-        RunVertexStateModel ToRunVertexModel(Coordinate coordinate,
-            RunVertexState stateType, bool state = true)
-        {
-            return new(graph.Get(coordinate), stateType, state);
-        }
 
         range.Skip(1).Take(range.Count - 2)
             .Select(x => ToRunVertexModel(x, RunVertexState.Transit))
@@ -157,6 +152,12 @@ internal class RunModel : ReactiveObject, IDisposable
         }
 
         return subAlgorithms.AsReadOnly();
+
+        RunVertexStateModel ToRunVertexModel(Coordinate coordinate,
+            RunVertexState stateType, bool state = true)
+        {
+            return new(graph.Get(coordinate), stateType, state);
+        }
     }
 
     public void Dispose()

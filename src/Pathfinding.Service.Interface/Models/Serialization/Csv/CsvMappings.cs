@@ -7,7 +7,7 @@ internal static class CsvMappings
 {
     private static CsvVertex ToVertex(this VertexSerializationModel model, int graphId)
     {
-        return new CsvVertex()
+        return new()
         {
             GraphId = graphId,
             LowerValueOfRange = model.Cost.LowerValueOfRange,
@@ -53,7 +53,7 @@ internal static class CsvMappings
         };
     }
 
-    private static List<CsvStatistics> ToStatisics(this IEnumerable<RunStatisticsSerializationModel> models, int graphId)
+    private static List<CsvStatistics> ToStatistics(this IEnumerable<RunStatisticsSerializationModel> models, int graphId)
     {
         return [.. models.Select(x => x.ToStatistics(graphId))];
     }
@@ -82,16 +82,16 @@ internal static class CsvMappings
 
     private static VertexSerializationModel ToVertex(this CsvVertex model)
     {
-        return new VertexSerializationModel()
+        return new()
         {
-            Cost = new VertexCostModel()
+            Cost = new()
             {
                 Cost = model.Cost,
                 UpperValueOfRange = model.UpperValueOfRange,
                 LowerValueOfRange = model.LowerValueOfRange
             },
             IsObstacle = model.IsObstacle,
-            Position = new CoordinateModel() 
+            Position = new() 
             { 
                 Coordinate = JsonConvert.DeserializeObject<int[]>(model.Coordinate) 
             }
@@ -140,7 +140,7 @@ internal static class CsvMappings
         {
             Graph = x.Graph.ToGraph(i + 1),
             Vertices = x.Vertices.ToVertices(i + 1),
-            Statistics = x.Statistics.ToStatisics(i + 1),
+            Statistics = x.Statistics.ToStatistics(i + 1),
             Range = x.Range.ToRanges(i + 1)
         })];
     }

@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
 using Pathfinding.App.Console.Injection;
+using Pathfinding.App.Console.Messages.ViewModel.Requests;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
@@ -16,8 +17,6 @@ using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Security.Cryptography.X509Certificates;
-using Pathfinding.App.Console.Messages.ViewModel.Requests;
 using static Pathfinding.App.Console.Models.RunModel;
 // ReSharper disable AccessToModifiedClosure
 

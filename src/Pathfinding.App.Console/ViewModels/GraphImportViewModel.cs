@@ -22,7 +22,7 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
     private readonly IMessenger messenger;
     private readonly ILog logger;
 
-    public ReactiveCommand<StreamModel, Unit> ImportGraphCommand { get; }
+    public ReactiveCommand<Func<StreamModel>, Unit> ImportGraphCommand { get; }
 
     public IReadOnlyCollection<StreamFormat> StreamFormats { get; }
 
@@ -39,28 +39,26 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
         StreamFormats = [.. serializers
             .OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat])];
-        ImportGraphCommand = ReactiveCommand.CreateFromTask<StreamModel>(ImportGraphs);
+        ImportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(ImportGraphs);
     }
 
-    private async Task ImportGraphs(StreamModel stream)
+    private async Task ImportGraphs(Func<StreamModel> streamFactory)
     {
         await ExecuteSafe(async () =>
         {
-            await using (stream)
+            await using var stream = streamFactory();
+            if (!stream.IsEmpty)
             {
-                if (!stream.IsEmpty)
-                {
-                    var serializer = serializers[stream.Format.Value];
-                    var histories = await serializer.DeserializeFromAsync(stream.Stream)
-                        .ConfigureAwait(false);
-                    var result = await service.CreatePathfindingHistoriesAsync(histories.Histories)
-                        .ConfigureAwait(false);
-                    var graphs = result.Select(x => x.Graph).ToGraphInfo();
-                    messenger.Send(new GraphsCreatedMessage(graphs));
-                    logger.Info(graphs.Length > 0
-                        ? Resource.WasLoadedMsg
-                        : Resource.WereLoadedMsg);
-                }
+                var serializer = serializers[stream.Format.Value];
+                var histories = await serializer.DeserializeFromAsync(stream.Stream)
+                    .ConfigureAwait(false);
+                var result = await service.CreatePathfindingHistoriesAsync(histories.Histories)
+                    .ConfigureAwait(false);
+                var graphs = result.Select(x => x.Graph).ToGraphInfo();
+                messenger.Send(new GraphsCreatedMessage(graphs));
+                logger.Info(graphs.Length > 0
+                    ? Resource.WasLoadedMsg
+                    : Resource.WereLoadedMsg);
             }
         }, logger.Error).ConfigureAwait(false);
     }

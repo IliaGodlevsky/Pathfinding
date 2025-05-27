@@ -2,16 +2,15 @@
 using ReactiveUI;
 using System.Reactive;
 
-namespace Pathfinding.App.Console.ViewModels.Interface
+namespace Pathfinding.App.Console.ViewModels.Interface;
+
+internal interface IGraphExportViewModel
 {
-    internal interface IGraphExportViewModel
-    {
-        ExportOptions Options { get; set; }
+    ExportOptions Options { get; set; }
 
-        IReadOnlyList<ExportOptions> AllowedOptions { get; }
+    IReadOnlyList<ExportOptions> AllowedOptions { get; }
 
-        IReadOnlyCollection<StreamFormat> StreamFormats { get; }
+    IReadOnlyCollection<StreamFormat> StreamFormats { get; }
 
-        ReactiveCommand<StreamModel, Unit> ExportGraphCommand { get; }
-    }
+    ReactiveCommand<Func<StreamModel>, Unit> ExportGraphCommand { get; }
 }

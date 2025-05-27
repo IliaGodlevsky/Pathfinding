@@ -12,8 +12,7 @@ public sealed class BundleSerializer<T> : ISerializer<T>
     {
         try
         {
-            using var archive = new ZipArchive(stream, 
-                ZipArchiveMode.Read, leaveOpen: true);
+            using var archive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: true);
             var result = new T();
             await result.DeserializeAsync(archive, token).ConfigureAwait(false);
             return result;
@@ -29,8 +28,7 @@ public sealed class BundleSerializer<T> : ISerializer<T>
     {
         try
         {
-            using var archive = new ZipArchive(stream,
-                ZipArchiveMode.Create, leaveOpen: true);
+            using var archive = new ZipArchive(stream, ZipArchiveMode.Create, leaveOpen: true);
             await item.SerializeAsync(archive, token).ConfigureAwait(false);
         }
         catch (Exception ex)

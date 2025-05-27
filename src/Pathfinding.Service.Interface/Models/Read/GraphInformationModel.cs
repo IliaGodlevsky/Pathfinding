@@ -2,7 +2,7 @@
 
 namespace Pathfinding.Service.Interface.Models.Read;
 
-public record GraphInformationModel : IGraphLayersInfo
+public record GraphInformationModel
 {
     public int Id { get; set; }
 

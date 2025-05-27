@@ -20,8 +20,7 @@ public abstract class NeighborhoodLayer : ILayer
     private static List<IVertex> GetNeighboursWithinGraph(INeighborhood self,
         IGraph<IVertex> graph)
     {
-        return [.. self.OrderBy(x => x.ToString())
-            .Where(IsInRange).Distinct().Select(graph.Get)];
+        return [.. self.Where(IsInRange).Distinct().Select(graph.Get)];
 
         bool IsInRange(Coordinate coordinate)
         {
