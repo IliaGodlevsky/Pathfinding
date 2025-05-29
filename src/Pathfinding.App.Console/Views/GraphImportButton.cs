@@ -19,9 +19,9 @@ internal sealed partial class GraphImportButton : Button
             .Select(_ =>
             {
                 var fileName = GetFileName(viewModel);
-                return string.IsNullOrEmpty(fileName.Path)
+                return string.IsNullOrEmpty(fileName.Path) || fileName.Format == null
                     ? new Func<StreamModel>(() => StreamModel.Empty)
-                    : () => new StreamModel(File.OpenRead(fileName.Path), fileName.Format);
+                    : () => new(File.OpenRead(fileName.Path), fileName.Format);
             })
             .InvokeCommand(viewModel, x => x.ImportGraphCommand);
     }
@@ -37,9 +37,10 @@ internal sealed partial class GraphImportButton : Button
         Application.Run(dialog);
         var filePath = dialog.FilePath.ToString();
         var extension = Path.GetExtension(filePath);
-        return !dialog.Canceled && dialog.FilePath != null 
-                                && !string.IsNullOrEmpty(extension)
-            ? (filePath, formats[extension])
+        return !dialog.Canceled
+               && !string.IsNullOrEmpty(filePath)
+               && formats.TryGetValue(extension, out var format)
+            ? (filePath, format)
             : (string.Empty, null);
     }
 }

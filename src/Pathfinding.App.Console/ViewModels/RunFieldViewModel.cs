@@ -54,7 +54,7 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
     {
         this.messenger = messenger;
         this.graphAssemble = graphAssemble;
-        Runs.ActOnEveryObject(OnAdded, OnRemoved);
+        Runs.ActOnEveryObject(_ => { }, OnRemoved);
         messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
         messenger.Register<RunsDeletedMessage>(this, OnRunsDeleted);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
@@ -128,8 +128,6 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
         }
     }
 
-    private static void OnAdded(RunModel model) { }
-
     private static void OnRemoved(RunModel model) => model.Dispose();
 
     private void ActivateRun(RunInfoModel model)
@@ -177,10 +175,7 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
             }
 
             var rangeCoordinates = rangeMsg.Response.Select(x => x.Position).ToArray();
-            run = new(RunGraph, subRevisions, rangeCoordinates)
-            {
-                Id = model.Id
-            };
+            run = new(RunGraph, subRevisions, rangeCoordinates) { Id = model.Id };
             Runs.Add(run);
         }
         SelectedRun = run;

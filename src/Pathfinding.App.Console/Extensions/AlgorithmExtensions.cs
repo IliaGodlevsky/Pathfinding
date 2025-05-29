@@ -11,13 +11,14 @@ internal static class AlgorithmExtensions
     {
         Algorithms[] orders =
         [
+            // Wave group
             Algorithms.Dijkstra,
             Algorithms.AStar,
             Algorithms.BidirectDijkstra,
             Algorithms.BidirectAStar,
             Algorithms.CostGreedy,
             Algorithms.AStarGreedy,
-
+            // Breadth group
             Algorithms.Lee,
             Algorithms.BidirectLee,
             Algorithms.AStarLee,
@@ -25,7 +26,7 @@ internal static class AlgorithmExtensions
             Algorithms.DepthFirst,
             Algorithms.DepthFirstRandom,
             Algorithms.Snake,
-
+            // Random group
             Algorithms.Random,
             Algorithms.BidirectRandom
         ];

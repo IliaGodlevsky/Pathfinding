@@ -1,10 +1,9 @@
 ﻿using ReactiveUI;
 using System.Reactive;
 
-namespace Pathfinding.App.Console.ViewModels.Interface
+namespace Pathfinding.App.Console.ViewModels.Interface;
+
+internal interface IGraphAssembleViewModel
 {
-    internal interface IGraphAssembleViewModel
-    {
-        ReactiveCommand<Unit, Unit> AssembleGraphCommand { get; }
-    }
+    ReactiveCommand<Unit, Unit> AssembleGraphCommand { get; }
 }

@@ -54,7 +54,7 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
         messenger.Register<RunsSelectedMessage>(this, OnRunsSelected);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
         messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
-        messenger.RegisterAsyncHandler<AsyncGraphUpdatedMessage, int>(this,
+        messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage, int>(this,
             Tokens.AlgorithmUpdate, OnGraphUpdated);
     }
 
@@ -96,7 +96,7 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
         }, log.Error).ConfigureAwait(false);
     }
 
-    private async Task OnGraphUpdated(object recipient, AsyncGraphUpdatedMessage msg)
+    private async Task OnGraphUpdated(object recipient, AwaitGraphUpdatedMessage msg)
     {
         var id = ActivatedGraphId;
         var local = Graph;
@@ -119,8 +119,6 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
                 messenger.Send(new RunsUpdatedMessage(updated));
             }, log.Error).ConfigureAwait(false);
         }
-
-        msg.SetCompleted(true);
     }
 
     private async Task<RunStatisticsModel[]> UpdateRunsAsync(

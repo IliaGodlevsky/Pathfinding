@@ -35,59 +35,28 @@ public static class AlgorithmBuildInfoExtensions
     }
 
     private static DistanceFirstAlgorithm ToDistanceFirstAlgorithm(this IAlgorithmBuildInfo info,
-        IReadOnlyCollection<IPathfindingVertex> range)
-    {
-        return new(range, info.GetHeuristic());
-    }
+        IReadOnlyCollection<IPathfindingVertex> range) => new(range, info.GetHeuristic());
 
-    private static CostGreedyAlgorithm ToCostGreedyAlgorithm(
-        this IAlgorithmBuildInfo info,
-        IReadOnlyCollection<IPathfindingVertex> range)
-    {
-        return new(range, info.GetStepRule());
-    }
+    private static CostGreedyAlgorithm ToCostGreedyAlgorithm(this IAlgorithmBuildInfo info,
+        IReadOnlyCollection<IPathfindingVertex> range) => new(range, info.GetStepRule());
 
-    private static BidirectDijkstraAlgorithm ToBidirectDijkstraAlgorithm(
-        this IAlgorithmBuildInfo info,
-        IReadOnlyCollection<IPathfindingVertex> range)
-    {
-        return new(range, info.GetStepRule());
-    }
+    private static BidirectDijkstraAlgorithm ToBidirectDijkstraAlgorithm(this IAlgorithmBuildInfo info, 
+        IReadOnlyCollection<IPathfindingVertex> range) => new(range, info.GetStepRule());
 
-    private static DijkstraAlgorithm ToDijkstraAlgorithm(
-        this IAlgorithmBuildInfo info,
-        IReadOnlyCollection<IPathfindingVertex> range)
-    {
-        return new(range, info.GetStepRule());
-    }
-    
-    private static AStarAlgorithm ToAStartAlgorithm(
-        this IAlgorithmBuildInfo info,
-        IReadOnlyCollection<IPathfindingVertex> range)
-    {
-        return new (range, info.GetStepRule(), info.GetHeuristic());
-    }
+    private static DijkstraAlgorithm ToDijkstraAlgorithm(this IAlgorithmBuildInfo info,
+        IReadOnlyCollection<IPathfindingVertex> range) => new(range, info.GetStepRule());
 
-    private static BidirectAStarAlgorithm ToBidirectAStarAlgorithm(
-        this IAlgorithmBuildInfo info,
-        IReadOnlyCollection<IPathfindingVertex> range)
-    {
-        return new(range, info.GetStepRule(), info.GetHeuristic());
-    }
+    private static AStarAlgorithm ToAStartAlgorithm(this IAlgorithmBuildInfo info,
+        IReadOnlyCollection<IPathfindingVertex> range) => new (range, info.GetStepRule(), info.GetHeuristic());
 
-    private static AStarLeeAlgorithm ToAStarLeeAlgorithm(
-        this IAlgorithmBuildInfo info,
-        IReadOnlyCollection<IPathfindingVertex> range)
-    {
-        return new (range, info.GetHeuristic());
-    }
+    private static BidirectAStarAlgorithm ToBidirectAStarAlgorithm(this IAlgorithmBuildInfo info,
+        IReadOnlyCollection<IPathfindingVertex> range) => new(range, info.GetStepRule(), info.GetHeuristic());
 
-    private static AStarGreedyAlgorithm ToAStarGreedyAlgorithm(
-        this IAlgorithmBuildInfo info,
-        IReadOnlyCollection<IPathfindingVertex> range)
-    {
-        return new(range, info.GetHeuristic(), info.GetStepRule());
-    }
+    private static AStarLeeAlgorithm ToAStarLeeAlgorithm(this IAlgorithmBuildInfo info,
+        IReadOnlyCollection<IPathfindingVertex> range) => new (range, info.GetHeuristic());
+
+    private static AStarGreedyAlgorithm ToAStarGreedyAlgorithm(this IAlgorithmBuildInfo info,
+        IReadOnlyCollection<IPathfindingVertex> range) => new(range, info.GetHeuristic(), info.GetStepRule());
 
     private static IStepRule GetStepRule(this IAlgorithmBuildInfo info)
     {

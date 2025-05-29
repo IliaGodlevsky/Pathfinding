@@ -1,4 +1,3 @@
-﻿namespace Pathfinding.App.Console.Messages.View
-{
-    internal sealed record CloseRunCreateViewMessage;
-}
+﻿namespace Pathfinding.App.Console.Messages.View;
+
+internal sealed record CloseRunCreateViewMessage;

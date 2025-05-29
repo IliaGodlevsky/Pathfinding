@@ -14,6 +14,9 @@ public sealed class Layers(params ILayer[] layers) : List<ILayer>(layers), ILaye
 
     public void Overlay(IGraph<IVertex> graph)
     {
-        ForEach(layer => layer.Overlay(graph));
+        foreach (var layer in layers)
+        {
+            layer.Overlay(graph);
+        }
     }
 }

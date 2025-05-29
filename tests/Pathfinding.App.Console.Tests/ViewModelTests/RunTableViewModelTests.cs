@@ -39,7 +39,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
         {
             using var mock = AutoMock.GetLoose();
 
-            var graph = new AsyncGraphActivatedMessage(
+            var graph = new AwaitGraphActivatedMessage(
                 new(Graph<GraphVertexModel>.Empty, 
                     default, 
                     default,
@@ -51,8 +51,8 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                 .Setup(x => x.Register(
                     It.IsAny<object>(),
                     It.IsAny<IsAnyToken>(),
-                    It.IsAny<MessageHandler<object, AsyncGraphActivatedMessage>>()))
-                .Callback<object, object, MessageHandler<object, AsyncGraphActivatedMessage>>((r, _, handler) => handler(r, graph));
+                    It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()))
+                .Callback<object, object, MessageHandler<object, AwaitGraphActivatedMessage>>((r, _, handler) => handler(r, graph));
 
             mock.Mock<IRequestService<GraphVertexModel>>()
                 .Setup(x => x.ReadStatisticsAsync(
@@ -89,7 +89,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
         {
             using var mock = AutoMock.GetLoose();
 
-            var graph = new AsyncGraphActivatedMessage(
+            var graph = new AwaitGraphActivatedMessage(
                 new(Graph<GraphVertexModel>.Empty,
                     default,
                     default,
@@ -101,8 +101,8 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                 .Setup(x => x.Register(
                     It.IsAny<object>(),
                     It.IsAny<IsAnyToken>(),
-                    It.IsAny<MessageHandler<object, AsyncGraphActivatedMessage>>()))
-                .Callback<object, object, MessageHandler<object, AsyncGraphActivatedMessage>>((r, _, handler)
+                    It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()))
+                .Callback<object, object, MessageHandler<object, AwaitGraphActivatedMessage>>((r, _, handler)
                 => handler(r, graph));
 
             mock.Mock<IRequestService<GraphVertexModel>>()
@@ -127,7 +127,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                     .Verify(x => x.Register(
                         It.IsAny<object>(),
                         It.IsAny<IsAnyToken>(),
-                        It.IsAny<MessageHandler<object, AsyncGraphActivatedMessage>>()), Times.Once);
+                        It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()), Times.Once);
 
                 mock.Mock<IRequestService<GraphVertexModel>>()
                     .Verify(x => x.ReadStatisticsAsync(
@@ -149,7 +149,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
         {
             using var mock = AutoMock.GetLoose();
 
-            var graph = new AsyncGraphActivatedMessage(
+            var graph = new AwaitGraphActivatedMessage(
                 new(Graph<GraphVertexModel>.Empty,
                     default,
                     default,
@@ -161,8 +161,8 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                 .Setup(x => x.Register(
                     It.IsAny<object>(),
                     It.IsAny<IsAnyToken>(),
-                    It.IsAny<MessageHandler<object, AsyncGraphActivatedMessage>>()))
-                .Callback<object, object, MessageHandler<object, AsyncGraphActivatedMessage>>((r, _, handler)
+                    It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()))
+                .Callback<object, object, MessageHandler<object, AwaitGraphActivatedMessage>>((r, _, handler)
                 => handler(r, graph));
 
             mock.Mock<IRequestService<GraphVertexModel>>()
@@ -187,7 +187,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                     .Verify(x => x.Register(
                         It.IsAny<object>(),
                         It.IsAny<IsAnyToken>(),
-                        It.IsAny<MessageHandler<object, AsyncGraphActivatedMessage>>()), Times.Once);
+                        It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()), Times.Once);
 
                 mock.Mock<IRequestService<GraphVertexModel>>()
                     .Verify(x => x.ReadStatisticsAsync(
@@ -214,7 +214,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
         {
             using var mock = AutoMock.GetLoose();
 
-            var graph = new AsyncGraphActivatedMessage(
+            var graph = new AwaitGraphActivatedMessage(
                 new(Graph<GraphVertexModel>.Empty,
                     default,
                     default,
@@ -230,8 +230,8 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                 .Setup(x => x.Register(
                     It.IsAny<object>(),
                     It.IsAny<IsAnyToken>(),
-                    It.IsAny<MessageHandler<object, AsyncGraphActivatedMessage>>()))
-                .Callback<object, object, MessageHandler<object, AsyncGraphActivatedMessage>>((r, _, handler)
+                    It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()))
+                .Callback<object, object, MessageHandler<object, AwaitGraphActivatedMessage>>((r, _, handler)
                     => handler(r, graph));
 
             _ = mock.Create<RunsTableViewModel>();

@@ -16,12 +16,12 @@ internal sealed partial class GraphExportButton
         Initialize();
         this.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-            .Select(x =>
+            .Select(_ =>
             {
                 var filePath = GetFilePath(viewModel);
-                return string.IsNullOrEmpty(filePath.Path)
+                return string.IsNullOrEmpty(filePath.Path) || filePath.Format == null
                     ? new Func<StreamModel>(() => StreamModel.Empty)
-                    : () => new StreamModel(OpenWrite(filePath.Path), filePath.Format);
+                    : () => new (OpenWrite(filePath.Path), filePath.Format);
             })
             .InvokeCommand(viewModel, x => x.ExportGraphCommand);
         viewModel.ExportGraphCommand.CanExecute
@@ -38,25 +38,23 @@ internal sealed partial class GraphExportButton
         var formats = viewModel.StreamFormats
             .ToDictionary(x => x.ToExtensionRepresentation());
         using var dialog = new SaveDialog(Resource.Export,
-            Resource.ChooseFile, [.. formats.Keys])
-        {
-            Width = Dim.Percent(45),
-            Height = Dim.Percent(55)
-        };
-        using var export = new GraphExportOptionsView(viewModel)
-        {
-            ColorScheme = dialog.ColorScheme,
-            Width = Dim.Percent(50),
-            Height = 2,
-            X = Pos.Center(),
-            Y = 5
-        };
+            Resource.ChooseFile, [.. formats.Keys]);
+        dialog.Width = Dim.Percent(45);
+        dialog.Height = Dim.Percent(55);
+        using var export = new GraphExportOptionsView(viewModel);
+        export.ColorScheme = dialog.ColorScheme;
+        export.Width = Dim.Percent(50);
+        export.Height = 2;
+        export.X = Pos.Center();
+        export.Y = 5;
         dialog.Add(export);
         Application.Run(dialog);
-        string filePath = dialog.FilePath.ToString();
-        string extension = Path.GetExtension(filePath);
-        return !dialog.Canceled && dialog.FilePath != null
-            ? (filePath, formats[extension])
+        var filePath = dialog.FilePath.ToString();
+        var extension = Path.GetExtension(filePath);
+        return !dialog.Canceled
+               && !string.IsNullOrEmpty(filePath)
+               && formats.TryGetValue(extension, out var format)
+            ? (filePath, format)
             : (string.Empty, null);
     }
 }

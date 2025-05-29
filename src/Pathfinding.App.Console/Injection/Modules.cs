@@ -86,10 +86,6 @@ internal static class Modules
             .SingleInstance().Where(x => x.Name.EndsWith("ViewModel")).AsSelf()
             .AsImplementedInterfaces().WithAttributeFiltering();
 
-        var algorithms = Enum.GetValues<Algorithms>()
-            .OrderBy(x => x.GetOrder()).ToArray();
-        builder.RegisterInstance(algorithms).AsSelf().SingleInstance();
-
         builder.RegisterType<MainView>().AsSelf().WithAttributeFiltering();
 
         builder.RegisterType<RightPanelView>().Keyed<View>(KeyFilters.MainWindow).WithAttributeFiltering();

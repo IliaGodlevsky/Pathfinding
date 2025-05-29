@@ -41,7 +41,7 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
         this.service = service;
         this.messenger = messenger;
         this.logger = logger;
-        messenger.RegisterAsyncHandler<AsyncGraphUpdatedMessage, int>(this, Tokens.GraphTable, OnGraphUpdated);
+        messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage, int>(this, Tokens.GraphTable, OnGraphUpdated);
         messenger.Register<GraphsCreatedMessage>(this, OnGraphCreated);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
         messenger.Register<ObstaclesCountChangedMessage>(this, OnObstaclesCountChanged);
@@ -71,8 +71,8 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
             await graphModel.Neighborhood.ToNeighborhoodLayer()
                 .OverlayAsync(graph).ConfigureAwait(false);
             messenger.Send(new GraphActivatedMessage(activated), Tokens.GraphField);
-            await messenger.Send(new AsyncGraphActivatedMessage(activated), Tokens.RunsTable);
-            await messenger.Send(new AsyncGraphActivatedMessage(activated), Tokens.PathfindingRange);
+            await messenger.Send(new AwaitGraphActivatedMessage(activated), Tokens.RunsTable);
+            await messenger.Send(new AwaitGraphActivatedMessage(activated), Tokens.PathfindingRange);
             messenger.Send(new GraphActivatedMessage(activated));
             ActivatedGraphId = graphModel.Id;
         }, logger.Error).ConfigureAwait(false);
@@ -83,9 +83,8 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
         await ExecuteSafe(async () =>
         {
             Graphs.Clear();
-            var infos = (await service.ReadAllGraphInfoAsync().ConfigureAwait(false))
-                .ToGraphInfo();
-            Graphs.Add(infos);
+            var infos = await service.ReadAllGraphInfoAsync().ConfigureAwait(false);
+            Graphs.Add(infos.ToGraphInfo());
         }, logger.Error).ConfigureAwait(false);
     }
 
@@ -107,7 +106,7 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
         }
     }
 
-    private async Task OnGraphUpdated(object recipient, AsyncGraphUpdatedMessage msg)
+    private async Task OnGraphUpdated(object recipient, AwaitGraphUpdatedMessage msg)
     {
         var model = Graphs.FirstOrDefault(x => x.Id == msg.Value.Id);
         if (model != null)
@@ -120,8 +119,6 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
                 await ActivatedGraph(ActivatedGraphId);
             }
         }
-
-        msg.SetCompleted(true);
     }
 
     private void OnGraphCreated(object recipient, GraphsCreatedMessage msg)

@@ -1,10 +1,9 @@
 ﻿using ReactiveUI;
 using System.Reactive;
 
-namespace Pathfinding.App.Console.ViewModels.Interface
+namespace Pathfinding.App.Console.ViewModels.Interface;
+
+internal interface IGraphDeleteViewModel
 {
-    internal interface IGraphDeleteViewModel
-    {
-        ReactiveCommand<Unit, Unit> DeleteGraphCommand { get; }
-    }
+    ReactiveCommand<Unit, Unit> DeleteGraphCommand { get; }
 }

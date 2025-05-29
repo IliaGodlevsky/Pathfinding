@@ -1,10 +1,9 @@
 ﻿using ReactiveUI;
 using System.Reactive;
 
-namespace Pathfinding.App.Console.ViewModels.Interface
+namespace Pathfinding.App.Console.ViewModels.Interface;
+
+internal interface IRunUpdateViewModel
 {
-    internal interface IRunUpdateViewModel
-    {
-        ReactiveCommand<Unit, Unit> UpdateRunsCommand { get; }
-    }
+    ReactiveCommand<Unit, Unit> UpdateRunsCommand { get; }
 }

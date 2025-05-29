@@ -1,7 +1,6 @@
-﻿namespace Pathfinding.App.Console.ViewModels.Interface
+﻿namespace Pathfinding.App.Console.ViewModels.Interface;
+
+internal interface IRequireGraphNameViewModel
 {
-    internal interface IRequireGraphNameViewModel
-    {
-        public string Name { get; set; }
-    }
+    string Name { get; set; }
 }

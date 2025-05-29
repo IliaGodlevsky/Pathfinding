@@ -11,16 +11,16 @@ internal sealed partial class GraphTableButtonsFrame : FrameView
         [KeyFilter(KeyFilters.GraphTableButtons)] Meta<Button>[] children)
     {
         Initialize();
-        var childs = children
+        var kids = children
             .OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => x.Value)
-            .ToArray();
-        float widthPercent = 100f / childs.Length;
-        for (int i = 0; i < childs.Length; i++)
+            .ToArray<View>();
+        var widthPercent = 100f / kids.Length;
+        for (var i = 0; i < kids.Length; i++)
         {
-            childs[i].X = Pos.Percent(i * widthPercent);
-            childs[i].Width = Dim.Percent(widthPercent);
+            kids[i].X = Pos.Percent(i * widthPercent);
+            kids[i].Width = Dim.Percent(widthPercent);
         }
-        Add(childs);
+        Add(kids);
     }
 }

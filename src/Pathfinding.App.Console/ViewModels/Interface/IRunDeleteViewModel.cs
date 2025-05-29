@@ -1,10 +1,9 @@
 ﻿using ReactiveUI;
 using System.Reactive;
 
-namespace Pathfinding.App.Console.ViewModels.Interface
+namespace Pathfinding.App.Console.ViewModels.Interface;
+
+internal interface IRunDeleteViewModel
 {
-    internal interface IRunDeleteViewModel
-    {
-        ReactiveCommand<Unit, Unit> DeleteRunsCommand { get; }
-    }
+    ReactiveCommand<Unit, Unit> DeleteRunsCommand { get; }
 }

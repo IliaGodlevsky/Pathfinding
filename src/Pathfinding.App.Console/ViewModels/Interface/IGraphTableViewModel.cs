@@ -3,16 +3,15 @@ using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Reactive;
 
-namespace Pathfinding.App.Console.ViewModels.Interface
+namespace Pathfinding.App.Console.ViewModels.Interface;
+
+internal interface IGraphTableViewModel
 {
-    internal interface IGraphTableViewModel
-    {
-        ObservableCollection<GraphInfoModel> Graphs { get; }
+    ObservableCollection<GraphInfoModel> Graphs { get; }
 
-        ReactiveCommand<int, Unit> ActivateGraphCommand { get; }
+    ReactiveCommand<int, Unit> ActivateGraphCommand { get; }
 
-        ReactiveCommand<int[], Unit> SelectGraphsCommand { get; }
+    ReactiveCommand<int[], Unit> SelectGraphsCommand { get; }
 
-        ReactiveCommand<Unit, Unit> LoadGraphsCommand { get; }
-    }
+    ReactiveCommand<Unit, Unit> LoadGraphsCommand { get; }
 }

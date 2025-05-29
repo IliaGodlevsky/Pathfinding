@@ -1,5 +1,6 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.Requests;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
@@ -102,14 +103,13 @@ internal sealed class RunCreateViewModel : BaseViewModel,
 
     public RunCreateViewModel(IRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        Algorithms[] allowedAlgorithms,
         ILog logger)
     {
         this.messenger = messenger;
         this.service = service;
         this.logger = logger;
         CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm, CanCreateAlgorithm());
-        AllowedAlgorithms = allowedAlgorithms;
+        AllowedAlgorithms = [.. Enum.GetValues<Algorithms>().OrderBy(x => x.GetOrder())];
         AllowedHeuristics = Enum.GetValues<Heuristics>();
         messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);

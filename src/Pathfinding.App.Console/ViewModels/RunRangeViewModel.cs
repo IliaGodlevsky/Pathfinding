@@ -102,8 +102,8 @@ internal sealed class RunRangeViewModel : BaseViewModel,
 
     public RunRangeViewModel(
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        [KeyFilter(KeyFilters.IncludeCommands)] IEnumerable<Meta<Command>> includeCommands,
-        [KeyFilter(KeyFilters.ExcludeCommands)] IEnumerable<Meta<Command>> excludeCommands,
+        [KeyFilter(KeyFilters.IncludeCommands)] Meta<Command>[] includeCommands,
+        [KeyFilter(KeyFilters.ExcludeCommands)] Meta<Command>[] excludeCommands,
         IRequestService<GraphVertexModel> service,
         ILog logger)
     {
@@ -122,7 +122,7 @@ internal sealed class RunRangeViewModel : BaseViewModel,
         messenger.Register<PathfindingRangeRequestMessage>(this, OnGetPathfindingRangeReceived);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
         messenger.Register<GraphStateChangedMessage>(this, OnGraphBecameReadonly);
-        messenger.RegisterAsyncHandler<AsyncGraphActivatedMessage, int>(this, Tokens.PathfindingRange, OnGraphActivated);
+        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage, int>(this, Tokens.PathfindingRange, OnGraphActivated);
         AddToRangeCommand = ReactiveCommand.Create<GraphVertexModel>(AddVertexToRange, CanExecute());
         RemoveFromRangeCommand = ReactiveCommand.Create<GraphVertexModel>(RemoveVertexFromRange, CanExecute());
         DeletePathfindingRange = ReactiveCommand.CreateFromTask(DeleteRange, CanExecute());
@@ -200,7 +200,7 @@ internal sealed class RunRangeViewModel : BaseViewModel,
         }
     }
 
-    private async Task OnGraphActivated(object recipient, AsyncGraphActivatedMessage msg)
+    private async Task OnGraphActivated(object recipient, AwaitGraphActivatedMessage msg)
     {
         await ExecuteSafe(async () =>
         {
@@ -221,12 +221,8 @@ internal sealed class RunRangeViewModel : BaseViewModel,
             Transit.CollectionChanged += OnCollectionChanged;
             Transit.AddRange(transit);
             Graph.ForEach(SubscribeToEvents);
-            msg.SetCompleted(true);
-        }, (ex, message) =>
-        {
-            logger.Error(ex, message);
-            msg.SetCompleted(false);
-        }).ConfigureAwait(false);
+            
+        }, logger.Error).ConfigureAwait(false);
     }
 
     private void OnGraphBecameReadonly(object recipient, GraphStateChangedMessage msg)

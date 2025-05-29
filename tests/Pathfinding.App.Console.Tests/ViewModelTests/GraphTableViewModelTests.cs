@@ -1,14 +1,13 @@
 ﻿using Autofac.Extras.Moq;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using System.Reactive.Linq;
-using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests
 {
@@ -81,10 +80,10 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(graph));
             mock.Mock<IMessenger>()
-                .Setup(x => x.Send(It.IsAny<AsyncGraphActivatedMessage>(),
+                .Setup(x => x.Send(It.IsAny<AwaitGraphActivatedMessage>(),
                     It.IsAny<IsAnyToken>()))
-                .Returns<AsyncGraphActivatedMessage, object>((x, o) => x)
-                .Callback<AsyncGraphActivatedMessage, object>((m, t) => m.SetCompleted(true));
+                .Returns<AwaitGraphActivatedMessage, object>((x, o) => x)
+                .Callback<AwaitGraphActivatedMessage, object>((m, t) => m.SetCompleted());
 
             var viewModel = mock.Create<GraphTableViewModel>();
 
@@ -98,7 +97,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests
                         It.IsAny<CancellationToken>()), Times.Once);
                 mock.Mock<IMessenger>()
                     .Verify(x => x.Send(
-                        It.IsAny<AsyncGraphActivatedMessage>(),
+                        It.IsAny<AwaitGraphActivatedMessage>(),
                         It.IsAny<IsAnyToken>()), Times.Exactly(2));
                 mock.Mock<IMessenger>()
                     .Verify(x => x.Send(

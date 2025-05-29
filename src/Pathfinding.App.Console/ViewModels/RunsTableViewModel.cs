@@ -37,7 +37,7 @@ internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel
         this.logger = logger;
 
         messenger.RegisterAsyncHandler<RunsCreatedMessaged>(this, OnRunCreated);
-        messenger.RegisterAsyncHandler<AsyncGraphActivatedMessage, int>(this, Tokens.RunsTable, OnGraphActivatedMessage);
+        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage, int>(this, Tokens.RunsTable, OnGraphActivatedMessage);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
         messenger.Register<RunsUpdatedMessage>(this, OnRunsUpdated);
         messenger.RegisterAsyncHandler<RunsDeletedMessage>(this, OnRunsDeleteMessage);
@@ -51,7 +51,7 @@ internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel
         messenger.Send(new RunsSelectedMessage(selectedRuns));
     }
 
-    private async Task OnGraphActivatedMessage(object recipient, AsyncGraphActivatedMessage msg)
+    private async Task OnGraphActivatedMessage(object recipient, AwaitGraphActivatedMessage msg)
     {
         await ExecuteSafe(async () =>
         {
@@ -61,12 +61,7 @@ internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel
             ActivatedGraphId = msg.Value.GraphId;
             Runs.Clear();
             Runs.Add(models);
-            msg.SetCompleted(true);
-        },(ex, message) =>
-        {
-            msg.SetCompleted(false);
-            logger.Error(ex, message);
-        }).ConfigureAwait(false);
+        }, logger.Error).ConfigureAwait(false);
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)

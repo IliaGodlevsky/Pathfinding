@@ -2,14 +2,13 @@
 using ReactiveUI;
 using System.Reactive;
 
-namespace Pathfinding.App.Console.ViewModels.Interface
+namespace Pathfinding.App.Console.ViewModels.Interface;
+
+internal interface IRunCreateViewModel
 {
-    internal interface IRunCreateViewModel
-    {
-        Algorithms? Algorithm { get; set; }
+    Algorithms? Algorithm { get; set; }
 
-        IReadOnlyList<Algorithms> AllowedAlgorithms { get; }
+    IReadOnlyList<Algorithms> AllowedAlgorithms { get; }
 
-        ReactiveCommand<Unit, Unit> CreateRunCommand { get; }
-    }
+    ReactiveCommand<Unit, Unit> CreateRunCommand { get; }
 }

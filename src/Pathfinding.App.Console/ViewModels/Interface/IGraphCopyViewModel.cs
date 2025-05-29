@@ -1,10 +1,9 @@
 ﻿using ReactiveUI;
 using System.Reactive;
 
-namespace Pathfinding.App.Console.ViewModels.Interface
+namespace Pathfinding.App.Console.ViewModels.Interface;
+
+internal interface IGraphCopyViewModel
 {
-    internal interface IGraphCopyViewModel
-    {
-        ReactiveCommand<Unit, Unit> CopyGraphCommand { get; }
-    }
+    ReactiveCommand<Unit, Unit> CopyGraphCommand { get; }
 }
