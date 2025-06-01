@@ -4,10 +4,10 @@ using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Infrastructure.Business.Layers;
 
-public sealed class MooreNeighborhoodLayer : NeighborhoodLayer
+public class DiagonalNeighborhoodLayer : NeighborhoodLayer
 {
     protected override INeighborhood CreateNeighborhood(Coordinate coordinate)
     {
-        return new MooreNeighborhood(coordinate);
+        return new DiagonalNeighborhood(coordinate);
     }
 }

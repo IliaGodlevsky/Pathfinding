@@ -3,102 +3,111 @@ using Microsoft.Data.Sqlite;
 using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Interface.Repositories;
 
-namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
+namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories;
+
+internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParametersRepository
 {
-    internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParametersRepository
-    {
-        protected override string CreateTableScript { get; } = @$"
+    private const string NameProperty = nameof(Graph.Name);
+    private const string NeighborhoodProperty = nameof(Graph.Neighborhood);
+    private const string SmoothLevelProperty = nameof(Graph.SmoothLevel);
+    private const string StatusProperty = nameof(Graph.Status);
+    private const string DimensionsProperty = nameof(Graph.Dimensions);
+    private const string IdProperty = nameof(Graph.Id);
+
+    protected override string CreateTableScript =>
+        @$"
             CREATE TABLE IF NOT EXISTS {DbTables.Graphs} (
-                Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                Name TEXT NOT NULL,
-                Neighborhood INTEGER NOT NULL,
-                SmoothLevel INTEGER NOT NULL,
-                Status INTEGER NOT NULL,
-                Dimensions TEXT NOT NULL
+                {IdProperty} INTEGER PRIMARY KEY AUTOINCREMENT,
+                {NameProperty} TEXT NOT NULL,
+                {NeighborhoodProperty} INTEGER NOT NULL,
+                {SmoothLevelProperty} INTEGER NOT NULL,
+                {StatusProperty} INTEGER NOT NULL,
+                {DimensionsProperty} TEXT NOT NULL
             );
             CREATE INDEX IF NOT EXISTS idx_graph_id ON {DbTables.Graphs}(Id);";
 
-        public SqliteGraphRepository(SqliteConnection connection,
-            SqliteTransaction transaction) : base(connection, transaction)
-        {
-            _ = new SqliteVerticesRepository(connection, transaction);
-        }
+    public SqliteGraphRepository(SqliteConnection connection,
+        SqliteTransaction transaction) : base(connection, transaction)
+    {
+        _ = new SqliteVerticesRepository(connection, transaction);
+    }
 
-        public async Task<Graph> CreateAsync(Graph graph, CancellationToken token = default)
-        {
-            const string query = @$"
-                INSERT INTO {DbTables.Graphs} (Name, Neighborhood, SmoothLevel, Status, Dimensions)
-                VALUES (@Name, @Neighborhood, @SmoothLevel, @Status, @Dimensions);
+    public async Task<Graph> CreateAsync(Graph graph, CancellationToken token = default)
+    {
+        const string query = @$"
+                INSERT INTO {DbTables.Graphs} ({NameProperty}, {NeighborhoodProperty}, {SmoothLevelProperty}, {StatusProperty}, {DimensionsProperty})
+                VALUES (@{NameProperty}, @{NeighborhoodProperty}, @{SmoothLevelProperty}, @{StatusProperty}, @{DimensionsProperty});
                 SELECT last_insert_rowid();";
 
-            var id = await connection.ExecuteScalarAsync<int>(
-                new(query, graph, transaction, cancellationToken: token))
-                .ConfigureAwait(false);
-            graph.Id = id;
-            return graph;
-        }
+        var id = await Connection.ExecuteScalarAsync<int>(
+                new(query, graph, Transaction, cancellationToken: token))
+            .ConfigureAwait(false);
+        graph.Id = id;
+        return graph;
+    }
 
-        public async Task<bool> DeleteAsync(
-            IReadOnlyCollection<int> graphIds, 
-            CancellationToken token = default)
-        {
-            const string query = $"DELETE FROM {DbTables.Graphs} WHERE Id IN @Ids";
+    public async Task<bool> DeleteAsync(
+        IReadOnlyCollection<int> graphIds, 
+        CancellationToken token = default)
+    {
+        const string query = $"DELETE FROM {DbTables.Graphs} WHERE Id IN @Ids";
 
-            var affectedRows = await connection.ExecuteAsync(
-                new(query, new { Ids = graphIds }, transaction, cancellationToken: token))
-                .ConfigureAwait(false);
-            return affectedRows > 0;
-        }
+        var affectedRows = await Connection.ExecuteAsync(
+                new(query, new { Ids = graphIds }, Transaction, cancellationToken: token))
+            .ConfigureAwait(false);
+        return affectedRows > 0;
+    }
 
-        public IAsyncEnumerable<Graph> GetAll()
-        {
-            const string query = $"SELECT * FROM {DbTables.Graphs}";
+    public IAsyncEnumerable<Graph> GetAll()
+    {
+        const string query = $"SELECT * FROM {DbTables.Graphs}";
 
-            return connection.QueryUnbufferedAsync<Graph>(query, transaction: transaction);
-        }
+        return Connection.QueryUnbufferedAsync<Graph>(query, transaction: Transaction);
+    }
 
-        public async Task<Graph> ReadAsync(int graphId, CancellationToken token = default)
-        {
-            const string query = $"SELECT * FROM {DbTables.Graphs} WHERE Id = @Id";
+    public async Task<Graph> ReadAsync(int graphId, CancellationToken token = default)
+    {
+        const string query = $"SELECT * FROM {DbTables.Graphs} WHERE Id = @Id";
 
-            return await connection.QuerySingleOrDefaultAsync<Graph>(
-                new(query, new { Id = graphId }, transaction, cancellationToken: token))
-                .ConfigureAwait(false);
-        }
+        return await Connection.QuerySingleOrDefaultAsync<Graph>(
+                new(query, new { Id = graphId }, Transaction, cancellationToken: token))
+            .ConfigureAwait(false);
+    }
 
-        public async Task<bool> UpdateAsync(Graph graph, CancellationToken token = default)
-        {
-            const string query = @$"
+    public async Task<bool> UpdateAsync(Graph graph, CancellationToken token = default)
+    {
+        const string query = @$"
                 UPDATE {DbTables.Graphs}
-                SET Name = @Name,
-                    Neighborhood = @Neighborhood,
-                    SmoothLevel = @SmoothLevel,
-                    Status = @Status,
-                    Dimensions = @Dimensions
-                WHERE Id = @Id";
+                SET {NameProperty} = @{NameProperty},
+                    {NeighborhoodProperty} = @{NeighborhoodProperty},
+                    {SmoothLevelProperty} = @{SmoothLevelProperty},
+                    {StatusProperty} = @{StatusProperty},
+                    {DimensionsProperty} = @{DimensionsProperty}
+                WHERE {IdProperty} = @{IdProperty}";
 
-            var affectedRows = await connection.ExecuteAsync(
-                new(query, graph, transaction, cancellationToken: token))
-                .ConfigureAwait(false);
+        var affectedRows = await Connection.ExecuteAsync(
+                new(query, graph, Transaction, cancellationToken: token))
+            .ConfigureAwait(false);
 
-            return affectedRows > 0;
-        }
+        return affectedRows > 0;
+    }
 
-        public async Task<IReadOnlyDictionary<int, int>> ReadObstaclesCountAsync(
-            IReadOnlyCollection<int> graphIds,
-            CancellationToken token = default)
-        {
-            const string query = $@"
-                SELECT g.GraphId, COALESCE(SUM(v.IsObstacle), 0) AS ObstacleCount
-                FROM (SELECT DISTINCT GraphId FROM Vertices WHERE GraphId IN @GraphIds) g
-                LEFT JOIN Vertices v ON g.GraphId = v.GraphId
-                GROUP BY g.GraphId;";
+    public async Task<IReadOnlyDictionary<int, int>> ReadObstaclesCountAsync(
+        IReadOnlyCollection<int> graphIds,
+        CancellationToken token = default)
+    {
+        const string graphIdProperty = nameof(Vertex.GraphId);
 
-            var result = await connection.QueryAsync<(int GraphId, int ObstacleCount)>(
-                new(query, new { GraphIds = graphIds }, transaction, cancellationToken: token))
-                .ConfigureAwait(false);
+        const string query = $@"
+                SELECT g.{graphIdProperty}, COALESCE(SUM(v.{nameof(Vertex.IsObstacle)}), 0) AS ObstacleCount
+                FROM (SELECT DISTINCT {graphIdProperty} FROM {DbTables.Vertices} WHERE {graphIdProperty} IN @GraphIds) g
+                LEFT JOIN { DbTables.Vertices } v ON g.{graphIdProperty} = v.{graphIdProperty}
+                GROUP BY g.{graphIdProperty};";
 
-            return result.ToDictionary(x => x.GraphId, x => x.ObstacleCount);
-        }
+        var result = await Connection.QueryAsync<(int GraphId, int ObstacleCount)>(
+                new(query, new { GraphIds = graphIds }, Transaction, cancellationToken: token))
+            .ConfigureAwait(false);
+
+        return result.ToDictionary(x => x.GraphId, x => x.ObstacleCount);
     }
 }

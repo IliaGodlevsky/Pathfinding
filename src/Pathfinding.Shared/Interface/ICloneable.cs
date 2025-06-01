@@ -1,8 +1,7 @@
-﻿namespace Pathfinding.Shared.Interface
+﻿namespace Pathfinding.Shared.Interface;
+
+public interface ICloneable<out T>
+    where T : ICloneable<T>
 {
-    public interface ICloneable<out T>
-        where T : ICloneable<T>
-    {
-        T DeepClone();
-    }
+    T DeepClone();
 }

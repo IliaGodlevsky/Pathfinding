@@ -9,139 +9,138 @@ using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using System.Reactive.Linq;
 
-namespace Pathfinding.App.Console.Tests.ViewModelTests
+namespace Pathfinding.App.Console.Tests.ViewModelTests;
+
+[Category("Unit")]
+internal sealed class GraphTableViewModelTests
 {
-    [Category("Unit")]
-    internal sealed class GraphTableViewModelTests
+    [Test]
+    public async Task LoadGraphsCommand_ShouldAddGraphs()
     {
-        [Test]
-        public async Task LoadGraphsCommand_ShouldAddGraphs()
+        using var mock = AutoMock.GetLoose();
+
+        IReadOnlyCollection<GraphInformationModel> graphs =
+        [.. Enumerable.Range(1, 5).Select(x => new GraphInformationModel
         {
-            using var mock = AutoMock.GetLoose();
+            Id = x,
+            Dimensions = []
+        })];
+        mock.Mock<IRequestService<GraphVertexModel>>()
+            .Setup(x => x.ReadAllGraphInfoAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(graphs));
 
-            IReadOnlyCollection<GraphInformationModel> graphs =
-                [.. Enumerable.Range(1, 5).Select(x => new GraphInformationModel
-                {
-                    Id = x,
-                    Dimensions = []
-                })];
-            mock.Mock<IRequestService<GraphVertexModel>>()
-                .Setup(x => x.ReadAllGraphInfoAsync(It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(graphs));
+        var viewModel = mock.Create<GraphTableViewModel>();
 
-            var viewModel = mock.Create<GraphTableViewModel>();
+        await viewModel.LoadGraphsCommand.Execute();
 
-            await viewModel.LoadGraphsCommand.Execute();
-
-            Assert.Multiple(() =>
-            {
-                mock.Mock<IRequestService<GraphVertexModel>>()
-                    .Verify(x => x.ReadAllGraphInfoAsync(
-                        It.IsAny<CancellationToken>()), Times.Once);
-                Assert.That(viewModel.Graphs, Has.Count.EqualTo(graphs.Count));
-            });
-        }
-
-        [Test]
-        public async Task LoadGraphsCommand_ThrowsException_ShouldLogError()
+        Assert.Multiple(() =>
         {
-            using var mock = AutoMock.GetLoose();
-
             mock.Mock<IRequestService<GraphVertexModel>>()
-                 .Setup(x => x.ReadAllGraphInfoAsync(It.IsAny<CancellationToken>()))
-                 .Throws(new Exception());
+                .Verify(x => x.ReadAllGraphInfoAsync(
+                    It.IsAny<CancellationToken>()), Times.Once);
+            Assert.That(viewModel.Graphs, Has.Count.EqualTo(graphs.Count));
+        });
+    }
 
-            var viewModel = mock.Create<GraphTableViewModel>();
+    [Test]
+    public async Task LoadGraphsCommand_ThrowsException_ShouldLogError()
+    {
+        using var mock = AutoMock.GetLoose();
 
-            await viewModel.LoadGraphsCommand.Execute();
+        mock.Mock<IRequestService<GraphVertexModel>>()
+            .Setup(x => x.ReadAllGraphInfoAsync(It.IsAny<CancellationToken>()))
+            .Throws(new Exception());
 
-            mock.Mock<ILog>()
-                .Verify(x => x.Error(
-                    It.IsAny<Exception>(),
-                    It.IsAny<string>()), Times.Once);
-        }
+        var viewModel = mock.Create<GraphTableViewModel>();
 
-        [Test]
-        public async Task ActivateGraphCommand_ShouldSendMessage()
+        await viewModel.LoadGraphsCommand.Execute();
+
+        mock.Mock<ILog>()
+            .Verify(x => x.Error(
+                It.IsAny<Exception>(),
+                It.IsAny<string>()), Times.Once);
+    }
+
+    [Test]
+    public async Task ActivateGraphCommand_ShouldSendMessage()
+    {
+        using var mock = AutoMock.GetLoose();
+
+        var graph = new GraphModel<GraphVertexModel>()
         {
-            using var mock = AutoMock.GetLoose();
+            Id = 1,
+            Name = "Test",
+            Vertices = [],
+            DimensionSizes = []
+        };
 
-            var graph = new GraphModel<GraphVertexModel>()
-            {
-                Id = 1,
-                Name = "Test",
-                Vertices = [],
-                DimensionSizes = []
-            };
+        mock.Mock<IRequestService<GraphVertexModel>>()
+            .Setup(x => x.ReadGraphAsync(
+                It.Is<int>(z => z == 1),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(graph));
+        mock.Mock<IMessenger>()
+            .Setup(x => x.Send(It.IsAny<AwaitGraphActivatedMessage>(),
+                It.IsAny<IsAnyToken>()))
+            .Returns<AwaitGraphActivatedMessage, object>((x, o) => x)
+            .Callback<AwaitGraphActivatedMessage, object>((m, t) => m.SetCompleted());
 
+        var viewModel = mock.Create<GraphTableViewModel>();
+
+        await viewModel.ActivateGraphCommand.Execute(1);
+
+        Assert.Multiple(() =>
+        {
             mock.Mock<IRequestService<GraphVertexModel>>()
-                .Setup(x => x.ReadGraphAsync(
+                .Verify(x => x.ReadGraphAsync(
                     It.Is<int>(z => z == 1),
-                    It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(graph));
-            mock.Mock<IMessenger>()
-                .Setup(x => x.Send(It.IsAny<AwaitGraphActivatedMessage>(),
-                    It.IsAny<IsAnyToken>()))
-                .Returns<AwaitGraphActivatedMessage, object>((x, o) => x)
-                .Callback<AwaitGraphActivatedMessage, object>((m, t) => m.SetCompleted());
-
-            var viewModel = mock.Create<GraphTableViewModel>();
-
-            await viewModel.ActivateGraphCommand.Execute(1);
-
-            Assert.Multiple(() =>
-            {
-                mock.Mock<IRequestService<GraphVertexModel>>()
-                    .Verify(x => x.ReadGraphAsync(
-                        It.Is<int>(z => z == 1),
-                        It.IsAny<CancellationToken>()), Times.Once);
-                mock.Mock<IMessenger>()
-                    .Verify(x => x.Send(
-                        It.IsAny<AwaitGraphActivatedMessage>(),
-                        It.IsAny<IsAnyToken>()), Times.Exactly(2));
-                mock.Mock<IMessenger>()
-                    .Verify(x => x.Send(
-                        It.IsAny<GraphActivatedMessage>(),
-                        It.IsAny<IsAnyToken>()), Times.Exactly(2));
-            });
-        }
-
-        [Test]
-        public async Task ActivateGraphCommand_ThrowException_ShouldLogError()
-        {
-            using var mock = AutoMock.GetLoose();
-
-            mock.Mock<IRequestService<GraphVertexModel>>()
-               .Setup(x => x.ReadGraphAsync(
-                   It.IsAny<int>(),
-                   It.IsAny<CancellationToken>()))
-               .Throws(new Exception());
-
-            var viewModel = mock.Create<GraphTableViewModel>();
-
-            await viewModel.ActivateGraphCommand.Execute(new());
-
-            mock.Mock<ILog>()
-                .Verify(x => x.Error(
-                    It.IsAny<Exception>(),
-                    It.IsAny<string>()), Times.Once);
-        }
-
-        [Test]
-        public async Task SelectedGraphsCommand_ShouldSendMessage()
-        {
-            using var mock = AutoMock.GetLoose();
-
-            var models = Enumerable.Range(1, 5).ToArray();
-
-            var viewModel = mock.Create<GraphTableViewModel>();
-
-            await viewModel.SelectGraphsCommand.Execute(models);
-
+                    It.IsAny<CancellationToken>()), Times.Once);
             mock.Mock<IMessenger>()
                 .Verify(x => x.Send(
-                    It.IsAny<GraphsSelectedMessage>(),
-                    It.IsAny<IsAnyToken>()), Times.Once);
-        }
+                    It.IsAny<AwaitGraphActivatedMessage>(),
+                    It.IsAny<IsAnyToken>()), Times.Exactly(2));
+            mock.Mock<IMessenger>()
+                .Verify(x => x.Send(
+                    It.IsAny<GraphActivatedMessage>(),
+                    It.IsAny<IsAnyToken>()), Times.Exactly(2));
+        });
+    }
+
+    [Test]
+    public async Task ActivateGraphCommand_ThrowException_ShouldLogError()
+    {
+        using var mock = AutoMock.GetLoose();
+
+        mock.Mock<IRequestService<GraphVertexModel>>()
+            .Setup(x => x.ReadGraphAsync(
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()))
+            .Throws(new Exception());
+
+        var viewModel = mock.Create<GraphTableViewModel>();
+
+        await viewModel.ActivateGraphCommand.Execute(new());
+
+        mock.Mock<ILog>()
+            .Verify(x => x.Error(
+                It.IsAny<Exception>(),
+                It.IsAny<string>()), Times.Once);
+    }
+
+    [Test]
+    public async Task SelectedGraphsCommand_ShouldSendMessage()
+    {
+        using var mock = AutoMock.GetLoose();
+
+        var models = Enumerable.Range(1, 5).ToArray();
+
+        var viewModel = mock.Create<GraphTableViewModel>();
+
+        await viewModel.SelectGraphsCommand.Execute(models);
+
+        mock.Mock<IMessenger>()
+            .Verify(x => x.Send(
+                It.IsAny<GraphsSelectedMessage>(),
+                It.IsAny<IsAnyToken>()), Times.Once);
     }
 }

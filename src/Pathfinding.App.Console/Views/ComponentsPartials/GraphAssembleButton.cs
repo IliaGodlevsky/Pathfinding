@@ -1,10 +1,9 @@
-﻿namespace Pathfinding.App.Console.Views
+﻿namespace Pathfinding.App.Console.Views;
+
+internal sealed partial class GraphAssembleButton
 {
-    internal sealed partial class GraphAssembleButton
+    private void Initialize()
     {
-        private void Initialize()
-        {
-            Text = "New";
-        }
+        Text = "New";
     }
 }

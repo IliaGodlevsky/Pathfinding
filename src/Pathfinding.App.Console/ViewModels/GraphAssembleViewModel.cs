@@ -6,8 +6,8 @@ using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
-using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Factories;
+using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Infrastructure.Business.Layers;
 using Pathfinding.Infrastructure.Data.Extensions;
 using Pathfinding.Infrastructure.Data.Pathfinding;
@@ -141,12 +141,7 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
             SmoothLevels.Extreme => new(8),
             _ => new(0)
         };
-        ILayer neighborhoodLayer = Neighborhood switch
-        {
-            Neighborhoods.Moore => new MooreNeighborhoodLayer(),
-            Neighborhoods.VonNeumann => new VonNeumannNeighborhoodLayer(),
-            _ => Layers.Empty
-        };
+        var neighborhoodLayer = Neighborhood.ToNeighborhoodLayer();
         return new (neighborhoodLayer, costLayer, obstacleLayer, smoothLayer);
     }
 }

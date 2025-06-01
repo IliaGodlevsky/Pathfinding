@@ -12,63 +12,62 @@ using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Requests.Create;
 using System.Reactive.Linq;
 
-namespace Pathfinding.App.Console.Tests.ViewModelTests
+namespace Pathfinding.App.Console.Tests.ViewModelTests;
+
+[Category("Unit")]
+internal class GraphAssembleViewModelTests
 {
-    [Category("Unit")]
-    internal class GraphAssembleViewModelTests
+    [Test]
+    public async Task CreateCommand_ValidInputs_ShouldCreateValidGraph()
     {
-        [Test]
-        public async Task CreateCommand_ValidInputs_ShouldCreateValidGraph()
+        using var mock = AutoMock.GetLoose();
+
+        mock.Mock<IGraphAssemble<GraphVertexModel>>()
+            .Setup(x => x.AssembleGraph(It.IsAny<IReadOnlyList<int>>()))
+            .Returns(Graph<GraphVertexModel>.Empty);
+        mock.Mock<IRequestService<GraphVertexModel>>()
+            .Setup(x => x.CreateGraphAsync(
+                It.IsAny<CreateGraphRequest<GraphVertexModel>>(),
+                It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(new GraphModel<GraphVertexModel>()
+            {
+                Id = 1,
+                Name = "Demo",
+                SmoothLevel = SmoothLevels.No,
+                Neighborhood = Neighborhoods.VonNeumann,
+                Status = GraphStatuses.Editable,
+                Vertices = [],
+                DimensionSizes = [15, 15]
+            }));
+
+        var viewModel = mock.Create<GraphAssembleViewModel>();
+        viewModel.SmoothLevel = SmoothLevels.No;
+        viewModel.Length = 15;
+        viewModel.Width = 15;
+        viewModel.Neighborhood = Neighborhoods.VonNeumann;
+        viewModel.Obstacles = 10;
+        viewModel.Name = "Demo";
+
+        var command = viewModel.AssembleGraphCommand;
+        bool canExecute = await command.CanExecute.FirstOrDefaultAsync();
+        if (canExecute)
         {
-            using var mock = AutoMock.GetLoose();
-
-            mock.Mock<IGraphAssemble<GraphVertexModel>>()
-                .Setup(x => x.AssembleGraph(It.IsAny<IReadOnlyList<int>>()))
-                .Returns(Graph<GraphVertexModel>.Empty);
-            mock.Mock<IRequestService<GraphVertexModel>>()
-                .Setup(x => x.CreateGraphAsync(
-                    It.IsAny<CreateGraphRequest<GraphVertexModel>>(),
-                    It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new GraphModel<GraphVertexModel>()
-                {
-                    Id = 1,
-                    Name = "Demo",
-                    SmoothLevel = SmoothLevels.No,
-                    Neighborhood = Neighborhoods.VonNeumann,
-                    Status = GraphStatuses.Editable,
-                    Vertices = [],
-                    DimensionSizes = [15, 15]
-                }));
-
-            var viewModel = mock.Create<GraphAssembleViewModel>();
-            viewModel.SmoothLevel = SmoothLevels.No;
-            viewModel.Length = 15;
-            viewModel.Width = 15;
-            viewModel.Neighborhood = Neighborhoods.VonNeumann;
-            viewModel.Obstacles = 10;
-            viewModel.Name = "Demo";
-
-            var command = viewModel.AssembleGraphCommand;
-            bool canExecute = await command.CanExecute.FirstOrDefaultAsync();
-            if (canExecute)
-            {
-                await command.Execute();
-            }
-
-            Assert.Multiple(() =>
-            {
-                Assert.That(canExecute, Is.True);
-                mock.Mock<IRequestService<GraphVertexModel>>()
-                    .Verify(x => x.CreateGraphAsync(
-                        It.IsAny<CreateGraphRequest<GraphVertexModel>>(),
-                        It.IsAny<CancellationToken>()), Times.Once);
-                mock.Mock<IMessenger>().Verify(x => x.Send(
-                    It.IsAny<GraphsCreatedMessage>(),
-                    It.IsAny<IsAnyToken>()), Times.Once);
-                mock.Mock<IGraphAssemble<GraphVertexModel>>()
-                    .Verify(x => x.AssembleGraph(
-                        It.IsAny<IReadOnlyList<int>>()), Times.Once);
-            });
+            await command.Execute();
         }
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(canExecute, Is.True);
+            mock.Mock<IRequestService<GraphVertexModel>>()
+                .Verify(x => x.CreateGraphAsync(
+                    It.IsAny<CreateGraphRequest<GraphVertexModel>>(),
+                    It.IsAny<CancellationToken>()), Times.Once);
+            mock.Mock<IMessenger>().Verify(x => x.Send(
+                It.IsAny<GraphsCreatedMessage>(),
+                It.IsAny<IsAnyToken>()), Times.Once);
+            mock.Mock<IGraphAssemble<GraphVertexModel>>()
+                .Verify(x => x.AssembleGraph(
+                    It.IsAny<IReadOnlyList<int>>()), Times.Once);
+        });
     }
 }

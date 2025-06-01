@@ -3,13 +3,13 @@ using Microsoft.Data.Sqlite;
 using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Interface.Repositories;
 
-namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
+namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories;
+
+internal sealed class SqliteVerticesRepository(SqliteConnection connection,
+    SqliteTransaction transaction) : SqliteRepository(connection, transaction), IVerticesRepository
 {
-    internal sealed class SqliteVerticesRepository(SqliteConnection connection,
-        SqliteTransaction transaction) : SqliteRepository(connection, transaction), IVerticesRepository
-    {
-        protected override string CreateTableScript { get; } =
-            @$"CREATE TABLE IF NOT EXISTS {DbTables.Vertices} (
+    protected override string CreateTableScript { get; } =
+        @$"CREATE TABLE IF NOT EXISTS {DbTables.Vertices} (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 GraphId INTEGER NOT NULL,
                 Coordinates TEXT NOT NULL,
@@ -22,55 +22,49 @@ namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
             CREATE INDEX IF NOT EXISTS idx_vertex_id ON {DbTables.Vertices}(Id);
             CREATE INDEX IF NOT EXISTS idx_vertex_graphid ON {DbTables.Vertices}(GraphId);";
 
-        public async Task<IReadOnlyCollection<Vertex>> CreateAsync(
-            IReadOnlyCollection<Vertex> vertices, 
-            CancellationToken token = default)
-        {
-            const string query = @$"
+    public async Task<IReadOnlyCollection<Vertex>> CreateAsync(
+        IReadOnlyCollection<Vertex> vertices, 
+        CancellationToken token = default)
+    {
+        const string query = @$"
                 INSERT INTO {DbTables.Vertices} (GraphId, Coordinates, Cost, UpperValueRange, LowerValueRange, IsObstacle)
                 VALUES (@GraphId, @Coordinates, @Cost, @UpperValueRange, @LowerValueRange, @IsObstacle);
                 SELECT last_insert_rowid();";
 
-            foreach (var vertex in vertices)
-            {
-                var id = await connection.ExecuteScalarAsync<int>(
-                    new(query, vertex, transaction, cancellationToken: token))
-                    .ConfigureAwait(false);
-                vertex.Id = id;
-            }
-
-            return vertices;
-        }
-
-        public async Task<Vertex> ReadAsync(
-            long vertexId, CancellationToken token = default)
+        foreach (var vertex in vertices)
         {
-            const string query = $"SELECT * FROM {DbTables.Vertices} WHERE Id = @Id";
-
-            return await connection.QuerySingleOrDefaultAsync<Vertex>(
-                new(query, new { Id = vertexId }, transaction, cancellationToken: token))
+            var id = await Connection.ExecuteScalarAsync<int>(
+                    new(query, vertex, Transaction, cancellationToken: token))
                 .ConfigureAwait(false);
+            vertex.Id = id;
         }
 
-        public IAsyncEnumerable<Vertex> ReadAsync(IReadOnlyCollection<long> verticesIds)
-        {
-            const string query = $"SELECT * FROM {DbTables.Vertices} WHERE Id IN @Ids";
-            return connection.QueryUnbufferedAsync<Vertex>(query, new { Ids = verticesIds });
-        }
+        return vertices;
+    }
 
-        public IAsyncEnumerable<Vertex> ReadVerticesByGraphIdAsync(int graphId)
-        {
-            const string query = $"SELECT * FROM {DbTables.Vertices} WHERE GraphId = @GraphId";
+    public async Task<Vertex> ReadAsync(
+        long vertexId, CancellationToken token = default)
+    {
+        const string query = $"SELECT * FROM {DbTables.Vertices} WHERE Id = @Id";
 
-            return connection.QueryUnbufferedAsync<Vertex>(query,
-                new { GraphId = graphId });
-        }
+        return await Connection.QuerySingleOrDefaultAsync<Vertex>(
+                new(query, new { Id = vertexId }, Transaction, cancellationToken: token))
+            .ConfigureAwait(false);
+    }
 
-        public async Task<bool> UpdateVerticesAsync(
-            IReadOnlyCollection<Vertex> vertices, 
-            CancellationToken token = default)
-        {
-            const string query = @$"
+    public IAsyncEnumerable<Vertex> ReadVerticesByGraphIdAsync(int graphId)
+    {
+        const string query = $"SELECT * FROM {DbTables.Vertices} WHERE GraphId = @GraphId";
+
+        return Connection.QueryUnbufferedAsync<Vertex>(query,
+            new { GraphId = graphId });
+    }
+
+    public async Task<bool> UpdateVerticesAsync(
+        IReadOnlyCollection<Vertex> vertices, 
+        CancellationToken token = default)
+    {
+        const string query = @$"
                 UPDATE {DbTables.Vertices}
                 SET Coordinates = @Coordinates,
                     Cost = @Cost,
@@ -79,11 +73,10 @@ namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
                     IsObstacle = @IsObstacle
                 WHERE Id = @Id";
 
-            var affectedRows = await connection.ExecuteAsync(
-                new(query, vertices, transaction, cancellationToken: token))
-                .ConfigureAwait(false);
+        var affectedRows = await Connection.ExecuteAsync(
+                new(query, vertices, Transaction, cancellationToken: token))
+            .ConfigureAwait(false);
 
-            return affectedRows > 0;
-        }
+        return affectedRows > 0;
     }
 }

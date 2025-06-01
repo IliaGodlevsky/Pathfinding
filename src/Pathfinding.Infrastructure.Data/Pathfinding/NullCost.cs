@@ -2,46 +2,45 @@
 using Pathfinding.Shared.Primitives;
 using System.Diagnostics;
 
-namespace Pathfinding.Infrastructure.Data.Pathfinding
+namespace Pathfinding.Infrastructure.Data.Pathfinding;
+
+[DebuggerDisplay("Null")]
+public sealed class NullCost : Singleton<NullCost, IVertexCost>, IVertexCost
 {
-    [DebuggerDisplay("Null")]
-    public sealed class NullCost : Singleton<NullCost, IVertexCost>, IVertexCost
+    public int CurrentCost
     {
-        public int CurrentCost
-        {
-            get => default;
-            set { }
-        }
+        get => default;
+        set { }
+    }
 
-        public InclusiveValueRange<int> CostRange
-        {
-            get => default;
-            set { }
-        }
+    public InclusiveValueRange<int> CostRange
+    {
+        get => default;
+        set { }
+    }
 
-        private NullCost()
-        {
+    private NullCost()
+    {
 
-        }
+    }
 
-        public override bool Equals(object obj)
-        {
-            return obj is NullCost;
-        }
+    public override bool Equals(object obj)
+    {
+        return obj is NullCost;
+    }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
+    }
 
-        public override string ToString()
-        {
-            return string.Empty;
-        }
+    public override string ToString()
+    {
+        return string.Empty;
+    }
 
-        public IVertexCost DeepClone()
-        {
-            return Instance;
-        }
+    public IVertexCost DeepClone()
+    {
+        return Instance;
     }
 }

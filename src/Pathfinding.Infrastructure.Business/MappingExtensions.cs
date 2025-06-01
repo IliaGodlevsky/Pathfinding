@@ -62,7 +62,7 @@ internal static class MappingExtensions
 
     public static IReadOnlyCollection<CoordinateModel> ToCoordinates(this IEnumerable<PathfindingRangeModel> models)
     {
-        return [.. models.Select(x => new CoordinateModel { Coordinate = [.. x.Position.CoordinatesValues] })];
+        return [.. models.Select(x => new CoordinateModel { Coordinate = x.Position })];
     }
 
     public static Statistics ToStatistics(this RunStatisticsModel model)
@@ -199,7 +199,7 @@ internal static class MappingExtensions
                 UpperValueOfRange = cost.CostRange.UpperValueOfRange,
                 LowerValueOfRange = cost.CostRange.LowerValueOfRange
             },
-            Position = new() { Coordinate = vertex.Position.CoordinatesValues }
+            Position = new() { Coordinate = vertex.Position }
         };
     }
 
@@ -279,7 +279,7 @@ internal static class MappingExtensions
 
     public static string ToStringCoordinates(this Coordinate coordinate)
     {
-        var array = coordinate.CoordinatesValues.ToList();
+        var array = coordinate.ToList();
         return JsonConvert.SerializeObject(array);
     }
 

@@ -1,10 +1,9 @@
-﻿namespace Pathfinding.Shared.Extensions
+﻿namespace Pathfinding.Shared.Extensions;
+
+public static class GenericExtensions
 {
-    public static class GenericExtensions
+    public static IEnumerable<T> Enumerate<T>(this T obj)
     {
-        public static IEnumerable<T> Enumerate<T>(this T obj)
-        {
-            yield return obj;
-        }
+        yield return obj;
     }
 }

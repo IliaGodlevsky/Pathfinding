@@ -18,6 +18,8 @@ public static class LayerExtensions
         {
             Neighborhoods.Moore => new MooreNeighborhoodLayer(),
             Neighborhoods.VonNeumann => new VonNeumannNeighborhoodLayer(),
+            Neighborhoods.Diagonal => new DiagonalNeighborhoodLayer(),
+            Neighborhoods.Knight => new KnightsNeighborhoodLayer(),
             _ => Layers.Layers.Empty
         };
     }

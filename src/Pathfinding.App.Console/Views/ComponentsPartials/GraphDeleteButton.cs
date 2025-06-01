@@ -1,12 +1,11 @@
 ﻿using Pathfinding.App.Console.Resources;
 
-namespace Pathfinding.App.Console.Views
+namespace Pathfinding.App.Console.Views;
+
+internal sealed partial class GraphDeleteButton
 {
-    internal sealed partial class GraphDeleteButton
+    private void Initialize()
     {
-        private void Initialize()
-        {
-            Text = Resource.DeleteGraph;
-        }
+        Text = Resource.DeleteGraph;
     }
 }

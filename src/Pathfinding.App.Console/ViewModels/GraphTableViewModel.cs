@@ -68,8 +68,7 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
                 graphModel.SmoothLevel,
                 graphModel.Status,
                 graphModel.Id);
-            await graphModel.Neighborhood.ToNeighborhoodLayer()
-                .OverlayAsync(graph).ConfigureAwait(false);
+            await graphModel.Neighborhood.ToNeighborhoodLayer().OverlayAsync(graph).ConfigureAwait(false);
             messenger.Send(new GraphActivatedMessage(activated), Tokens.GraphField);
             await messenger.Send(new AwaitGraphActivatedMessage(activated), Tokens.RunsTable);
             await messenger.Send(new AwaitGraphActivatedMessage(activated), Tokens.PathfindingRange);

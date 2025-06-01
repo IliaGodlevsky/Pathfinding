@@ -2,7 +2,4 @@
 
 namespace Pathfinding.Domain.Interface;
 
-public interface INeighborhood : IReadOnlyCollection<Coordinate>
-{
-
-}
+public interface INeighborhood : IReadOnlyCollection<Coordinate>;

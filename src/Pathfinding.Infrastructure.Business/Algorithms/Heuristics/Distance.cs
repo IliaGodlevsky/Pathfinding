@@ -11,8 +11,8 @@ public abstract class Distance : IHeuristic
         IPathfindingVertex first,
         IPathfindingVertex second)
     {
-        return first.Position.CoordinatesValues
-            .Zip(second.Position.CoordinatesValues, Zip)
+        return first.Position
+            .Zip(second.Position, Zip)
             .AggregateOrDefault(Aggregate);
     }
 

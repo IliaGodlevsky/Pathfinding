@@ -1,22 +1,21 @@
 ﻿using Moq;
 
-namespace Pathfinding.App.Console.Tests
+namespace Pathfinding.App.Console.Tests;
+
+[TypeMatcher]
+internal sealed class IsAnyToken : ITypeMatcher, IEquatable<IsAnyToken>
 {
-    [TypeMatcher]
-    internal sealed class IsAnyToken : ITypeMatcher, IEquatable<IsAnyToken>
+    public bool Matches(Type typeArgument) => true;
+
+    public bool Equals(IsAnyToken other) => true;
+
+    public override bool Equals(object obj)
     {
-        public bool Matches(Type typeArgument) => true;
+        return Equals(obj as IsAnyToken);
+    }
 
-        public bool Equals(IsAnyToken other) => true;
-
-        public override bool Equals(object obj)
-        {
-            return Equals(obj as IsAnyToken);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+    public override int GetHashCode()
+    {
+        return base.GetHashCode();
     }
 }

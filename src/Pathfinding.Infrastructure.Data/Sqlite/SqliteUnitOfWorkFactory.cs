@@ -1,10 +1,9 @@
 ﻿using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Factories;
 
-namespace Pathfinding.Infrastructure.Data.Sqlite
+namespace Pathfinding.Infrastructure.Data.Sqlite;
+
+public sealed class SqliteUnitOfWorkFactory(string connectionString) : IUnitOfWorkFactory
 {
-    public sealed class SqliteUnitOfWorkFactory(string connectionString) : IUnitOfWorkFactory
-    {
-        public IUnitOfWork Create() => new SqliteUnitOfWork(connectionString);
-    }
+    public IUnitOfWork Create() => new SqliteUnitOfWork(connectionString);
 }

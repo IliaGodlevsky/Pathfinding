@@ -3,12 +3,12 @@ using Microsoft.Data.Sqlite;
 using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Interface.Repositories;
 
-namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
+namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories;
+
+internal sealed class SqliteStatisticsRepository(SqliteConnection connection,
+    SqliteTransaction transaction) : SqliteRepository(connection, transaction), IStatisticsRepository
 {
-    internal sealed class SqliteStatisticsRepository(SqliteConnection connection,
-        SqliteTransaction transaction) : SqliteRepository(connection, transaction), IStatisticsRepository
-    {
-        protected override string CreateTableScript { get; } = $@"
+    protected override string CreateTableScript { get; } = $@"
             CREATE TABLE IF NOT EXISTS {DbTables.Statistics} (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 GraphId INTEGER NOT NULL,
@@ -26,62 +26,62 @@ namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
             CREATE INDEX IF NOT EXISTS idx_statistics_id ON {DbTables.Statistics}(Id);
             CREATE INDEX IF NOT EXISTS idx_statistics_graphid ON {DbTables.Statistics}(GraphId);";
 
-        public async Task<IReadOnlyCollection<Statistics>> CreateAsync(
-            IReadOnlyCollection<Statistics> statistics,
-            CancellationToken token = default)
-        {
-            const string query = @$"
+    public async Task<IReadOnlyCollection<Statistics>> CreateAsync(
+        IReadOnlyCollection<Statistics> statistics,
+        CancellationToken token = default)
+    {
+        const string query = @$"
                 INSERT INTO {DbTables.Statistics} (GraphId, Algorithm, Heuristics, StepRule, ResultStatus, Elapsed, Steps, Cost, Visited, Weight)
                 VALUES (@GraphId, @Algorithm, @Heuristics, @StepRule, @ResultStatus, @Elapsed, @Steps, @Cost, @Visited, @Weight);
                 SELECT last_insert_rowid();";
 
-            foreach (var entity in statistics)
-            {
-                entity.Id = await connection.ExecuteScalarAsync<int>(
-                    new(query, entity, transaction, cancellationToken: token))
-                    .ConfigureAwait(false);
-            }
-
-            return statistics;
-        }
-
-        public IAsyncEnumerable<Statistics> ReadByGraphIdAsync(int graphId)
+        foreach (var entity in statistics)
         {
-            const string query = $"SELECT * FROM {DbTables.Statistics} WHERE GraphId = @GraphId";
-
-            return connection.QueryUnbufferedAsync<Statistics>(query, 
-                new { GraphId = graphId }, transaction);
-        }
-
-        public async Task<bool> DeleteByIdsAsync(
-            IReadOnlyCollection<int> ids, CancellationToken token = default)
-        {
-            const string query = $"DELETE FROM {DbTables.Statistics} WHERE Id IN @Ids";
-
-            var rowsAffected = await connection.ExecuteAsync(
-                new (query, new { Ids = ids.ToArray() }, transaction, cancellationToken: token))
+            entity.Id = await Connection.ExecuteScalarAsync<int>(
+                    new(query, entity, Transaction, cancellationToken: token))
                 .ConfigureAwait(false);
-
-            return rowsAffected > 0;
         }
 
-        public async Task<Statistics> ReadByIdAsync(
-            int id, CancellationToken token = default)
-        {
-            const string query = $"SELECT * FROM {DbTables.Statistics} WHERE Id = @Id";
+        return statistics;
+    }
 
-            var statistics = await connection.QuerySingleOrDefaultAsync<Statistics>(
-                new(query, new { Id = id }, transaction, cancellationToken: token))
-                .ConfigureAwait(false);
+    public IAsyncEnumerable<Statistics> ReadByGraphIdAsync(int graphId)
+    {
+        const string query = $"SELECT * FROM {DbTables.Statistics} WHERE GraphId = @GraphId";
 
-            return statistics;
-        }
+        return Connection.QueryUnbufferedAsync<Statistics>(query, 
+            new { GraphId = graphId }, Transaction);
+    }
 
-        public async Task<bool> UpdateAsync(
-            IReadOnlyCollection<Statistics> entities, 
-            CancellationToken token = default)
-        {
-            const string query = @$"
+    public async Task<bool> DeleteByIdsAsync(
+        IReadOnlyCollection<int> ids, CancellationToken token = default)
+    {
+        const string query = $"DELETE FROM {DbTables.Statistics} WHERE Id IN @Ids";
+
+        var rowsAffected = await Connection.ExecuteAsync(
+                new (query, new { Ids = ids.ToArray() }, Transaction, cancellationToken: token))
+            .ConfigureAwait(false);
+
+        return rowsAffected > 0;
+    }
+
+    public async Task<Statistics> ReadByIdAsync(
+        int id, CancellationToken token = default)
+    {
+        const string query = $"SELECT * FROM {DbTables.Statistics} WHERE Id = @Id";
+
+        var statistics = await Connection.QuerySingleOrDefaultAsync<Statistics>(
+                new(query, new { Id = id }, Transaction, cancellationToken: token))
+            .ConfigureAwait(false);
+
+        return statistics;
+    }
+
+    public async Task<bool> UpdateAsync(
+        IReadOnlyCollection<Statistics> entities, 
+        CancellationToken token = default)
+    {
+        const string query = @$"
                 UPDATE {DbTables.Statistics}
                 SET Algorithm = @Algorithm, 
                     Heuristics = @Heuristics, 
@@ -94,18 +94,17 @@ namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories
                     Weight = @Weight
                 WHERE Id = @Id";
 
-            var affectedRows = await connection.ExecuteAsync(
-                new(query, entities.ToArray(), transaction, cancellationToken: token)).ConfigureAwait(false);
+        var affectedRows = await Connection.ExecuteAsync(
+            new(query, entities.ToArray(), Transaction, cancellationToken: token)).ConfigureAwait(false);
 
-            return affectedRows > 0;
-        }
+        return affectedRows > 0;
+    }
 
-        public IAsyncEnumerable<Statistics> ReadByIdsAsync(IReadOnlyCollection<int> runIds)
-        {
-            const string query = $"SELECT * FROM {DbTables.Statistics} WHERE Id IN @Ids";
+    public IAsyncEnumerable<Statistics> ReadByIdsAsync(IReadOnlyCollection<int> runIds)
+    {
+        const string query = $"SELECT * FROM {DbTables.Statistics} WHERE Id IN @Ids";
 
-            return connection.QueryUnbufferedAsync<Statistics>(query,
-                new { Ids = runIds.ToArray() }, transaction);
-        }
+        return Connection.QueryUnbufferedAsync<Statistics>(query,
+            new { Ids = runIds.ToArray() }, Transaction);
     }
 }

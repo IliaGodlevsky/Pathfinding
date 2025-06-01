@@ -1,21 +1,20 @@
 ﻿using Terminal.Gui;
 
-namespace Pathfinding.App.Console.Views
+namespace Pathfinding.App.Console.Views;
+
+internal partial class RunsTableButtonsFrame
 {
-    internal partial class RunsTableButtonsFrame
+    private void Initialize()
     {
-        private void Initialize()
+        Border = new Border()
         {
-            Border = new Border()
-            {
-                BorderStyle = BorderStyle.Rounded,
-                DrawMarginFrame = false,
-                Padding = new Thickness(0)
-            };
-            X = 0;
-            Y = Pos.Percent(90);
-            Width = Dim.Fill();
-            Height = Dim.Fill();
-        }
+            BorderStyle = BorderStyle.Rounded,
+            DrawMarginFrame = false,
+            Padding = new Thickness(0)
+        };
+        X = 0;
+        Y = Pos.Percent(90);
+        Width = Dim.Fill();
+        Height = Dim.Fill();
     }
 }
