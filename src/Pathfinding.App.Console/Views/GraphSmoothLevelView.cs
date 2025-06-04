@@ -1,7 +1,6 @@
 ﻿using NStack;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.ViewModels.Interface;
-using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive.Linq;
@@ -13,7 +12,7 @@ internal sealed partial class GraphSmoothLevelView : FrameView
 {
     public GraphSmoothLevelView(IRequireSmoothLevelViewModel viewModel)
     {
-        var smoothLevels = Enum.GetValues<SmoothLevels>()
+        var smoothLevels = viewModel.AllowedLevels
             .ToDictionary(x => x.ToStringRepresentation());
         Initialize();
         var labels = smoothLevels.Keys.Select(ustring.Make).ToArray();

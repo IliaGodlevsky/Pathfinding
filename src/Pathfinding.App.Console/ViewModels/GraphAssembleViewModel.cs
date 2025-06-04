@@ -1,13 +1,13 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Extensions;
+using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface.Factories;
-using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Infrastructure.Business.Layers;
 using Pathfinding.Infrastructure.Data.Extensions;
 using Pathfinding.Infrastructure.Data.Pathfinding;
@@ -33,6 +33,8 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
     private static readonly InclusiveValueRange<int> ObstaclesRange = (99, 0);
     private static readonly InclusiveValueRange<int> CostRange = (9, 1);
 
+    private readonly INeighborhoodLayerFactory neighborFactory;
+    private readonly ISmoothLevelFactory smoothLevelFactory;
     private readonly IRequestService<GraphVertexModel> service;
     private readonly IGraphAssemble<GraphVertexModel> graphAssemble;
     private readonly IMessenger messenger;
@@ -73,6 +75,9 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
         set => this.RaiseAndSetIfChanged(ref level, value);
     }
 
+    public IReadOnlyCollection<SmoothLevels> AllowedLevels
+        => smoothLevelFactory.Allowed;
+
     private Neighborhoods neighborhood;
     public Neighborhoods Neighborhood
     {
@@ -80,10 +85,16 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
         set => this.RaiseAndSetIfChanged(ref neighborhood, value);
     }
 
+    public IReadOnlyCollection<Neighborhoods> AllowedNeighborhoods
+        => neighborFactory.Allowed;
+
     public ReactiveCommand<Unit, Unit> AssembleGraphCommand { get; }
 
-    public GraphAssembleViewModel(IRequestService<GraphVertexModel> service,
+    public GraphAssembleViewModel(
+        IRequestService<GraphVertexModel> service,
         IGraphAssemble<GraphVertexModel> graphAssemble,
+        ISmoothLevelFactory smoothLevelFactory,
+        INeighborhoodLayerFactory neighborFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         ILog logger)
     {
@@ -91,6 +102,8 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
         this.messenger = messenger;
         this.logger = logger;
         this.graphAssemble = graphAssemble;
+        this.neighborFactory = neighborFactory;
+        this.smoothLevelFactory = smoothLevelFactory;
         AssembleGraphCommand = ReactiveCommand.CreateFromTask(CreateGraph, CanExecute());
     }
 
@@ -133,15 +146,8 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
         var costLayer = new VertexCostLayer(CostRange, range => new VertexCost(random.Next(
             range.LowerValueOfRange, range.UpperValueOfRange + 1), range));
         var obstacleLayer = new ObstacleLayer(Obstacles);
-        SmoothLayer smoothLayer = SmoothLevel switch
-        {
-            SmoothLevels.Low => new(1),
-            SmoothLevels.Medium => new(2),
-            SmoothLevels.High => new(4),
-            SmoothLevels.Extreme => new(8),
-            _ => new(0)
-        };
-        var neighborhoodLayer = Neighborhood.ToNeighborhoodLayer();
+        var smoothLayer = smoothLevelFactory.CreateLayer(SmoothLevel);
+        var neighborhoodLayer = neighborFactory.CreateNeighborhoodLayer(Neighborhood);
         return new (neighborhoodLayer, costLayer, obstacleLayer, smoothLayer);
     }
 }

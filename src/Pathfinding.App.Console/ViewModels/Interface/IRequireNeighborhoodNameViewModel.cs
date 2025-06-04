@@ -5,4 +5,6 @@ namespace Pathfinding.App.Console.ViewModels.Interface;
 internal interface IRequireNeighborhoodNameViewModel
 {
     Neighborhoods Neighborhood { get; set; }
+
+    IReadOnlyCollection<Neighborhoods> AllowedNeighborhoods { get; }
 }

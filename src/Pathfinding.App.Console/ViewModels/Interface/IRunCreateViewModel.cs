@@ -8,7 +8,7 @@ internal interface IRunCreateViewModel
 {
     Algorithms? Algorithm { get; set; }
 
-    IReadOnlyList<Algorithms> AllowedAlgorithms { get; }
+    IReadOnlyCollection<Algorithms> AllowedAlgorithms { get; }
 
     ReactiveCommand<Unit, Unit> CreateRunCommand { get; }
 }

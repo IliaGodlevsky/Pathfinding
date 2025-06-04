@@ -1,6 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
+using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.Requests;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
@@ -9,7 +10,6 @@ using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Business.Algorithms.Events;
-using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Infrastructure.Data.Extensions;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Shared.Primitives;
@@ -26,6 +26,7 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
 {
     private readonly IMessenger messenger;
     private readonly IGraphAssemble<RunVertexModel> graphAssemble;
+    private readonly IAlgorithmsFactory algorithmsFactory;
 
     private readonly CompositeDisposable disposables = [];
 
@@ -50,10 +51,12 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
 
     public RunFieldViewModel(
         IGraphAssemble<RunVertexModel> graphAssemble,
+        IAlgorithmsFactory algorithmsFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger)
     {
         this.messenger = messenger;
         this.graphAssemble = graphAssemble;
+        this.algorithmsFactory = algorithmsFactory;
         Runs.ActOnEveryObject(_ => { }, OnRemoved);
         messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
         messenger.Register<RunsDeletedMessage>(this, OnRunsDeleted);
@@ -157,7 +160,8 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
                 AddSubAlgorithm(args.SubPath);
             }
 
-            var algorithm = model.ToAlgorithm(rangeMsg.Response);
+            var factory = algorithmsFactory.GetAlgorithmFactory(model.Algorithm);
+            var algorithm = factory.CreateAlgorithm(rangeMsg.Response, model);
             algorithm.SubPathFound += OnSubPathFound;
             algorithm.VertexProcessed += OnVertexProcessed;
             try

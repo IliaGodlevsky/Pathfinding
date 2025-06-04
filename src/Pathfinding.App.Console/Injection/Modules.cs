@@ -1,12 +1,20 @@
 ﻿using Autofac;
 using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Factories;
+using Pathfinding.App.Console.Factories.Algos;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.App.Console.Views;
+using Pathfinding.Domain.Core.Enums;
+using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Business;
+using Pathfinding.Infrastructure.Business.Algorithms;
+using Pathfinding.Infrastructure.Business.Algorithms.Heuristics;
+using Pathfinding.Infrastructure.Business.Algorithms.StepRules;
 using Pathfinding.Infrastructure.Business.Commands;
+using Pathfinding.Infrastructure.Business.Layers;
 using Pathfinding.Infrastructure.Business.Serializers;
 using Pathfinding.Infrastructure.Business.Serializers.Decorators;
 using Pathfinding.Infrastructure.Data.Pathfinding;
@@ -70,6 +78,78 @@ internal static class Modules
         builder.RegisterDecorator<Serializer>(
             (_, _, inner) => new BufferedSerializer<PathfindingHistoriesSerializationModel>(inner),
             condition: ctx => ctx.CurrentInstance is not CompressSerializer<PathfindingHistoriesSerializationModel>);
+
+        builder.RegisterType<DefaultStepRule>().As<IStepRule>()
+            .WithMetadata(MetadataKeys.StepRule, StepRules.Default).SingleInstance();
+        builder.RegisterType<LandscapeStepRule>().As<IStepRule>()
+            .WithMetadata(MetadataKeys.StepRule, StepRules.Landscape).SingleInstance();
+        builder.RegisterType<StepRulesFactory>().As<IStepRuleFactory>().SingleInstance();
+
+        builder.RegisterType<EuclideanDistance>().As<IHeuristic>()
+            .WithMetadata(MetadataKeys.Heuristics, Heuristics.Euclidean).SingleInstance();
+        builder.RegisterType<DiagonalDistance>().As<IHeuristic>()
+            .WithMetadata(MetadataKeys.Heuristics, Heuristics.Diagonal).SingleInstance();
+        builder.RegisterType<ChebyshevDistance>().As<IHeuristic>()
+            .WithMetadata(MetadataKeys.Heuristics, Heuristics.Chebyshev).SingleInstance();
+        builder.RegisterType<ManhattanDistance>().As<IHeuristic>()
+            .WithMetadata(MetadataKeys.Heuristics, Heuristics.Manhattan).SingleInstance();
+        builder.RegisterType<HeuristicsFactory>().As<IHeuristicsFactory>().SingleInstance();
+
+        builder.RegisterType<MooreNeighborhoodLayer>().Keyed<ILayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Moore);
+        builder.RegisterType<VonNeumannNeighborhoodLayer>().Keyed<ILayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.VonNeumann);
+        builder.RegisterType<DiagonalNeighborhoodLayer>().Keyed<ILayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Diagonal);
+        builder.RegisterType<KnightsNeighborhoodLayer>().Keyed<ILayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Knight);
+
+        builder.RegisterType<NeighborhoodLayerFactory>().As<INeighborhoodLayerFactory>()
+            .WithAttributeFiltering().SingleInstance();
+
+        builder.RegisterInstance(new SmoothLayer(0)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.No);
+        builder.RegisterInstance(new SmoothLayer(1)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Low);
+        builder.RegisterInstance(new SmoothLayer(2)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Medium);
+        builder.RegisterInstance(new SmoothLayer(4)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.High);
+        builder.RegisterInstance(new SmoothLayer(8)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Extreme);
+        builder.RegisterType<SmoothLevelFactory>().As<ISmoothLevelFactory>().SingleInstance();
+
+        builder.RegisterType<RandomAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Random)
+            .WithMetadata(MetadataKeys.Order, 14).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<AStarAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.AStar)
+            .WithMetadata(MetadataKeys.Order, 2).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<SnakeAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Snake)
+            .WithMetadata(MetadataKeys.Order, 13).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<CostGreedyAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.CostGreedy)
+            .WithMetadata(MetadataKeys.Order, 5).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<BidirectLeeAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.BidirectLee)
+            .WithMetadata(MetadataKeys.Order, 8).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<LeeAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Lee)
+            .WithMetadata(MetadataKeys.Order, 7).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<BidirectDijkstraAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.BidirectDijkstra)
+            .WithMetadata(MetadataKeys.Order, 3).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<BidirectAStarAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.BidirectAStar)
+            .WithMetadata(MetadataKeys.Order, 4).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<DepthFirstAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.DepthFirst)
+            .WithMetadata(MetadataKeys.Order, 11).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<DistanceFirstAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.DistanceFirst)
+            .WithMetadata(MetadataKeys.Order, 10).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<AStarGreedyAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.AStarGreedy)
+            .WithMetadata(MetadataKeys.Order, 6).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<AStarLeeAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.AStarLee)
+            .WithMetadata(MetadataKeys.Order, 9).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<DepthRandomAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.DepthFirstRandom)
+            .WithMetadata(MetadataKeys.Order, 12).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<BidirectRandomAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.BidirectRandom)
+            .WithMetadata(MetadataKeys.Order, 15).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<DijkstraAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Dijkstra)
+            .WithMetadata(MetadataKeys.Order, 1).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<AlgorithmsFactory>().As<IAlgorithmsFactory>().SingleInstance();
 
         builder.RegisterType<FileLog>().As<ILog>().SingleInstance();
         builder.RegisterType<MessageBoxLog>().As<ILog>().SingleInstance();

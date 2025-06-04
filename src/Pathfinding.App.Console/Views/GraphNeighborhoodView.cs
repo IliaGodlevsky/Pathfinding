@@ -1,7 +1,6 @@
 ﻿using NStack;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.ViewModels.Interface;
-using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive.Linq;
@@ -13,11 +12,11 @@ internal sealed partial class GraphNeighborhoodView : FrameView
 {
     public GraphNeighborhoodView(IRequireNeighborhoodNameViewModel viewModel)
     {
-        var neighborhoods = Enum.GetValues<Neighborhoods>()
+        var map = viewModel.AllowedNeighborhoods
             .ToDictionary(x => x.ToStringRepresentation());
         Initialize();
-        var labels = neighborhoods.Keys.Select(ustring.Make).ToArray();
-        var values = labels.Select(x => neighborhoods[x.ToString()]).ToList();
+        var labels = map.Keys.Select(ustring.Make).ToArray();
+        var values = labels.Select(x => map[x.ToString()]).ToList();
         this.neighborhoods.RadioLabels = labels;
         this.neighborhoods.Events().SelectedItemChanged
             .Where(x => x.SelectedItem > -1)
@@ -25,7 +24,7 @@ internal sealed partial class GraphNeighborhoodView : FrameView
             .BindTo(viewModel, x => x.Neighborhood);
         this.neighborhoods.SelectedItem = 0;
         this.Events().VisibleChanged
-            .Where(x => Visible)
-            .Do(x => this.neighborhoods.SelectedItem = 0);
+            .Where(_ => Visible)
+            .Do(_ => neighborhoods.SelectedItem = 0);
     }
 }

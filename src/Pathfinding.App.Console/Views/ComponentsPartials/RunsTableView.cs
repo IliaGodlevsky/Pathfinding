@@ -3,6 +3,7 @@ using Pathfinding.Domain.Core.Enums;
 using System.Data;
 using System.Globalization;
 using Terminal.Gui;
+// ReSharper disable AssignNullToNotNullAttribute
 
 namespace Pathfinding.App.Console.Views;
 

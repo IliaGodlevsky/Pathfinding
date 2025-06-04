@@ -82,8 +82,8 @@ internal sealed class GraphTableViewModelTests
         mock.Mock<IMessenger>()
             .Setup(x => x.Send(It.IsAny<AwaitGraphActivatedMessage>(),
                 It.IsAny<IsAnyToken>()))
-            .Returns<AwaitGraphActivatedMessage, object>((x, o) => x)
-            .Callback<AwaitGraphActivatedMessage, object>((m, t) => m.SetCompleted());
+            .Returns<AwaitGraphActivatedMessage, object>((x, _) => x)
+            .Callback<AwaitGraphActivatedMessage, object>((m, _) => m.SetCompleted());
 
         var viewModel = mock.Create<GraphTableViewModel>();
 

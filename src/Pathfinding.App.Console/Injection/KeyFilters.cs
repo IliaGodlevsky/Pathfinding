@@ -17,4 +17,6 @@ internal static class KeyFilters
     public const string RunCreateView = nameof(RunCreateView);
     public const string RunParametersView = nameof(RunParametersView);
     public const string Compress = nameof(Compress);
+    public const string Neighborhoods = nameof(Neighborhoods);
+    public const string SmoothLevels = nameof(SmoothLevels);
 }

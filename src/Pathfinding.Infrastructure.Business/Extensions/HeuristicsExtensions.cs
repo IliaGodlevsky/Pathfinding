@@ -5,8 +5,8 @@ namespace Pathfinding.Infrastructure.Business.Extensions;
 
 public static class HeuristicsExtensions
 {
-    public static IHeuristic WithWeight(this IHeuristic heuristic, double? weight)
+    public static WeightedHeuristic WithWeight(this IHeuristic heuristic, double? weight)
     {
-        return new WeightedHeuristic(heuristic, weight ?? 1);
+        return new (heuristic, weight ?? 1);
     }
 }

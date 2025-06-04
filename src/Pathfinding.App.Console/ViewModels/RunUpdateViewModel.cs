@@ -1,6 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Extensions;
+using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
@@ -24,6 +25,8 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
     private readonly IMessenger messenger;
     private readonly IRequestService<GraphVertexModel> service;
     private readonly ILog log;
+    private readonly IAlgorithmsFactory algorithmsFactory;
+    private readonly INeighborhoodLayerFactory neighborFactory;
 
     private RunInfoModel[] selected = [];
     private RunInfoModel[] Selected
@@ -44,12 +47,16 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
     public ReactiveCommand<Unit, Unit> UpdateRunsCommand { get; }
 
     public RunUpdateViewModel(IRequestService<GraphVertexModel> service,
+        IAlgorithmsFactory algorithmsFactory,
+        INeighborhoodLayerFactory neighborFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         ILog log)
     {
         this.messenger = messenger;
         this.service = service;
         this.log = log;
+        this.neighborFactory = neighborFactory;
+        this.algorithmsFactory = algorithmsFactory;
         UpdateRunsCommand = ReactiveCommand.CreateFromTask(ExecuteUpdate, CanUpdate());
         messenger.Register<RunsSelectedMessage>(this, OnRunsSelected);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
@@ -107,8 +114,8 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
             var model = await service.ReadGraphAsync(msg.Value.Id).ConfigureAwait(false);
             local = new (model.Vertices, model.DimensionSizes);
             id = model.Id;
-            await model.Neighborhood.ToNeighborhoodLayer()
-                .OverlayAsync(local).ConfigureAwait(false);
+            var layer = neighborFactory.CreateNeighborhoodLayer(model.Neighborhood);
+            await layer.OverlayAsync(local).ConfigureAwait(false);
         }
         if (local != Graph<GraphVertexModel>.Empty)
         {
@@ -137,7 +144,8 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
                 var visitedCount = 0;
                 void OnVertexProcessed(EventArgs e) => visitedCount++;
                 var info = await service.ReadStatisticAsync(select.Id).ConfigureAwait(false);
-                var algorithm = select.ToAlgorithm(range);
+                var factory = algorithmsFactory.GetAlgorithmFactory(info.Algorithm);
+                var algorithm = factory.CreateAlgorithm(range, info);
                 algorithm.VertexProcessed += OnVertexProcessed;
 
                 var status = RunStatuses.Success;

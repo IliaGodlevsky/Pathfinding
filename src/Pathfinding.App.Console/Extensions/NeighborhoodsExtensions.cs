@@ -11,8 +11,8 @@ internal static class NeighborhoodsExtensions
         {
             Neighborhoods.Moore => Resource.Moore,
             Neighborhoods.VonNeumann => Resource.VonNeumann,
-            Neighborhoods.Diagonal => "Diagonal",
-            Neighborhoods.Knight => "Knight",
+            Neighborhoods.Diagonal => Resource.DiagonalNeighborhood,
+            Neighborhoods.Knight => Resource.Knight,
             _ => string.Empty
         };
     }

@@ -232,6 +232,15 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Diagonal.
+        /// </summary>
+        internal static string DiagonalNeighborhood {
+            get {
+                return ResourceManager.GetString("DiagonalNeighborhood", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dijkstra.
         /// </summary>
         internal static string Dijkstra {
@@ -336,6 +345,15 @@ namespace Pathfinding.App.Console.Resources {
         internal static string InvalidExportOptions {
             get {
                 return ResourceManager.GetString("InvalidExportOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Knight.
+        /// </summary>
+        internal static string Knight {
+            get {
+                return ResourceManager.GetString("Knight", resourceCulture);
             }
         }
         

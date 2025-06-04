@@ -5,37 +5,6 @@ namespace Pathfinding.App.Console.Extensions;
 
 internal static class AlgorithmExtensions
 {
-    private static Dictionary<Algorithms, int> OrderMap { get; }
-
-    static AlgorithmExtensions()
-    {
-        Algorithms[] orders =
-        [
-            // Wave group
-            Algorithms.Dijkstra,
-            Algorithms.AStar,
-            Algorithms.BidirectDijkstra,
-            Algorithms.BidirectAStar,
-            Algorithms.CostGreedy,
-            Algorithms.AStarGreedy,
-            // Breadth group
-            Algorithms.Lee,
-            Algorithms.BidirectLee,
-            Algorithms.AStarLee,
-            Algorithms.DistanceFirst,
-            Algorithms.DepthFirst,
-            Algorithms.DepthFirstRandom,
-            Algorithms.Snake,
-            // Random group
-            Algorithms.Random,
-            Algorithms.BidirectRandom
-        ];
-
-        OrderMap = orders
-            .Select((algorithm, index) => (algorithm, index))
-            .ToDictionary(x => x.algorithm, x => x.index);
-    }
-
     public static string ToStringRepresentation(this Algorithms algorithm)
     {
         return algorithm switch
@@ -57,10 +26,5 @@ internal static class AlgorithmExtensions
             Algorithms.DepthFirstRandom => Resource.DepthRandom,
             _ => string.Empty
         };
-    }
-
-    public static int GetOrder(this Algorithms algorithm)
-    {
-        return OrderMap.GetValueOrDefault(algorithm, int.MaxValue);
     }
 }

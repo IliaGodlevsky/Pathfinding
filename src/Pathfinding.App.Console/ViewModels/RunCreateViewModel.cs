@@ -1,6 +1,6 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
-using Pathfinding.App.Console.Extensions;
+using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.Requests;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
@@ -10,7 +10,6 @@ using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Business.Algorithms.Exceptions;
 using Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
-using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
@@ -47,6 +46,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     private readonly IRequestService<GraphVertexModel> service;
     private readonly IMessenger messenger;
     private readonly ILog logger;
+    private readonly IAlgorithmsFactory algorithmsFactory;
 
     public ReactiveCommand<Unit, Unit> CreateRunCommand { get; }
 
@@ -59,7 +59,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
 
     public IReadOnlyCollection<Heuristics> AllowedHeuristics { get; }
 
-    public IReadOnlyList<Algorithms> AllowedAlgorithms { get; }
+    public IReadOnlyCollection<Algorithms> AllowedAlgorithms { get; }
 
     public ObservableCollection<Heuristics?> AppliedHeuristics { get; } = [];
 
@@ -102,15 +102,18 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     }
 
     public RunCreateViewModel(IRequestService<GraphVertexModel> service,
+        IAlgorithmsFactory algorithmsFactory,
+        IHeuristicsFactory heuristicsFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         ILog logger)
     {
         this.messenger = messenger;
         this.service = service;
         this.logger = logger;
+        this.algorithmsFactory = algorithmsFactory;
+        AllowedHeuristics = heuristicsFactory.Allowed;
+        AllowedAlgorithms = algorithmsFactory.Allowed;
         CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm, CanCreateAlgorithm());
-        AllowedAlgorithms = [.. Enum.GetValues<Algorithms>().OrderBy(x => x.GetOrder())];
-        AllowedHeuristics = Enum.GetValues<Heuristics>();
         messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
     }
@@ -220,8 +223,9 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     {
         var rangeMessage = new PathfindingRangeRequestMessage();
         messenger.Send(rangeMessage);
+        var range = rangeMessage.Response;
 
-        if (rangeMessage.Response.Length > 1)
+        if (range.Length > 1)
         {
             var visitedCount = 0;
             void OnVertexProcessed(EventArgs e) => visitedCount++;
@@ -238,7 +242,8 @@ internal sealed class RunCreateViewModel : BaseViewModel,
                 foreach (var buildInfo in GetBuildInfo(weight))
                 {
                     visitedCount = 0;
-                    var algo = buildInfo.ToAlgorithm(rangeMessage.Response);
+                    var factory = algorithmsFactory.GetAlgorithmFactory(buildInfo.Algorithm);
+                    var algo = factory.CreateAlgorithm(range, buildInfo);
                     algo.VertexProcessed += OnVertexProcessed;
                     var path = NullGraphPath.Interface;
                     var stopwatch = Stopwatch.StartNew();

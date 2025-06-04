@@ -1,6 +1,5 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
-using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
@@ -10,12 +9,14 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
+using Pathfinding.App.Console.Factories;
 
 namespace Pathfinding.App.Console.ViewModels;
 
 internal sealed class GraphUpdateViewModel : BaseViewModel
 {
     private readonly IMessenger messenger;
+    private readonly INeighborhoodLayerFactory neighborFactory;
     private readonly IRequestService<GraphVertexModel> service;
     private readonly ILog log;
 
@@ -32,6 +33,9 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
         get => neighborhood;
         set => this.RaiseAndSetIfChanged(ref neighborhood, value);
     }
+
+    public IReadOnlyCollection<Neighborhoods> Allowed 
+        => neighborFactory.Allowed;
 
     private string name;
     public string Name
@@ -50,12 +54,14 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
     public ReactiveCommand<Unit, Unit> UpdateGraphCommand { get; }
 
     public GraphUpdateViewModel(IRequestService<GraphVertexModel> service,
+        INeighborhoodLayerFactory neighborFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         ILog log)
     {
         this.messenger = messenger;
         this.service = service;
         this.log = log;
+        this.neighborFactory = neighborFactory;
         messenger.Register<GraphsSelectedMessage>(this, OnGraphSelected);
         messenger.Register<GraphStateChangedMessage>(this, OnStatusChanged);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);

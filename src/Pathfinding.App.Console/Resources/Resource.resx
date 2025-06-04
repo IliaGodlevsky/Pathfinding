@@ -174,6 +174,9 @@
   <data name="Diagonal" xml:space="preserve">
     <value>Diagonal</value>
   </data>
+  <data name="DiagonalNeighborhood" xml:space="preserve">
+    <value>Diagonal</value>
+  </data>
   <data name="Dijkstra" xml:space="preserve">
     <value>Dijkstra</value>
   </data>
@@ -209,6 +212,9 @@
   </data>
   <data name="InvalidExportOptions" xml:space="preserve">
     <value>Invalid export option</value>
+  </data>
+  <data name="Knight" xml:space="preserve">
+    <value>Knight</value>
   </data>
   <data name="Landscape" xml:space="preserve">
     <value>Landscape</value>

@@ -14,12 +14,14 @@ using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Reactive;
+using Pathfinding.App.Console.Factories;
 
 namespace Pathfinding.App.Console.ViewModels;
 
 internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
 {
     private readonly IRequestService<GraphVertexModel> service;
+    private readonly INeighborhoodLayerFactory neighborFactory;
     private readonly IMessenger messenger;
     private readonly ILog logger;
 
@@ -35,12 +37,14 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
 
     public GraphTableViewModel(
         IRequestService<GraphVertexModel> service,
+        INeighborhoodLayerFactory neighborFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         ILog logger)
     {
         this.service = service;
         this.messenger = messenger;
         this.logger = logger;
+        this.neighborFactory = neighborFactory;
         messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage, int>(this, Tokens.GraphTable, OnGraphUpdated);
         messenger.Register<GraphsCreatedMessage>(this, OnGraphCreated);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
@@ -68,7 +72,8 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
                 graphModel.SmoothLevel,
                 graphModel.Status,
                 graphModel.Id);
-            await graphModel.Neighborhood.ToNeighborhoodLayer().OverlayAsync(graph).ConfigureAwait(false);
+            var layer = neighborFactory.CreateNeighborhoodLayer(graphModel.Neighborhood);
+            await layer.OverlayAsync(graph).ConfigureAwait(false);
             messenger.Send(new GraphActivatedMessage(activated), Tokens.GraphField);
             await messenger.Send(new AwaitGraphActivatedMessage(activated), Tokens.RunsTable);
             await messenger.Send(new AwaitGraphActivatedMessage(activated), Tokens.PathfindingRange);

@@ -136,7 +136,7 @@ internal static class CsvMappings
 
     public static List<CsvHistory> ToHistory(this IEnumerable<PathfindingHistorySerializationModel> models)
     {
-        return [.. models.Select((x, i) => new CsvHistory()
+        return [.. models.Select((x, i) => new CsvHistory
         {
             Graph = x.Graph.ToGraph(i + 1),
             Vertices = x.Vertices.ToVertices(i + 1),
@@ -157,7 +157,7 @@ internal static class CsvMappings
             .ToDictionary(x => x.Key, x => x.ToList());
         var ranges = models.Ranges.GroupBy(x => x.GraphId)
             .ToDictionary(x => x.Key, x => x.ToList());
-        return [.. models.Graphs.Select(x => new PathfindingHistorySerializationModel()
+        return [.. models.Graphs.Select(x => new PathfindingHistorySerializationModel
         {
             Graph = x.ToGraph(),
             Vertices = vertices.GetValueOrDefault(x.Id, []).ToVertices(),

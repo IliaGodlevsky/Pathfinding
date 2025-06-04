@@ -221,7 +221,6 @@ internal sealed class RunRangeViewModel : BaseViewModel,
             Transit.CollectionChanged += OnCollectionChanged;
             Transit.AddRange(transit);
             Graph.ForEach(SubscribeToEvents);
-            
         }, logger.Error).ConfigureAwait(false);
     }
 

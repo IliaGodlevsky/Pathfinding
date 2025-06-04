@@ -2,7 +2,6 @@
 using NStack;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.ViewModels;
-using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive.Linq;
@@ -15,7 +14,7 @@ internal sealed partial class GraphNeighborhoodUpdateView : FrameView
     public GraphNeighborhoodUpdateView(GraphUpdateViewModel viewModel)
     {
         Initialize();
-        var factories = Enum.GetValues<Neighborhoods>()
+        var factories = viewModel.Allowed
             .ToDictionary(x => x.ToStringRepresentation());
         var radioLabels = factories.Keys
             .Select(ustring.Make)

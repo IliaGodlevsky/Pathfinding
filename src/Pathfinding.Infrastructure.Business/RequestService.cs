@@ -20,8 +20,7 @@ namespace Pathfinding.Infrastructure.Business;
 public sealed class RequestService<T>(IUnitOfWorkFactory factory) : IRequestService<T>
     where T : IVertex, IEntity<long>, new()
 {
-    public RequestService()
-        : this(new InMemoryUnitOfWorkFactory())
+    public RequestService() : this(new InMemoryUnitOfWorkFactory())
     {
     }
 

@@ -5,4 +5,6 @@ namespace Pathfinding.App.Console.ViewModels.Interface;
 internal interface IRequireSmoothLevelViewModel
 {
     SmoothLevels SmoothLevel { get; set; }
+
+    IReadOnlyCollection<SmoothLevels> AllowedLevels { get; }
 }
