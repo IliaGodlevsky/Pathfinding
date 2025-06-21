@@ -18,7 +18,7 @@ public sealed class InMemoryUnitOfWork : IUnitOfWork
     {
         var vertices = new InMemoryVerticesRepository();
         var range = new InMemoryRangeRepository();
-        var statistics = new InMemoryStatisicsRepository();
+        var statistics = new InMemoryStatisticsRepository();
         VerticesRepository = vertices;
         RangeRepository = range;
         StatisticsRepository = statistics;

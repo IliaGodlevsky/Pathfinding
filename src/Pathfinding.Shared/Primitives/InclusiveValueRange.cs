@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 namespace Pathfinding.Shared.Primitives;
 
 /// <summary>
-/// Representa an inclusive value range, value of which should 
+/// Represents an inclusive value range, value of which should 
 /// implement <see cref="IComparable{T}"/>
 /// </summary>
 /// <typeparam name="T">The type of values, that 
@@ -12,9 +12,9 @@ namespace Pathfinding.Shared.Primitives;
 public readonly record struct InclusiveValueRange<T>
     where T : IComparable<T>
 {
-    public readonly T UpperValueOfRange { get; }
+    public T UpperValueOfRange { get; }
 
-    public readonly T LowerValueOfRange { get; }
+    public T LowerValueOfRange { get; }
 
     /// <param name="upperValueOfRange"></param>
     /// <param name="lowerValueOfRange"></param>
@@ -48,7 +48,7 @@ public readonly record struct InclusiveValueRange<T>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public override readonly string ToString()
+    public override string ToString()
     {
         return $"[{LowerValueOfRange},{UpperValueOfRange}]";
     }

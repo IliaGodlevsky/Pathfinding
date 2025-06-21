@@ -3,7 +3,7 @@ using Pathfinding.Domain.Interface.Repositories;
 
 namespace Pathfinding.Infrastructure.Data.InMemory.Repositories;
 
-internal sealed class InMemoryStatisicsRepository : IStatisticsRepository
+internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
 {
     private int id;
     private readonly HashSet<Statistics> set = new(EntityComparer<int>.Instance);

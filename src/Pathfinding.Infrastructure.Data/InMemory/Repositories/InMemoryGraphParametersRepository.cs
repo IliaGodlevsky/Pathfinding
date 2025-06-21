@@ -6,7 +6,7 @@ namespace Pathfinding.Infrastructure.Data.InMemory.Repositories;
 internal sealed class InMemoryGraphParametersRepository(
     InMemoryRangeRepository rangeRepository,
     InMemoryVerticesRepository verticesRepository,
-    InMemoryStatisicsRepository statisticsRepository) : IGraphParametersRepository
+    InMemoryStatisticsRepository statisticsRepository) : IGraphParametersRepository
 {
     private int id;
 

@@ -6,7 +6,7 @@ namespace Pathfinding.Infrastructure.Data.Pathfinding.Neighborhoods;
 [DebuggerDisplay("Count = {Count}")]
 public sealed class KnightNeighborhood(Coordinate coordinate) : Neighborhood(coordinate)
 {
-    protected override IReadOnlyCollection<Coordinate> Filter(Coordinate coordinate)
+    protected override HashSet<Coordinate> Filter(Coordinate coordinate)
     {
         var neighbors = new HashSet<Coordinate>();
         for (var i = 0; i < coordinate.Count; i++)

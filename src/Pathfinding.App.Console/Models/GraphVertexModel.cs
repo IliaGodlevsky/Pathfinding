@@ -7,9 +7,18 @@ using ReactiveUI;
 
 namespace Pathfinding.App.Console.Models;
 
-public class GraphVertexModel : ReactiveObject,
-    IVertex, IPathfindingVertex, IEntity<long>
+public class GraphVertexModel : ReactiveObject, IVertex, IPathfindingVertex, IEntity<long>
 {
+    // ReSharper disable once InconsistentNaming
+    private static int globalIterator;
+
+    private readonly int localHashCode;
+
+    public GraphVertexModel()
+    {
+        localHashCode = Interlocked.Increment(ref globalIterator);
+    }
+
     public long Id { get; set; }
 
     private bool isObstacle;
@@ -63,5 +72,5 @@ public class GraphVertexModel : ReactiveObject,
 
     public override bool Equals(object obj) => obj is IVertex vertex && Equals(vertex);
 
-    public override int GetHashCode() => Position.GetHashCode();
+    public override int GetHashCode() => localHashCode.GetHashCode();
 }

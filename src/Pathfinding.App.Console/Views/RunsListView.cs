@@ -34,6 +34,7 @@ internal sealed partial class RunsListView : FrameView
                 switch (algorithm)
                 {
                     case Algorithms.AStar:
+                    case Algorithms.IdaStar:
                     case Algorithms.BidirectAStar:
                     case Algorithms.AStarGreedy:
                         messenger.Send(new OpenStepRuleViewMessage());

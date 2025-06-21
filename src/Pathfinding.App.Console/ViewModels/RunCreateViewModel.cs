@@ -61,6 +61,8 @@ internal sealed class RunCreateViewModel : BaseViewModel,
 
     public IReadOnlyCollection<Algorithms> AllowedAlgorithms { get; }
 
+    public IReadOnlyCollection<StepRules> AllowedStepRules { get; }
+
     public ObservableCollection<Heuristics?> AppliedHeuristics { get; } = [];
 
     private double? fromWeight;
@@ -85,6 +87,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     }
 
     private StepRules? stepRule;
+    
     public StepRules? StepRule
     {
         get => stepRule;
@@ -104,6 +107,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     public RunCreateViewModel(IRequestService<GraphVertexModel> service,
         IAlgorithmsFactory algorithmsFactory,
         IHeuristicsFactory heuristicsFactory,
+        IStepRuleFactory stepRuleFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         ILog logger)
     {
@@ -113,6 +117,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
         this.algorithmsFactory = algorithmsFactory;
         AllowedHeuristics = heuristicsFactory.Allowed;
         AllowedAlgorithms = algorithmsFactory.Allowed;
+        AllowedStepRules = stepRuleFactory.Allowed;
         CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm, CanCreateAlgorithm());
         messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
@@ -213,7 +218,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     private AlgorithmBuildInfo[] GetBuildInfo(double? weight)
     {
         return AppliedHeuristics.Count == 0
-            ? [new (Algorithm.Value, null, weight, StepRule)]
+            ? [new (Algorithm.Value, null, null, StepRule)]
             : [.. AppliedHeuristics
                 .Where(x => x is not null)
                 .Select(x => new AlgorithmBuildInfo(Algorithm.Value, x, weight, StepRule))];

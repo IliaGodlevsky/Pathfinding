@@ -5,14 +5,13 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.App.Console.Factories;
 
-public sealed class StepRulesFactory : IStepRuleFactory
+public sealed class StepRulesFactory(IEnumerable<Meta<IStepRule>> stepRules) : IStepRuleFactory
 {
-    private readonly Dictionary<StepRules, IStepRule> stepRules;
+    private readonly Dictionary<StepRules, IStepRule> stepRules = stepRules.ToDictionary(
+            x => (StepRules)x.Metadata[MetadataKeys.StepRule],
+            x => x.Value);
 
-    public StepRulesFactory(IEnumerable<Meta<IStepRule>> stepRules)
-    {
-        this.stepRules = stepRules.ToDictionary(x => (StepRules)x.Metadata[MetadataKeys.StepRule], x => x.Value);
-    }
+    public IReadOnlyCollection<StepRules> Allowed => stepRules.Keys;
 
     public IStepRule CreateStepRule(StepRules stepRule)
     {

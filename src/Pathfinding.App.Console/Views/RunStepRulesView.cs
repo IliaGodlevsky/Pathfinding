@@ -5,7 +5,6 @@ using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.ViewModels.Interface;
-using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive.Linq;
@@ -22,15 +21,15 @@ internal sealed partial class RunStepRulesView : FrameView
         IRequireStepRuleViewModel viewModel)
     {
         Initialize();
-        var rules = Enum.GetValues<StepRules>()
+        var rules = viewModel.AllowedStepRules
             .ToDictionary(x => x.ToStringRepresentation());
         var labels = rules.Select(x => ustring.Make(x.Key)).ToArray();
-        var values = labels.Select(x => rules[x.ToString()]).ToList();
+        var values = labels.Select(x => rules[x.ToString()!]).ToList();
         stepRules.RadioLabels = labels;
         stepRules.Events().SelectedItemChanged
-           .Where(x => x.SelectedItem > -1)
-           .Select(x => values[x.SelectedItem])
-           .BindTo(viewModel, x => x.StepRule);
+            .Where(x => x.SelectedItem > -1)
+            .Select(x => values[x.SelectedItem])
+            .BindTo(viewModel, x => x.StepRule);
         stepRules.SelectedItem = 0;
         messenger.Register<OpenStepRuleViewMessage>(this, OnOpen);
         messenger.Register<CloseStepRulesViewMessage>(this, OnStepRulesViewClose);

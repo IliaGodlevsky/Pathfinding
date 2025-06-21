@@ -9,4 +9,5 @@ internal static class MetadataKeys
     public const string Heuristics = "Heuristics";
     public const string Neighborhoods = "Neighborhoods";
     public const string SmoothLevels = "SmoothLevels";
+    public const string ExportOptions = "ExportOptions";
 }

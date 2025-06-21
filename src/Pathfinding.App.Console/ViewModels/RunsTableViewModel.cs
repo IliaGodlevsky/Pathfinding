@@ -55,12 +55,12 @@ internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel
     {
         await ExecuteSafe(async () =>
         {
-            var statistics = await service.ReadStatisticsAsync(msg.Value.GraphId)
+            var statistics = await service
+                .ReadStatisticsAsync(msg.Value.GraphId)
                 .ConfigureAwait(false);
-            var models = statistics.ToRunInfo();
             ActivatedGraphId = msg.Value.GraphId;
             Runs.Clear();
-            Runs.Add(models);
+            Runs.Add(statistics.ToRunInfo());
         }, logger.Error).ConfigureAwait(false);
     }
 

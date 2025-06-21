@@ -13,9 +13,8 @@ public sealed class DistanceFirstAlgorithmFactory(
         IAlgorithmBuildInfo info)
     {
         ArgumentNullException.ThrowIfNull(info.Heuristics, nameof(info.Heuristics));
-        ArgumentNullException.ThrowIfNull(info.Weight, nameof(info.Weight));
 
-        var heuristics = heuristicsFactory.CreateHeuristic(info.Heuristics.Value, info.Weight.Value);
+        var heuristics = heuristicsFactory.CreateHeuristic(info.Heuristics.Value, 1);
         return new(range, heuristics);
     }
 }

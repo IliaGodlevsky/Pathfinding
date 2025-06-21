@@ -75,9 +75,6 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
         set => this.RaiseAndSetIfChanged(ref level, value);
     }
 
-    public IReadOnlyCollection<SmoothLevels> AllowedLevels
-        => smoothLevelFactory.Allowed;
-
     private Neighborhoods neighborhood;
     public Neighborhoods Neighborhood
     {
@@ -85,8 +82,9 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
         set => this.RaiseAndSetIfChanged(ref neighborhood, value);
     }
 
-    public IReadOnlyCollection<Neighborhoods> AllowedNeighborhoods
-        => neighborFactory.Allowed;
+    public IReadOnlyCollection<Neighborhoods> AllowedNeighborhoods { get; }
+
+    public IReadOnlyCollection<SmoothLevels> AllowedLevels { get; }
 
     public ReactiveCommand<Unit, Unit> AssembleGraphCommand { get; }
 
@@ -104,6 +102,8 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
         this.graphAssemble = graphAssemble;
         this.neighborFactory = neighborFactory;
         this.smoothLevelFactory = smoothLevelFactory;
+        AllowedNeighborhoods = neighborFactory.Allowed;
+        AllowedLevels = smoothLevelFactory.Allowed;
         AssembleGraphCommand = ReactiveCommand.CreateFromTask(CreateGraph, CanExecute());
     }
 

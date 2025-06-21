@@ -12,7 +12,7 @@ public static class VertexExtension
 
     public static bool IsEqual(this IVertex self, IVertex vertex)
     {
-        return self.Cost.CurrentCost.Equals(vertex.Cost.CurrentCost)
+        return self.Cost.CurrentCost == vertex.Cost.CurrentCost
                && self.Position.Equals(vertex.Position)
                && self.IsObstacle == vertex.IsObstacle;
     }

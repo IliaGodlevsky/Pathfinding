@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using Pathfinding.App.Console.Messages;
 
 // ReSharper disable AsyncVoidLambda
@@ -7,6 +8,14 @@ namespace Pathfinding.App.Console.Extensions;
 
 internal static class MessengerExtensions
 {
+    public static T Get<T, TMessage>(this IMessenger messenger)
+        where TMessage : RequestMessage<T>, new()
+    {
+        var message = new TMessage();
+        messenger.Send(message);
+        return message.Response;
+    }
+
     public static void RegisterAwaitHandler<TMessage, TToken>(this IMessenger messenger,
         object recipient, TToken token, Func<object, TMessage, Task> handler)
         where TMessage : class, IAwaitMessage

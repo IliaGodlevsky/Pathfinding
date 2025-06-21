@@ -11,6 +11,7 @@ public sealed class BidirectDijkstraAlgorithmFactory(IStepRuleFactory stepRuleFa
         IAlgorithmBuildInfo info)
     {
         ArgumentNullException.ThrowIfNull(info.StepRule, nameof(info.StepRule));
+
         var stepRule = stepRuleFactory.CreateStepRule(info.StepRule.Value);
         return new(range, stepRule);
     }

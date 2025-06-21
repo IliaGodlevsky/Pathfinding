@@ -18,5 +18,6 @@ public enum Algorithms
     Snake = 11,
     Random = 12,
     BidirectRandom = 13,
-    DepthFirstRandom = 14
+    DepthFirstRandom = 14,
+    IdaStar = 15
 }

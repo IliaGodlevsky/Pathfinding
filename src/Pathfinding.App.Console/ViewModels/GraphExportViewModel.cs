@@ -1,22 +1,23 @@
 ﻿using Autofac.Features.AttributeFilters;
 using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Export;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.Resources;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Logging.Interface;
-using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
+
 // ReSharper disable PossibleInvalidOperationException
 
 namespace Pathfinding.App.Console.ViewModels;
 
 internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewModel
 {
-    private readonly IRequestService<GraphVertexModel> service;
+    private readonly IReadHistoryOptionsFacade facade;
     private readonly Dictionary<StreamFormat, Serializer> serializers;
     private readonly ILog logger;
 
@@ -35,12 +36,12 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
 
     public IReadOnlyCollection<StreamFormat> StreamFormats { get; }
 
-    public GraphExportViewModel(IRequestService<GraphVertexModel> service,
+    public GraphExportViewModel(IReadHistoryOptionsFacade facade,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         Meta<Serializer>[] serializers,
         ILog logger)
     {
-        this.service = service;
+        this.facade = facade;
         this.logger = logger;
         this.serializers = serializers
             .ToDictionary(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], x => x.Value);
@@ -48,7 +49,7 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
             .OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat])];
         ExportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(ExportGraph, CanExport());
-        AllowedOptions = Enum.GetValues<ExportOptions>();
+        AllowedOptions = facade.Allowed;
         messenger.Register<GraphsSelectedMessage>(this, OnGraphSelected);
         messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
     }
@@ -66,18 +67,14 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
             await using var stream = streamFactory();
             if (!stream.IsEmpty)
             {
+                var histories = await facade.ReadHistoryAsync(Options, 
+                    SelectedGraphIds).ConfigureAwait(false);
                 var serializer = serializers[stream.Format.Value];
-                var historiesTask = Options switch
-                {
-                    ExportOptions.GraphOnly => service.ReadSerializationGraphsAsync(SelectedGraphIds),
-                    ExportOptions.WithRange => service.ReadSerializationGraphsWithRangeAsync(SelectedGraphIds),
-                    ExportOptions.WithRuns => service.ReadSerializationHistoriesAsync(SelectedGraphIds),
-                    _ => throw new InvalidOperationException(Resource.InvalidExportOptions)
-                };
-                var histories = await historiesTask.ConfigureAwait(false);
-                await serializer.SerializeToAsync(histories, stream.Stream).ConfigureAwait(false);
-                var count = histories.Histories.Count;
-                logger.Info(count == 1 ? Resource.WasDeletedMsg : Resource.WereDeletedMsg);
+                await serializer.SerializeToAsync(histories, 
+                    stream.Stream).ConfigureAwait(false);
+                logger.Info(histories.Histories.Count == 1 
+                    ? Resource.WasDeletedMsg 
+                    : Resource.WereDeletedMsg);
             }
         }, logger.Error).ConfigureAwait(false);
     }
