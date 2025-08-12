@@ -4,5 +4,7 @@ namespace Pathfinding.App.Console.Export;
 
 internal interface IReadHistoryOption
 {
-    Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(IReadOnlyCollection<int> graphIds);
+    Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(
+        IReadOnlyCollection<int> graphIds, 
+        CancellationToken token = default);
 }

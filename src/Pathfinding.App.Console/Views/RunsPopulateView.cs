@@ -9,6 +9,8 @@ using ReactiveUI;
 using System.Linq.Expressions;
 using System.Reactive.Linq;
 using Terminal.Gui;
+using System.Reactive.Disposables;
+using Pathfinding.App.Console.Extensions;
 
 namespace Pathfinding.App.Console.Views;
 
@@ -17,6 +19,7 @@ internal sealed partial class RunsPopulateView : FrameView
     private const double DefaultWeight = 1;
 
     private readonly IRequirePopulationViewModel populateViewModel;
+    private readonly CompositeDisposable disposables = [];
 
     public RunsPopulateView(
         [KeyFilter(KeyFilters.Views)] IMessenger messenger,
@@ -29,9 +32,15 @@ internal sealed partial class RunsPopulateView : FrameView
         BindTo(toWeightTextField, x => x.ToWeight);
         BindTo(stepTextField, x => x.Step);
 
-        messenger.Register<OpenRunsPopulateViewMessage>(this, OnRunPopulateOpen);
-        messenger.Register<CloseRunPopulateViewMessage>(this, OnRunPopulateViewClosed);
-        messenger.Register<CloseRunCreateViewMessage>(this, OnRunCreateViewClosed);
+        messenger.RegisterHandler<OpenRunsPopulateViewMessage>(this, OnRunPopulateOpen).DisposeWith(disposables);
+        messenger.RegisterHandler<CloseRunPopulateViewMessage>(this, OnRunPopulateViewClosed).DisposeWith(disposables);
+        messenger.RegisterHandler<CloseRunCreateViewMessage>(this, OnRunCreateViewClosed).DisposeWith(disposables);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 
     private void BindTo(TextField field,
@@ -42,7 +51,8 @@ internal sealed partial class RunsPopulateView : FrameView
         field.Events().TextChanging
             .DistinctUntilChanged()
             .Select(x => double.TryParse(x.NewText.ToString(), out var value) ? value : default(double?))
-            .BindTo(populateViewModel, expression);
+            .BindTo(populateViewModel, expression)
+            .DisposeWith(disposables);
         populateViewModel.Events().PropertyChanged
             .Where(x => x.PropertyName == propertyName)
             .Do(_ =>
@@ -57,7 +67,8 @@ internal sealed partial class RunsPopulateView : FrameView
                     }
                 });
             })
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(disposables);
     }
 
     private void OnRunPopulateOpen(object recipient, OpenRunsPopulateViewMessage msg)

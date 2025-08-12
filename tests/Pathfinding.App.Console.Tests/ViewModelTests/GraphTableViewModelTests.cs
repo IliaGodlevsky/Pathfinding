@@ -1,9 +1,12 @@
 ﻿using Autofac.Extras.Moq;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
+using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
+using Pathfinding.Domain.Core.Enums;
+using Pathfinding.Infrastructure.Business.Layers;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
@@ -79,6 +82,9 @@ internal sealed class GraphTableViewModelTests
                 It.Is<int>(z => z == 1),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(graph));
+        mock.Mock<INeighborhoodLayerFactory>()
+            .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
+            .Returns(new Layers());
         mock.Mock<IMessenger>()
             .Setup(x => x.Send(It.IsAny<AwaitGraphActivatedMessage>(),
                 It.IsAny<IsAnyToken>()))

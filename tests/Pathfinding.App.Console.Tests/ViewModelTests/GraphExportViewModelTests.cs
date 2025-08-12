@@ -3,6 +3,7 @@ using Autofac.Extras.Moq;
 using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
+using Pathfinding.App.Console.Export;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
@@ -20,8 +21,8 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests;
 [Category("Unit")]
 internal class GraphExportViewModelTests
 {
-    private static async Task ExportGraphCommand_HasGraphs_ShouldExport(Expression<Func<IRequestService<GraphVertexModel>, Task<PathfindingHistoriesSerializationModel>>> expression,
-        ExportOptions options)
+    [Test]
+    public async Task ExportGraphCommand_HasGraphs_ShouldExport()
     {
         using var mock = AutoMock.GetLoose();
 
@@ -33,8 +34,11 @@ internal class GraphExportViewModelTests
                 .ToArray()
                 .To(x => new PathfindingHistoriesSerializationModel { Histories = [.. x] });
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
-            .Setup(expression)
+        mock.Mock<IReadHistoryOptionsFacade>()
+            .Setup(x => x.ReadHistoryAsync(
+                It.IsAny<ExportOptions>(), 
+                It.IsAny<IReadOnlyCollection<int>>(),
+                It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(histories));
 
         mock.Mock<IMessenger>().Setup(x => x.Register(
@@ -53,7 +57,7 @@ internal class GraphExportViewModelTests
         var typedParam = new TypedParameter(typeof(Meta<ISerializer<PathfindingHistoriesSerializationModel>>[]), new[] { meta });
 
         var viewModel = mock.Create<GraphExportViewModel>(typedParam);
-        viewModel.Options = options;
+        viewModel.Options = ExportOptions.WithRuns;
 
         var command = viewModel.ExportGraphCommand;
         if (await command.CanExecute.FirstOrDefaultAsync())
@@ -63,9 +67,6 @@ internal class GraphExportViewModelTests
 
         Assert.Multiple(() =>
         {
-            mock.Mock<IRequestService<GraphVertexModel>>()
-                .Verify(expression, Times.Once);
-
             mock.Mock<IMessenger>()
                 .Verify(x => x.Register(
                     It.IsAny<object>(),
@@ -77,33 +78,6 @@ internal class GraphExportViewModelTests
                 It.IsAny<Stream>(),
                 It.IsAny<CancellationToken>()), Times.Once);
         });
-    }
-
-    [Test]
-    public async Task ExportGraphCommand_WithRuns_ShouldExport()
-    {
-        await ExportGraphCommand_HasGraphs_ShouldExport(x => x.ReadSerializationHistoriesAsync(
-                It.IsAny<IEnumerable<int>>(),
-                It.IsAny<CancellationToken>()),
-            ExportOptions.WithRuns);
-    }
-
-    [Test]
-    public async Task ExportGraphCommand_WithRange_ShouldExport()
-    {
-        await ExportGraphCommand_HasGraphs_ShouldExport(x => x.ReadSerializationGraphsWithRangeAsync(
-                It.IsAny<IEnumerable<int>>(),
-                It.IsAny<CancellationToken>()),
-            ExportOptions.WithRange);
-    }
-
-    [Test]
-    public async Task ExportGraphCommand_GraphOnly_ShouldExport()
-    {
-        await ExportGraphCommand_HasGraphs_ShouldExport(x => x.ReadSerializationGraphsAsync(
-                It.IsAny<IEnumerable<int>>(),
-                It.IsAny<CancellationToken>()),
-            ExportOptions.GraphOnly);
     }
 
     [Test]

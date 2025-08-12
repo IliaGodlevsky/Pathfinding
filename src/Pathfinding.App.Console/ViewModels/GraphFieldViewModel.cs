@@ -1,5 +1,6 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.Requests;
@@ -15,14 +16,15 @@ using Pathfinding.Service.Interface.Requests.Update;
 using Pathfinding.Shared.Extensions;
 using ReactiveUI;
 using System.Reactive;
+using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
+internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly IRequestService<GraphVertexModel> service;
-    private readonly ILog logger;
+    private readonly CompositeDisposable disposables = [];
 
     private int graphId;
     private int GraphId
@@ -58,21 +60,18 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
     public GraphFieldViewModel(
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         IRequestService<GraphVertexModel> service,
-        ILog logger)
+        ILog logger) : base(logger)
     {
         this.messenger = messenger;
         this.service = service;
-        this.logger = logger;
-        messenger.Register<GraphActivatedMessage, int>(this, Tokens.GraphField, OnGraphActivated);
-        messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
-        messenger.Register<GraphStateChangedMessage>(this, OnGraphBecameReadonly);
-        var canExecute = CanExecute();
-        var canChangeCost = CanChangeCost();
-        ChangeVertexPolarityCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(ChangePolarity, canExecute);
-        InverseVertexCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(InverseVertex, canExecute);
-        ReverseVertexCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(ReverseVertex, canExecute);
-        IncreaseVertexCostCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(IncreaseVertexCost, canChangeCost);
-        DecreaseVertexCostCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(DecreaseVertexCost, canChangeCost);
+        messenger.RegisterHandler<GraphActivatedMessage, int>(this, Tokens.GraphField, OnGraphActivated).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphStateChangedMessage>(this, OnGraphBecameReadonly).DisposeWith(disposables);
+        ChangeVertexPolarityCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(ChangePolarity, CanExecute()).DisposeWith(disposables);
+        InverseVertexCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(InverseVertex, CanExecute()).DisposeWith(disposables);
+        ReverseVertexCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(ReverseVertex, CanExecute()).DisposeWith(disposables);
+        IncreaseVertexCostCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(IncreaseVertexCost, CanChangeCost()).DisposeWith(disposables);
+        DecreaseVertexCostCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(DecreaseVertexCost, CanChangeCost()).DisposeWith(disposables);
     }
 
     private IObservable<bool> CanExecute()
@@ -126,8 +125,9 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
                     [.. vertex.Enumerate()]);
                 await ExecuteSafe(async () =>
                 {
-                    await service.UpdateVerticesAsync(request).ConfigureAwait(false);
-                }, logger.Error).ConfigureAwait(false);
+                    using var cts = new CancellationTokenSource(Timeout);
+                    await service.UpdateVerticesAsync(request, cts.Token).ConfigureAwait(false);
+                }).ConfigureAwait(false);
             }
         }
     }
@@ -149,9 +149,11 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
         cost = vertex.Cost.CostRange.ReturnInRange(cost);
         vertex.Cost = new VertexCost(cost, vertex.Cost.CostRange);
         var request = new UpdateVerticesRequest<GraphVertexModel>(GraphId, [.. vertex.Enumerate()]);
-        await ExecuteSafe(async () => await service.UpdateVerticesAsync(request)
-            .ConfigureAwait(false),
-            logger.Error).ConfigureAwait(false);
+        await ExecuteSafe(async () =>
+        {
+            using var cts = new CancellationTokenSource(Timeout);
+            await service.UpdateVerticesAsync(request, cts.Token).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
@@ -174,5 +176,10 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel
             Graph = Graph<GraphVertexModel>.Empty;
             IsReadOnly = false;
         }
+    }
+
+    public void Dispose()
+    {
+        disposables.Dispose();
     }
 }

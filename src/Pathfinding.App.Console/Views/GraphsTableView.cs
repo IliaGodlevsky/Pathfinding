@@ -18,6 +18,7 @@ namespace Pathfinding.App.Console.Views;
 internal sealed partial class GraphsTableView
 {
     private readonly Dictionary<int, IDisposable> modelChangingSubs = [];
+    private readonly CompositeDisposable disposables = [];
 
     public GraphsTableView(IGraphTableViewModel viewModel,
         [KeyFilter(KeyFilters.Views)] IMessenger messenger) : this()
@@ -25,11 +26,13 @@ internal sealed partial class GraphsTableView
         viewModel.Graphs.ActOnEveryObject(AddToTable, RemoveFromTable);
         this.Events().Initialized
             .Select(_ => Unit.Default)
-            .InvokeCommand(viewModel, x => x.LoadGraphsCommand);
+            .InvokeCommand(viewModel, x => x.LoadGraphsCommand)
+            .DisposeWith(disposables);
         this.Events().CellActivated
             .Where(x => x.Row < table.Rows.Count)
             .Select(x => GetGraphId(x.Row))
-            .InvokeCommand(viewModel, x => x.ActivateGraphCommand);
+            .InvokeCommand(viewModel, x => x.ActivateGraphCommand)
+            .DisposeWith(disposables);
         this.Events().KeyPress
             .Where(x => x.KeyEvent.Key.HasFlag(Key.A)
                 && x.KeyEvent.Key.HasFlag(Key.CtrlMask))
@@ -38,19 +41,22 @@ internal sealed partial class GraphsTableView
                     .SelectMany(x => (x.Rect.Top, x.Rect.Bottom - 1).Iterate())
                     .Select(GetGraphId)
                     .ToArray())
-            .InvokeCommand(viewModel, x => x.SelectGraphsCommand);
+            .InvokeCommand(viewModel, x => x.SelectGraphsCommand)
+            .DisposeWith(disposables);
         this.Events().SelectedCellChanged
             .Where(x => x.NewRow > -1 && x.NewRow < table.Rows.Count)
             .Select(_ => GetAllSelectedCells().Select(x => x.Y)
                 .Distinct().Select(GetGraphId).ToArray())
-            .InvokeCommand(viewModel, x => x.SelectGraphsCommand);
+            .InvokeCommand(viewModel, x => x.SelectGraphsCommand)
+            .DisposeWith(disposables);
         this.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
             .Do(_ => messenger.Send(new CloseRunFieldMessage()))
             .Select(x => x.MouseEvent.Y + RowOffset - headerLinesConsumed)
             .Where(x => x >= 0 && x < Table.Rows.Count && x == SelectedRow)
             .Select(x => GetGraphId(x).Enumerate().ToArray())
-            .InvokeCommand(viewModel, x => x.SelectGraphsCommand);
+            .InvokeCommand(viewModel, x => x.SelectGraphsCommand)
+            .DisposeWith(disposables);
     }
 
     private int GetGraphId(int selectedRow)
@@ -72,6 +78,7 @@ internal sealed partial class GraphsTableView
             BindTo(model, SmoothCol, x => x.SmoothLevel).DisposeWith(composite);
             BindTo(model, NeighborsCol, x => x.Neighborhood).DisposeWith(composite);
             modelChangingSubs.Add(model.Id, composite);
+            composite.DisposeWith(disposables);
             SetCursorInvisible();
         });
     }
@@ -82,6 +89,12 @@ internal sealed partial class GraphsTableView
         return model.WhenAnyValue(expression)
             .Do(x => Update(model.Id, column, x))
             .Subscribe();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 
     private void Update<T>(int id, string column, T value)

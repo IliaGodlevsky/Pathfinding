@@ -10,15 +10,17 @@ using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
 using Pathfinding.App.Console.Factories;
+using System.Reactive.Disposables;
+using Pathfinding.App.Console.Extensions;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class GraphUpdateViewModel : BaseViewModel
+internal sealed class GraphUpdateViewModel : BaseViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly INeighborhoodLayerFactory neighborFactory;
     private readonly IRequestService<GraphVertexModel> service;
-    private readonly ILog log;
+    private readonly CompositeDisposable disposables = [];
 
     private GraphInfoModel[] selectedGraph = [];
     public GraphInfoModel[] SelectedGraphs
@@ -56,15 +58,14 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
     public GraphUpdateViewModel(IRequestService<GraphVertexModel> service,
         INeighborhoodLayerFactory neighborFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        ILog log)
+        ILog log) : base(log)
     {
         this.messenger = messenger;
         this.service = service;
-        this.log = log;
         this.neighborFactory = neighborFactory;
-        messenger.Register<GraphsSelectedMessage>(this, OnGraphSelected);
-        messenger.Register<GraphStateChangedMessage>(this, OnStatusChanged);
-        messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
+        messenger.RegisterHandler<GraphsSelectedMessage>(this, OnGraphSelected).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphStateChangedMessage>(this, OnStatusChanged).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
         UpdateGraphCommand = ReactiveCommand.CreateFromTask(ExecuteUpdate, CanExecute());
     }
 
@@ -82,15 +83,16 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
         await ExecuteSafe(async () =>
         {
             var graph = SelectedGraphs[0];
-            var info = await service.ReadGraphInfoAsync(graph.Id)
+            using var cts = new CancellationTokenSource(Timeout);
+            var info = await service.ReadGraphInfoAsync(graph.Id, cts.Token)
                 .ConfigureAwait(false);
             info.Name = Name;
             info.Neighborhood = Neighborhood;
-            await service.UpdateGraphInfoAsync(info).ConfigureAwait(false);
+            await service.UpdateGraphInfoAsync(info, cts.Token).ConfigureAwait(false);
             await messenger.Send(new AwaitGraphUpdatedMessage(info), Tokens.GraphTable);
             messenger.Send(new GraphUpdatedMessage(info));
             await messenger.Send(new AwaitGraphUpdatedMessage(info), Tokens.AlgorithmUpdate);
-        }, log.Error).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     private void OnStatusChanged(object recipient, GraphStateChangedMessage msg)
@@ -118,5 +120,10 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
         {
             Name = string.Empty;
         }
+    }
+
+    public void Dispose()
+    {
+        disposables.Dispose();
     }
 }

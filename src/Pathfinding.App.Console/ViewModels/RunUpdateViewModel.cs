@@ -17,16 +17,17 @@ using Pathfinding.Service.Interface.Models.Undefined;
 using ReactiveUI;
 using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
+internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly IRequestService<GraphVertexModel> service;
-    private readonly ILog log;
     private readonly IAlgorithmsFactory algorithmsFactory;
     private readonly INeighborhoodLayerFactory neighborFactory;
+    private readonly CompositeDisposable disposables = [];
 
     private RunInfoModel[] selected = [];
     private RunInfoModel[] Selected
@@ -50,19 +51,18 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
         IAlgorithmsFactory algorithmsFactory,
         INeighborhoodLayerFactory neighborFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        ILog log)
+        ILog log) : base(log)
     {
         this.messenger = messenger;
         this.service = service;
-        this.log = log;
         this.neighborFactory = neighborFactory;
         this.algorithmsFactory = algorithmsFactory;
-        UpdateRunsCommand = ReactiveCommand.CreateFromTask(ExecuteUpdate, CanUpdate());
-        messenger.Register<RunsSelectedMessage>(this, OnRunsSelected);
-        messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
-        messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
+        UpdateRunsCommand = ReactiveCommand.CreateFromTask(ExecuteUpdate, CanUpdate()).DisposeWith(disposables);
+        messenger.RegisterHandler<RunsSelectedMessage>(this, OnRunsSelected).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
         messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage, int>(this,
-            Tokens.AlgorithmUpdate, OnGraphUpdated);
+            Tokens.AlgorithmUpdate, OnGraphUpdated).DisposeWith(disposables);
     }
 
     private void OnRunsSelected(object recipient, RunsSelectedMessage msg)
@@ -96,22 +96,25 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
     {
         await ExecuteSafe(async () =>
         {
-            var models = await service.ReadStatisticsAsync(Selected.Select(x => x.Id))
-                .ConfigureAwait(false);
+            using var cts = new CancellationTokenSource(Timeout);
+            var models = await service.ReadStatisticsAsync(
+                Selected.Select(x => x.Id),
+                cts.Token).ConfigureAwait(false);
             var updated = await UpdateRunsAsync(models, Graph, ActivatedGraphId).ConfigureAwait(false);
             messenger.Send(new RunsUpdatedMessage(updated));
-        }, log.Error).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     private async Task OnGraphUpdated(object recipient, AwaitGraphUpdatedMessage msg)
     {
         var id = ActivatedGraphId;
         var local = Graph;
+        using var cts = new CancellationTokenSource(Timeout);
         if ((local != Graph<GraphVertexModel>.Empty 
-             && msg.Value.Id != ActivatedGraphId)
+            && msg.Value.Id != ActivatedGraphId)
             || local == Graph<GraphVertexModel>.Empty)
         {
-            var model = await service.ReadGraphAsync(msg.Value.Id).ConfigureAwait(false);
+            var model = await service.ReadGraphAsync(msg.Value.Id, cts.Token).ConfigureAwait(false);
             local = new (model.Vertices, model.DimensionSizes);
             id = model.Id;
             var layer = neighborFactory.CreateNeighborhoodLayer(model.Neighborhood);
@@ -121,10 +124,10 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
         {
             await ExecuteSafe(async () =>
             {
-                var models = await service.ReadStatisticsAsync(id).ConfigureAwait(false);
+                var models = await service.ReadStatisticsAsync(id, cts.Token).ConfigureAwait(false);
                 var updated = await UpdateRunsAsync(models, local, id);
                 messenger.Send(new RunsUpdatedMessage(updated));
-            }, log.Error).ConfigureAwait(false);
+            }).ConfigureAwait(false);
         }
     }
 
@@ -133,9 +136,8 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
         Graph<GraphVertexModel> graphToUpdate,
         int graphId)
     {
-        var range = (await service.ReadRangeAsync(graphId).ConfigureAwait(false))
-            .Select(x => graphToUpdate.Get(x.Position))
-            .ToList();
+        var rangeModels = await service.ReadRangeAsync(graphId).ConfigureAwait(false);
+        var range = rangeModels.Select(x => graphToUpdate.Get(x.Position)).ToList();
         var updatedRuns = new List<RunStatisticsModel>();
         if (range.Count > 1)
         {
@@ -143,7 +145,10 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
             {
                 var visitedCount = 0;
                 void OnVertexProcessed(EventArgs e) => visitedCount++;
-                var info = await service.ReadStatisticAsync(select.Id).ConfigureAwait(false);
+                using var cts = new CancellationTokenSource(Timeout);
+                var info = await service
+                    .ReadStatisticAsync(select.Id, cts.Token)
+                    .ConfigureAwait(false);
                 var factory = algorithmsFactory.GetAlgorithmFactory(info.Algorithm);
                 var algorithm = factory.CreateAlgorithm(range, info);
                 algorithm.VertexProcessed += OnVertexProcessed;
@@ -172,13 +177,16 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel
             }
             await ExecuteSafe(async () =>
             {
-                await service.UpdateStatisticsAsync(updatedRuns).ConfigureAwait(false);
-            }, (ex, msg) =>
-            {
-                log.Error(ex, msg);
-                updatedRuns.Clear();
-            });
+                var timeout = Timeout * updatedRuns.Count;
+                using var cts = new CancellationTokenSource(timeout);
+                await service.UpdateStatisticsAsync(updatedRuns, cts.Token).ConfigureAwait(false);
+            }, updatedRuns.Clear);
         }
         return [.. updatedRuns];
+    }
+
+    public void Dispose()
+    {
+        disposables.Dispose();
     }
 }

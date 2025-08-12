@@ -9,14 +9,15 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
+using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel
+internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly IRequestService<GraphVertexModel> service;
-    private readonly ILog log;
+    private readonly CompositeDisposable disposables = [];
 
     public ReactiveCommand<Unit, Unit> CopyGraphCommand { get; }
 
@@ -30,14 +31,13 @@ internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel
     public GraphCopyViewModel(
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         IRequestService<GraphVertexModel> service,
-        ILog log)
+        ILog log) : base(log)
     {
         this.messenger = messenger;
         this.service = service;
-        this.log = log;
-        messenger.Register<GraphsSelectedMessage>(this, OnGraphSelected);
-        messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
-        CopyGraphCommand = ReactiveCommand.CreateFromTask(ExecuteCopy, CanExecute());
+        messenger.RegisterHandler<GraphsSelectedMessage>(this, OnGraphSelected).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
+        CopyGraphCommand = ReactiveCommand.CreateFromTask(ExecuteCopy, CanExecute()).DisposeWith(disposables);
     }
 
     private void OnGraphSelected(object recipient, GraphsSelectedMessage msg)
@@ -54,18 +54,27 @@ internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel
     {
         await ExecuteSafe(async () =>
         {
-            var copies = await service.ReadSerializationHistoriesAsync(SelectedGraphIds)
+            var timeout = Timeout * SelectedGraphIds.Length;
+            using var cts = new CancellationTokenSource(timeout);
+            var copies = await service.ReadSerializationHistoriesAsync(
+                SelectedGraphIds, cts.Token)
                 .ConfigureAwait(false);
-            var histories = await service.CreatePathfindingHistoriesAsync(copies.Histories)
+            var histories = await service.CreatePathfindingHistoriesAsync(
+                copies.Histories, cts.Token)
                 .ConfigureAwait(false);
             var graphs = histories.Select(x => x.Graph).ToGraphInfo();
             messenger.Send(new GraphsCreatedMessage(graphs));
-        }, log.Error).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     private IObservable<bool> CanExecute()
     {
         return this.WhenAnyValue(x => x.SelectedGraphIds,
             ids => ids.Length > 0);
+    }
+
+    public void Dispose()
+    {
+        disposables.Dispose();
     }
 }

@@ -16,7 +16,7 @@ internal class FakeVertex : IVertex, IEntity<long>
 
     public Coordinate Position { get; set; }
 
-    public IReadOnlyCollection<IVertex> Neighbors { get; set; } = Array.Empty<IVertex>();
+    public IReadOnlyCollection<IVertex> Neighbors { get; set; } = [];
 
     public bool Equals(IVertex other) => this.IsEqual(other);
 }

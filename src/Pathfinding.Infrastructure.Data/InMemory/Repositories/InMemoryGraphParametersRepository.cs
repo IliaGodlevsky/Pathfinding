@@ -25,9 +25,9 @@ internal sealed class InMemoryGraphParametersRepository(
     {
         // Order sensitive. Do not change the order of deleting
         // Reason: some repositories need the presence of values in the database
-        await rangeRepository.DeleteByGraphIdAsync(graphId, token);
-        await verticesRepository.DeleteVerticesByGraphIdAsync(graphId);
-        await statisticsRepository.DeleteByGraphId(graphId);
+        await rangeRepository.DeleteByGraphIdAsync(graphId, token).ConfigureAwait(false);
+        await verticesRepository.DeleteVerticesByGraphIdAsync(graphId).ConfigureAwait(false);
+        await statisticsRepository.DeleteByGraphId(graphId).ConfigureAwait(false);
         var deleted = set.RemoveWhere(x => x.Id == graphId);
         return await Task.FromResult(deleted == 1);
     }
@@ -38,7 +38,7 @@ internal sealed class InMemoryGraphParametersRepository(
     {
         foreach (var graphId in graphIds)
         {
-            await DeleteAsync(graphId, token);
+            await DeleteAsync(graphId, token).ConfigureAwait(false);
         }
         return true;
     }

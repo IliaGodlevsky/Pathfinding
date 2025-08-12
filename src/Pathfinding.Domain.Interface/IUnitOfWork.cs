@@ -12,7 +12,7 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
 
     IStatisticsRepository StatisticsRepository { get; }
 
-    Task BeginTransactionAsync(CancellationToken token = default);
+    ValueTask BeginTransactionAsync(CancellationToken token = default);
 
     Task RollbackTransactionAsync(CancellationToken token = default);
 

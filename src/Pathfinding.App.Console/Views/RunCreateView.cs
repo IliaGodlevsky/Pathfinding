@@ -4,6 +4,7 @@ using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -14,6 +15,8 @@ internal sealed partial class RunCreateView : FrameView
     private readonly Button createButton = new("Create");
     private readonly Button cancelButton = new("Cancel");
     private readonly FrameView buttonFrame = new();
+
+    private readonly CompositeDisposable disposables = [];
 
     public RunCreateView(
         IRunCreateViewModel viewModel,
@@ -26,20 +29,30 @@ internal sealed partial class RunCreateView : FrameView
         cancelButton.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
             .Do(x => Visible = false)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(disposables);
         viewModel.CreateRunCommand.CanExecute
-            .BindTo(createButton, x => x.Enabled);
+            .BindTo(createButton, x => x.Enabled)
+            .DisposeWith(disposables);
         createButton.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
             .Select(x => Unit.Default)
             .Do(x => Visible = false)
-            .InvokeCommand(viewModel, x => x.CreateRunCommand);
+            .InvokeCommand(viewModel, x => x.CreateRunCommand)
+            .DisposeWith(disposables);
         foreach (var child in children)
         {
             this.Events().VisibleChanged
                 .Select(x => Visible)
-                .BindTo(child, x => x.Visible);
+                .BindTo(child, x => x.Visible)
+                .DisposeWith(disposables);
         }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 
     private void Initialize()

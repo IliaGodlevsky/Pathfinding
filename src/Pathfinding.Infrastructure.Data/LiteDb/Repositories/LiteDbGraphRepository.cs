@@ -34,9 +34,9 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
     {
         // Order sensitive. Do not change the order of deleting
         // Reason: some repositories need the presence of values in the database
-        await rangeRepository.DeleteByGraphIdAsync(graphId, token);
-        await verticesRepository.DeleteVerticesByGraphIdAsync(graphId);
-        await statisticsRepository.DeleteByGraphId(graphId);
+        await rangeRepository.DeleteByGraphIdAsync(graphId, token).ConfigureAwait(false);
+        await verticesRepository.DeleteVerticesByGraphIdAsync(graphId).ConfigureAwait(false);
+        await statisticsRepository.DeleteByGraphId(graphId).ConfigureAwait(false);
         return collection.Delete(graphId);
     }
 
@@ -46,7 +46,7 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
     {
         foreach (var id in graphIds)
         {
-            await DeleteAsync(id, token);
+            await DeleteAsync(id, token).ConfigureAwait(false);
         }
         return true;
     }

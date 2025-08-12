@@ -2,6 +2,7 @@
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Linq.Expressions;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -10,6 +11,7 @@ namespace Pathfinding.App.Console.Views;
 internal sealed partial class GraphParametresView : FrameView
 {
     private readonly IRequireGraphParametresViewModel viewModel;
+    private readonly CompositeDisposable disposables = [];
 
     public GraphParametresView(IRequireGraphParametresViewModel viewModel)
     {
@@ -26,7 +28,8 @@ internal sealed partial class GraphParametresView : FrameView
                 graphLengthInput.Text = string.Empty;
                 obstaclesInput.Text = string.Empty;
             })
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(disposables);
     }
 
     private void BindTo(TextField field, Expression<Func<IRequireGraphParametresViewModel, int>> expression)
@@ -35,7 +38,8 @@ internal sealed partial class GraphParametresView : FrameView
         var propertyName = ((MemberExpression)expression.Body).Member.Name;
         field.Events().TextChanging
             .Select(x => int.TryParse(x.NewText.ToString(), out var value) ? value : default)
-            .BindTo(viewModel, expression);
+            .BindTo(viewModel, expression)
+            .DisposeWith(disposables);
         viewModel.Events().PropertyChanged
             .Where(x => x.PropertyName == propertyName)
             .Do(x =>
@@ -49,6 +53,13 @@ internal sealed partial class GraphParametresView : FrameView
                     }
                 });
             })
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(disposables);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 }

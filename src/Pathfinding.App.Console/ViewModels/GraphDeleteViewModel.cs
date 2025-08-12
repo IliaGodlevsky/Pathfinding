@@ -1,5 +1,6 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
@@ -8,14 +9,15 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
+using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class GraphDeleteViewModel : BaseViewModel, IGraphDeleteViewModel
+internal sealed class GraphDeleteViewModel : BaseViewModel, IGraphDeleteViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly IRequestService<GraphVertexModel> service;
-    private readonly ILog logger;
+    private readonly CompositeDisposable disposables = [];
 
     private int[] selectedGraphIds = [];
     public int[] SelectedGraphIds
@@ -29,13 +31,12 @@ internal sealed class GraphDeleteViewModel : BaseViewModel, IGraphDeleteViewMode
     public GraphDeleteViewModel(
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         IRequestService<GraphVertexModel> service,
-        ILog logger)
+        ILog logger) : base(logger)
     {
-        DeleteGraphCommand = ReactiveCommand.CreateFromTask(DeleteGraph, CanDelete());
+        DeleteGraphCommand = ReactiveCommand.CreateFromTask(DeleteGraph, CanDelete()).DisposeWith(disposables);
         this.messenger = messenger;
         this.service = service;
-        this.logger = logger;
-        messenger.Register<GraphsSelectedMessage>(this, OnGraphSelected);
+        messenger.RegisterHandler<GraphsSelectedMessage>(this, OnGraphSelected).DisposeWith(disposables);
     }
 
     private IObservable<bool> CanDelete()
@@ -48,19 +49,26 @@ internal sealed class GraphDeleteViewModel : BaseViewModel, IGraphDeleteViewMode
     {
         await ExecuteSafe(async () =>
         {
-            var isDeleted = await service.DeleteGraphsAsync(selectedGraphIds)
-                .ConfigureAwait(false);
+            var timeout = Timeout * SelectedGraphIds.Length;
+            using var cts = new CancellationTokenSource(timeout);
+            var isDeleted = await service.DeleteGraphsAsync(
+                SelectedGraphIds, cts.Token).ConfigureAwait(false);
             if (isDeleted)
             {
                 var graphs = SelectedGraphIds.ToArray();
                 SelectedGraphIds = [];
                 messenger.Send(new GraphsDeletedMessage(graphs));
             }
-        }, logger.Error).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     private void OnGraphSelected(object recipient, GraphsSelectedMessage msg)
     {
         SelectedGraphIds = [.. msg.Value.Select(x => x.Id)];
+    }
+
+    public void Dispose()
+    {
+        disposables.Dispose();
     }
 }

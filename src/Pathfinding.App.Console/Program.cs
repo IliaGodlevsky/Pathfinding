@@ -1,10 +1,16 @@
 ﻿using Autofac;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Views;
+using Pathfinding.Logging.Interface;
 using Terminal.Gui;
 
 Application.Init();
-await using var scope = Modules.Build();
-using var main = scope.Resolve<MainView>();
+await using var context = Modules.Build();
+using var main = context.Resolve<MainView>();
+var log = context.Resolve<ILog>();
 Application.Top.Add(main);
-Application.Run(_ => true);
+Application.Run(x =>
+{
+    log.Fatal(x, x.Message);
+    return false;
+});

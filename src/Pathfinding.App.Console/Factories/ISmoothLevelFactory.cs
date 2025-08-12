@@ -3,7 +3,7 @@ using Pathfinding.Infrastructure.Business.Layers;
 
 namespace Pathfinding.App.Console.Factories;
 
-internal interface ISmoothLevelFactory
+public interface ISmoothLevelFactory
 {
     IReadOnlyCollection<SmoothLevels> Allowed { get; }
 

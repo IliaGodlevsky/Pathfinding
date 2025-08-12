@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
 using Pathfinding.App.Console.Extensions;
+using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
@@ -14,16 +15,16 @@ using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Reactive;
-using Pathfinding.App.Console.Factories;
+using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
+internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel, IDisposable
 {
     private readonly IRequestService<GraphVertexModel> service;
     private readonly INeighborhoodLayerFactory neighborFactory;
     private readonly IMessenger messenger;
-    private readonly ILog logger;
+    private readonly CompositeDisposable disposables = [];
 
     public ReactiveCommand<Unit, Unit> LoadGraphsCommand { get; }
 
@@ -39,20 +40,20 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
         IRequestService<GraphVertexModel> service,
         INeighborhoodLayerFactory neighborFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        ILog logger)
+        ILog logger) : base(logger)
     {
         this.service = service;
         this.messenger = messenger;
-        this.logger = logger;
         this.neighborFactory = neighborFactory;
-        messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage, int>(this, Tokens.GraphTable, OnGraphUpdated);
-        messenger.Register<GraphsCreatedMessage>(this, OnGraphCreated);
-        messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
-        messenger.Register<ObstaclesCountChangedMessage>(this, OnObstaclesCountChanged);
-        messenger.Register<GraphStateChangedMessage>(this, GraphStateChanged);
-        LoadGraphsCommand = ReactiveCommand.CreateFromTask(LoadGraphs);
-        ActivateGraphCommand = ReactiveCommand.CreateFromTask<int>(ActivatedGraph);
-        SelectGraphsCommand = ReactiveCommand.Create<int[]>(SelectGraphs);
+        messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage, int>(this, 
+            Tokens.GraphTable, OnGraphUpdated).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphsCreatedMessage>(this, OnGraphCreated).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
+        messenger.RegisterHandler<ObstaclesCountChangedMessage>(this, OnObstaclesCountChanged).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphStateChangedMessage>(this, GraphStateChanged).DisposeWith(disposables);
+        LoadGraphsCommand = ReactiveCommand.CreateFromTask(LoadGraphs).DisposeWith(disposables);
+        ActivateGraphCommand = ReactiveCommand.CreateFromTask<int>(ActivatedGraph).DisposeWith(disposables);
+        SelectGraphsCommand = ReactiveCommand.Create<int[]>(SelectGraphs).DisposeWith(disposables);
     }
 
     private void SelectGraphs(int[] selected)
@@ -65,7 +66,8 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
     {
         await ExecuteSafe(async () =>
         {
-            var graphModel = await service.ReadGraphAsync(model).ConfigureAwait(false);
+            using var cts = new CancellationTokenSource(Timeout);
+            var graphModel = await service.ReadGraphAsync(model, cts.Token).ConfigureAwait(false);
             var graph = new Graph<GraphVertexModel>(graphModel.Vertices, graphModel.DimensionSizes);
             var activated = new ActivatedGraphModel(graph,
                 graphModel.Neighborhood,
@@ -79,7 +81,7 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
             await messenger.Send(new AwaitGraphActivatedMessage(activated), Tokens.PathfindingRange);
             messenger.Send(new GraphActivatedMessage(activated));
             ActivatedGraphId = graphModel.Id;
-        }, logger.Error).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     private async Task LoadGraphs()
@@ -89,7 +91,7 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
             Graphs.Clear();
             var infos = await service.ReadAllGraphInfoAsync().ConfigureAwait(false);
             Graphs.Add(infos.ToGraphInfo());
-        }, logger.Error).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     private void OnObstaclesCountChanged(object recipient, ObstaclesCountChangedMessage msg)
@@ -136,5 +138,10 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel
             .Where(x => msg.Value.Contains(x.Id))
             .ToList();
         Graphs.Remove(graphs);
+    }
+
+    public void Dispose()
+    {
+        disposables.Dispose();
     }
 }

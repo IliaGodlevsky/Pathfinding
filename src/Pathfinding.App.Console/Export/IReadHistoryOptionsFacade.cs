@@ -9,5 +9,6 @@ internal interface IReadHistoryOptionsFacade
 
     Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(
         ExportOptions option,
-        IReadOnlyCollection<int> graphIds);
+        IReadOnlyCollection<int> graphIds,
+        CancellationToken token = default);
 }

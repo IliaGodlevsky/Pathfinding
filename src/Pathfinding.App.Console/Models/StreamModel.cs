@@ -1,16 +1,13 @@
-﻿using System.Reactive.Disposables;
+﻿namespace Pathfinding.App.Console.Models;
 
-namespace Pathfinding.App.Console.Models;
-
-internal class StreamModel(Stream stream, 
-    StreamFormat? format = null,
+internal sealed class StreamModel(Stream stream = null, StreamFormat? format = null,
     params IDisposable[] disposables) : IDisposable, IAsyncDisposable
 {
-    public static readonly StreamModel Empty = new(Stream.Null);
+    public static readonly StreamModel Empty = new();
 
-    private readonly CompositeDisposable disposables = [.. disposables.Append(stream)];
+    private readonly IDisposable[] disposables = disposables;
 
-    public Stream Stream { get; } = stream;
+    public Stream Stream { get; } = stream ?? Stream.Null;
 
     public StreamFormat? Format { get; } = format;
 
@@ -18,22 +15,26 @@ internal class StreamModel(Stream stream,
 
     public void Dispose()
     {
-        disposables.Dispose();
+        stream.Dispose();
+        foreach (var disposable in disposables)
+        {
+            disposable.Dispose();
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
+        await stream.DisposeAsync().ConfigureAwait(false);
         foreach (var disposable in disposables)
         {
             if (disposable is IAsyncDisposable async)
             {
-                await async.DisposeAsync();
+                await async.DisposeAsync().ConfigureAwait(false);
             }
             else
             {
                 disposable.Dispose();
             }
         }
-        disposables.Dispose();
     }
 }

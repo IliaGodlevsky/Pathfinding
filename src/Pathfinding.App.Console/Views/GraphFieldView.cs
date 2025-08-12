@@ -1,5 +1,6 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.Models;
@@ -24,6 +25,7 @@ internal sealed partial class GraphFieldView : FrameView
     private readonly IGraphFieldViewModel graphFieldViewModel;
     private readonly IRunRangeViewModel runRangeViewModel;
 
+    private readonly CompositeDisposable disposables = [];
     private readonly CompositeDisposable vertexDisposables = [];
     private readonly MainLoop mainLoop;
 
@@ -41,12 +43,20 @@ internal sealed partial class GraphFieldView : FrameView
         this.graphFieldViewModel.WhenAnyValue(x => x.Graph)
             .Where(x => x != null)
             .Do(RenderGraph)
-            .Subscribe();
-        messenger.Register<OpenRunFieldMessage>(this, OnOpenAlgorithmRunView);
-        messenger.Register<CloseRunFieldMessage>(this, OnCloseAlgorithmRunField);
+            .Subscribe()
+            .DisposeWith(disposables);
+        messenger.RegisterHandler<OpenRunFieldMessage>(this, OnOpenAlgorithmRunView).DisposeWith(disposables);
+        messenger.RegisterHandler<CloseRunFieldMessage>(this, OnCloseAlgorithmRunField).DisposeWith(disposables);
         container.X = Pos.Center();
         container.Y = Pos.Center();
         Add(container);
+        vertexDisposables.DisposeWith(disposables);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 
     private void OnOpenAlgorithmRunView(object recipient, OpenRunFieldMessage msg)

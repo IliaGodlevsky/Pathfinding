@@ -4,6 +4,7 @@ using Pathfinding.App.Console.Resources;
 using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -11,6 +12,8 @@ namespace Pathfinding.App.Console.Views;
 
 internal sealed partial class GraphImportButton : Button
 {
+    private readonly CompositeDisposable disposables = [];
+
     public GraphImportButton(IGraphImportViewModel viewModel)
     {
         Initialize();
@@ -23,7 +26,14 @@ internal sealed partial class GraphImportButton : Button
                     ? new Func<StreamModel>(() => StreamModel.Empty)
                     : () => new(File.OpenRead(fileName.Path), fileName.Format);
             })
-            .InvokeCommand(viewModel, x => x.ImportGraphCommand);
+            .InvokeCommand(viewModel, x => x.ImportGraphCommand)
+            .DisposeWith(disposables);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 
     private static (string Path, StreamFormat? Format) GetFileName(IGraphImportViewModel viewModel)
