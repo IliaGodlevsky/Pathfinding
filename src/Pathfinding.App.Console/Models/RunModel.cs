@@ -64,7 +64,7 @@ internal class RunModel : ReactiveObject, IDisposable
 
     private InclusiveValueRange<int> CursorRange { get; }
 
-    public int Id { get; set; }
+    public int Id { get; init; }
 
     private float fraction;
     public float Fraction
@@ -97,12 +97,18 @@ internal class RunModel : ReactiveObject, IDisposable
 
     private void Next(int count)
     {
-        while (count-- >= 0) Algorithm[Cursor++].Set();
+        while (count-- >= 0)
+        {
+            Algorithm[Cursor++].Set();
+        }
     }
 
     private void Previous(int count)
     {
-        while (count++ <= 0) Algorithm[Cursor--].SetInverse();
+        while (count++ <= 0)
+        {
+            Algorithm[Cursor--].SetInverse();
+        }
     }
 
     private static ReadOnlyCollection<RunVertexStateModel> CreateAlgorithmRevision(

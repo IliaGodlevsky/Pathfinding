@@ -16,13 +16,13 @@ public sealed class BidirectRandomAlgorithm(IReadOnlyCollection<IPathfindingVert
 
         if (ForwardStorage.Count > 0)
         {
-            int index = random.Next(ForwardStorage.Count);
+            var index = random.Next(ForwardStorage.Count);
             forward = ForwardStorage[index];
             ForwardStorage.RemoveAt(index);
         }
         if (BackwardStorage.Count > 0)
         {
-            int index = random.Next(BackwardStorage.Count);
+            var index = random.Next(BackwardStorage.Count);
             backward = BackwardStorage[index];
             BackwardStorage.RemoveAt(index);
         }

@@ -15,10 +15,12 @@ public sealed class AStarGreedyAlgorithm(IReadOnlyCollection<IPathfindingVertex>
 
     }
 
-    protected override IGraphPath GetSubPath()
+    protected override GraphPath GetSubPath()
     {
-        return new GraphPath(Traces.ToFrozenDictionary(),
-            CurrentRange.Target, stepRule);
+        return new (
+            Traces.ToFrozenDictionary(),
+            CurrentRange.Target,
+            stepRule);
     }
 
     protected override double CalculateGreed(IPathfindingVertex vertex)

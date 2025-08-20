@@ -9,7 +9,7 @@ using System.Collections.Frozen;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public sealed class IDAStarAlgorithm(
+public sealed class IdaStarAlgorithm(
     IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
     IStepRule stepRule, IHeuristic heuristic) 
     : PathfindingAlgorithm<Stack<IPathfindingVertex>>(pathfindingRange)
@@ -18,7 +18,7 @@ public sealed class IDAStarAlgorithm(
     private double currentBound;
     private double nextBound;
 
-    public IDAStarAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
+    public IdaStarAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
         : this(pathfindingRange, new DefaultStepRule(), new ChebyshevDistance())
     {
     }
@@ -32,16 +32,20 @@ public sealed class IDAStarAlgorithm(
         nextBound = double.PositiveInfinity;
     }
 
-    protected override IGraphPath GetSubPath()
+    protected override GraphPath GetSubPath()
     {
-        return new GraphPath(Traces.ToFrozenDictionary(), CurrentRange.Target, stepRule);
+        return new (
+            Traces.ToFrozenDictionary(), 
+            CurrentRange.Target,
+            stepRule);
     }
 
     protected override void PrepareForSubPathfinding(SubRange range)
     {
         base.PrepareForSubPathfinding(range);
         
-        double initialHeuristic = heuristic.Calculate(CurrentRange.Source, CurrentRange.Target);
+        var initialHeuristic = heuristic.Calculate(CurrentRange.Source,
+            CurrentRange.Target);
         currentBound = initialHeuristic;
         nextBound = double.PositiveInfinity;
         
@@ -82,8 +86,8 @@ public sealed class IDAStarAlgorithm(
 
     protected override void InspectCurrentVertex()
     {
-        double g = gCosts[CurrentVertex.Position];
-        double f = g + heuristic.Calculate(CurrentVertex, CurrentRange.Target);
+        var g = gCosts[CurrentVertex.Position];
+        var f = g + heuristic.Calculate(CurrentVertex, CurrentRange.Target);
         
         if (f > currentBound)
         {
@@ -96,9 +100,9 @@ public sealed class IDAStarAlgorithm(
         
         foreach (var neighbor in neighbors.Reverse())
         {
-            double newG = g + stepRule.CalculateStepCost(neighbor, CurrentVertex);
+            var newG = g + stepRule.CalculateStepCost(neighbor, CurrentVertex);
             
-            if (!gCosts.TryGetValue(neighbor.Position, out double oldG) || newG < oldG)
+            if (!gCosts.TryGetValue(neighbor.Position, out var oldG) || newG < oldG)
             {
                 gCosts[neighbor.Position] = newG;
                 Storage.Push(neighbor);

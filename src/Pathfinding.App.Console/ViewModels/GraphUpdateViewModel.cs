@@ -82,8 +82,7 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
         await ExecuteSafe(async () =>
         {
             var graph = SelectedGraphs[0];
-            var info = await service.ReadGraphInfoAsync(graph.Id)
-                .ConfigureAwait(false);
+            var info = await service.ReadGraphInfoAsync(graph.Id).ConfigureAwait(false);
             info.Name = Name;
             info.Neighborhood = Neighborhood;
             await service.UpdateGraphInfoAsync(info).ConfigureAwait(false);
@@ -112,8 +111,7 @@ internal sealed class GraphUpdateViewModel : BaseViewModel
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
     {
-        SelectedGraphs = [.. SelectedGraphs
-            .Where(x => !msg.Value.Contains(x.Id))];
+        SelectedGraphs = [.. SelectedGraphs.Where(x => !msg.Value.Contains(x.Id))];
         if (SelectedGraphs.Length == 0)
         {
             Name = string.Empty;

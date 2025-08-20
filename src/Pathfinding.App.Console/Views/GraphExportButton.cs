@@ -24,8 +24,7 @@ internal sealed partial class GraphExportButton
                     : () => new (OpenWrite(filePath.Path), filePath.Format);
             })
             .InvokeCommand(viewModel, x => x.ExportGraphCommand);
-        viewModel.ExportGraphCommand.CanExecute
-            .BindTo(this, x => x.Enabled);
+        viewModel.ExportGraphCommand.CanExecute.BindTo(this, x => x.Enabled);
     }
 
     private static FileStream OpenWrite(string path)

@@ -1,11 +1,13 @@
 ﻿using Autofac.Extras.Moq;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
+using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface.Factories;
+using Pathfinding.Infrastructure.Business.Layers;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
@@ -39,6 +41,13 @@ internal class GraphAssembleViewModelTests
                 Vertices = [],
                 DimensionSizes = [15, 15]
             }));
+
+        mock.Mock<INeighborhoodLayerFactory>()
+            .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
+            .Returns(new Layers());
+        mock.Mock<ISmoothLevelFactory>()
+            .Setup(x => x.CreateLayer(It.IsAny<SmoothLevels>()))
+            .Returns(new SmoothLayer(0));
 
         var viewModel = mock.Create<GraphAssembleViewModel>();
         viewModel.SmoothLevel = SmoothLevels.No;

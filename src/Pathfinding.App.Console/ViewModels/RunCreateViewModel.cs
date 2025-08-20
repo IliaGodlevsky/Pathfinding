@@ -104,7 +104,8 @@ internal sealed class RunCreateViewModel : BaseViewModel,
         set => this.RaiseAndSetIfChanged(ref graph, value);
     }
 
-    public RunCreateViewModel(IRequestService<GraphVertexModel> service,
+    public RunCreateViewModel(
+        IRequestService<GraphVertexModel> service,
         IAlgorithmsFactory algorithmsFactory,
         IHeuristicsFactory heuristicsFactory,
         IStepRuleFactory stepRuleFactory,

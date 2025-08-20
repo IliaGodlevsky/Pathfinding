@@ -9,14 +9,13 @@ using Terminal.Gui;
 
 namespace Pathfinding.App.Console.Views;
 
-internal sealed partial class RunCreateView : FrameView
+internal sealed class RunCreateView : FrameView
 {
     private readonly Button createButton = new("Create");
     private readonly Button cancelButton = new("Cancel");
     private readonly FrameView buttonFrame = new();
 
-    public RunCreateView(
-        IRunCreateViewModel viewModel,
+    public RunCreateView(IRunCreateViewModel viewModel,
         [KeyFilter(KeyFilters.RunCreateView)] View[] children)
     {
         Initialize();
@@ -25,19 +24,18 @@ internal sealed partial class RunCreateView : FrameView
         Add(buttonFrame);
         cancelButton.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-            .Do(x => Visible = false)
+            .Do(_ => Visible = false)
             .Subscribe();
-        viewModel.CreateRunCommand.CanExecute
-            .BindTo(createButton, x => x.Enabled);
+        viewModel.CreateRunCommand.CanExecute.BindTo(createButton, x => x.Enabled);
         createButton.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-            .Select(x => Unit.Default)
-            .Do(x => Visible = false)
+            .Select(_ => Unit.Default)
+            .Do(_ => Visible = false)
             .InvokeCommand(viewModel, x => x.CreateRunCommand);
         foreach (var child in children)
         {
             this.Events().VisibleChanged
-                .Select(x => Visible)
+                .Select(_ => Visible)
                 .BindTo(child, x => x.Visible);
         }
     }
@@ -62,10 +60,10 @@ internal sealed partial class RunCreateView : FrameView
         Width = Dim.Fill();
         Height = Dim.Fill();
         Visible = false;
-        Border = new Border()
+        Border = new()
         {
             BorderStyle = BorderStyle.None,
-            BorderThickness = new Thickness(0)
+            BorderThickness = new(0)
         };
     }
 }

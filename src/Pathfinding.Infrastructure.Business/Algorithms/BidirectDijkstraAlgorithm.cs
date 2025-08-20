@@ -25,11 +25,13 @@ public class BidirectDijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> p
         BackwardStorage.EnqueueOrUpdatePriority(Range.Target, 0);
     }
 
-    protected override IGraphPath GetSubPath()
+    protected override BidirectGraphPath GetSubPath()
     {
-        return new BidirectGraphPath(
+        return new (
             ForwardTraces.ToFrozenDictionary(),
-            BackwardTraces.ToFrozenDictionary(), Intersection, StepRule);
+            BackwardTraces.ToFrozenDictionary(), 
+            Intersection,
+            StepRule);
     }
 
     protected override void DropState()

@@ -1,4 +1,5 @@
-﻿using Pathfinding.Infrastructure.Business.Algorithms;
+﻿using Pathfinding.App.Console.Extensions;
+using Pathfinding.Infrastructure.Business.Algorithms;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models;
 
@@ -17,7 +18,7 @@ public sealed class AStarAlgorithmFactory(
         ArgumentNullException.ThrowIfNull(info.Weight, nameof(info.Weight));
         ArgumentNullException.ThrowIfNull(info.StepRule, nameof(info.StepRule));
 
-        var heuristics = heuristicFactory.CreateHeuristic(info.Heuristics.Value, info.Weight.Value);
+        var heuristics = heuristicFactory.CreateHeuristic(info);
         var stepRule = stepRuleFactory.CreateStepRule(info.StepRule.Value);
         return new(range, stepRule, heuristics);
     }

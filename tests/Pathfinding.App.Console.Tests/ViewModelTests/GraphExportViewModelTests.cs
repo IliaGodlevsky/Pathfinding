@@ -3,6 +3,7 @@ using Autofac.Extras.Moq;
 using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
+using Pathfinding.App.Console.Export;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
@@ -20,7 +21,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests;
 [Category("Unit")]
 internal class GraphExportViewModelTests
 {
-    private static async Task ExportGraphCommand_HasGraphs_ShouldExport(Expression<Func<IRequestService<GraphVertexModel>, Task<PathfindingHistoriesSerializationModel>>> expression,
+    private static async Task ExportGraphCommand_HasGraphs_ShouldExport(Expression<Func<IReadHistoryOptionsFacade, Task<PathfindingHistoriesSerializationModel>>> expression,
         ExportOptions options)
     {
         using var mock = AutoMock.GetLoose();
@@ -33,7 +34,7 @@ internal class GraphExportViewModelTests
                 .ToArray()
                 .To(x => new PathfindingHistoriesSerializationModel { Histories = [.. x] });
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IReadHistoryOptionsFacade>()
             .Setup(expression)
             .Returns(Task.FromResult(histories));
 
@@ -63,8 +64,10 @@ internal class GraphExportViewModelTests
 
         Assert.Multiple(() =>
         {
-            mock.Mock<IRequestService<GraphVertexModel>>()
-                .Verify(expression, Times.Once);
+            mock.Mock<IReadHistoryOptionsFacade>()
+                .Verify(x => x.ReadHistoryAsync(
+                    It.Is<ExportOptions>(y => y == options),
+                    It.IsAny<IReadOnlyCollection<int>>()), Times.Once);
 
             mock.Mock<IMessenger>()
                 .Verify(x => x.Register(
@@ -82,27 +85,27 @@ internal class GraphExportViewModelTests
     [Test]
     public async Task ExportGraphCommand_WithRuns_ShouldExport()
     {
-        await ExportGraphCommand_HasGraphs_ShouldExport(x => x.ReadSerializationHistoriesAsync(
-                It.IsAny<IEnumerable<int>>(),
-                It.IsAny<CancellationToken>()),
+        await ExportGraphCommand_HasGraphs_ShouldExport(x => x.ReadHistoryAsync(
+                It.Is<ExportOptions>(y => y == ExportOptions.WithRuns),
+                It.IsAny<IReadOnlyCollection<int>>()),
             ExportOptions.WithRuns);
     }
 
     [Test]
     public async Task ExportGraphCommand_WithRange_ShouldExport()
     {
-        await ExportGraphCommand_HasGraphs_ShouldExport(x => x.ReadSerializationGraphsWithRangeAsync(
-                It.IsAny<IEnumerable<int>>(),
-                It.IsAny<CancellationToken>()),
+        await ExportGraphCommand_HasGraphs_ShouldExport(x => x.ReadHistoryAsync(
+                It.Is<ExportOptions>(y => y == ExportOptions.WithRange),
+                It.IsAny<IReadOnlyCollection<int>>()),
             ExportOptions.WithRange);
     }
 
     [Test]
     public async Task ExportGraphCommand_GraphOnly_ShouldExport()
     {
-        await ExportGraphCommand_HasGraphs_ShouldExport(x => x.ReadSerializationGraphsAsync(
-                It.IsAny<IEnumerable<int>>(),
-                It.IsAny<CancellationToken>()),
+        await ExportGraphCommand_HasGraphs_ShouldExport(x => x.ReadHistoryAsync(
+                It.Is<ExportOptions>(y => y == ExportOptions.GraphOnly),
+                It.IsAny<IReadOnlyCollection<int>>()),
             ExportOptions.GraphOnly);
     }
 

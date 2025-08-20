@@ -142,9 +142,10 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
 
     private Layers GetLayers()
     {
-        var random = Random.Shared;
-        var costLayer = new VertexCostLayer(CostRange, range => new VertexCost(random.Next(
-            range.LowerValueOfRange, range.UpperValueOfRange + 1), range));
+        var costLayer = new VertexCostLayer(CostRange, range 
+            => new VertexCost(Random.Shared.Next(
+                range.LowerValueOfRange, 
+                range.UpperValueOfRange + 1), range));
         var obstacleLayer = new ObstacleLayer(Obstacles);
         var smoothLayer = smoothLevelFactory.CreateLayer(SmoothLevel);
         var neighborhoodLayer = neighborFactory.CreateNeighborhoodLayer(Neighborhood);

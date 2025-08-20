@@ -8,6 +8,9 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using System.Reactive.Linq;
+using Pathfinding.App.Console.Factories;
+using Pathfinding.Domain.Core.Enums;
+using Pathfinding.Infrastructure.Business.Layers;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 
@@ -84,6 +87,10 @@ internal sealed class GraphTableViewModelTests
                 It.IsAny<IsAnyToken>()))
             .Returns<AwaitGraphActivatedMessage, object>((x, _) => x)
             .Callback<AwaitGraphActivatedMessage, object>((m, _) => m.SetCompleted());
+
+        mock.Mock<INeighborhoodLayerFactory>()
+            .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
+            .Returns(new Layers());
 
         var viewModel = mock.Create<GraphTableViewModel>();
 

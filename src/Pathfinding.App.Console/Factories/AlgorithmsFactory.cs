@@ -5,20 +5,16 @@ using Pathfinding.Infrastructure.Business.Algorithms;
 
 namespace Pathfinding.App.Console.Factories;
 
-internal sealed class AlgorithmsFactory : IAlgorithmsFactory
+internal sealed class AlgorithmsFactory(Meta<IAlgorithmFactory<PathfindingProcess>>[] algorithms) : IAlgorithmsFactory
 {
-    private readonly Dictionary<Algorithms, IAlgorithmFactory<PathfindingProcess>> algorithms;
-
-    public IReadOnlyCollection<Algorithms> Allowed { get; }
-
-    public AlgorithmsFactory(Meta<IAlgorithmFactory<PathfindingProcess>>[] algorithms)
-    {
-        this.algorithms = algorithms.ToDictionary(
-            x => (Algorithms)x.Metadata[MetadataKeys.Algorithm], 
+    private readonly Dictionary<Algorithms, IAlgorithmFactory<PathfindingProcess>> algorithms 
+        = algorithms.ToDictionary(
+            x => (Algorithms)x.Metadata[MetadataKeys.Algorithm],
             x => x.Value);
-        Allowed = [.. algorithms.OrderBy(x => x.Metadata[MetadataKeys.Order])
+
+    public IReadOnlyCollection<Algorithms> Allowed { get; } 
+        = [.. algorithms.OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => (Algorithms)x.Metadata[MetadataKeys.Algorithm])];
-    }
 
     public IAlgorithmFactory<PathfindingProcess> GetAlgorithmFactory(Algorithms algorithm)
     {

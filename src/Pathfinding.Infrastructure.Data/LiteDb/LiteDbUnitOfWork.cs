@@ -41,10 +41,10 @@ internal sealed class LiteDbUnitOfWork : IUnitOfWork
         StatisticsRepository = new LiteDbStatisticsRepository(database);
     }
 
-    public async Task BeginTransactionAsync(CancellationToken token = default)
+    public Task BeginTransactionAsync(CancellationToken token = default)
     {
         database.BeginTrans();
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     public void Dispose()
@@ -52,21 +52,21 @@ internal sealed class LiteDbUnitOfWork : IUnitOfWork
         database.Dispose();
     }
 
-    public async Task RollbackTransactionAsync(CancellationToken token = default)
+    public Task RollbackTransactionAsync(CancellationToken token = default)
     {
         database.Rollback();
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public async Task CommitTransactionAsync(CancellationToken token = default)
+    public Task CommitTransactionAsync(CancellationToken token = default)
     {
         database.Commit();
-        await Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         database.Dispose();
-        await Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }

@@ -149,7 +149,7 @@ internal static class Modules
             .WithMetadata(MetadataKeys.Order, 16).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<DijkstraAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Dijkstra)
             .WithMetadata(MetadataKeys.Order, 1).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
-        builder.RegisterType<IDAStarAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.IdaStar)
+        builder.RegisterType<IdaStarAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.IdaStar)
             .WithMetadata(MetadataKeys.Order, 5).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<AlgorithmsFactory>().As<IAlgorithmsFactory>().SingleInstance();
 

@@ -44,7 +44,9 @@ internal sealed class GraphExportViewModel : BaseViewModel, IGraphExportViewMode
         this.facade = facade;
         this.logger = logger;
         this.serializers = serializers
-            .ToDictionary(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], x => x.Value);
+            .ToDictionary(
+                x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], 
+                x => x.Value);
         StreamFormats = [.. serializers
             .OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat])];

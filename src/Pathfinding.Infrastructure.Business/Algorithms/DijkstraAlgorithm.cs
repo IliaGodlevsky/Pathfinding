@@ -18,10 +18,12 @@ public class DijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindi
 
     }
 
-    protected override IGraphPath GetSubPath()
+    protected override GraphPath GetSubPath() 
     {
-        return new GraphPath(Traces.ToFrozenDictionary(),
-            CurrentRange.Target, StepRule);
+        return new (
+            Traces.ToFrozenDictionary(),
+            CurrentRange.Target, 
+            StepRule);
     }
 
     protected override void DropState()
@@ -38,13 +40,13 @@ public class DijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindi
     protected override void PrepareForSubPathfinding(SubRange range)
     {
         base.PrepareForSubPathfinding(range);
-        Storage.EnqueueOrUpdatePriority(CurrentRange.Source, default);
+        Storage.EnqueueOrUpdatePriority(CurrentRange.Source, 0);
     }
 
     protected override void RelaxVertex(IPathfindingVertex vertex)
     {
-        double relaxedCost = GetVertexRelaxedCost(vertex);
-        double vertexCost = GetVertexCurrentCost(vertex);
+        var relaxedCost = GetVertexRelaxedCost(vertex);
+        var vertexCost = GetVertexCurrentCost(vertex);
         if (vertexCost > relaxedCost)
         {
             Enqueue(vertex, relaxedCost);

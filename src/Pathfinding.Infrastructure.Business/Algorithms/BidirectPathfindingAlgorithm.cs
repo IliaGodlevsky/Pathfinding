@@ -34,11 +34,12 @@ public abstract class BidirectPathfindingAlgorithm<TStorage>(IReadOnlyCollection
         Current = Range;
     }
 
-    protected override IGraphPath GetSubPath()
+    protected override BidirectGraphPath GetSubPath()
     {
-        return new BidirectGraphPath(
+        return new(
             ForwardTraces.ToFrozenDictionary(),
-            BackwardTraces.ToFrozenDictionary(), Intersection);
+            BackwardTraces.ToFrozenDictionary(),
+            Intersection);
     }
 
     protected virtual void SetForwardIntersection(IPathfindingVertex vertex)

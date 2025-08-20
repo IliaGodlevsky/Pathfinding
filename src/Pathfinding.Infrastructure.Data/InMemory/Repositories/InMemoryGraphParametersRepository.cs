@@ -76,14 +76,13 @@ internal sealed class InMemoryGraphParametersRepository(
         CancellationToken token = default)
     {
         var result = new Dictionary<int, int>();
-        foreach (var graph in graphIds)
+        foreach (var graphId in graphIds)
         {
-            var vertices = await verticesRepository
-                .ReadVerticesByGraphIdAsync(graph)
-                .ToListAsync(token)
+            var obstacles = await verticesRepository
+                .ReadVerticesByGraphIdAsync(graphId)
+                .CountAsync(x => x.IsObstacle, token)
                 .ConfigureAwait(false);
-            int obstacles = vertices.Count(x => x.IsObstacle);
-            result.Add(graph, obstacles);
+            result.Add(graphId, obstacles);
         }
         return result;
     }
