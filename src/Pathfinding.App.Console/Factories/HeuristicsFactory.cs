@@ -1,5 +1,6 @@
 ﻿using Autofac.Features.Metadata;
 using Pathfinding.App.Console.Injection;
+using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Business.Algorithms.Heuristics;
 using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Service.Interface;
@@ -9,14 +10,14 @@ namespace Pathfinding.App.Console.Factories;
 public sealed class HeuristicsFactory(IEnumerable<Meta<IHeuristic>> heuristics) 
     : IHeuristicsFactory
 {
-    private readonly Dictionary<Heuristic, IHeuristic> heuristics 
+    private readonly Dictionary<Heuristics, IHeuristic> heuristics 
         = heuristics.ToDictionary(
-            x => (Heuristic)x.Metadata[MetadataKeys.Heuristics],
+            x => (Heuristics)x.Metadata[MetadataKeys.Heuristics],
             x => x.Value);
 
-    public IReadOnlyCollection<Heuristic> Allowed => heuristics.Keys;
+    public IReadOnlyCollection<Heuristics> Allowed => heuristics.Keys;
 
-    public IHeuristic CreateHeuristic(Heuristic heuristic, double weight)
+    public IHeuristic CreateHeuristic(Heuristics heuristic, double weight)
     {
         if (heuristics.TryGetValue(heuristic, out var value))
         {
