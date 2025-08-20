@@ -41,6 +41,12 @@ internal class GraphAssembleViewModelTests
                 Vertices = [],
                 DimensionSizes = [15, 15]
             }));
+        mock.Mock<ISmoothLevelFactory>()
+            .Setup(x => x.CreateLayer(It.IsAny<SmoothLevels>()))
+            .Returns(new SmoothLayer(0));
+        mock.Mock<INeighborhoodLayerFactory>()
+            .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
+            .Returns(new Layers());
 
         mock.Mock<INeighborhoodLayerFactory>()
             .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))

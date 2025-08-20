@@ -22,11 +22,11 @@ internal sealed class RunVertexView : VertexView<RunVertexModel>
     }
 
     private void BindTo(Expression<Func<RunVertexModel, bool>> expression,
-        ColorScheme toColor, ColorScheme falseColor, int toSkip = 1)
+        ColorScheme toColor, ColorScheme reverseColor, int toSkip = 1)
     {
         model.WhenAnyValue(expression)
            .Skip(toSkip)
-           .Select(x => x ? toColor : falseColor)
+           .Select(x => x ? toColor : reverseColor)
            .BindTo(this, x => x.ColorScheme)
            .DisposeWith(disposables);
     }

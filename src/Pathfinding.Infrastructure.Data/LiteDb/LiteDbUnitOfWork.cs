@@ -41,10 +41,10 @@ internal sealed class LiteDbUnitOfWork : IUnitOfWork
         StatisticsRepository = new LiteDbStatisticsRepository(database);
     }
 
-    public Task BeginTransactionAsync(CancellationToken token = default)
+    public ValueTask BeginTransactionAsync(CancellationToken token = default)
     {
         database.BeginTrans();
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     public void Dispose()

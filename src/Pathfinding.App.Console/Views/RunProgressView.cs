@@ -8,6 +8,7 @@ using Pathfinding.Shared.Extensions;
 using Pathfinding.Shared.Primitives;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -23,6 +24,7 @@ internal sealed partial class RunProgressView : FrameView
     private static readonly InclusiveValueRange<float> FractionRange = (1, 0);
 
     private readonly IRunFieldViewModel viewModel;
+    private readonly CompositeDisposable disposables = [];
 
     private float Fraction
     {
@@ -58,7 +60,14 @@ internal sealed partial class RunProgressView : FrameView
             .Where(x => viewModel.SelectedRun != RunModel.Empty
                 && flags.Any(z => x.MouseEvent.Flags.HasFlag(z)))
             .Select(function)
-            .BindTo(viewModel, x => x.SelectedRun.Fraction);
+            .BindTo(viewModel, x => x.SelectedRun.Fraction)
+            .DisposeWith(disposables);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 
     private void OnRunFieldClosed(object recipient, CloseRunFieldMessage msg)

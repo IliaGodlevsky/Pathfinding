@@ -4,6 +4,7 @@ using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -11,6 +12,8 @@ namespace Pathfinding.App.Console.Views;
 
 internal sealed partial class GraphAssembleView : FrameView
 {
+    private readonly CompositeDisposable disposables = [];
+
     public GraphAssembleView(
         [KeyFilter(KeyFilters.GraphAssembleView)] View[] children,
         IGraphAssembleViewModel viewModel)
@@ -18,18 +21,21 @@ internal sealed partial class GraphAssembleView : FrameView
         Initialize();
         Add(children);
         viewModel.AssembleGraphCommand.CanExecute
-            .BindTo(createButton, x => x.Enabled);
+            .BindTo(createButton, x => x.Enabled)
+            .DisposeWith(disposables);
         createButton.Events()
             .MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
             .Select(x => Unit.Default)
             .Do(x => Visible = false)
-            .InvokeCommand(viewModel, x => x.AssembleGraphCommand);
+            .InvokeCommand(viewModel, x => x.AssembleGraphCommand)
+            .DisposeWith(disposables);
         foreach (var child in children)
         {
             this.Events().VisibleChanged
                 .Select(x => Visible)
-                .BindTo(child, x => x.Visible);
+                .BindTo(child, x => x.Visible)
+                .DisposeWith(disposables);
         }
         cancelButton.Events().MouseClick
             .Where(e => e.MouseEvent.Flags == MouseFlags.Button1Clicked)
@@ -38,6 +44,13 @@ internal sealed partial class GraphAssembleView : FrameView
                 Visible = false;
                 Application.Driver.SetCursorVisibility(CursorVisibility.Invisible);
             })
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(disposables);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 }

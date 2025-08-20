@@ -6,6 +6,7 @@ using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -15,6 +16,8 @@ internal sealed partial class RunHeuristicsView
 {
     private readonly IRequireHeuristicsViewModel viewModel;
     private readonly List<CheckBox> checkBoxes = [];
+
+    private readonly CompositeDisposable disposables = [];
 
     public RunHeuristicsView([KeyFilter(KeyFilters.Views)] IMessenger messenger,
         IRequireHeuristicsViewModel viewModel)
@@ -30,7 +33,8 @@ internal sealed partial class RunHeuristicsView
                     ? (Action<Heuristics?>)(z => heuristics.Remove(z))
                     : heuristics.Add)
                 .Do(x => x(heuristic))
-                .Subscribe();
+                .Subscribe()
+                .DisposeWith(disposables);
             checkBoxes.Add(checkBox);
         }
         Add([.. checkBoxes]);
@@ -38,6 +42,12 @@ internal sealed partial class RunHeuristicsView
         messenger.Register<CloseHeuristicsViewMessage>(this, OnHeuristicsViewClosed);
         messenger.Register<CloseRunCreateViewMessage>(this, OnRunCreationViewClosed);
         this.viewModel = viewModel;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 
     private void OnHeuristicsViewOpen(object recipient, OpenHeuristicsViewMessage msg)

@@ -4,6 +4,7 @@ using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -15,7 +16,10 @@ internal sealed class RunCreateView : FrameView
     private readonly Button cancelButton = new("Cancel");
     private readonly FrameView buttonFrame = new();
 
-    public RunCreateView(IRunCreateViewModel viewModel,
+    private readonly CompositeDisposable disposables = [];
+
+    public RunCreateView(
+        IRunCreateViewModel viewModel,
         [KeyFilter(KeyFilters.RunCreateView)] View[] children)
     {
         Initialize();
@@ -24,20 +28,31 @@ internal sealed class RunCreateView : FrameView
         Add(buttonFrame);
         cancelButton.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-            .Do(_ => Visible = false)
-            .Subscribe();
-        viewModel.CreateRunCommand.CanExecute.BindTo(createButton, x => x.Enabled);
+            .Do(x => Visible = false)
+            .Subscribe()
+            .DisposeWith(disposables);
+        viewModel.CreateRunCommand.CanExecute
+            .BindTo(createButton, x => x.Enabled)
+            .DisposeWith(disposables);
         createButton.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-            .Select(_ => Unit.Default)
-            .Do(_ => Visible = false)
-            .InvokeCommand(viewModel, x => x.CreateRunCommand);
+            .Select(x => Unit.Default)
+            .Do(x => Visible = false)
+            .InvokeCommand(viewModel, x => x.CreateRunCommand)
+            .DisposeWith(disposables);
         foreach (var child in children)
         {
             this.Events().VisibleChanged
-                .Select(_ => Visible)
-                .BindTo(child, x => x.Visible);
+                .Select(x => Visible)
+                .BindTo(child, x => x.Visible)
+                .DisposeWith(disposables);
         }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 
     private void Initialize()

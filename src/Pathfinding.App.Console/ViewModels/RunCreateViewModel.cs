@@ -1,5 +1,6 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.Requests;
@@ -21,6 +22,7 @@ using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive;
+using System.Reactive.Disposables;
 
 // ReSharper disable PossibleInvalidOperationException
 // ReSharper disable RedundantAssignment
@@ -33,7 +35,8 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     IRunCreateViewModel,
     IRequireHeuristicsViewModel,
     IRequireStepRuleViewModel,
-    IRequirePopulationViewModel
+    IRequirePopulationViewModel,
+    IDisposable
 {
     private static readonly InclusiveValueRange<double> WeightRange = (5, 0);
 
@@ -45,8 +48,8 @@ internal sealed class RunCreateViewModel : BaseViewModel,
 
     private readonly IRequestService<GraphVertexModel> service;
     private readonly IMessenger messenger;
-    private readonly ILog logger;
     private readonly IAlgorithmsFactory algorithmsFactory;
+    private readonly CompositeDisposable disposables = [];
 
     public ReactiveCommand<Unit, Unit> CreateRunCommand { get; }
 
@@ -110,18 +113,17 @@ internal sealed class RunCreateViewModel : BaseViewModel,
         IHeuristicsFactory heuristicsFactory,
         IStepRuleFactory stepRuleFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        ILog logger)
+        ILog logger) : base(logger)
     {
         this.messenger = messenger;
         this.service = service;
-        this.logger = logger;
         this.algorithmsFactory = algorithmsFactory;
         AllowedHeuristics = heuristicsFactory.Allowed;
         AllowedAlgorithms = algorithmsFactory.Allowed;
         AllowedStepRules = stepRuleFactory.Allowed;
         CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm, CanCreateAlgorithm());
-        messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
-        messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
+        messenger.RegisterHandler<GraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
     }
 
     private IObservable<bool> CanCreateAlgorithm()
@@ -260,12 +262,12 @@ internal sealed class RunCreateViewModel : BaseViewModel,
                     catch (PathfindingException ex)
                     {
                         status = RunStatuses.Failure;
-                        logger.Warn(ex);
+                        log.Warn(ex);
                     }
                     catch (Exception ex)
                     {
                         status = RunStatuses.Failure;
-                        logger.Error(ex);
+                        log.Error(ex);
                     }
                     finally
                     {
@@ -290,14 +292,21 @@ internal sealed class RunCreateViewModel : BaseViewModel,
             }
             await ExecuteSafe(async () =>
             {
-                var result = await service.CreateStatisticsAsync(list)
+                var timeout = Timeout * list.Count;
+                using var cts = new CancellationTokenSource(timeout);
+                var result = await service.CreateStatisticsAsync(list, cts.Token)
                     .ConfigureAwait(false);
                 messenger.Send(new RunsCreatedMessaged([.. result]));
-            }, logger.Error).ConfigureAwait(false);
+            }).ConfigureAwait(false);
         }
         else
         {
-            logger.Info(Resource.RangeIsNotSetMsg);
+            log.Info(Resource.RangeIsNotSetMsg);
         }
+    }
+
+    public void Dispose()
+    {
+        disposables.Dispose();
     }
 }

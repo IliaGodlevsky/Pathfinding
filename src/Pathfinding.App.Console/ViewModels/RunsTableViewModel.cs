@@ -13,14 +13,15 @@ using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Reactive;
+using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel
+internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel, IDisposable 
 {
     private readonly IMessenger messenger;
     private readonly IRequestService<GraphVertexModel> service;
-    private readonly ILog logger;
+    private readonly CompositeDisposable disposables = [];
 
     public ObservableCollection<RunInfoModel> Runs { get; } = [];
 
@@ -30,17 +31,16 @@ internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel
 
     public RunsTableViewModel(IRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        ILog logger)
+        ILog logger) :base(logger)
     {
         this.messenger = messenger;
         this.service = service;
-        this.logger = logger;
 
-        messenger.RegisterAsyncHandler<RunsCreatedMessaged>(this, OnRunCreated);
-        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage, int>(this, Tokens.RunsTable, OnGraphActivatedMessage);
-        messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
-        messenger.Register<RunsUpdatedMessage>(this, OnRunsUpdated);
-        messenger.RegisterAsyncHandler<RunsDeletedMessage>(this, OnRunsDeleteMessage);
+        messenger.RegisterAsyncHandler<RunsCreatedMessaged>(this, OnRunCreated).DisposeWith(disposables);
+        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage, int>(this, Tokens.RunsTable, OnGraphActivatedMessage).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
+        messenger.RegisterHandler<RunsUpdatedMessage>(this, OnRunsUpdated).DisposeWith(disposables);
+        messenger.RegisterAsyncHandler<RunsDeletedMessage>(this, OnRunsDeleteMessage).DisposeWith(disposables);
 
         SelectRunsCommand = ReactiveCommand.Create<int[]>(SelectRuns);
     }
@@ -55,13 +55,14 @@ internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel
     {
         await ExecuteSafe(async () =>
         {
+            using var cts = new CancellationTokenSource(Timeout);
             var statistics = await service
-                .ReadStatisticsAsync(msg.Value.GraphId)
+                .ReadStatisticsAsync(msg.Value.GraphId, cts.Token)
                 .ConfigureAwait(false);
             ActivatedGraphId = msg.Value.GraphId;
             Runs.Clear();
             Runs.Add(statistics.ToRunInfo());
-        }, logger.Error).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
@@ -96,9 +97,13 @@ internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel
         {
             Runs.Clear();
             messenger.Send(new GraphStateChangedMessage((ActivatedGraphId, GraphStatuses.Editable)));
-            var graphInfo = await service.ReadGraphInfoAsync(ActivatedGraphId).ConfigureAwait(false);
+            using var cts = new CancellationTokenSource(Timeout);
+            var graphInfo = await service.ReadGraphInfoAsync(
+                ActivatedGraphId, 
+                cts.Token).ConfigureAwait(false);
             graphInfo.Status = GraphStatuses.Editable;
-            await service.UpdateGraphInfoAsync(graphInfo).ConfigureAwait(false);
+            await service.UpdateGraphInfoAsync(
+                graphInfo, cts.Token).ConfigureAwait(false);
         }
         else
         {
@@ -113,9 +118,15 @@ internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel
         if (previousCount == 0)
         {
             messenger.Send(new GraphStateChangedMessage((ActivatedGraphId, GraphStatuses.Readonly)));
-            var graphInfo = await service.ReadGraphInfoAsync(ActivatedGraphId).ConfigureAwait(false);
+            using var cts = new CancellationTokenSource(Timeout);
+            var graphInfo = await service.ReadGraphInfoAsync(ActivatedGraphId, cts.Token).ConfigureAwait(false);
             graphInfo.Status = GraphStatuses.Readonly;
-            await service.UpdateGraphInfoAsync(graphInfo).ConfigureAwait(false);
+            await service.UpdateGraphInfoAsync(graphInfo, cts.Token).ConfigureAwait(false);
         }
+    }
+
+    public void Dispose()
+    {
+        disposables.Dispose();
     }
 }

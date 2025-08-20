@@ -20,7 +20,6 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
     private readonly Dictionary<StreamFormat, Serializer> serializers;
     private readonly IRequestService<GraphVertexModel> service;
     private readonly IMessenger messenger;
-    private readonly ILog logger;
 
     public ReactiveCommand<Func<StreamModel>, Unit> ImportGraphCommand { get; }
 
@@ -29,11 +28,10 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
     public GraphImportViewModel(IRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         Meta<Serializer>[] serializers,
-        ILog logger)
+        ILog logger) : base(logger)
     {
         this.messenger = messenger;
         this.service = service;
-        this.logger = logger;
         this.serializers = serializers.ToDictionary(x =>
             (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], x => x.Value);
         StreamFormats = [.. serializers
@@ -52,14 +50,17 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
                 var serializer = serializers[stream.Format.Value];
                 var histories = await serializer.DeserializeFromAsync(stream.Stream)
                     .ConfigureAwait(false);
-                var result = await service.CreatePathfindingHistoriesAsync(histories.Histories)
-                    .ConfigureAwait(false);
+                var timeout = Timeout * histories.Histories.Count;
+                using var cts = new CancellationTokenSource(timeout);
+                var result = await service.CreatePathfindingHistoriesAsync(
+                    histories.Histories,
+                    cts.Token).ConfigureAwait(false);
                 var graphs = result.Select(x => x.Graph).ToGraphInfo();
                 messenger.Send(new GraphsCreatedMessage(graphs));
-                logger.Info(graphs.Length > 0
+                log.Info(graphs.Length > 0
                     ? Resource.WasLoadedMsg
                     : Resource.WereLoadedMsg);
             }
-        }, logger.Error).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 }

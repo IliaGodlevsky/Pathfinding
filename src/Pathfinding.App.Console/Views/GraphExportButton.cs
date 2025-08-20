@@ -4,6 +4,7 @@ using Pathfinding.App.Console.Resources;
 using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -11,6 +12,8 @@ namespace Pathfinding.App.Console.Views;
 
 internal sealed partial class GraphExportButton
 {
+    private readonly CompositeDisposable disposables = [];
+
     public GraphExportButton(IGraphExportViewModel viewModel)
     {
         Initialize();
@@ -23,8 +26,17 @@ internal sealed partial class GraphExportButton
                     ? new Func<StreamModel>(() => StreamModel.Empty)
                     : () => new (OpenWrite(filePath.Path), filePath.Format);
             })
-            .InvokeCommand(viewModel, x => x.ExportGraphCommand);
-        viewModel.ExportGraphCommand.CanExecute.BindTo(this, x => x.Enabled);
+            .InvokeCommand(viewModel, x => x.ExportGraphCommand)
+            .DisposeWith(disposables);
+        viewModel.ExportGraphCommand.CanExecute
+            .BindTo(this, x => x.Enabled)
+            .DisposeWith(disposables);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 
     private static FileStream OpenWrite(string path)

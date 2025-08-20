@@ -7,6 +7,7 @@ using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -14,6 +15,8 @@ namespace Pathfinding.App.Console.Views;
 
 internal sealed partial class RunsListView : FrameView
 {
+    private readonly CompositeDisposable disposables = [];
+
     public RunsListView([KeyFilter(KeyFilters.Views)] IMessenger messenger,
         IRunCreateViewModel viewModel)
     {
@@ -23,7 +26,8 @@ internal sealed partial class RunsListView : FrameView
         this.Events().VisibleChanged
             .Where(_ => Visible)
             .Do(x => runList.SelectedItem = runList.SelectedItem)
-            .Subscribe();
+            .Subscribe()
+            .DisposeWith(disposables);
         runList.SetSource(source.Keys.ToList());
         runList.Events().SelectedItemChanged
             .Where(x => x.Item > -1)
@@ -61,6 +65,13 @@ internal sealed partial class RunsListView : FrameView
                         break;
                 }
             })
-            .BindTo(viewModel, x => x.Algorithm);
+            .BindTo(viewModel, x => x.Algorithm)
+            .DisposeWith(disposables);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 }

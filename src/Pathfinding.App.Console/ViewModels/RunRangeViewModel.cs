@@ -25,19 +25,19 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
 // ReSharper disable AsyncVoidLambda
+// ReSharper disable once UnusedMember.Global
 
 namespace Pathfinding.App.Console.ViewModels;
 
-// ReSharper disable once UnusedMember.Global
 internal sealed class RunRangeViewModel : BaseViewModel,
-    IPathfindingRange<GraphVertexModel>, IRunRangeViewModel
+    IPathfindingRange<GraphVertexModel>, IRunRangeViewModel, IDisposable
 {
     private readonly CompositeDisposable disposables = [];
+    private readonly CompositeDisposable shortLifeDisposables = [];
     private readonly IRequestService<GraphVertexModel> service;
     private readonly IEnumerable<Command> includeCommands;
     private readonly IEnumerable<Command> excludeCommands;
     private readonly IPathfindingRange<GraphVertexModel> pathfindingRange;
-    private readonly ILog logger;
 
     private int GraphId { get; set; }
 
@@ -105,7 +105,7 @@ internal sealed class RunRangeViewModel : BaseViewModel,
         [KeyFilter(KeyFilters.IncludeCommands)] Meta<Command>[] includeCommands,
         [KeyFilter(KeyFilters.ExcludeCommands)] Meta<Command>[] excludeCommands,
         IRequestService<GraphVertexModel> service,
-        ILog logger)
+        ILog logger) : base(logger)
     {
         pathfindingRange = this;
         this.service = service;
@@ -117,15 +117,14 @@ internal sealed class RunRangeViewModel : BaseViewModel,
             .OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => x.Value)
             .ToReadOnly();
-        this.logger = logger;
-        messenger.Register<IsVertexInRangeRequestMessage>(this, OnVertexIsInRangeReceived);
-        messenger.Register<PathfindingRangeRequestMessage>(this, OnGetPathfindingRangeReceived);
-        messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
-        messenger.Register<GraphStateChangedMessage>(this, OnGraphBecameReadonly);
-        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage, int>(this, Tokens.PathfindingRange, OnGraphActivated);
-        AddToRangeCommand = ReactiveCommand.Create<GraphVertexModel>(AddVertexToRange, CanExecute());
-        RemoveFromRangeCommand = ReactiveCommand.Create<GraphVertexModel>(RemoveVertexFromRange, CanExecute());
-        DeletePathfindingRange = ReactiveCommand.CreateFromTask(DeleteRange, CanExecute());
+        messenger.RegisterHandler<IsVertexInRangeRequestMessage>(this, OnVertexIsInRangeReceived).DisposeWith(disposables);
+        messenger.RegisterHandler<PathfindingRangeRequestMessage>(this, OnGetPathfindingRangeReceived).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphStateChangedMessage>(this, OnGraphBecameReadonly).DisposeWith(disposables);
+        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage, int>(this, Tokens.PathfindingRange, OnGraphActivated).DisposeWith(disposables);
+        AddToRangeCommand = ReactiveCommand.Create<GraphVertexModel>(AddVertexToRange, CanExecute()).DisposeWith(disposables);
+        RemoveFromRangeCommand = ReactiveCommand.Create<GraphVertexModel>(RemoveVertexFromRange, CanExecute()).DisposeWith(disposables);
+        DeletePathfindingRange = ReactiveCommand.CreateFromTask(DeleteRange, CanExecute()).DisposeWith(disposables);
     }
 
     private IObservable<bool> CanExecute()
@@ -148,10 +147,10 @@ internal sealed class RunRangeViewModel : BaseViewModel,
     {
         model.WhenAnyValue(expression).Skip(1).Where(x => x)
             .Do(async _ => await AddRangeToStorage(model))
-            .Subscribe().DisposeWith(disposables);
+            .Subscribe().DisposeWith(shortLifeDisposables);
         model.WhenAnyValue(expression).Skip(1).Where(x => !x)
             .Do(async _ => await RemoveVertexFromStorage(model))
-            .Subscribe().DisposeWith(disposables);
+            .Subscribe().DisposeWith(shortLifeDisposables);
     }
 
     private void SubscribeToEvents(GraphVertexModel vertex)
@@ -167,9 +166,10 @@ internal sealed class RunRangeViewModel : BaseViewModel,
         {
             var vertices = pathfindingRange.ToList();
             var index = vertices.IndexOf(vertex);
-            await service.CreatePathfindingVertexAsync(GraphId, vertex.Id, index)
-                .ConfigureAwait(false);
-        }, logger.Error).ConfigureAwait(false);
+            using var cts = new CancellationTokenSource(Timeout);
+            await service.CreatePathfindingVertexAsync(GraphId,
+                vertex.Id, index, cts.Token).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     private void RemoveVertexFromRange(GraphVertexModel vertex)
@@ -179,9 +179,11 @@ internal sealed class RunRangeViewModel : BaseViewModel,
 
     private async Task RemoveVertexFromStorage(GraphVertexModel vertex)
     {
-        await ExecuteSafe(async ()
-            => await service.DeleteRangeAsync(vertex.Enumerate()).ConfigureAwait(false),
-            logger.Error).ConfigureAwait(false);
+        await ExecuteSafe(async () => 
+        {
+            using var cts = new CancellationTokenSource(Timeout);
+            await service.DeleteRangeAsync(vertex.Enumerate(), cts.Token).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     private void ClearRange()
@@ -204,13 +206,14 @@ internal sealed class RunRangeViewModel : BaseViewModel,
     {
         await ExecuteSafe(async () =>
         {
-            disposables.Clear();
+            shortLifeDisposables.Clear();
             Transit.CollectionChanged -= OnCollectionChanged;
             ClearRange();
             Graph = msg.Value.Graph;
             GraphId = msg.Value.GraphId;
             IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
-            var range = await service.ReadRangeAsync(GraphId).ConfigureAwait(false);
+            using var cts = new CancellationTokenSource(Timeout);
+            var range = await service.ReadRangeAsync(GraphId, cts.Token).ConfigureAwait(false);
             var src = range.FirstOrDefault(x => x.IsSource);
             Source = src != null ? Graph.Get(src.Position) : null;
             var tgt = range.FirstOrDefault(x => x.IsTarget);
@@ -221,7 +224,7 @@ internal sealed class RunRangeViewModel : BaseViewModel,
             Transit.CollectionChanged += OnCollectionChanged;
             Transit.AddRange(transit);
             Graph.ForEach(SubscribeToEvents);
-        }, logger.Error).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     private void OnGraphBecameReadonly(object recipient, GraphStateChangedMessage msg)
@@ -273,5 +276,12 @@ internal sealed class RunRangeViewModel : BaseViewModel,
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
+    }
+
+    public void Dispose()
+    {
+        disposables.Dispose();
+        shortLifeDisposables.Dispose();
+        Transit.CollectionChanged -= OnCollectionChanged;
     }
 }

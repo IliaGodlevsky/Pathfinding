@@ -1,5 +1,6 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
@@ -8,14 +9,15 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
+using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel
+internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly IRequestService<GraphVertexModel> service;
-    private readonly ILog logger;
+    private readonly CompositeDisposable disposables = [];
 
     private int[] selectedRunsIds = [];
     public int[] SelectedRunsIds
@@ -31,14 +33,13 @@ internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel
     public RunDeleteViewModel(
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         IRequestService<GraphVertexModel> service,
-        ILog logger)
+        ILog logger) : base(logger)
     {
         this.messenger = messenger;
         this.service = service;
-        this.logger = logger;
-        messenger.Register<RunsSelectedMessage>(this, OnRunsSelected);
-        messenger.Register<GraphsDeletedMessage>(this, OnGraphsDeleted);
-        messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
+        messenger.RegisterHandler<RunsSelectedMessage>(this, OnRunsSelected).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphsDeleted).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
         DeleteRunsCommand = ReactiveCommand.CreateFromTask(DeleteRuns, CanDelete());
     }
 
@@ -52,14 +53,18 @@ internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel
     {
         await ExecuteSafe(async () =>
         {
-            var isDeleted = await service.DeleteRunsAsync(SelectedRunsIds).ConfigureAwait(false);
+            var timeout = Timeout * SelectedRunsIds.Length;
+            using var cts = new CancellationTokenSource(timeout);
+            var isDeleted = await service.DeleteRunsAsync(
+                SelectedRunsIds,
+                cts.Token).ConfigureAwait(false);
             if (isDeleted)
             {
                 var runs = SelectedRunsIds.ToArray();
                 SelectedRunsIds = [];
                 messenger.Send(new RunsDeletedMessage(runs));
             }
-        }, logger.Error).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     private void OnRunsSelected(object recipient, RunsSelectedMessage msg)
@@ -79,5 +84,10 @@ internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel
             ActivatedGraph = 0;
             SelectedRunsIds = [];
         }
+    }
+
+    public void Dispose()
+    {
+        disposables.Dispose();
     }
 }

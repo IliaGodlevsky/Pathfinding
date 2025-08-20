@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 namespace Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
 internal abstract class AwaitValueChangedMessage<T>(T payload) 
-    : ValueChangedMessage<T>(payload), IAwaitMessage
+    : ValueChangedMessage<T>(payload), IAwaitableMessage
 {
     private readonly TaskCompletionSource source = new();
 

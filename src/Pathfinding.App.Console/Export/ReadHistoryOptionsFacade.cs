@@ -21,11 +21,12 @@ internal sealed class ReadHistoryOptionsFacade : IReadHistoryOptionsFacade
 
     public async Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(
         ExportOptions option, 
-        IReadOnlyCollection<int> graphIds)
+        IReadOnlyCollection<int> graphIds,
+        CancellationToken token = default)
     {
         if (options.TryGetValue(option, out var value))
         {
-            return await value.ReadHistoryAsync(graphIds).ConfigureAwait(false);
+            return await value.ReadHistoryAsync(graphIds, token).ConfigureAwait(false);
         }
 
         throw new KeyNotFoundException($"{option} was not found");

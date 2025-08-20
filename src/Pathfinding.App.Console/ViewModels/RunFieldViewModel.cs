@@ -1,6 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.Requests;
@@ -22,13 +23,14 @@ using static Pathfinding.App.Console.Models.RunModel;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
+internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly IGraphAssemble<RunVertexModel> graphAssemble;
     private readonly IAlgorithmsFactory algorithmsFactory;
 
     private readonly CompositeDisposable disposables = [];
+    private readonly CompositeDisposable shortTermDisposables = [];
 
     private int graphId;
 
@@ -57,12 +59,13 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
         this.messenger = messenger;
         this.graphAssemble = graphAssemble;
         this.algorithmsFactory = algorithmsFactory;
-        Runs.ActOnEveryObject(_ => { }, OnRemoved);
-        messenger.Register<GraphActivatedMessage>(this, OnGraphActivated);
-        messenger.Register<RunsDeletedMessage>(this, OnRunsDeleted);
-        messenger.Register<GraphsDeletedMessage>(this, OnGraphDeleted);
-        messenger.Register<GraphUpdatedMessage>(this, OnGraphUpdated);
-        messenger.Register<RunsSelectedMessage>(this, OnRunActivated);
+        Runs.ActOnEveryObject(_ => { }, OnRemoved).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
+        messenger.RegisterHandler<RunsDeletedMessage>(this, OnRunsDeleted).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
+        messenger.RegisterHandler<GraphUpdatedMessage>(this, OnGraphUpdated).DisposeWith(disposables);
+        messenger.RegisterHandler<RunsSelectedMessage>(this, OnRunActivated).DisposeWith(disposables);
+        shortTermDisposables.DisposeWith(disposables);
     }
 
     private void OnRunActivated(object recipient, RunsSelectedMessage msg)
@@ -95,7 +98,7 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
         Runs.Clear();
         SelectedRun.Fraction = 0;
         selected = Empty;
-        disposables.Clear();
+        shortTermDisposables.Clear();
     }
 
     private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
@@ -123,11 +126,11 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
             var runVertex = runGraph.Get(vertex.Position);
             vertex.WhenAnyValue(x => x.IsObstacle)
                 .BindTo(runVertex, x => x.IsObstacle)
-                .DisposeWith(disposables);
+                .DisposeWith(shortTermDisposables);
             vertex.WhenAnyValue(x => x.Cost)
                 .Do(x => runVertex.Cost = x.DeepClone())
                 .Subscribe()
-                .DisposeWith(disposables);
+                .DisposeWith(shortTermDisposables);
         }
     }
 
@@ -183,5 +186,10 @@ internal sealed class RunFieldViewModel : BaseViewModel, IRunFieldViewModel
             Runs.Add(run);
         }
         SelectedRun = run;
+    }
+
+    public void Dispose()
+    {
+        disposables.Dispose();
     }
 }

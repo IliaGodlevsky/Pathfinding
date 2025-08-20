@@ -7,6 +7,7 @@ using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -15,6 +16,7 @@ namespace Pathfinding.App.Console.Views;
 internal sealed partial class RunStepRulesView : FrameView
 {
     private readonly IRequireStepRuleViewModel viewModel;
+    private readonly CompositeDisposable disposables = [];
 
     public RunStepRulesView(
         [KeyFilter(KeyFilters.Views)] IMessenger messenger,
@@ -29,11 +31,12 @@ internal sealed partial class RunStepRulesView : FrameView
         stepRules.Events().SelectedItemChanged
             .Where(x => x.SelectedItem > -1)
             .Select(x => values[x.SelectedItem])
-            .BindTo(viewModel, x => x.StepRule);
+            .BindTo(viewModel, x => x.StepRule)
+            .DisposeWith(disposables);
         stepRules.SelectedItem = 0;
-        messenger.Register<OpenStepRuleViewMessage>(this, OnOpen);
-        messenger.Register<CloseStepRulesViewMessage>(this, OnStepRulesViewClose);
-        messenger.Register<CloseRunCreateViewMessage>(this, OnRunCreationViewClosed);
+        messenger.RegisterHandler<OpenStepRuleViewMessage>(this, OnOpen).DisposeWith(disposables);
+        messenger.RegisterHandler<CloseStepRulesViewMessage>(this, OnStepRulesViewClose).DisposeWith(disposables);
+        messenger.RegisterHandler<CloseRunCreateViewMessage>(this, OnRunCreationViewClosed).DisposeWith(disposables);
         this.viewModel = viewModel;
     }
 
@@ -57,5 +60,11 @@ internal sealed partial class RunStepRulesView : FrameView
     {
         viewModel.StepRule = default;
         Visible = false;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 }

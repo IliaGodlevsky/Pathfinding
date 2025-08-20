@@ -3,6 +3,7 @@ using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -11,6 +12,7 @@ namespace Pathfinding.App.Console.Views;
 internal sealed class GraphExportOptionsView : FrameView
 {
     private readonly RadioGroup exportOptions = new();
+    private readonly CompositeDisposable disposables = [];
 
     public DisplayModeLayout DisplayMode
     {
@@ -27,10 +29,17 @@ internal sealed class GraphExportOptionsView : FrameView
         exportOptions.Events().SelectedItemChanged
             .Where(x => x.SelectedItem >= 0)
             .Select(x => viewModel.AllowedOptions[x.SelectedItem])
-            .BindTo(viewModel, x => x.Options);
+            .BindTo(viewModel, x => x.Options)
+            .DisposeWith(disposables);
         exportOptions.X = 1;
         exportOptions.Y = 1;
         exportOptions.SelectedItem = viewModel.AllowedOptions.Count - 1;
         Add(exportOptions);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 }

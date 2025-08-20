@@ -30,7 +30,7 @@ namespace Pathfinding.App.Console.Injection;
 
 internal static class Modules
 {
-    public static ILifetimeScope Build()
+    public static IContainer Build()
     {
         var builder = new ContainerBuilder();
 
@@ -107,16 +107,14 @@ internal static class Modules
         builder.RegisterType<NeighborhoodLayerFactory>().As<INeighborhoodLayerFactory>()
             .WithAttributeFiltering().SingleInstance();
 
-        builder.RegisterInstance(new SmoothLayer(0)).AsSelf().SingleInstance()
-            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.No);
-        builder.RegisterInstance(new SmoothLayer(1)).AsSelf().SingleInstance()
-            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Low);
-        builder.RegisterInstance(new SmoothLayer(2)).AsSelf().SingleInstance()
-            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Medium);
-        builder.RegisterInstance(new SmoothLayer(4)).AsSelf().SingleInstance()
-            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.High);
-        builder.RegisterInstance(new SmoothLayer(8)).AsSelf().SingleInstance()
-            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Extreme);
+        int lvl = 0;
+        foreach (var level in Enum.GetValues<SmoothLevels>())
+        {
+            var smooth = new SmoothLayer(2 << lvl);
+            builder.RegisterInstance(new SmoothLayer(2 << lvl)).AsSelf().SingleInstance()
+                .WithMetadata(MetadataKeys.SmoothLevels, level);
+            lvl++;
+        }
         builder.RegisterType<SmoothLevelFactory>().As<ISmoothLevelFactory>().SingleInstance();
 
         builder.RegisterType<RandomAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Random)
@@ -149,8 +147,8 @@ internal static class Modules
             .WithMetadata(MetadataKeys.Order, 16).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<DijkstraAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Dijkstra)
             .WithMetadata(MetadataKeys.Order, 1).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
-        builder.RegisterType<IdaStarAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.IdaStar)
-            .WithMetadata(MetadataKeys.Order, 5).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        //builder.RegisterType<IDAStarAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.IdaStar)
+        //    .WithMetadata(MetadataKeys.Order, 5).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<AlgorithmsFactory>().As<IAlgorithmsFactory>().SingleInstance();
 
         builder.RegisterType<ReadGraphOnlyOption>().As<IReadHistoryOption>().SingleInstance()

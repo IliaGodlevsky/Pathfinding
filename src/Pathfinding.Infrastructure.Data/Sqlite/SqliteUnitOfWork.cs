@@ -28,7 +28,7 @@ public sealed class SqliteUnitOfWork : IUnitOfWork
         connection.Open();
     }
 
-    public async Task BeginTransactionAsync(CancellationToken token = default)
+    public async ValueTask BeginTransactionAsync(CancellationToken token = default)
     {
         transaction ??= (SqliteTransaction)await connection
             .BeginTransactionAsync(token)

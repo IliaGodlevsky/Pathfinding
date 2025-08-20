@@ -26,7 +26,8 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
     IRequireGraphNameViewModel,
     IRequireGraphParametresViewModel,
     IRequireSmoothLevelViewModel,
-    IRequireNeighborhoodNameViewModel
+    IRequireNeighborhoodNameViewModel,
+    IDisposable
 {
     private static readonly InclusiveValueRange<int> WidthRange = (52, 1);
     private static readonly InclusiveValueRange<int> LengthRange = (51, 1);
@@ -38,7 +39,6 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
     private readonly IRequestService<GraphVertexModel> service;
     private readonly IGraphAssemble<GraphVertexModel> graphAssemble;
     private readonly IMessenger messenger;
-    private readonly ILog logger;
 
     private string name;
     public string Name
@@ -94,11 +94,10 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
         ISmoothLevelFactory smoothLevelFactory,
         INeighborhoodLayerFactory neighborFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        ILog logger)
+        ILog logger) : base(logger)
     {
         this.service = service;
         this.messenger = messenger;
-        this.logger = logger;
         this.graphAssemble = graphAssemble;
         this.neighborFactory = neighborFactory;
         this.smoothLevelFactory = smoothLevelFactory;
@@ -134,10 +133,12 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
                 SmoothLevel = SmoothLevel,
                 Status = GraphStatuses.Editable
             };
-            var graphModel = await service.CreateGraphAsync(request).ConfigureAwait(false);
+            using var cts = new CancellationTokenSource(Timeout);
+            var graphModel = await service
+                .CreateGraphAsync(request, cts.Token).ConfigureAwait(false);
             var info = graphModel.ToGraphInformationModel().ToGraphInfo();
             messenger.Send(new GraphsCreatedMessage([info]));
-        }, logger.Error).ConfigureAwait(false);
+        }).ConfigureAwait(false);
     }
 
     private Layers GetLayers()
@@ -150,5 +151,10 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
         var smoothLayer = smoothLevelFactory.CreateLayer(SmoothLevel);
         var neighborhoodLayer = neighborFactory.CreateNeighborhoodLayer(Neighborhood);
         return new (neighborhoodLayer, costLayer, obstacleLayer, smoothLayer);
+    }
+
+    public void Dispose()
+    {
+        AssembleGraphCommand.Dispose();
     }
 }

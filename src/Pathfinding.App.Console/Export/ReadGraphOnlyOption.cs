@@ -6,8 +6,10 @@ namespace Pathfinding.App.Console.Export;
 
 internal sealed class ReadGraphOnlyOption(IRequestService<GraphVertexModel> service) : IReadHistoryOption
 {
-    public async Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(IReadOnlyCollection<int> graphIds)
+    public async Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(
+        IReadOnlyCollection<int> graphIds,
+        CancellationToken token = default)
     {
-        return await service.ReadSerializationGraphsAsync(graphIds).ConfigureAwait(false);
+        return await service.ReadSerializationGraphsAsync(graphIds, token).ConfigureAwait(false);
     }
 }

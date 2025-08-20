@@ -26,7 +26,7 @@ internal class RequestServiceTests
             .RuleFor(x => x.Neighborhood, x => x.Random.Enum<Neighborhoods>());
         var graphs = faker.Generate(10);
         var obstaclesCount = (IReadOnlyDictionary<int, int>)graphs.ToDictionary(x => x.Id, x => 25);
-        var mock = AutoMock.GetLoose();
+        using var mock = AutoMock.GetLoose();
         mock.Mock<IGraphParametersRepository>()
             .Setup(x => x.GetAll())
             .Returns(graphs.ToAsyncEnumerable());

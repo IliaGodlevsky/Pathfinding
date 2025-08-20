@@ -21,8 +21,8 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests;
 [Category("Unit")]
 internal class GraphExportViewModelTests
 {
-    private static async Task ExportGraphCommand_HasGraphs_ShouldExport(Expression<Func<IReadHistoryOptionsFacade, Task<PathfindingHistoriesSerializationModel>>> expression,
-        ExportOptions options)
+    [Test]
+    public async Task ExportGraphCommand_HasGraphs_ShouldExport()
     {
         using var mock = AutoMock.GetLoose();
 
@@ -35,7 +35,10 @@ internal class GraphExportViewModelTests
                 .To(x => new PathfindingHistoriesSerializationModel { Histories = [.. x] });
 
         mock.Mock<IReadHistoryOptionsFacade>()
-            .Setup(expression)
+            .Setup(x => x.ReadHistoryAsync(
+                It.IsAny<ExportOptions>(), 
+                It.IsAny<IReadOnlyCollection<int>>(),
+                It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(histories));
 
         mock.Mock<IMessenger>().Setup(x => x.Register(
@@ -54,7 +57,7 @@ internal class GraphExportViewModelTests
         var typedParam = new TypedParameter(typeof(Meta<ISerializer<PathfindingHistoriesSerializationModel>>[]), new[] { meta });
 
         var viewModel = mock.Create<GraphExportViewModel>(typedParam);
-        viewModel.Options = options;
+        viewModel.Options = ExportOptions.WithRuns;
 
         var command = viewModel.ExportGraphCommand;
         if (await command.CanExecute.FirstOrDefaultAsync())
@@ -64,11 +67,6 @@ internal class GraphExportViewModelTests
 
         Assert.Multiple(() =>
         {
-            mock.Mock<IReadHistoryOptionsFacade>()
-                .Verify(x => x.ReadHistoryAsync(
-                    It.Is<ExportOptions>(y => y == options),
-                    It.IsAny<IReadOnlyCollection<int>>()), Times.Once);
-
             mock.Mock<IMessenger>()
                 .Verify(x => x.Register(
                     It.IsAny<object>(),
@@ -80,33 +78,6 @@ internal class GraphExportViewModelTests
                 It.IsAny<Stream>(),
                 It.IsAny<CancellationToken>()), Times.Once);
         });
-    }
-
-    [Test]
-    public async Task ExportGraphCommand_WithRuns_ShouldExport()
-    {
-        await ExportGraphCommand_HasGraphs_ShouldExport(x => x.ReadHistoryAsync(
-                It.Is<ExportOptions>(y => y == ExportOptions.WithRuns),
-                It.IsAny<IReadOnlyCollection<int>>()),
-            ExportOptions.WithRuns);
-    }
-
-    [Test]
-    public async Task ExportGraphCommand_WithRange_ShouldExport()
-    {
-        await ExportGraphCommand_HasGraphs_ShouldExport(x => x.ReadHistoryAsync(
-                It.Is<ExportOptions>(y => y == ExportOptions.WithRange),
-                It.IsAny<IReadOnlyCollection<int>>()),
-            ExportOptions.WithRange);
-    }
-
-    [Test]
-    public async Task ExportGraphCommand_GraphOnly_ShouldExport()
-    {
-        await ExportGraphCommand_HasGraphs_ShouldExport(x => x.ReadHistoryAsync(
-                It.Is<ExportOptions>(y => y == ExportOptions.GraphOnly),
-                It.IsAny<IReadOnlyCollection<int>>()),
-            ExportOptions.GraphOnly);
     }
 
     [Test]

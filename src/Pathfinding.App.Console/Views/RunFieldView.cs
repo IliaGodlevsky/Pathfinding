@@ -1,5 +1,6 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.Models;
@@ -17,6 +18,7 @@ namespace Pathfinding.App.Console.Views;
 internal sealed partial class RunFieldView : FrameView
 {
     private readonly CompositeDisposable vertexDisposables = [];
+    private readonly CompositeDisposable disposables = [];
 
     private readonly View container = new();
 
@@ -28,7 +30,7 @@ internal sealed partial class RunFieldView : FrameView
         Y = 0;
         Width = Dim.Percent(66);
         Height = Dim.Percent(95);
-        Border = new Border()
+        Border = new()
         {
             BorderBrush = Color.BrightYellow,
             BorderStyle = BorderStyle.Rounded,
@@ -40,10 +42,18 @@ internal sealed partial class RunFieldView : FrameView
             .DistinctUntilChanged()
             .Where(x => x is not null)
             .Do(async x => await RenderGraphState(x))
-            .Subscribe();
-        messenger.Register<OpenRunFieldMessage>(this, OnOpen);
-        messenger.Register<CloseRunFieldMessage>(this, OnClose);
+            .Subscribe()
+            .DisposeWith(disposables);
+        messenger.RegisterHandler<OpenRunFieldMessage>(this, OnOpen).DisposeWith(disposables);
+        messenger.RegisterHandler<CloseRunFieldMessage>(this, OnClose).DisposeWith(disposables);
         Add(container);
+        vertexDisposables.DisposeWith(disposables);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 
     private void OnOpen(object recipient, OpenRunFieldMessage msg)

@@ -2,7 +2,7 @@
 
 namespace Pathfinding.App.Console.Messages;
 
-internal interface IAwaitMessage
+internal interface IAwaitableMessage
 {
     TaskAwaiter GetAwaiter();
 

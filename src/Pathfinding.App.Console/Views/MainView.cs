@@ -17,6 +17,12 @@ internal sealed class MainView : Window
         Loaded += OnActivate;
     }
 
+    protected override void Dispose(bool disposing)
+    {
+        Loaded -= OnActivate;
+        base.Dispose(disposing);
+    }
+
     private void OnActivate()
     {
         var driver = Application.Driver;
