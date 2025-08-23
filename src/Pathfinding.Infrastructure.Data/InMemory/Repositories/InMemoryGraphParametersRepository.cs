@@ -29,7 +29,7 @@ internal sealed class InMemoryGraphParametersRepository(
         await verticesRepository.DeleteVerticesByGraphIdAsync(graphId).ConfigureAwait(false);
         await statisticsRepository.DeleteByGraphId(graphId).ConfigureAwait(false);
         var deleted = set.RemoveWhere(x => x.Id == graphId);
-        return await Task.FromResult(deleted == 1);
+        return deleted == 1;
     }
 
     public async Task<bool> DeleteAsync(
@@ -48,15 +48,15 @@ internal sealed class InMemoryGraphParametersRepository(
         return set.ToAsyncEnumerable();
     }
 
-    public async Task<Graph> ReadAsync(int graphId,
+    public Task<Graph> ReadAsync(int graphId,
         CancellationToken token = default)
     {
         var equal = new Graph { Id = graphId };
         set.TryGetValue(equal, out var result);
-        return await Task.FromResult(result);
+        return Task.FromResult(result);
     }
 
-    public async Task<bool> UpdateAsync(Graph graph,
+    public Task<bool> UpdateAsync(Graph graph,
         CancellationToken token = default)
     {
         var equal = new Graph { Id = graph.Id };
@@ -66,9 +66,9 @@ internal sealed class InMemoryGraphParametersRepository(
             result.Name = graph.Name;
             result.Neighborhood = graph.Neighborhood;
             result.SmoothLevel = graph.SmoothLevel;
-            return await Task.FromResult(true);
+            return Task.FromResult(true);
         }
-        return false;
+        return Task.FromResult(false);
     }
 
     public async Task<IReadOnlyDictionary<int, int>> ReadObstaclesCountAsync(

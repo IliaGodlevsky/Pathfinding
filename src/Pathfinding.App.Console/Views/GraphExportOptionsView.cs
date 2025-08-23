@@ -29,7 +29,7 @@ internal sealed class GraphExportOptionsView : FrameView
         exportOptions.Events().SelectedItemChanged
             .Where(x => x.SelectedItem >= 0)
             .Select(x => viewModel.AllowedOptions[x.SelectedItem])
-            .BindTo(viewModel, x => x.Options)
+            .BindTo(viewModel, x => x.Option)
             .DisposeWith(disposables);
         exportOptions.X = 1;
         exportOptions.Y = 1;

@@ -57,11 +57,9 @@ internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel, I
             var timeout = Timeout * SelectedGraphIds.Length;
             using var cts = new CancellationTokenSource(timeout);
             var copies = await service.ReadSerializationHistoriesAsync(
-                SelectedGraphIds, cts.Token)
-                .ConfigureAwait(false);
+                SelectedGraphIds, cts.Token).ConfigureAwait(false);
             var histories = await service.CreatePathfindingHistoriesAsync(
-                copies.Histories, cts.Token)
-                .ConfigureAwait(false);
+                copies.Histories, cts.Token).ConfigureAwait(false);
             var graphs = histories.Select(x => x.Graph).ToGraphInfo();
             messenger.Send(new GraphsCreatedMessage(graphs));
         }).ConfigureAwait(false);

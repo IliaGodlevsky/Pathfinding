@@ -12,8 +12,7 @@ namespace Pathfinding.App.Console.Views;
 internal abstract class VertexView<T> : Label
     where T : IVertex
 {
-    private static readonly Color Background = Enum.Parse<Color>(Default.BackgroundColor);
-
+    protected static readonly Color Background = Enum.Parse<Color>(Default.BackgroundColor);
     protected static readonly ColorScheme ObstacleColor = Create(Default.BackgroundColor);
     protected static readonly ColorScheme RegularColor = Create(Default.RegularVertexColor);
     protected static readonly ColorScheme VisitedColor = Create(Default.VisitedVertexColor);

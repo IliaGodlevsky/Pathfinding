@@ -5,13 +5,13 @@ using Pathfinding.Service.Interface.Models.Serialization;
 
 namespace Pathfinding.App.Console.Export;
 
-internal sealed class ReadHistoryOptionsFacade : IReadHistoryOptionsFacade
+internal sealed class ReadHistoryOptions : IReadHistoryOptions
 {
     private readonly Dictionary<ExportOptions, IReadHistoryOption> options;
 
     public IReadOnlyList<ExportOptions> Allowed { get; }
 
-    public ReadHistoryOptionsFacade(Meta<IReadHistoryOption>[] options)
+    public ReadHistoryOptions(Meta<IReadHistoryOption>[] options)
     {
         this.options = options.ToDictionary(
             x => (ExportOptions)x.Metadata[MetadataKeys.ExportOptions], 

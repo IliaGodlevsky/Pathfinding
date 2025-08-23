@@ -15,7 +15,7 @@ internal sealed class StreamModel(Stream stream = null, StreamFormat? format = n
 
     public void Dispose()
     {
-        stream.Dispose();
+        Stream.Dispose();
         foreach (var disposable in disposables)
         {
             disposable.Dispose();
@@ -24,7 +24,7 @@ internal sealed class StreamModel(Stream stream = null, StreamFormat? format = n
 
     public async ValueTask DisposeAsync()
     {
-        await stream.DisposeAsync().ConfigureAwait(false);
+        await Stream.DisposeAsync().ConfigureAwait(false);
         foreach (var disposable in disposables)
         {
             if (disposable is IAsyncDisposable async)

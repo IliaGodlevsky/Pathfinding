@@ -1,5 +1,6 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.Models;
@@ -37,8 +38,8 @@ internal sealed partial class RunProgressView : FrameView
         IRunFieldViewModel viewModel)
     {
         Initialize();
-        messenger.Register<CloseRunFieldMessage>(this, OnRunFieldClosed);
-        messenger.Register<OpenRunFieldMessage>(this, OnRunFieldOpen);
+        messenger.RegisterHandler<CloseRunFieldMessage>(this, OnRunFieldClosed).DisposeWith(disposables);
+        messenger.RegisterHandler<OpenRunFieldMessage>(this, OnRunFieldOpen).DisposeWith(disposables);
         this.viewModel = viewModel;
 
         BindTo(leftLabel, _ => Fraction - FractionPerClick, Button1Pressed, WheeledDown);
@@ -50,7 +51,9 @@ internal sealed partial class RunProgressView : FrameView
         BindTo(rightLabel, _ => Fraction - FractionPerClick, WheeledDown);
         BindTo(rightLabel, _ => FractionRange.UpperValueOfRange, Button2Clicked);
         BindTo(bar, x => (float)Math.Round((x.MouseEvent.X + 1f) / bar.Bounds.Width, 3), Button1Clicked);
-        viewModel.WhenAnyValue(x => x.SelectedRun.Fraction).BindTo(this, x => x.Fraction);
+        viewModel.WhenAnyValue(x => x.SelectedRun.Fraction)
+            .BindTo(this, x => x.Fraction)
+            .DisposeWith(disposables);
     }
 
     private void BindTo(View view, Func<MouseEventArgs, float> function,

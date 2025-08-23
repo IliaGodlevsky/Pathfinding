@@ -3,7 +3,7 @@ using Pathfinding.Service.Interface.Models.Serialization;
 
 namespace Pathfinding.App.Console.Export;
 
-internal interface IReadHistoryOptionsFacade
+internal interface IReadHistoryOptions
 {
     IReadOnlyList<ExportOptions> Allowed { get; }
 

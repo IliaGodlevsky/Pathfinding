@@ -20,10 +20,9 @@ namespace Pathfinding.App.Console.ViewModels;
 internal sealed class GraphExportViewModel 
     : BaseViewModel, IGraphExportViewModel, IDisposable
 {
-    private readonly IReadHistoryOptionsFacade facade;
+    private readonly IReadHistoryOptions options;
     private readonly Dictionary<StreamFormat, Serializer> serializers;
     private readonly CompositeDisposable disposables = [];
-    private readonly ILog logger;
 
     private int[] selectedGraphIds = [];
     private int[] SelectedGraphIds
@@ -32,20 +31,20 @@ internal sealed class GraphExportViewModel
         set => this.RaiseAndSetIfChanged(ref selectedGraphIds, value);
     }
 
-    public ExportOptions Options { get; set; }
+    public ExportOptions Option { get; set; }
 
-    public ReactiveCommand<Func<StreamModel>, Unit> ExportGraphCommand { get; }
-
-    public IReadOnlyList<ExportOptions> AllowedOptions { get; }
+    public IReadOnlyList<ExportOptions> AllowedOptions => options.Allowed;
 
     public IReadOnlyCollection<StreamFormat> StreamFormats { get; }
 
-    public GraphExportViewModel(IReadHistoryOptionsFacade facade,
+    public ReactiveCommand<Func<StreamModel>, Unit> ExportGraphCommand { get; }
+
+    public GraphExportViewModel(IReadHistoryOptions options,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         Meta<Serializer>[] serializers,
         ILog logger) : base(logger)
     {
-        this.facade = facade;
+        this.options = options;
         this.serializers = serializers
             .ToDictionary(
                 x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], 
@@ -54,7 +53,6 @@ internal sealed class GraphExportViewModel
             .OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat])];
         ExportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(ExportGraph, CanExport()).DisposeWith(disposables);
-        AllowedOptions = facade.Allowed;
         messenger.RegisterHandler<GraphsSelectedMessage>(this, OnGraphSelected).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
     }
@@ -74,12 +72,12 @@ internal sealed class GraphExportViewModel
             {
                 var timeout = Timeout * SelectedGraphIds.Length;
                 using var cts = new CancellationTokenSource(timeout);
-                var histories = await facade.ReadHistoryAsync(Options, 
+                var histories = await options.ReadHistoryAsync(Option, 
                     SelectedGraphIds, cts.Token).ConfigureAwait(false);
                 var serializer = serializers[stream.Format.Value];
                 await serializer.SerializeToAsync(histories, 
                     stream.Stream, cts.Token).ConfigureAwait(false);
-                logger.Info(histories.Histories.Count == 1 
+                log.Info(histories.Histories.Count == 1 
                     ? Resource.WasDeletedMsg 
                     : Resource.WereDeletedMsg);
             }

@@ -18,14 +18,17 @@ internal static class ZipArchiveExtensions
         string entryName, CancellationToken token = default)
     {
         var entry = archive.GetEntry(entryName);
-        if (entry is null) return [];
-        await using var entryStream = entry.Open();
-        using var reader = new StreamReader(entryStream, 
-            Encoding.UTF8, leaveOpen: true, bufferSize: 1024);
-        using var csvReader = new CsvReader(reader, 
-            CultureInfo.InvariantCulture, leaveOpen: true);
-        return await csvReader.GetRecordsAsync<T>(token)
-            .ToListAsync(token).ConfigureAwait(false);
+        if (entry is not null)
+        {
+            await using var entryStream = entry.Open();
+            using var reader = new StreamReader(entryStream,
+                Encoding.UTF8, leaveOpen: true, bufferSize: 1024);
+            using var csvReader = new CsvReader(reader,
+                CultureInfo.InvariantCulture, leaveOpen: true);
+            return await csvReader.GetRecordsAsync<T>(token)
+                .ToListAsync(token).ConfigureAwait(false);
+        }
+        return [];
     }
 
     private static async Task WriteEntryAsync<T>(this ZipArchive archive, 

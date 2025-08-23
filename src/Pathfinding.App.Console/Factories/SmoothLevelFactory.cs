@@ -5,18 +5,13 @@ using Pathfinding.Infrastructure.Business.Layers;
 
 namespace Pathfinding.App.Console.Factories;
 
-internal sealed class SmoothLevelFactory : ISmoothLevelFactory
+internal sealed class SmoothLevelFactory(Meta<SmoothLayer>[] layers) : ISmoothLevelFactory
 {
-    private readonly Dictionary<SmoothLevels, SmoothLayer> layers;
-
-    public IReadOnlyCollection<SmoothLevels> Allowed => layers.Keys;
-
-    public SmoothLevelFactory(Meta<SmoothLayer>[] layers)
-    {
-        this.layers = layers.ToDictionary(
+    private readonly Dictionary<SmoothLevels, SmoothLayer> layers = layers.ToDictionary(
             x => (SmoothLevels)x.Metadata[MetadataKeys.SmoothLevels],
             x => x.Value);
-    }
+
+    public IReadOnlyCollection<SmoothLevels> Allowed => layers.Keys;
 
     public SmoothLayer CreateLayer(SmoothLevels level)
     {

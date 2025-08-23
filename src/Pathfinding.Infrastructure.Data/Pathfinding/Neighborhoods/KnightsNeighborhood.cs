@@ -9,15 +9,15 @@ public sealed class KnightNeighborhood(Coordinate coordinate) : Neighborhood(coo
     protected override HashSet<Coordinate> Filter(Coordinate coordinate)
     {
         var neighbors = new HashSet<Coordinate>();
-        for (var i = 0; i < coordinate.Count; i++)
+        for (int i = 0; i < coordinate.Count; i++)
         {
-            for (var j = 0; j < coordinate.Count; j++)
+            for (int j = 0; j < coordinate.Count; j++)
             {
                 if (i != j)
                 {
-                    foreach (var sign1 in new[] { +2, -2 })
+                    foreach (int sign1 in new[] { +2, -2 })
                     {
-                        foreach (var sign2 in new[] { +1, -1 })
+                        foreach (int sign2 in new[] { +1, -1 })
                         {
                             var delta = new int[coordinate.Count];
                             delta[i] = sign1;

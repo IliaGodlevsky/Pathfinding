@@ -8,7 +8,6 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
     private int id;
     private readonly HashSet<Statistics> set = new(EntityComparer<int>.Instance);
 
-
     public Task<IReadOnlyCollection<Statistics>> CreateAsync(
         IReadOnlyCollection<Statistics> statistics, 
         CancellationToken token = default)
@@ -40,16 +39,16 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
         return Task.FromResult(removed);
     }
 
-    public async Task<Statistics> ReadByIdAsync(
+    public Task<Statistics> ReadByIdAsync(
         int statId,
         CancellationToken token = default)
     {
         var tracking = new Statistics { Id = statId };
         set.TryGetValue(tracking, out var statistics);
-        return await Task.FromResult(statistics);
+        return Task.FromResult(statistics);
     }
 
-    public async Task<bool> UpdateAsync(
+    public Task<bool> UpdateAsync(
         IReadOnlyCollection<Statistics> entities,
         CancellationToken token = default)
     {
@@ -68,7 +67,7 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
                 statistics.Elapsed = entity.Elapsed;
             }
         }
-        return await Task.FromResult(true);
+        return Task.FromResult(true);
     }
 
     public IAsyncEnumerable<Statistics> ReadByIdsAsync(

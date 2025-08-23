@@ -50,7 +50,7 @@ internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParameters
         IReadOnlyCollection<int> graphIds, 
         CancellationToken token = default)
     {
-        const string query = $"DELETE FROM {DbTables.Graphs} WHERE Id IN @Ids";
+        const string query = $"DELETE FROM {DbTables.Graphs} WHERE {IdProperty} IN @Ids";
 
         var affectedRows = await Connection.ExecuteAsync(
                 new(query, new { Ids = graphIds }, Transaction, cancellationToken: token))
@@ -67,7 +67,7 @@ internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParameters
 
     public async Task<Graph> ReadAsync(int graphId, CancellationToken token = default)
     {
-        const string query = $"SELECT * FROM {DbTables.Graphs} WHERE Id = @Id";
+        const string query = $"SELECT * FROM {DbTables.Graphs} WHERE {IdProperty} = @Id";
 
         return await Connection.QuerySingleOrDefaultAsync<Graph>(
                 new(query, new { Id = graphId }, Transaction, cancellationToken: token))

@@ -10,7 +10,7 @@ internal sealed class InMemoryRangeRepository : IRangeRepository
 
     private readonly HashSet<PathfindingRange> set = new(EntityComparer<int>.Instance);
 
-    public async Task<IReadOnlyCollection<PathfindingRange>> CreateAsync(
+    public Task<IReadOnlyCollection<PathfindingRange>> CreateAsync(
         IReadOnlyCollection<PathfindingRange> entities,
         CancellationToken token = default)
     {
@@ -18,21 +18,21 @@ internal sealed class InMemoryRangeRepository : IRangeRepository
             .ForEach(x => x.Id = ++id)
             .ForWhole(set.AddRange)
             .ToList();
-        return await Task.FromResult(result);
+        return Task.FromResult((IReadOnlyCollection<PathfindingRange>)result);
     }
 
-    public async Task<bool> DeleteByGraphIdAsync(int graphId,
+    public Task<bool> DeleteByGraphIdAsync(int graphId,
         CancellationToken token = default)
     {
         var result = set.RemoveWhere(x => x.GraphId == graphId);
-        return await Task.FromResult(result > 0);
+        return Task.FromResult(result > 0);
     }
 
-    public async Task<bool> DeleteByVerticesIdsAsync(IReadOnlyCollection<long> verticesIds,
+    public Task<bool> DeleteByVerticesIdsAsync(IReadOnlyCollection<long> verticesIds,
         CancellationToken token = default)
     {
         var result = set.RemoveWhere(x => verticesIds.Contains(x.VertexId));
-        return await Task.FromResult(result > 0);
+        return Task.FromResult(result > 0);
     }
 
     public IAsyncEnumerable<PathfindingRange> ReadByGraphIdAsync(int graphId)
@@ -42,7 +42,7 @@ internal sealed class InMemoryRangeRepository : IRangeRepository
             .ToAsyncEnumerable();
     }
 
-    public async Task<IReadOnlyCollection<PathfindingRange>> UpsertAsync(
+    public Task<IReadOnlyCollection<PathfindingRange>> UpsertAsync(
         IReadOnlyCollection<PathfindingRange> entities,
         CancellationToken token = default)
     {
@@ -59,6 +59,6 @@ internal sealed class InMemoryRangeRepository : IRangeRepository
                 set.Add(entity);
             }
         }
-        return await Task.FromResult(entities);
+        return Task.FromResult(entities);
     }
 }

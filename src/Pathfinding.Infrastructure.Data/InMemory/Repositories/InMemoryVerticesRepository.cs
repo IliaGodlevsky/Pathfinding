@@ -10,7 +10,7 @@ internal sealed class InMemoryVerticesRepository : IVerticesRepository
 
     private readonly HashSet<Vertex> set = new(EntityComparer<long>.Instance);
 
-    public async Task<IReadOnlyCollection<Vertex>> CreateAsync(
+    public Task<IReadOnlyCollection<Vertex>> CreateAsync(
         IReadOnlyCollection<Vertex> vertices,
         CancellationToken token = default)
     {
@@ -18,21 +18,21 @@ internal sealed class InMemoryVerticesRepository : IVerticesRepository
             .ForEach(x => x.Id = ++id)
             .ForWhole(set.AddRange)
             .ToList();
-        return await Task.FromResult(result);
+        return Task.FromResult((IReadOnlyCollection<Vertex>)result);
     }
 
-    public async Task<bool> DeleteVerticesByGraphIdAsync(int graphId)
+    public Task<bool> DeleteVerticesByGraphIdAsync(int graphId)
     {
         var result = set.RemoveWhere(x => x.GraphId == graphId);
-        return await Task.FromResult(result > 0);
+        return Task.FromResult(result > 0);
     }
 
-    public async Task<Vertex> ReadAsync(long vertexId,
+    public Task<Vertex> ReadAsync(long vertexId,
         CancellationToken token = default)
     {
         var vertex = new Vertex { Id = vertexId };
         set.TryGetValue(vertex, out var result);
-        return await Task.FromResult(result);
+        return Task.FromResult(result);
     }
 
     public IAsyncEnumerable<Vertex> ReadVerticesByGraphIdAsync(int graphId)

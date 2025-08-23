@@ -107,14 +107,16 @@ internal static class Modules
         builder.RegisterType<NeighborhoodLayerFactory>().As<INeighborhoodLayerFactory>()
             .WithAttributeFiltering().SingleInstance();
 
-        int lvl = 0;
-        foreach (var level in Enum.GetValues<SmoothLevels>())
-        {
-            var smooth = new SmoothLayer(2 << lvl);
-            builder.RegisterInstance(new SmoothLayer(2 << lvl)).AsSelf().SingleInstance()
-                .WithMetadata(MetadataKeys.SmoothLevels, level);
-            lvl++;
-        }
+        builder.RegisterInstance(new SmoothLayer(0)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.No);
+        builder.RegisterInstance(new SmoothLayer(1)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Low);
+        builder.RegisterInstance(new SmoothLayer(2)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Medium);
+        builder.RegisterInstance(new SmoothLayer(4)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.High);
+        builder.RegisterInstance(new SmoothLayer(8)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Extreme);
         builder.RegisterType<SmoothLevelFactory>().As<ISmoothLevelFactory>().SingleInstance();
 
         builder.RegisterType<RandomAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Random)
@@ -157,7 +159,7 @@ internal static class Modules
             .WithMetadata(MetadataKeys.ExportOptions, ExportOptions.WithRange);
         builder.RegisterType<ReadGraphWithRunsOptions>().As<IReadHistoryOption>().SingleInstance()
             .WithMetadata(MetadataKeys.ExportOptions, ExportOptions.WithRuns);
-        builder.RegisterType<ReadHistoryOptionsFacade>().As<IReadHistoryOptionsFacade>().SingleInstance();
+        builder.RegisterType<ReadHistoryOptions>().As<IReadHistoryOptions>().SingleInstance();
 
         builder.RegisterType<FileLog>().As<ILog>().SingleInstance();
         builder.RegisterType<MessageBoxLog>().As<ILog>().SingleInstance();

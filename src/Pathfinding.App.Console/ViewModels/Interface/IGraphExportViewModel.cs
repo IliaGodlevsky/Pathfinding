@@ -6,7 +6,7 @@ namespace Pathfinding.App.Console.ViewModels.Interface;
 
 internal interface IGraphExportViewModel
 {
-    ExportOptions Options { get; set; }
+    ExportOptions Option { get; set; }
 
     IReadOnlyList<ExportOptions> AllowedOptions { get; }
 

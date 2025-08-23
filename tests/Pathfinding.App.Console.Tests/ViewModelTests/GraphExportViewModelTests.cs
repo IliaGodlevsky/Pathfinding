@@ -34,7 +34,7 @@ internal class GraphExportViewModelTests
                 .ToArray()
                 .To(x => new PathfindingHistoriesSerializationModel { Histories = [.. x] });
 
-        mock.Mock<IReadHistoryOptionsFacade>()
+        mock.Mock<IReadHistoryOptions>()
             .Setup(x => x.ReadHistoryAsync(
                 It.IsAny<ExportOptions>(), 
                 It.IsAny<IReadOnlyCollection<int>>(),
@@ -57,7 +57,7 @@ internal class GraphExportViewModelTests
         var typedParam = new TypedParameter(typeof(Meta<ISerializer<PathfindingHistoriesSerializationModel>>[]), new[] { meta });
 
         var viewModel = mock.Create<GraphExportViewModel>(typedParam);
-        viewModel.Options = ExportOptions.WithRuns;
+        viewModel.Option = ExportOptions.WithRuns;
 
         var command = viewModel.ExportGraphCommand;
         if (await command.CanExecute.FirstOrDefaultAsync())
