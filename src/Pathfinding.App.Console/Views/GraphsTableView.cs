@@ -23,7 +23,7 @@ internal sealed partial class GraphsTableView
     public GraphsTableView(IGraphTableViewModel viewModel,
         [KeyFilter(KeyFilters.Views)] IMessenger messenger) : this()
     {
-        viewModel.Graphs.ActOnEveryObject(AddToTable, RemoveFromTable);
+        viewModel.Graphs.ActOnEveryObject(AddToTable, RemoveFromTable).DisposeWith(disposables);
         this.Events().Initialized
             .Select(_ => Unit.Default)
             .InvokeCommand(viewModel, x => x.LoadGraphsCommand)
@@ -122,8 +122,9 @@ internal sealed partial class GraphsTableView
                 var index = table.Rows.IndexOf(row);
                 row.Delete();
                 table.AcceptChanges();
-                modelChangingSubs[model.Id].Dispose();
+                var toDispose = modelChangingSubs[model.Id];
                 modelChangingSubs.Remove(model.Id);
+                disposables.Remove(toDispose);
                 MultiSelectedRegions.Clear();
                 if (table.Rows.Count > 0)
                 {

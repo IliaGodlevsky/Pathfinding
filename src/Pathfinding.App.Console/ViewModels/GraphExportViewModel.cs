@@ -65,18 +65,16 @@ internal sealed class GraphExportViewModel
 
     private async Task ExportGraph(Func<StreamModel> streamFactory)
     {
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
             await using var stream = streamFactory();
             if (!stream.IsEmpty)
             {
-                var timeout = Timeout * SelectedGraphIds.Length;
-                using var cts = new CancellationTokenSource(timeout);
                 var histories = await options.ReadHistoryAsync(Option, 
-                    SelectedGraphIds, cts.Token).ConfigureAwait(false);
+                    SelectedGraphIds, token).ConfigureAwait(false);
                 var serializer = serializers[stream.Format.Value];
                 await serializer.SerializeToAsync(histories, 
-                    stream.Stream, cts.Token).ConfigureAwait(false);
+                    stream.Stream, token).ConfigureAwait(false);
                 log.Info(histories.Histories.Count == 1 
                     ? Resource.WasDeletedMsg 
                     : Resource.WereDeletedMsg);
@@ -84,14 +82,20 @@ internal sealed class GraphExportViewModel
         }).ConfigureAwait(false);
     }
 
-    private void OnGraphSelected(object recipient, GraphsSelectedMessage msg)
+    private void OnGraphSelected(GraphsSelectedMessage msg)
     {
         SelectedGraphIds = [.. msg.Value.Select(x => x.Id)];
     }
 
-    private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
+    private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
         SelectedGraphIds = [.. SelectedGraphIds.Except(msg.Value)];
+    }
+
+    protected override CancellationTokenSource GetTokenSource()
+    {
+        var timeout = Timeout * SelectedGraphIds.Length;
+        return new CancellationTokenSource(timeout);
     }
 
     public void Dispose()

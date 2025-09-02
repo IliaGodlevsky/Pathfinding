@@ -40,26 +40,24 @@ internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel, I
         CopyGraphCommand = ReactiveCommand.CreateFromTask(ExecuteCopy, CanExecute()).DisposeWith(disposables);
     }
 
-    private void OnGraphSelected(object recipient, GraphsSelectedMessage msg)
+    private void OnGraphSelected(GraphsSelectedMessage msg)
     {
         SelectedGraphIds = [.. msg.Value.Select(x => x.Id)];
     }
 
-    private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
+    private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
         SelectedGraphIds = [.. SelectedGraphIds.Where(x => !msg.Value.Contains(x))];
     }
 
     private async Task ExecuteCopy()
     {
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
-            var timeout = Timeout * SelectedGraphIds.Length;
-            using var cts = new CancellationTokenSource(timeout);
             var copies = await service.ReadSerializationHistoriesAsync(
-                SelectedGraphIds, cts.Token).ConfigureAwait(false);
+                SelectedGraphIds, token).ConfigureAwait(false);
             var histories = await service.CreatePathfindingHistoriesAsync(
-                copies.Histories, cts.Token).ConfigureAwait(false);
+                copies.Histories, token).ConfigureAwait(false);
             var graphs = histories.Select(x => x.Graph).ToGraphInfo();
             messenger.Send(new GraphsCreatedMessage(graphs));
         }).ConfigureAwait(false);
@@ -69,6 +67,12 @@ internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel, I
     {
         return this.WhenAnyValue(x => x.SelectedGraphIds,
             ids => ids.Length > 0);
+    }
+
+    protected override CancellationTokenSource GetTokenSource()
+    {
+        var timeout = Timeout * SelectedGraphIds.Length;
+        return new CancellationTokenSource(timeout);
     }
 
     public void Dispose()

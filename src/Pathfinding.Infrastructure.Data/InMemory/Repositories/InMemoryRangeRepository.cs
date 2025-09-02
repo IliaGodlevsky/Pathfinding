@@ -14,11 +14,12 @@ internal sealed class InMemoryRangeRepository : IRangeRepository
         IReadOnlyCollection<PathfindingRange> entities,
         CancellationToken token = default)
     {
-        var result = entities
-            .ForEach(x => x.Id = ++id)
-            .ForWhole(set.AddRange)
-            .ToList();
-        return Task.FromResult((IReadOnlyCollection<PathfindingRange>)result);
+        foreach (var entity in entities)
+        {
+            entity.Id = ++id;
+            set.Add(entity);
+        }
+        return Task.FromResult(entities);
     }
 
     public Task<bool> DeleteByGraphIdAsync(int graphId,

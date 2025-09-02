@@ -16,7 +16,7 @@ internal sealed class ReadHistoryOptions : IReadHistoryOptions
         this.options = options.ToDictionary(
             x => (ExportOptions)x.Metadata[MetadataKeys.ExportOptions], 
             x => x.Value);
-        Allowed = this.options.Keys.ToList().AsReadOnly();
+        Allowed = [.. this.options.Keys];
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(

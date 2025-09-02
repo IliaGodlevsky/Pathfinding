@@ -40,18 +40,18 @@ internal sealed partial class RunStepRulesView : FrameView
         this.viewModel = viewModel;
     }
 
-    private void OnOpen(object recipient, OpenStepRuleViewMessage msg)
+    private void OnOpen(OpenStepRuleViewMessage msg)
     {
         stepRules.SelectedItem = 0;
         Visible = true;
     }
 
-    private void OnStepRulesViewClose(object recipient, CloseStepRulesViewMessage msg)
+    private void OnStepRulesViewClose(CloseStepRulesViewMessage msg)
     {
         Close();
     }
 
-    private void OnRunCreationViewClosed(object recipient, CloseRunCreateViewMessage msg)
+    private void OnRunCreationViewClosed(CloseRunCreateViewMessage msg)
     {
         Close();
     }

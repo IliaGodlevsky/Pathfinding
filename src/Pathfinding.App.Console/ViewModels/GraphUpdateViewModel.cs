@@ -66,7 +66,7 @@ internal sealed class GraphUpdateViewModel : BaseViewModel, IDisposable
         messenger.RegisterHandler<GraphsSelectedMessage>(this, OnGraphSelected).DisposeWith(disposables);
         messenger.RegisterHandler<GraphStateChangedMessage>(this, OnStatusChanged).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
-        UpdateGraphCommand = ReactiveCommand.CreateFromTask(ExecuteUpdate, CanExecute());
+        UpdateGraphCommand = ReactiveCommand.CreateFromTask(ExecuteUpdate, CanExecute()).DisposeWith(disposables);
     }
 
     private IObservable<bool> CanExecute()
@@ -80,27 +80,25 @@ internal sealed class GraphUpdateViewModel : BaseViewModel, IDisposable
 
     private async Task ExecuteUpdate()
     {
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
             var graph = SelectedGraphs[0];
-            using var cts = new CancellationTokenSource(Timeout);
-            var info = await service.ReadGraphInfoAsync(graph.Id, cts.Token)
-                .ConfigureAwait(false);
+            var info = await service.ReadGraphInfoAsync(graph.Id, token).ConfigureAwait(false);
             info.Name = Name;
             info.Neighborhood = Neighborhood;
-            await service.UpdateGraphInfoAsync(info, cts.Token).ConfigureAwait(false);
+            await service.UpdateGraphInfoAsync(info, token).ConfigureAwait(false);
             await messenger.Send(new AwaitGraphUpdatedMessage(info), Tokens.GraphTable);
             messenger.Send(new GraphUpdatedMessage(info));
             await messenger.Send(new AwaitGraphUpdatedMessage(info), Tokens.AlgorithmUpdate);
         }).ConfigureAwait(false);
     }
 
-    private void OnStatusChanged(object recipient, GraphStateChangedMessage msg)
+    private void OnStatusChanged(GraphStateChangedMessage msg)
     {
         Status = msg.Value.Status;
     }
 
-    private void OnGraphSelected(object recipient, GraphsSelectedMessage msg)
+    private void OnGraphSelected(GraphsSelectedMessage msg)
     {
         if (msg.Value.Length == 1)
         {
@@ -112,7 +110,7 @@ internal sealed class GraphUpdateViewModel : BaseViewModel, IDisposable
         }
     }
 
-    private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
+    private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
         SelectedGraphs = [.. SelectedGraphs.Where(x => !msg.Value.Contains(x.Id))];
         if (SelectedGraphs.Length == 0)

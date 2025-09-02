@@ -15,27 +15,27 @@ internal sealed class LiteDbRangeRepository : IRangeRepository
         collection.EnsureIndex(x => x.GraphId);
     }
 
-    public async Task<IReadOnlyCollection<PathfindingRange>> CreateAsync(
+    public Task<IReadOnlyCollection<PathfindingRange>> CreateAsync(
         IReadOnlyCollection<PathfindingRange> entities,
         CancellationToken token = default)
     {
         collection.Insert(entities);
-        return await Task.FromResult(entities);
+        return Task.FromResult(entities);
     }
 
-    public async Task<bool> DeleteByGraphIdAsync(int graphId, 
+    public  Task<bool> DeleteByGraphIdAsync(int graphId, 
         CancellationToken token = default)
     {
         int deleted = collection.DeleteMany(x => x.GraphId == graphId);
-        return await Task.FromResult(deleted > 0);
+        return Task.FromResult(deleted > 0);
     }
 
-    public async Task<bool> DeleteByVerticesIdsAsync(IReadOnlyCollection<long> verticesIds,
+    public Task<bool> DeleteByVerticesIdsAsync(IReadOnlyCollection<long> verticesIds,
         CancellationToken token = default)
     {
         var ids = verticesIds.Select(x => new BsonValue(x)).ToArray();
         var query = Query.In(nameof(PathfindingRange.VertexId), ids);
-        return await Task.FromResult(collection.DeleteMany(query) > 0);
+        return Task.FromResult(collection.DeleteMany(query) > 0);
     }
 
     public IAsyncEnumerable<PathfindingRange> ReadByGraphIdAsync(int graphId)
@@ -47,11 +47,11 @@ internal sealed class LiteDbRangeRepository : IRangeRepository
             .ToAsyncEnumerable();
     }
 
-    public async Task<IReadOnlyCollection<PathfindingRange>> UpsertAsync(
+    public Task<IReadOnlyCollection<PathfindingRange>> UpsertAsync(
         IReadOnlyCollection<PathfindingRange> entities, 
         CancellationToken token = default)
     {
         collection.Upsert(entities);
-        return await Task.FromResult(entities);
+        return Task.FromResult(entities);
     }
 }

@@ -15,26 +15,26 @@ internal sealed class LiteDbStatisticsRepository : IStatisticsRepository
         collection.EnsureIndex(x => x.Id);
     }
 
-    public async Task<IReadOnlyCollection<Statistics>> CreateAsync(
+    public Task<IReadOnlyCollection<Statistics>> CreateAsync(
         IReadOnlyCollection<Statistics> statistics,
         CancellationToken token = default)
     {
         collection.InsertBulk(statistics);
-        return await Task.FromResult(statistics);
+        return Task.FromResult(statistics);
     }
 
-    public async Task<bool> DeleteByGraphId(int graphId)
+    public Task<bool> DeleteByGraphId(int graphId)
     {
         var deletedCount = collection.DeleteMany(x => x.GraphId == graphId);
-        return await Task.FromResult(deletedCount > 0);
+        return Task.FromResult(deletedCount > 0);
     }
 
-    public async Task<bool> DeleteByIdsAsync(
+    public Task<bool> DeleteByIdsAsync(
         IReadOnlyCollection<int> ids,
         CancellationToken token = default)
     {
         var deletedCount = collection.DeleteMany(x => ids.Contains(x.Id));
-        return await Task.FromResult(deletedCount > 0);
+        return Task.FromResult(deletedCount > 0);
     }
 
     public IAsyncEnumerable<Statistics> ReadByGraphIdAsync(int graphId)
@@ -42,10 +42,10 @@ internal sealed class LiteDbStatisticsRepository : IStatisticsRepository
         return collection.Find(x => x.GraphId == graphId).ToAsyncEnumerable();
     }
 
-    public async Task<Statistics> ReadByIdAsync(int id, CancellationToken token = default)
+    public Task<Statistics> ReadByIdAsync(int id, CancellationToken token = default)
     {
         var result = collection.FindById(id);
-        return await Task.FromResult(result);
+        return Task.FromResult(result);
     }
 
     public IAsyncEnumerable<Statistics> ReadByIdsAsync(IReadOnlyCollection<int> runIds)
@@ -56,11 +56,11 @@ internal sealed class LiteDbStatisticsRepository : IStatisticsRepository
             .ToAsyncEnumerable();
     }
 
-    public async Task<bool> UpdateAsync(
+    public Task<bool> UpdateAsync(
         IReadOnlyCollection<Statistics> entities,
         CancellationToken token = default)
     {
         var updated = collection.Update(entities);
-        return await Task.FromResult(updated > 0);
+        return Task.FromResult(updated > 0);
     }
 }

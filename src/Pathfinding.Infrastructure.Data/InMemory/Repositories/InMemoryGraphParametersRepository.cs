@@ -28,7 +28,7 @@ internal sealed class InMemoryGraphParametersRepository(
         await rangeRepository.DeleteByGraphIdAsync(graphId, token).ConfigureAwait(false);
         await verticesRepository.DeleteVerticesByGraphIdAsync(graphId).ConfigureAwait(false);
         await statisticsRepository.DeleteByGraphId(graphId).ConfigureAwait(false);
-        var deleted = set.RemoveWhere(x => x.Id == graphId);
+        int deleted = set.RemoveWhere(x => x.Id == graphId);
         return deleted == 1;
     }
 

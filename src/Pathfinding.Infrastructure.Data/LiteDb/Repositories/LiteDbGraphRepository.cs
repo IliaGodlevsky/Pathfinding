@@ -22,11 +22,11 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
         collection.EnsureIndex(x => x.Id);
     }
 
-    public async Task<Graph> CreateAsync(
+    public Task<Graph> CreateAsync(
         Graph graph, CancellationToken token = default)
     {
         collection.Insert(graph);
-        return await Task.FromResult(graph);
+        return Task.FromResult(graph);
     }
 
     public async Task<bool> DeleteAsync(
@@ -56,24 +56,25 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
         return collection.FindAll().ToAsyncEnumerable();
     }
 
-    public async Task<Graph> ReadAsync(
+    public Task<Graph> ReadAsync(
         int graphId, CancellationToken token = default)
     {
-        return await Task.FromResult(collection.FindById(graphId));
+        return Task.FromResult(collection.FindById(graphId));
     }
 
-    public async Task<IReadOnlyDictionary<int, int>> ReadObstaclesCountAsync(
+    public Task<IReadOnlyDictionary<int, int>> ReadObstaclesCountAsync(
         IReadOnlyCollection<int> graphIds, 
         CancellationToken token = default)
     {
-        return await Task.FromResult(vertexCollection
+        var result = vertexCollection
             .Find(x => graphIds.Contains(x.GraphId) && x.IsObstacle)
             .GroupBy(x => x.GraphId)
-            .ToDictionary(x => x.Key, x => x.Count()));
+            .ToDictionary(x => x.Key, x => x.Count());
+        return Task.FromResult((IReadOnlyDictionary<int, int>)result);
     }
 
-    public async Task<bool> UpdateAsync(Graph graph, CancellationToken token = default)
+    public Task<bool> UpdateAsync(Graph graph, CancellationToken token = default)
     {
-        return await Task.FromResult(collection.Update(graph));
+        return Task.FromResult(collection.Update(graph));
     }
 }

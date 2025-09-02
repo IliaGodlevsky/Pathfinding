@@ -3,7 +3,6 @@ using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Shared.Extensions;
 using Pathfinding.Shared.Primitives;
 using ReactiveUI;
-using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -22,12 +21,12 @@ internal class RunModel : ReactiveObject, IDisposable
 
     private enum RunVertexState
     {
-        Source, 
+        Source,
         Target,
-        Transit, 
-        Visited, 
-        Enqueued, 
-        Path, 
+        Transit,
+        Visited,
+        Enqueued,
+        Path,
         CrossPath
     }
 
@@ -44,26 +43,37 @@ internal class RunModel : ReactiveObject, IDisposable
         {
             switch (State)
             {
-                case RunVertexState.Visited: Vertex.IsVisited = value; break;
-                case RunVertexState.Enqueued: Vertex.IsEnqueued = value; break;
-                case RunVertexState.CrossPath: Vertex.IsCrossedPath = value; break;
-                case RunVertexState.Path: Vertex.IsPath = value; break;
-                case RunVertexState.Source: Vertex.IsSource = value; break;
-                case RunVertexState.Target: Vertex.IsTarget = value; break;
-                case RunVertexState.Transit: Vertex.IsTransit = value; break;
+                case RunVertexState.Visited:
+                    Vertex.IsVisited = value; 
+                    break;
+                case RunVertexState.Enqueued:
+                    Vertex.IsEnqueued = value;
+                    break;
+                case RunVertexState.CrossPath: 
+                    Vertex.IsCrossedPath = value; 
+                    break;
+                case RunVertexState.Path:
+                    Vertex.IsPath = value;
+                    break;
+                case RunVertexState.Source:
+                    Vertex.IsSource = value;
+                    break;
+                case RunVertexState.Target: 
+                    Vertex.IsTarget = value;
+                    break;
+                case RunVertexState.Transit:
+                    Vertex.IsTransit = value;
+                    break;
             }
         }
     }
 
     public static readonly RunModel Empty = new(Graph<RunVertexModel>.Empty, [], []);
-
     private static readonly InclusiveValueRange<float> FractionRange = new(1);
 
     private readonly CompositeDisposable disposables = [];
-
-    private ImmutableArray<RunVertexStateModel> Algorithm { get; }
-
-    private InclusiveValueRange<int> CursorRange { get; }
+    private readonly ReadOnlyCollection<RunVertexStateModel> algorithm;
+    private readonly InclusiveValueRange<int> cursorRange;
 
     public int Id { get; init; }
 
@@ -78,7 +88,7 @@ internal class RunModel : ReactiveObject, IDisposable
     private int Cursor
     {
         get => cursor;
-        set => cursor = CursorRange.ReturnInRange(value);
+        set => cursor = cursorRange.ReturnInRange(value);
     }
 
     public RunModel(
@@ -86,14 +96,20 @@ internal class RunModel : ReactiveObject, IDisposable
         IReadOnlyCollection<SubRunModel> pathfindingResult,
         IReadOnlyCollection<Coordinate> range)
     {
-        Algorithm = CreateAlgorithmRevision(vertices, pathfindingResult, range);
-        CursorRange = new(Algorithm.Length - 1);
+        algorithm = GetAlgorithmStates(vertices, 
+            pathfindingResult, range);
+        cursorRange = new(algorithm.Count - 1);
+        Bind(fraction => fraction > 0, Next);
+        Bind(fraction => fraction < 0, Previous);
+    }
+
+    private void Bind(Func<int, bool> condition, Action<int> action)
+    {
         this.WhenAnyValue(x => x.Fraction)
             .DistinctUntilChanged()
-            .Select(x => (int)Math.Floor(Algorithm.Length * x - Cursor))
-            .Where(x => x != 0)
-            .Select(x => x > 0 ? new Action(() => Next(x)) : () => Previous(x))
-            .Subscribe(x => x())
+            .Select(x => (int)Math.Floor(algorithm.Count * x - Cursor))
+            .Where(condition)
+            .Subscribe(action)
             .DisposeWith(disposables);
     }
 
@@ -101,7 +117,7 @@ internal class RunModel : ReactiveObject, IDisposable
     {
         while (count-- >= 0)
         {
-            Algorithm[Cursor++].Activate();
+            algorithm[Cursor++].Activate();
         }
     }
 
@@ -109,18 +125,18 @@ internal class RunModel : ReactiveObject, IDisposable
     {
         while (count++ <= 0)
         {
-            Algorithm[Cursor--].Deactivate();
+            algorithm[Cursor--].Deactivate();
         }
     }
 
-    private static ImmutableArray<RunVertexStateModel> CreateAlgorithmRevision(
+    private static ReadOnlyCollection<RunVertexStateModel> GetAlgorithmStates(
         IGraph<RunVertexModel> graph,
         IReadOnlyCollection<SubRunModel> pathfindingResult,
         IReadOnlyCollection<Coordinate> range)
     {
         if (graph.Count == 0 || pathfindingResult.Count == 0 || range.Count < 2)
         {
-            return [];
+            return ReadOnlyCollection<RunVertexStateModel>.Empty;
         }
 
         var previousVisited = new HashSet<Coordinate>();
@@ -159,7 +175,7 @@ internal class RunModel : ReactiveObject, IDisposable
             previousPaths.AddRange(subAlgorithm.Path);
         }
 
-        return [.. subAlgorithms];
+        return subAlgorithms.AsReadOnly();
 
         RunVertexStateModel ToRunVertexModel(Coordinate coordinate,
             RunVertexState stateType, bool state = true)

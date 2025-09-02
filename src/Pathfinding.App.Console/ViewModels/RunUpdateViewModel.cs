@@ -65,18 +65,18 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel, I
             Tokens.AlgorithmUpdate, OnGraphUpdated).DisposeWith(disposables);
     }
 
-    private void OnRunsSelected(object recipient, RunsSelectedMessage msg)
+    private void OnRunsSelected(RunsSelectedMessage msg)
     {
         Selected = msg.Value;
     }
 
-    private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
+    private void OnGraphActivated(GraphActivatedMessage msg)
     {
         Graph = msg.Value.Graph;
         ActivatedGraphId = msg.Value.GraphId;
     }
 
-    private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
+    private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
         if (Graph != null && msg.Value.Contains(ActivatedGraphId))
         {
@@ -105,27 +105,28 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel, I
         }).ConfigureAwait(false);
     }
 
-    private async Task OnGraphUpdated(object recipient, AwaitGraphUpdatedMessage msg)
+    private async Task OnGraphUpdated(AwaitGraphUpdatedMessage msg)
     {
         var id = ActivatedGraphId;
         var local = Graph;
-        using var cts = new CancellationTokenSource(Timeout);
         if ((local != Graph<GraphVertexModel>.Empty 
-            && msg.Value.Id != ActivatedGraphId)
-            || local == Graph<GraphVertexModel>.Empty)
+            && msg.Value.Id != ActivatedGraphId) || local == Graph<GraphVertexModel>.Empty)
         {
-            var model = await service.ReadGraphAsync(msg.Value.Id, cts.Token).ConfigureAwait(false);
-            local = new (model.Vertices, model.DimensionSizes);
-            id = model.Id;
-            var layer = neighborFactory.CreateNeighborhoodLayer(model.Neighborhood);
-            await layer.OverlayAsync(local).ConfigureAwait(false);
+            await ExecuteSafe(async token =>
+            {
+                var model = await service.ReadGraphAsync(msg.Value.Id, token).ConfigureAwait(false);
+                local = model.CreateGraph();
+                id = model.Id;
+                var layer = neighborFactory.CreateNeighborhoodLayer(model.Neighborhood);
+                await layer.OverlayAsync(local, token).ConfigureAwait(false);
+            }).ConfigureAwait(false);
         }
         if (local != Graph<GraphVertexModel>.Empty)
         {
-            await ExecuteSafe(async () =>
+            await ExecuteSafe(async token =>
             {
-                var models = await service.ReadStatisticsAsync(id, cts.Token).ConfigureAwait(false);
-                var updated = await UpdateRunsAsync(models, local, id);
+                var models = await service.ReadStatisticsAsync(id, token).ConfigureAwait(false);
+                var updated = await UpdateRunsAsync(models, local, id).ConfigureAwait(false);
                 messenger.Send(new RunsUpdatedMessage(updated));
             }).ConfigureAwait(false);
         }
@@ -180,7 +181,7 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel, I
                 var timeout = Timeout * updatedRuns.Count;
                 using var cts = new CancellationTokenSource(timeout);
                 await service.UpdateStatisticsAsync(updatedRuns, cts.Token).ConfigureAwait(false);
-            }, updatedRuns.Clear);
+            }, updatedRuns.Clear).ConfigureAwait(false);
         }
         return [.. updatedRuns];
     }

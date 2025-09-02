@@ -15,23 +15,23 @@ internal sealed class LiteDbVerticesRepository : IVerticesRepository
         collection.EnsureIndex(x => x.GraphId);
     }
 
-    public async Task<IReadOnlyCollection<Vertex>> CreateAsync(
+    public Task<IReadOnlyCollection<Vertex>> CreateAsync(
         IReadOnlyCollection<Vertex> vertices, 
         CancellationToken token = default)
     {
         collection.InsertBulk(vertices);
-        return await Task.FromResult(vertices);
+        return Task.FromResult(vertices);
     }
 
-    public async Task<bool> DeleteVerticesByGraphIdAsync(int graphId)
+    public Task<bool> DeleteVerticesByGraphIdAsync(int graphId)
     {
-        return await Task.FromResult(collection.DeleteMany(x => x.GraphId == graphId) > 0);
+        return Task.FromResult(collection.DeleteMany(x => x.GraphId == graphId) > 0);
     }
 
-    public async Task<Vertex> ReadAsync(long vertexId,
+    public Task<Vertex> ReadAsync(long vertexId,
         CancellationToken token = default)
     {
-        return await Task.FromResult(collection.FindById(vertexId));
+        return Task.FromResult(collection.FindById(vertexId));
     }
 
     public IAsyncEnumerable<Vertex> ReadVerticesByGraphIdAsync(int graphId)
@@ -42,10 +42,10 @@ internal sealed class LiteDbVerticesRepository : IVerticesRepository
             .ToAsyncEnumerable();
     }
 
-    public async Task<bool> UpdateVerticesAsync(
+    public Task<bool> UpdateVerticesAsync(
         IReadOnlyCollection<Vertex> vertices, 
         CancellationToken token = default)
     {
-        return await Task.FromResult(collection.Update(vertices) > 0);
+        return Task.FromResult(collection.Update(vertices) > 0);
     }
 }

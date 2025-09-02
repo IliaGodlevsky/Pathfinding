@@ -73,14 +73,14 @@ internal sealed partial class RunProgressView : FrameView
         base.Dispose(disposing);
     }
 
-    private void OnRunFieldClosed(object recipient, CloseRunFieldMessage msg)
+    private void OnRunFieldClosed(CloseRunFieldMessage msg)
     {
         rightLabel.Visible = false;
         leftLabel.Visible = false;
         bar.Visible = false;
     }
 
-    private void OnRunFieldOpen(object recipient, OpenRunFieldMessage msg)
+    private void OnRunFieldOpen(OpenRunFieldMessage msg)
     {
         rightLabel.Visible = true;
         leftLabel.Visible = true;

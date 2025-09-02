@@ -20,18 +20,4 @@ public static class GraphAssembleExtensions
     {
         return self.AssembleGraph(layer, (IReadOnlyList<int>)dimensionSizes);
     }
-
-    public static async Task<IGraph<TVertex>> AssembleGraphAsync<TVertex>(this IGraphAssemble<TVertex> self,
-        ILayer layer, params int[] dimensionSizes)
-        where TVertex : IVertex
-    {
-        return await self.AssembleGraphAsync(layer, (IReadOnlyList<int>)dimensionSizes);
-    }
-
-    public static async Task<IGraph<TVertex>> AssembleGraphAsync<TVertex>(this IGraphAssemble<TVertex> self,
-        ILayer layer, IReadOnlyList<int> dimensionSizes)
-        where TVertex : IVertex
-    {
-        return await Task.Run(() => self.AssembleGraph(layer, dimensionSizes)).ConfigureAwait(false);
-    }
 }

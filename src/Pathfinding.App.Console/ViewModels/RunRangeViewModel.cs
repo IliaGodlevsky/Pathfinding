@@ -125,6 +125,7 @@ internal sealed class RunRangeViewModel : BaseViewModel,
         AddToRangeCommand = ReactiveCommand.Create<GraphVertexModel>(AddVertexToRange, CanExecute()).DisposeWith(disposables);
         RemoveFromRangeCommand = ReactiveCommand.Create<GraphVertexModel>(RemoveVertexFromRange, CanExecute()).DisposeWith(disposables);
         DeletePathfindingRange = ReactiveCommand.CreateFromTask(DeleteRange, CanExecute()).DisposeWith(disposables);
+        shortLifeDisposables.DisposeWith(disposables);
     }
 
     private IObservable<bool> CanExecute()
@@ -202,9 +203,9 @@ internal sealed class RunRangeViewModel : BaseViewModel,
         }
     }
 
-    private async Task OnGraphActivated(object recipient, AwaitGraphActivatedMessage msg)
+    private async Task OnGraphActivated(AwaitGraphActivatedMessage msg)
     {
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
             shortLifeDisposables.Clear();
             Transit.CollectionChanged -= OnCollectionChanged;
@@ -212,8 +213,7 @@ internal sealed class RunRangeViewModel : BaseViewModel,
             Graph = msg.Value.Graph;
             GraphId = msg.Value.GraphId;
             IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
-            using var cts = new CancellationTokenSource(Timeout);
-            var range = await service.ReadRangeAsync(GraphId, cts.Token).ConfigureAwait(false);
+            var range = await service.ReadRangeAsync(GraphId, token).ConfigureAwait(false);
             var src = range.FirstOrDefault(x => x.IsSource);
             Source = src != null ? Graph.Get(src.Position) : null;
             var tgt = range.FirstOrDefault(x => x.IsTarget);
@@ -227,12 +227,12 @@ internal sealed class RunRangeViewModel : BaseViewModel,
         }).ConfigureAwait(false);
     }
 
-    private void OnGraphBecameReadonly(object recipient, GraphStateChangedMessage msg)
+    private void OnGraphBecameReadonly(GraphStateChangedMessage msg)
     {
         IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
     }
 
-    private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
+    private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
         if (msg.Value.Contains(GraphId))
         {
@@ -259,13 +259,13 @@ internal sealed class RunRangeViewModel : BaseViewModel,
         }
     }
 
-    private void OnVertexIsInRangeReceived(object recipient, IsVertexInRangeRequestMessage request)
+    private void OnVertexIsInRangeReceived(IsVertexInRangeRequestMessage request)
     {
         var contains = pathfindingRange.Contains(request.Vertex);
         request.Reply(contains);
     }
 
-    private void OnGetPathfindingRangeReceived(object recipient, PathfindingRangeRequestMessage msg)
+    private void OnGetPathfindingRangeReceived(PathfindingRangeRequestMessage msg)
     {
         var range = pathfindingRange
             .Where(x => x is not null)
@@ -281,7 +281,6 @@ internal sealed class RunRangeViewModel : BaseViewModel,
     public void Dispose()
     {
         disposables.Dispose();
-        shortLifeDisposables.Dispose();
         Transit.CollectionChanged -= OnCollectionChanged;
     }
 }

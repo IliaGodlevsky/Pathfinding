@@ -51,13 +51,12 @@ internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel, I
         messenger.Send(new RunsSelectedMessage(selectedRuns));
     }
 
-    private async Task OnGraphActivatedMessage(object recipient, AwaitGraphActivatedMessage msg)
+    private async Task OnGraphActivatedMessage(AwaitGraphActivatedMessage msg)
     {
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
-            using var cts = new CancellationTokenSource(Timeout);
             var statistics = await service
-                .ReadStatisticsAsync(msg.Value.GraphId, cts.Token)
+                .ReadStatisticsAsync(msg.Value.GraphId, token)
                 .ConfigureAwait(false);
             ActivatedGraphId = msg.Value.GraphId;
             Runs.Clear();
@@ -65,7 +64,7 @@ internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel, I
         }).ConfigureAwait(false);
     }
 
-    private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
+    private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
         if (msg.Value.Contains(ActivatedGraphId))
         {
@@ -74,7 +73,7 @@ internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel, I
         }
     }
 
-    private void OnRunsUpdated(object recipient, RunsUpdatedMessage msg)
+    private void OnRunsUpdated(RunsUpdatedMessage msg)
     {
         var runs = Runs.ToDictionary(x => x.Id);
         foreach (var model in msg.Value)
@@ -90,39 +89,42 @@ internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel, I
         }
     }
 
-    private async Task OnRunsDeleteMessage(object recipient, RunsDeletedMessage msg)
+    private async Task OnRunsDeleteMessage(RunsDeletedMessage msg)
     {
-        var toDelete = Runs.Where(x => msg.Value.Contains(x.Id)).ToArray();
-        if (toDelete.Length == Runs.Count)
+        await ExecuteSafe(async token =>
         {
-            Runs.Clear();
-            messenger.Send(new GraphStateChangedMessage((ActivatedGraphId, GraphStatuses.Editable)));
-            using var cts = new CancellationTokenSource(Timeout);
-            var graphInfo = await service.ReadGraphInfoAsync(
-                ActivatedGraphId, 
-                cts.Token).ConfigureAwait(false);
-            graphInfo.Status = GraphStatuses.Editable;
-            await service.UpdateGraphInfoAsync(
-                graphInfo, cts.Token).ConfigureAwait(false);
-        }
-        else
-        {
-            Runs.Remove(toDelete);
-        }
+            var toDelete = Runs
+                .Where(x => msg.Value.Contains(x.Id))
+                .ToArray();
+            if (toDelete.Length == Runs.Count)
+            {
+                Runs.Clear();
+                messenger.Send(new GraphStateChangedMessage((ActivatedGraphId, GraphStatuses.Editable)));
+                var graphInfo = await service.ReadGraphInfoAsync(ActivatedGraphId, token).ConfigureAwait(false);
+                graphInfo.Status = GraphStatuses.Editable;
+                await service.UpdateGraphInfoAsync(graphInfo, token).ConfigureAwait(false);
+            }
+            else
+            {
+                Runs.Remove(toDelete);
+            }
+        }).ConfigureAwait(false);
     }
 
-    private async Task OnRunCreated(object recipient, RunsCreatedMessaged msg)
+    private async Task OnRunCreated(RunsCreatedMessaged msg)
     {
-        int previousCount = Runs.Count;
-        Runs.Add(msg.Value.ToRunInfo());
-        if (previousCount == 0)
+        await ExecuteSafe(async token =>
         {
-            messenger.Send(new GraphStateChangedMessage((ActivatedGraphId, GraphStatuses.Readonly)));
-            using var cts = new CancellationTokenSource(Timeout);
-            var graphInfo = await service.ReadGraphInfoAsync(ActivatedGraphId, cts.Token).ConfigureAwait(false);
-            graphInfo.Status = GraphStatuses.Readonly;
-            await service.UpdateGraphInfoAsync(graphInfo, cts.Token).ConfigureAwait(false);
-        }
+            int previousCount = Runs.Count;
+            Runs.Add(msg.Value.ToRunInfo());
+            if (previousCount == 0)
+            {
+                messenger.Send(new GraphStateChangedMessage((ActivatedGraphId, GraphStatuses.Readonly)));
+                var graphInfo = await service.ReadGraphInfoAsync(ActivatedGraphId, token).ConfigureAwait(false);
+                graphInfo.Status = GraphStatuses.Readonly;
+                await service.UpdateGraphInfoAsync(graphInfo, token).ConfigureAwait(false);
+            }
+        }).ConfigureAwait(false);
     }
 
     public void Dispose()

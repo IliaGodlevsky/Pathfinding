@@ -112,7 +112,8 @@ public sealed class RequestService<T>(IUnitOfWorkFactory factory) : IRequestServ
                 .ToListAsync(t)
                 .ConfigureAwait(false);
             var ids = result.Select(x => x.Id).ToHashSet();
-            var obstaclesCount = await unitOfWork.GraphRepository.ReadObstaclesCountAsync(ids, t)
+            var obstaclesCount = await unitOfWork.GraphRepository
+                .ReadObstaclesCountAsync(ids, t)
                 .ConfigureAwait(false);
             var infos = result.ToInformationModels();
             infos.ForEach(x => x.ObstaclesCount = obstaclesCount[x.Id]);

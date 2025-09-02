@@ -157,13 +157,13 @@ internal sealed class RunCreateViewModel : BaseViewModel,
         );
     }
 
-    private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
+    private void OnGraphActivated(GraphActivatedMessage msg)
     {
         Graph = msg.Value.Graph;
         ActivatedGraphId = msg.Value.GraphId;
     }
 
-    private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
+    private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
         if (msg.Value.Contains(ActivatedGraphId))
         {

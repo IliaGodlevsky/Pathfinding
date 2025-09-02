@@ -9,7 +9,6 @@ using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Infrastructure.Business.Extensions;
-using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using ReactiveUI;
@@ -68,14 +67,14 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel,
         {
             using var cts = new CancellationTokenSource(Timeout);
             var graphModel = await service.ReadGraphAsync(model, cts.Token).ConfigureAwait(false);
-            var graph = new Graph<GraphVertexModel>(graphModel.Vertices, graphModel.DimensionSizes);
+            var graph = graphModel.CreateGraph();
             var activated = new ActivatedGraphModel(graph,
                 graphModel.Neighborhood,
                 graphModel.SmoothLevel,
                 graphModel.Status,
                 graphModel.Id);
             var layer = neighborFactory.CreateNeighborhoodLayer(graphModel.Neighborhood);
-            await layer.OverlayAsync(graph).ConfigureAwait(false);
+            await layer.OverlayAsync(graph, cts.Token).ConfigureAwait(false);
             messenger.Send(new GraphActivatedMessage(activated), Tokens.GraphField);
             await messenger.Send(new AwaitGraphActivatedMessage(activated), Tokens.RunsTable);
             await messenger.Send(new AwaitGraphActivatedMessage(activated), Tokens.PathfindingRange);
@@ -86,15 +85,15 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel,
 
     private async Task LoadGraphs()
     {
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
             Graphs.Clear();
-            var infos = await service.ReadAllGraphInfoAsync().ConfigureAwait(false);
+            var infos = await service.ReadAllGraphInfoAsync(token).ConfigureAwait(false);
             Graphs.Add(infos.ToGraphInfo());
         }).ConfigureAwait(false);
     }
 
-    private void OnObstaclesCountChanged(object recipient, ObstaclesCountChangedMessage msg)
+    private void OnObstaclesCountChanged(ObstaclesCountChangedMessage msg)
     {
         var graph = Graphs.FirstOrDefault(x => x.Id == msg.Value.GraphId);
         if (graph != null)
@@ -103,7 +102,7 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel,
         }
     }
 
-    private void GraphStateChanged(object recipient, GraphStateChangedMessage msg)
+    private void GraphStateChanged(GraphStateChangedMessage msg)
     {
         var graph = Graphs.FirstOrDefault(x => x.Id == msg.Value.Id);
         if (graph != null)
@@ -112,7 +111,7 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel,
         }
     }
 
-    private async Task OnGraphUpdated(object recipient, AwaitGraphUpdatedMessage msg)
+    private async Task OnGraphUpdated(AwaitGraphUpdatedMessage msg)
     {
         var model = Graphs.FirstOrDefault(x => x.Id == msg.Value.Id);
         if (model != null)
@@ -127,12 +126,12 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel,
         }
     }
 
-    private void OnGraphCreated(object recipient, GraphsCreatedMessage msg)
+    private void OnGraphCreated(GraphsCreatedMessage msg)
     {
         Graphs.Add(msg.Value);
     }
 
-    private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
+    private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
         var graphs = Graphs
             .Where(x => msg.Value.Contains(x.Id))

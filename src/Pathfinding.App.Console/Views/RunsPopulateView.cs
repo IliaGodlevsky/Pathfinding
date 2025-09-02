@@ -71,15 +71,15 @@ internal sealed partial class RunsPopulateView : FrameView
             .DisposeWith(disposables);
     }
 
-    private void OnRunPopulateOpen(object recipient, OpenRunsPopulateViewMessage msg)
+    private void OnRunPopulateOpen(OpenRunsPopulateViewMessage msg)
     {
         SetDefaults();
         Visible = true;
     }
 
-    private void OnRunPopulateViewClosed(object recipient, CloseRunPopulateViewMessage msg) => Close();
+    private void OnRunPopulateViewClosed(CloseRunPopulateViewMessage msg) => Close();
 
-    private void OnRunCreateViewClosed(object recipient, CloseRunCreateViewMessage msg) => Close();
+    private void OnRunCreateViewClosed(CloseRunCreateViewMessage msg) => Close();
 
     private void SetDefaults()
     {

@@ -123,10 +123,9 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel,
                 messenger.Send(new ObstaclesCountChangedMessage((graphId, vertex.IsObstacle ? 1 : -1)));
                 var request = new UpdateVerticesRequest<GraphVertexModel>(graphId,
                     [.. vertex.Enumerate()]);
-                await ExecuteSafe(async () =>
+                await ExecuteSafe(async token =>
                 {
-                    using var cts = new CancellationTokenSource(Timeout);
-                    await service.UpdateVerticesAsync(request, cts.Token).ConfigureAwait(false);
+                    await service.UpdateVerticesAsync(request, token).ConfigureAwait(false);
                 }).ConfigureAwait(false);
             }
         }
@@ -149,26 +148,25 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel,
         cost = vertex.Cost.CostRange.ReturnInRange(cost);
         vertex.Cost = new VertexCost(cost, vertex.Cost.CostRange);
         var request = new UpdateVerticesRequest<GraphVertexModel>(GraphId, [.. vertex.Enumerate()]);
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
-            using var cts = new CancellationTokenSource(Timeout);
-            await service.UpdateVerticesAsync(request, cts.Token).ConfigureAwait(false);
+            await service.UpdateVerticesAsync(request, token).ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
 
-    private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
+    private void OnGraphActivated(GraphActivatedMessage msg)
     {
         Graph = msg.Value.Graph;
         GraphId = msg.Value.GraphId;
         IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
     }
 
-    private void OnGraphBecameReadonly(object recipient, GraphStateChangedMessage msg)
+    private void OnGraphBecameReadonly(GraphStateChangedMessage msg)
     {
         IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
     }
 
-    private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
+    private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
         if (msg.Value.Contains(GraphId))
         {

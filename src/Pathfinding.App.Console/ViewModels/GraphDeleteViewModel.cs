@@ -47,12 +47,10 @@ internal sealed class GraphDeleteViewModel : BaseViewModel, IGraphDeleteViewMode
 
     private async Task DeleteGraph()
     {
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
-            var timeout = Timeout * SelectedGraphIds.Length;
-            using var cts = new CancellationTokenSource(timeout);
             var isDeleted = await service.DeleteGraphsAsync(
-                SelectedGraphIds, cts.Token).ConfigureAwait(false);
+                SelectedGraphIds, token).ConfigureAwait(false);
             if (isDeleted)
             {
                 var graphs = SelectedGraphIds.ToArray();
@@ -62,9 +60,15 @@ internal sealed class GraphDeleteViewModel : BaseViewModel, IGraphDeleteViewMode
         }).ConfigureAwait(false);
     }
 
-    private void OnGraphSelected(object recipient, GraphsSelectedMessage msg)
+    private void OnGraphSelected(GraphsSelectedMessage msg)
     {
         SelectedGraphIds = [.. msg.Value.Select(x => x.Id)];
+    }
+
+    protected override CancellationTokenSource GetTokenSource()
+    {
+        var timeout = Timeout * SelectedGraphIds.Length;
+        return new CancellationTokenSource(timeout);
     }
 
     public void Dispose()

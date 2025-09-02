@@ -14,7 +14,7 @@ internal static class ZipArchiveExtensions
     private const string Statistics = "statistics.csv";
     private const string Ranges = "ranges.csv";
 
-    private static async Task<List<T>> ReadEntryAsync<T>(this ZipArchive archive,
+    private static async Task<T[]> ReadEntryAsync<T>(this ZipArchive archive,
         string entryName, CancellationToken token = default)
     {
         var entry = archive.GetEntry(entryName);
@@ -26,7 +26,7 @@ internal static class ZipArchiveExtensions
             using var csvReader = new CsvReader(reader,
                 CultureInfo.InvariantCulture, leaveOpen: true);
             return await csvReader.GetRecordsAsync<T>(token)
-                .ToListAsync(token).ConfigureAwait(false);
+                .ToArrayAsync(token).ConfigureAwait(false);
         }
         return [];
     }

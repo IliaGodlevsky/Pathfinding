@@ -23,8 +23,7 @@ public class Graph<TVertex> : IGraph<TVertex>
     {
         DimensionsSizes = [.. dimensionSizes.TakeOrDefault(requiredNumberOfDimensions, 1)];
         Count = DimensionsSizes.AggregateOrDefault((x, y) => x * y);
-        this.vertices = vertices.Take(Count)
-            .ToDictionary(vertex => vertex.Position);
+        this.vertices = vertices.Take(Count).ToDictionary(vertex => vertex.Position);
     }
 
     public Graph(IReadOnlyCollection<TVertex> vertices,
@@ -48,12 +47,9 @@ public class Graph<TVertex> : IGraph<TVertex>
 
     public TVertex Get(Coordinate coordinate)
     {
-        if (vertices.TryGetValue(coordinate, out var vertex))
-        {
-            return vertex;
-        }
-
-        throw new KeyNotFoundException();
+        return vertices.TryGetValue(coordinate, out var vertex) 
+            ? vertex 
+            : throw new KeyNotFoundException();
     }
 
     public void Overlay(IGraph<IVertex> graph)

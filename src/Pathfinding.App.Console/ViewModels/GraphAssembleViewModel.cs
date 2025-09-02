@@ -8,8 +8,8 @@ using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface.Factories;
+using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Infrastructure.Business.Layers;
-using Pathfinding.Infrastructure.Data.Extensions;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
@@ -120,11 +120,11 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
 
     private async Task CreateGraph()
     {
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
+            var graph = graphAssemble.AssembleGraph([Width, Length]);
             var layers = GetLayers();
-            var graph = await graphAssemble.AssembleGraphAsync(layers, Width, Length)
-                .ConfigureAwait(false);
+            await layers.OverlayAsync(graph, token).ConfigureAwait(false);
             var request = new CreateGraphRequest<GraphVertexModel>
             {
                 Graph = graph,
@@ -133,9 +133,8 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
                 SmoothLevel = SmoothLevel,
                 Status = GraphStatuses.Editable
             };
-            using var cts = new CancellationTokenSource(Timeout);
-            var graphModel = await service
-                .CreateGraphAsync(request, cts.Token).ConfigureAwait(false);
+            
+            var graphModel = await service.CreateGraphAsync(request, token).ConfigureAwait(false);
             var info = graphModel.ToGraphInformationModel().ToGraphInfo();
             messenger.Send(new GraphsCreatedMessage([info]));
         }).ConfigureAwait(false);

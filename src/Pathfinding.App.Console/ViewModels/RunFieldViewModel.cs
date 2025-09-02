@@ -68,7 +68,7 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
         shortTermDisposables.DisposeWith(disposables);
     }
 
-    private void OnRunActivated(object recipient, RunsSelectedMessage msg)
+    private void OnRunActivated(RunsSelectedMessage msg)
     {
         if (msg.Value.Length > 0)
         {
@@ -76,19 +76,17 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
         }
     }
 
-    private void OnRunsDeleted(object recipient, RunsDeletedMessage msg)
+    private void OnRunsDeleted(RunsDeletedMessage msg)
     {
         if (msg.Value.Contains(SelectedRun.Id))
         {
             selected = Empty;
         }
-        var runs = Runs
-            .Where(x => msg.Value.Contains(x.Id))
-            .ToArray();
+        var runs = Runs.Where(x => msg.Value.Contains(x.Id)).ToArray();
         Runs.Remove(runs);
     }
 
-    private void OnGraphUpdated(object recipient, GraphUpdatedMessage msg)
+    private void OnGraphUpdated(GraphUpdatedMessage msg)
     {
         this.RaisePropertyChanged(nameof(RunGraph));
     }
@@ -101,7 +99,7 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
         shortTermDisposables.Clear();
     }
 
-    private void OnGraphDeleted(object recipient, GraphsDeletedMessage msg)
+    private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
         if (msg.Value.Contains(graphId))
         {
@@ -112,7 +110,7 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
         }
     }
 
-    private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
+    private void OnGraphActivated(GraphActivatedMessage msg)
     {
         graphId = msg.Value.GraphId;
         var runGraph = graphAssemble.AssembleGraph(msg.Value.Graph,

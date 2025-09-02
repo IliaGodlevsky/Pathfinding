@@ -67,17 +67,17 @@ internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel, I
         }).ConfigureAwait(false);
     }
 
-    private void OnRunsSelected(object recipient, RunsSelectedMessage msg)
+    private void OnRunsSelected(RunsSelectedMessage msg)
     {
         SelectedRunsIds = [.. msg.Value.Select(x => x.Id)];
     }
 
-    private void OnGraphActivated(object recipient, GraphActivatedMessage msg)
+    private void OnGraphActivated(GraphActivatedMessage msg)
     {
         ActivatedGraph = msg.Value.GraphId;
     }
 
-    private void OnGraphsDeleted(object recipient, GraphsDeletedMessage msg)
+    private void OnGraphsDeleted(GraphsDeletedMessage msg)
     {
         if (msg.Value.Contains(ActivatedGraph))
         {

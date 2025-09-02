@@ -56,12 +56,12 @@ internal sealed partial class RunFieldView : FrameView
         base.Dispose(disposing);
     }
 
-    private void OnOpen(object recipient, OpenRunFieldMessage msg)
+    private void OnOpen(OpenRunFieldMessage msg)
     {
         Application.MainLoop.Invoke(() => Visible = true);
     }
 
-    private void OnClose(object recipient, CloseRunFieldMessage msg)
+    private void OnClose(CloseRunFieldMessage msg)
     {
         Application.MainLoop.Invoke(() => Visible = false);
     }

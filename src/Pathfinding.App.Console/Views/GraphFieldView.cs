@@ -59,12 +59,12 @@ internal sealed partial class GraphFieldView : FrameView
         base.Dispose(disposing);
     }
 
-    private void OnOpenAlgorithmRunView(object recipient, OpenRunFieldMessage msg)
+    private void OnOpenAlgorithmRunView(OpenRunFieldMessage msg)
     {
         mainLoop.Invoke(() => Visible = false);
     }
 
-    private void OnCloseAlgorithmRunField(object recipient, CloseRunFieldMessage msg)
+    private void OnCloseAlgorithmRunField(CloseRunFieldMessage msg)
     {
         mainLoop.Invoke(() => Visible = true);
     }
