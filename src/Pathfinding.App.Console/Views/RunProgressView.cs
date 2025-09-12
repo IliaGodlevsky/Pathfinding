@@ -19,9 +19,6 @@ namespace Pathfinding.App.Console.Views;
 
 internal sealed partial class RunProgressView : FrameView
 {
-    private const float FractionPerClick = 0.015f;
-    private const float ExtraFractionPerClick = FractionPerClick * 3;
-
     private static readonly InclusiveValueRange<float> FractionRange = (1, 0);
 
     private readonly IRunFieldViewModel viewModel;
@@ -42,18 +39,28 @@ internal sealed partial class RunProgressView : FrameView
         messenger.RegisterHandler<OpenRunFieldMessage>(this, OnRunFieldOpen).DisposeWith(disposables);
         this.viewModel = viewModel;
 
-        BindTo(leftLabel, _ => Fraction - FractionPerClick, Button1Pressed, WheeledDown);
-        BindTo(leftLabel, _ => Fraction - ExtraFractionPerClick, Button1Pressed | ButtonCtrl);
-        BindTo(leftLabel, _ => Fraction + FractionPerClick, WheeledUp);
+        BindTo(leftLabel, _ => Fraction - GetFractionPerClick(), Button1Pressed, WheeledDown);
+        BindTo(leftLabel, _ => Fraction - GetExtraFractionPerClick(), Button1Pressed | ButtonCtrl);
+        BindTo(leftLabel, _ => Fraction + GetFractionPerClick(), WheeledUp);
         BindTo(leftLabel, _ => FractionRange.LowerValueOfRange, Button2Clicked);
-        BindTo(rightLabel, _ => Fraction + FractionPerClick, Button1Pressed, WheeledUp);
-        BindTo(rightLabel, _ => Fraction + ExtraFractionPerClick, Button1Pressed | ButtonCtrl);
-        BindTo(rightLabel, _ => Fraction - FractionPerClick, WheeledDown);
+        BindTo(rightLabel, _ => Fraction + GetFractionPerClick(), Button1Pressed, WheeledUp);
+        BindTo(rightLabel, _ => Fraction + GetExtraFractionPerClick(), Button1Pressed | ButtonCtrl);
+        BindTo(rightLabel, _ => Fraction - GetFractionPerClick(), WheeledDown);
         BindTo(rightLabel, _ => FractionRange.UpperValueOfRange, Button2Clicked);
         BindTo(bar, x => (float)Math.Round((x.MouseEvent.X + 1f) / bar.Bounds.Width, 3), Button1Clicked);
         viewModel.WhenAnyValue(x => x.SelectedRun.Fraction)
             .BindTo(this, x => x.Fraction)
             .DisposeWith(disposables);
+    }
+
+    private static float GetFractionPerClick()
+    {
+        return Settings.Default.FractionPerClick;
+    }
+
+    private static float GetExtraFractionPerClick()
+    {
+        return GetFractionPerClick() * 3;
     }
 
     private void BindTo(View view, Func<MouseEventArgs, float> function,

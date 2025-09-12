@@ -34,10 +34,4 @@ public static class GraphExtensions
     {
         return graph.Select(vertex => vertex.Position);
     }
-
-    public static int GetObstaclesCount<TVertex>(this IEnumerable<TVertex> self)
-        where TVertex : IVertex
-    {
-        return self.GetObstacles().Count();
-    }
 }

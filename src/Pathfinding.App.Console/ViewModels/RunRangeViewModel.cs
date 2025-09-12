@@ -163,13 +163,12 @@ internal sealed class RunRangeViewModel : BaseViewModel,
 
     private async Task AddRangeToStorage(GraphVertexModel vertex)
     {
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
             var vertices = pathfindingRange.ToList();
             var index = vertices.IndexOf(vertex);
-            using var cts = new CancellationTokenSource(Timeout);
             await service.CreatePathfindingVertexAsync(GraphId,
-                vertex.Id, index, cts.Token).ConfigureAwait(false);
+                vertex.Id, index, token).ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
 
@@ -180,10 +179,9 @@ internal sealed class RunRangeViewModel : BaseViewModel,
 
     private async Task RemoveVertexFromStorage(GraphVertexModel vertex)
     {
-        await ExecuteSafe(async () => 
+        await ExecuteSafe(async token => 
         {
-            using var cts = new CancellationTokenSource(Timeout);
-            await service.DeleteRangeAsync(vertex.Enumerate(), cts.Token).ConfigureAwait(false);
+            await service.DeleteRangeAsync(vertex.Enumerate(), token).ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
 

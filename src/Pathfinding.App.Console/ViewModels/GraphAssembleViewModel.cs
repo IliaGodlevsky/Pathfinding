@@ -29,10 +29,12 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
     IRequireNeighborhoodNameViewModel,
     IDisposable
 {
-    private static readonly InclusiveValueRange<int> WidthRange = (52, 1);
-    private static readonly InclusiveValueRange<int> LengthRange = (51, 1);
+    private static readonly InclusiveValueRange<int> WidthRange = (Settings.Default.MaxGraphWidth, 1);
+    private static readonly InclusiveValueRange<int> LengthRange = (Settings.Default.MaxGraphLength, 1);
     private static readonly InclusiveValueRange<int> ObstaclesRange = (99, 0);
-    private static readonly InclusiveValueRange<int> CostRange = (9, 1);
+    private static readonly InclusiveValueRange<int> CostRange = (
+        Settings.Default.UpperValueOfCostRange, 
+        Settings.Default.LowerValueOfCostRange);
 
     private readonly INeighborhoodLayerFactory neighborFactory;
     private readonly ISmoothLevelFactory smoothLevelFactory;
@@ -133,10 +135,9 @@ internal sealed class GraphAssembleViewModel : BaseViewModel,
                 SmoothLevel = SmoothLevel,
                 Status = GraphStatuses.Editable
             };
-            
             var graphModel = await service.CreateGraphAsync(request, token).ConfigureAwait(false);
             var info = graphModel.ToGraphInformationModel().ToGraphInfo();
-            messenger.Send(new GraphsCreatedMessage([info]));
+            messenger.Send(new GraphsCreatedMessage(info));
         }).ConfigureAwait(false);
     }
 

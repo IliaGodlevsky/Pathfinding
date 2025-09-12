@@ -38,8 +38,6 @@ internal sealed class RunCreateViewModel : BaseViewModel,
     IRequirePopulationViewModel,
     IDisposable
 {
-    private static readonly InclusiveValueRange<double> WeightRange = (5, 0);
-
     private sealed record AlgorithmBuildInfo(
         Algorithms Algorithm,
         Heuristics? Heuristics,
@@ -179,7 +177,8 @@ internal sealed class RunCreateViewModel : BaseViewModel,
             field = null;
             return;
         }
-        field = WeightRange.ReturnInRange(value.Value);
+        var weightRange = GetWeightRange();
+        field = weightRange.ReturnInRange(value.Value);
         if (toWeight < field)
         {
             ToWeight = field;
@@ -201,7 +200,8 @@ internal sealed class RunCreateViewModel : BaseViewModel,
         field = value > fromWeight ? value : fromWeight;
         if (field != null)
         {
-            field = WeightRange.ReturnInRange(field.Value);
+            var weightRange = GetWeightRange();
+            field = weightRange.ReturnInRange(field.Value);
         }
         var amplitude = field - fromWeight;
         if (field == fromWeight && Step != amplitude
@@ -235,17 +235,17 @@ internal sealed class RunCreateViewModel : BaseViewModel,
 
         if (range.Length > 1)
         {
-            var visitedCount = 0;
+            int visitedCount = 0;
             void OnVertexProcessed(EventArgs e) => visitedCount++;
             var status = RunStatuses.Success;
-            var from = FromWeight ?? 0;
-            var to = ToWeight ?? 0;
-            var weightStep = Step ?? 1;
-            var limit = Step == 0 ? 0 : (int)Math.Ceiling((to - from) / weightStep);
+            double from = FromWeight ?? 0;
+            double to = ToWeight ?? 0;
+            double weightStep = Step ?? 1;
+            int limit = Step == 0 ? 0 : (int)Math.Ceiling((to - from) / weightStep);
             var list = new List<CreateStatisticsRequest>();
-            for (var i = 0; i <= limit; i++)
+            for (int i = 0; i <= limit; i++)
             {
-                var val = from + weightStep * i;
+                double val = from + weightStep * i;
                 double? weight = val == 0 ? null : Math.Round(val, 2);
                 foreach (var buildInfo in GetBuildInfo(weight))
                 {
@@ -292,7 +292,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
             }
             await ExecuteSafe(async () =>
             {
-                var timeout = Timeout * list.Count;
+                var timeout = GetTimeout() * list.Count;
                 using var cts = new CancellationTokenSource(timeout);
                 var result = await service.CreateStatisticsAsync(list, cts.Token)
                     .ConfigureAwait(false);
@@ -303,6 +303,12 @@ internal sealed class RunCreateViewModel : BaseViewModel,
         {
             log.Info(Resource.RangeIsNotSetMsg);
         }
+    }
+
+    private static InclusiveValueRange<double> GetWeightRange()
+    {
+        return (Settings.Default.UpperValueOfHeuristicWeightRange,
+            Settings.Default.LowerValueOfHeuristicWeightRange);
     }
 
     public void Dispose()

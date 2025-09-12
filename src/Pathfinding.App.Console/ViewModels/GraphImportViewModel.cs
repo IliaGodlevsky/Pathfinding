@@ -51,7 +51,7 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
                 var histories = await serializer
                     .DeserializeFromAsync(stream.Stream, CancellationToken.None)
                     .ConfigureAwait(false);
-                var timeout = Timeout * histories.Histories.Count;
+                var timeout = GetTimeout() * histories.Histories.Count;
                 using var cts = new CancellationTokenSource(timeout);
                 var result = await service.CreatePathfindingHistoriesAsync(
                     histories.Histories, cts.Token).ConfigureAwait(false);

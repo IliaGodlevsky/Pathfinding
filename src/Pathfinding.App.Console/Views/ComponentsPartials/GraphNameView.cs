@@ -4,8 +4,8 @@ namespace Pathfinding.App.Console.Views;
 
 internal sealed partial class GraphNameView
 {
-    private readonly TextField nameField = new TextField();
-    private readonly Label nameLabel = new Label("Name");
+    private readonly TextField nameField = new();
+    private readonly Label nameLabel = new("Name");
 
     private void Initialize()
     {

@@ -63,10 +63,9 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel,
 
     private async Task ActivatedGraph(int model)
     {
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
-            using var cts = new CancellationTokenSource(Timeout);
-            var graphModel = await service.ReadGraphAsync(model, cts.Token).ConfigureAwait(false);
+            var graphModel = await service.ReadGraphAsync(model, token).ConfigureAwait(false);
             var graph = graphModel.CreateGraph();
             var activated = new ActivatedGraphModel(graph,
                 graphModel.Neighborhood,
@@ -74,7 +73,7 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel,
                 graphModel.Status,
                 graphModel.Id);
             var layer = neighborFactory.CreateNeighborhoodLayer(graphModel.Neighborhood);
-            await layer.OverlayAsync(graph, cts.Token).ConfigureAwait(false);
+            await layer.OverlayAsync(graph, token).ConfigureAwait(false);
             messenger.Send(new GraphActivatedMessage(activated), Tokens.GraphField);
             await messenger.Send(new AwaitGraphActivatedMessage(activated), Tokens.RunsTable);
             await messenger.Send(new AwaitGraphActivatedMessage(activated), Tokens.PathfindingRange);

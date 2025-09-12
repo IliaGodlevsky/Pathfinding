@@ -33,36 +33,36 @@ internal class RunModel : ReactiveObject, IDisposable
     private readonly record struct RunVertexStateModel(
         RunVertexModel Vertex,
         RunVertexState State,
-        bool Value = true)
+        bool IsEnabled = true)
     {
-        public void Activate() => Activate(Value);
+        public void Apply() => Apply(IsEnabled);
 
-        public void Deactivate() => Activate(!Value);
+        public void Misapply() => Apply(!IsEnabled);
 
-        private void Activate(bool value)
+        private void Apply(bool isEnabled)
         {
             switch (State)
             {
                 case RunVertexState.Visited:
-                    Vertex.IsVisited = value; 
+                    Vertex.IsVisited = isEnabled;
                     break;
                 case RunVertexState.Enqueued:
-                    Vertex.IsEnqueued = value;
+                    Vertex.IsEnqueued = isEnabled;
                     break;
                 case RunVertexState.CrossPath: 
-                    Vertex.IsCrossedPath = value; 
+                    Vertex.IsCrossedPath = isEnabled;
                     break;
                 case RunVertexState.Path:
-                    Vertex.IsPath = value;
+                    Vertex.IsPath = isEnabled;
                     break;
                 case RunVertexState.Source:
-                    Vertex.IsSource = value;
+                    Vertex.IsSource = isEnabled;
                     break;
                 case RunVertexState.Target: 
-                    Vertex.IsTarget = value;
+                    Vertex.IsTarget = isEnabled;
                     break;
                 case RunVertexState.Transit:
-                    Vertex.IsTransit = value;
+                    Vertex.IsTransit = isEnabled;
                     break;
             }
         }
@@ -72,7 +72,7 @@ internal class RunModel : ReactiveObject, IDisposable
     private static readonly InclusiveValueRange<float> FractionRange = new(1);
 
     private readonly CompositeDisposable disposables = [];
-    private readonly ReadOnlyCollection<RunVertexStateModel> algorithm;
+    private readonly ReadOnlyCollection<RunVertexStateModel> verticesStates;
     private readonly InclusiveValueRange<int> cursorRange;
 
     public int Id { get; init; }
@@ -96,9 +96,9 @@ internal class RunModel : ReactiveObject, IDisposable
         IReadOnlyCollection<SubRunModel> pathfindingResult,
         IReadOnlyCollection<Coordinate> range)
     {
-        algorithm = GetAlgorithmStates(vertices, 
+        verticesStates = GetVerticesStates(vertices, 
             pathfindingResult, range);
-        cursorRange = new(algorithm.Count - 1);
+        cursorRange = new(verticesStates.Count - 1);
         Bind(fraction => fraction > 0, Next);
         Bind(fraction => fraction < 0, Previous);
     }
@@ -107,7 +107,7 @@ internal class RunModel : ReactiveObject, IDisposable
     {
         this.WhenAnyValue(x => x.Fraction)
             .DistinctUntilChanged()
-            .Select(x => (int)Math.Floor(algorithm.Count * x - Cursor))
+            .Select(x => (int)Math.Floor(verticesStates.Count * x - Cursor))
             .Where(condition)
             .Subscribe(action)
             .DisposeWith(disposables);
@@ -117,7 +117,7 @@ internal class RunModel : ReactiveObject, IDisposable
     {
         while (count-- >= 0)
         {
-            algorithm[Cursor++].Activate();
+            verticesStates[Cursor++].Apply();
         }
     }
 
@@ -125,11 +125,11 @@ internal class RunModel : ReactiveObject, IDisposable
     {
         while (count++ <= 0)
         {
-            algorithm[Cursor--].Deactivate();
+            verticesStates[Cursor--].Misapply();
         }
     }
 
-    private static ReadOnlyCollection<RunVertexStateModel> GetAlgorithmStates(
+    private static ReadOnlyCollection<RunVertexStateModel> GetVerticesStates(
         IGraph<RunVertexModel> graph,
         IReadOnlyCollection<SubRunModel> pathfindingResult,
         IReadOnlyCollection<Coordinate> range)
@@ -139,48 +139,48 @@ internal class RunModel : ReactiveObject, IDisposable
             return ReadOnlyCollection<RunVertexStateModel>.Empty;
         }
 
-        var previousVisited = new HashSet<Coordinate>();
-        var previousPaths = new HashSet<Coordinate>();
-        var previousEnqueued = new HashSet<Coordinate>();
-        var subAlgorithms = new List<RunVertexStateModel>();
+        var visited = new HashSet<Coordinate>();
+        var paths = new HashSet<Coordinate>();
+        var enqueued = new HashSet<Coordinate>();
+        var states = new List<RunVertexStateModel>();
 
         range.Skip(1).Take(range.Count - 2)
             .Select(x => ToRunVertexModel(x, RunVertexState.Transit))
             .Prepend(ToRunVertexModel(range.First(), RunVertexState.Source))
             .Append(ToRunVertexModel(range.Last(), RunVertexState.Target))
-            .ForWhole(subAlgorithms.AddRange);
+            .ForWhole(states.AddRange);
 
         foreach (var subAlgorithm in pathfindingResult)
         {
-            var visitedIgnore = range.Concat(previousPaths).ToArray();
+            var visitedIgnore = range.Concat(paths).ToArray();
             var exceptRangePath = subAlgorithm.Path.Except(range).ToArray();
 
             subAlgorithm.Visited.SelectMany(v =>
-                 v.Enqueued.Intersect(previousVisited).Except(visitedIgnore)
+                 v.Enqueued.Intersect(visited).Except(visitedIgnore)
                     .Select(x => ToRunVertexModel(x, RunVertexState.Visited, false))
                     .Concat(v.Visited.Enumerate().Except(visitedIgnore)
                     .Select(x => ToRunVertexModel(x, RunVertexState.Visited))
-                    .Concat(v.Enqueued.Except(visitedIgnore).Except(previousEnqueued)
+                    .Concat(v.Enqueued.Except(visitedIgnore).Except(enqueued)
                     .Select(x => ToRunVertexModel(x, RunVertexState.Enqueued)))))
-                    .Distinct().ForWhole(subAlgorithms.AddRange);
+                    .Distinct().ForWhole(states.AddRange);
 
-            exceptRangePath.Intersect(previousPaths)
+            exceptRangePath.Intersect(paths)
                 .Select(x => ToRunVertexModel(x, RunVertexState.CrossPath))
-                .Concat(exceptRangePath.Except(previousPaths)
+                .Concat(exceptRangePath.Except(paths)
                 .Select(x => ToRunVertexModel(x, RunVertexState.Path)))
-                .ForWhole(subAlgorithms.AddRange);
+                .ForWhole(states.AddRange);
 
-            previousVisited.AddRange(subAlgorithm.Visited.Select(x => x.Visited));
-            previousEnqueued.AddRange(subAlgorithm.Visited.SelectMany(x => x.Enqueued));
-            previousPaths.AddRange(subAlgorithm.Path);
+            visited.AddRange(subAlgorithm.Visited.Select(x => x.Visited));
+            enqueued.AddRange(subAlgorithm.Visited.SelectMany(x => x.Enqueued));
+            paths.AddRange(subAlgorithm.Path);
         }
 
-        return subAlgorithms.AsReadOnly();
+        return states.AsReadOnly();
 
         RunVertexStateModel ToRunVertexModel(Coordinate coordinate,
-            RunVertexState stateType, bool state = true)
+            RunVertexState stateType, bool isEnabled = true)
         {
-            return new(graph.Get(coordinate), stateType, state);
+            return new(graph.Get(coordinate), stateType, isEnabled);
         }
     }
 

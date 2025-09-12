@@ -7,5 +7,9 @@ public sealed class LiteDbInMemoryUnitOfWorkFactory : IUnitOfWorkFactory
 {
     private static readonly MemoryStream Memory = new();
 
-    public IUnitOfWork Create() => new LiteDbUnitOfWork(Memory);
+    public Task<IUnitOfWork> CreateAsync(CancellationToken token = default)
+    {
+        IUnitOfWork uow = new LiteDbUnitOfWork(Memory);
+        return Task.FromResult(uow);
+    }
 }

@@ -5,7 +5,10 @@ namespace Pathfinding.Infrastructure.Data.InMemory;
 
 public sealed class InMemoryUnitOfWorkFactory : IUnitOfWorkFactory
 {
-    private readonly InMemoryUnitOfWork unitOfWork = new();
+    private readonly IUnitOfWork unitOfWork = new InMemoryUnitOfWork();
 
-    public IUnitOfWork Create() => unitOfWork;
+    public Task<IUnitOfWork> CreateAsync(CancellationToken token = default)
+    {
+        return Task.FromResult(unitOfWork);
+    }
 }

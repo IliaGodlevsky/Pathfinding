@@ -51,13 +51,10 @@ internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel, I
 
     private async Task DeleteRuns()
     {
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
-            var timeout = Timeout * SelectedRunsIds.Length;
-            using var cts = new CancellationTokenSource(timeout);
             var isDeleted = await service.DeleteRunsAsync(
-                SelectedRunsIds,
-                cts.Token).ConfigureAwait(false);
+                SelectedRunsIds, token).ConfigureAwait(false);
             if (isDeleted)
             {
                 var runs = SelectedRunsIds.ToArray();
@@ -65,6 +62,11 @@ internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel, I
                 messenger.Send(new RunsDeletedMessage(runs));
             }
         }).ConfigureAwait(false);
+    }
+
+    protected override TimeSpan GetTimeout()
+    {
+        return base.GetTimeout() * SelectedRunsIds.Length;
     }
 
     private void OnRunsSelected(RunsSelectedMessage msg)

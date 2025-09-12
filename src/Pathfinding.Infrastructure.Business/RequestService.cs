@@ -308,7 +308,7 @@ public sealed class RequestService<T>(IUnitOfWorkFactory factory) : IRequestServ
 
     public async Task<GraphInformationModel> ReadGraphInfoAsync(int graphId, CancellationToken token = default)
     {
-        await using var unitOfWork = factory.Create();
+        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
         var result = await unitOfWork.GraphRepository.ReadAsync(graphId, token)
             .ConfigureAwait(false);
         return result.ToGraphInformationModel();

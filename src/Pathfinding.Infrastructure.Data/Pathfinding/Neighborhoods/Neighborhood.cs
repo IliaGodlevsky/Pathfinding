@@ -25,7 +25,7 @@ public abstract class Neighborhood : INeighborhood
     private HashSet<Coordinate> CollectNeighbors(int depth = 0)
     {
         var neighborhood = new HashSet<Coordinate>();
-        for (var offset = -1; offset <= 1; offset++)
+        for (int offset = -1; offset <= 1; offset++)
         {
             resultCoordinatesValues[depth] = SelfCoordinate[depth] + offset;
             var neighbours = IsBottom(depth)

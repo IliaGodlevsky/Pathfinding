@@ -12,8 +12,9 @@ public sealed class LiteDbInFileUnitOfWorkFactory(ConnectionString connectionStr
 
     }
 
-    public IUnitOfWork Create()
+    public Task<IUnitOfWork> CreateAsync(CancellationToken token = default)
     {
-        return new LiteDbUnitOfWork(connectionString);
+        IUnitOfWork uow = new LiteDbUnitOfWork(connectionString);
+        return Task.FromResult(uow);
     }
 }

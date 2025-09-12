@@ -19,7 +19,7 @@ internal sealed partial class RunFieldView : FrameView
 {
     private readonly CompositeDisposable vertexDisposables = [];
     private readonly CompositeDisposable disposables = [];
-
+    private readonly MainLoop mainLoop = Application.MainLoop;
     private readonly View container = new();
 
     public RunFieldView(IRunFieldViewModel viewModel,
@@ -41,12 +41,13 @@ internal sealed partial class RunFieldView : FrameView
         viewModel.WhenAnyValue(x => x.RunGraph)
             .DistinctUntilChanged()
             .Where(x => x is not null)
-            .Do(async x => await RenderGraphState(x))
+            .Do(RenderGraphState)
             .Subscribe()
             .DisposeWith(disposables);
         messenger.RegisterHandler<OpenRunFieldMessage>(this, OnOpen).DisposeWith(disposables);
         messenger.RegisterHandler<CloseRunFieldMessage>(this, OnClose).DisposeWith(disposables);
         Add(container);
+        container.DisposeWith(disposables);
         vertexDisposables.DisposeWith(disposables);
     }
 
@@ -58,33 +59,28 @@ internal sealed partial class RunFieldView : FrameView
 
     private void OnOpen(OpenRunFieldMessage msg)
     {
-        Application.MainLoop.Invoke(() => Visible = true);
+        mainLoop.Invoke(() => Visible = true);
     }
 
     private void OnClose(CloseRunFieldMessage msg)
     {
-        Application.MainLoop.Invoke(() => Visible = false);
+        mainLoop.Invoke(() => Visible = false);
     }
 
-    private async Task RenderGraphState(IGraph<RunVertexModel> graph)
+    private void RenderGraphState(IGraph<RunVertexModel> graph)
     {
-        Application.MainLoop.Invoke(container.RemoveAll);
+        mainLoop.Invoke(container.RemoveAll);
         vertexDisposables.Clear();
-        var children = new List<RunVertexView>(graph.Count);
-        await Task.Run(() =>
+        var children = new RunVertexView[graph.Count];
+        int i = 0;
+        foreach (var vertex in graph)
         {
-            foreach (var vertex in graph)
-            {
-                var view = new RunVertexView(vertex);
-                children.Add(view);
-                view.DisposeWith(vertexDisposables);
-            }
-        });
-        Application.MainLoop.Invoke(() =>
+            children[i++] = new RunVertexView(vertex).DisposeWith(vertexDisposables);
+        }
+        mainLoop.Invoke(() =>
         {
-            container.Add([.. children]);
-            container.Width = graph.GetWidth()
-                * GraphFieldView.DistanceBetweenVertices;
+            container.Add(children);
+            container.Width = graph.GetWidth() * GraphFieldView.DistanceBetweenVertices;
             container.Height = graph.GetLength();
         });
     }

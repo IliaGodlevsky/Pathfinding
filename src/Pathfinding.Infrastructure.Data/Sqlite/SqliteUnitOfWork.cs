@@ -5,27 +5,26 @@ using Pathfinding.Infrastructure.Data.Sqlite.Repositories;
 
 namespace Pathfinding.Infrastructure.Data.Sqlite;
 
-public sealed class SqliteUnitOfWork : IUnitOfWork
+public sealed class SqliteUnitOfWork(string connectionString) : IUnitOfWork
 {
-    private readonly SqliteConnection connection;
+    private readonly SqliteConnection connection = new(connectionString);
     private SqliteTransaction transaction;
 
     public IGraphParametersRepository GraphRepository
-        => new SqliteGraphRepository(connection, transaction);
+        => new SqliteGraphRepository(connection, transaction!);
 
     public IVerticesRepository VerticesRepository
-        => new SqliteVerticesRepository(connection, transaction);
+        => new SqliteVerticesRepository(connection, transaction!);
 
     public IRangeRepository RangeRepository
-        => new SqliteRangeRepository(connection, transaction);
+        => new SqliteRangeRepository(connection, transaction!);
 
     public IStatisticsRepository StatisticsRepository
-        => new SqliteStatisticsRepository(connection, transaction);
+        => new SqliteStatisticsRepository(connection, transaction!);
 
-    public SqliteUnitOfWork(string connectionString)
+    public async Task OpenConnectionAsync(CancellationToken token = default)
     {
-        connection = new(connectionString);
-        connection.Open();
+        await connection.OpenAsync(token).ConfigureAwait(false);
     }
 
     public async ValueTask BeginTransactionAsync(CancellationToken token = default)
@@ -48,6 +47,7 @@ public sealed class SqliteUnitOfWork : IUnitOfWork
     public void Dispose()
     {
         transaction?.Dispose();
+        connection.Close();
         connection.Dispose();
     }
 
@@ -67,6 +67,7 @@ public sealed class SqliteUnitOfWork : IUnitOfWork
         {
             await transaction.DisposeAsync().ConfigureAwait(false);
         }
+        await connection.CloseAsync().ConfigureAwait(false);
         await connection.DisposeAsync().ConfigureAwait(false);
     }
 }

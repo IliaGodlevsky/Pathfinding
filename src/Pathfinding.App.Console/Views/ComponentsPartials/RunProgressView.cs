@@ -26,10 +26,7 @@ internal partial class RunProgressView
         };
         bar.Fraction = 0;
 
-        rightLabel.Width = Dim.Percent(3);
-        leftLabel.Width = Dim.Percent(3);
         bar.Width = Dim.Percent(94);
-
         bar.X = Pos.Right(leftLabel);
         bar.Y = Pos.Center();
         bar.ProgressBarStyle = ProgressBarStyle.Blocks;
@@ -38,12 +35,14 @@ internal partial class RunProgressView
         leftLabel.WantContinuousButtonPressed = true;
         leftLabel.TextAlignment = TextAlignment.Centered;
         leftLabel.Y = Pos.Center();
+        leftLabel.Width = Dim.Percent(3);
         leftLabel.X = 1;
 
         rightLabel.X = Pos.Right(bar) + 1;
         rightLabel.Y = Pos.Center();
         rightLabel.TextAlignment = TextAlignment.Centered;
         rightLabel.WantContinuousButtonPressed = true;
+        rightLabel.Width = Dim.Percent(3);
 
         Add(rightLabel, bar, leftLabel);
         rightLabel.Visible = false;

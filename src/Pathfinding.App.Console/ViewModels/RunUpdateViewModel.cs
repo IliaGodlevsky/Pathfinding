@@ -94,12 +94,10 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel, I
 
     private async Task ExecuteUpdate()
     {
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
-            using var cts = new CancellationTokenSource(Timeout);
             var models = await service.ReadStatisticsAsync(
-                Selected.Select(x => x.Id),
-                cts.Token).ConfigureAwait(false);
+                Selected.Select(x => x.Id), token).ConfigureAwait(false);
             var updated = await UpdateRunsAsync(models, Graph, ActivatedGraphId).ConfigureAwait(false);
             messenger.Send(new RunsUpdatedMessage(updated));
         }).ConfigureAwait(false);
@@ -142,14 +140,13 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel, I
         var updatedRuns = new List<RunStatisticsModel>();
         if (range.Count > 1)
         {
-            foreach (var select in selectedStatistics)
+            using var cts = new CancellationTokenSource(GetTimeout());
+            var ids = selectedStatistics.Select(x => x.Id).ToArray();
+            var infos = await service.ReadStatisticsAsync(ids, cts.Token).ConfigureAwait(false);
+            foreach (var info in infos)
             {
                 var visitedCount = 0;
                 void OnVertexProcessed(EventArgs e) => visitedCount++;
-                using var cts = new CancellationTokenSource(Timeout);
-                var info = await service
-                    .ReadStatisticAsync(select.Id, cts.Token)
-                    .ConfigureAwait(false);
                 var factory = algorithmsFactory.GetAlgorithmFactory(info.Algorithm);
                 var algorithm = factory.CreateAlgorithm(range, info);
                 algorithm.VertexProcessed += OnVertexProcessed;
@@ -176,11 +173,9 @@ internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel, I
                 info.ResultStatus = status;
                 updatedRuns.Add(info);
             }
-            await ExecuteSafe(async () =>
+            await ExecuteSafe(async token =>
             {
-                var timeout = Timeout * updatedRuns.Count;
-                using var cts = new CancellationTokenSource(timeout);
-                await service.UpdateStatisticsAsync(updatedRuns, cts.Token).ConfigureAwait(false);
+                await service.UpdateStatisticsAsync(updatedRuns, token).ConfigureAwait(false);
             }, updatedRuns.Clear).ConfigureAwait(false);
         }
         return [.. updatedRuns];

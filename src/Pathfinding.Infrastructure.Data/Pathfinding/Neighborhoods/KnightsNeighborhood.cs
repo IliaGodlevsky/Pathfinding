@@ -15,16 +15,16 @@ public sealed class KnightNeighborhood(Coordinate coordinate) : Neighborhood(coo
             {
                 if (i != j)
                 {
-                    foreach (int sign1 in new[] { +2, -2 })
+                    for (int s1 = -1; s1 <= 1; s1 += 2)
                     {
-                        foreach (int sign2 in new[] { +1, -1 })
+                        for (int s2 = -1; s2 <= 1; s2 += 2)
                         {
                             var delta = new int[coordinate.Count];
-                            delta[i] = sign1;
-                            delta[j] = sign2;
+                            delta[i] = 2 * s1;
+                            delta[j] = 1 * s2;
 
-                            var neighbor = SelfCoordinate.Zip(delta, (x, d) => x + d);
-                            neighbors.Add(new(neighbor));
+                            var coords = SelfCoordinate.Zip(delta, (x, d) => x + d);
+                            neighbors.Add(new Coordinate(coords));
                         }
                     }
                 }

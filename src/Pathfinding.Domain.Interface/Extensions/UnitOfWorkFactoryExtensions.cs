@@ -8,7 +8,7 @@ public static class UnitOfWorkFactoryExtensions
         Func<IUnitOfWork, CancellationToken, Task<TParam>> action,
         CancellationToken token)
     {
-        await using var unitOfWork = factory.Create();
+        var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
         try
         {
             await unitOfWork.BeginTransactionAsync(token).ConfigureAwait(false);
@@ -16,10 +16,14 @@ public static class UnitOfWorkFactoryExtensions
             await unitOfWork.CommitTransactionAsync(token).ConfigureAwait(false);
             return result;
         }
-        catch (Exception)
+        catch
         {
             await unitOfWork.RollbackTransactionAsync(token).ConfigureAwait(false);
             throw;
+        }
+        finally
+        {
+            await unitOfWork.DisposeAsync().ConfigureAwait(false);
         }
     }
 }

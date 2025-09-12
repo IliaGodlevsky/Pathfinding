@@ -5,16 +5,15 @@ namespace Pathfinding.App.Console.ViewModels;
 
 internal abstract class BaseViewModel(ILog log) : ReactiveObject
 {
-    protected static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
     protected readonly ILog log = log;
 
     protected async Task ExecuteSafe(
         Func<CancellationToken, Task> action,
         Action onError = null)
     {
-        var cts = GetTokenSource();
         try
         {
+            using var cts = new CancellationTokenSource(GetTimeout());
             await action(cts.Token).ConfigureAwait(false);
         }
         catch (OperationCanceledException ex)
@@ -26,10 +25,6 @@ internal abstract class BaseViewModel(ILog log) : ReactiveObject
         {
             log.Error(ex, ex.Message);
             onError?.Invoke();
-        }
-        finally
-        {
-            cts.Dispose();
         }
     }
 
@@ -53,8 +48,8 @@ internal abstract class BaseViewModel(ILog log) : ReactiveObject
         }
     }
 
-    protected virtual CancellationTokenSource GetTokenSource()
+    protected virtual TimeSpan GetTimeout()
     {
-        return new CancellationTokenSource(Timeout);
+        return TimeSpan.FromSeconds(Settings.Default.BaseTimeoutSeconds);
     }
 }

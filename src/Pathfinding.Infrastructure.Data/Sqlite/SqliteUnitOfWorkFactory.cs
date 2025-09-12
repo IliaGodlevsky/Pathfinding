@@ -5,5 +5,10 @@ namespace Pathfinding.Infrastructure.Data.Sqlite;
 
 public sealed class SqliteUnitOfWorkFactory(string connectionString) : IUnitOfWorkFactory
 {
-    public IUnitOfWork Create() => new SqliteUnitOfWork(connectionString);
+    public async Task<IUnitOfWork> CreateAsync(CancellationToken token = default)
+    {
+        var unitOfWork = new SqliteUnitOfWork(connectionString);
+        await unitOfWork.OpenConnectionAsync(token).ConfigureAwait(false);
+        return unitOfWork;
+    }
 }

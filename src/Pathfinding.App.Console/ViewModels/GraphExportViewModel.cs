@@ -92,10 +92,9 @@ internal sealed class GraphExportViewModel
         SelectedGraphIds = [.. SelectedGraphIds.Except(msg.Value)];
     }
 
-    protected override CancellationTokenSource GetTokenSource()
+    protected override TimeSpan GetTimeout()
     {
-        var timeout = Timeout * SelectedGraphIds.Length;
-        return new CancellationTokenSource(timeout);
+        return base.GetTimeout() * SelectedGraphIds.Length;
     }
 
     public void Dispose()

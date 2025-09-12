@@ -69,10 +69,9 @@ internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel, I
             ids => ids.Length > 0);
     }
 
-    protected override CancellationTokenSource GetTokenSource()
+    protected override TimeSpan GetTimeout()
     {
-        var timeout = Timeout * SelectedGraphIds.Length;
-        return new CancellationTokenSource(timeout);
+        return base.GetTimeout() * SelectedGraphIds.Length;
     }
 
     public void Dispose()

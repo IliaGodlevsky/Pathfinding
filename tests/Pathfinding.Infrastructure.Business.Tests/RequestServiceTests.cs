@@ -39,8 +39,8 @@ internal class RequestServiceTests
             .Setup(x => x.GraphRepository)
             .Returns(mock.Container.Resolve<IGraphParametersRepository>());
         mock.Mock<IUnitOfWorkFactory>()
-            .Setup(x => x.Create())
-            .Returns(mock.Container.Resolve<IUnitOfWork>());
+            .Setup(x => x.CreateAsync(It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(mock.Container.Resolve<IUnitOfWork>()));
 
         var requestService = mock.Create<RequestService<FakeVertex>>();
 
@@ -48,7 +48,7 @@ internal class RequestServiceTests
 
         Assert.Multiple(() =>
         {
-            mock.Mock<IUnitOfWorkFactory>().Verify(x => x.Create(), Times.Once());
+            mock.Mock<IUnitOfWorkFactory>().Verify(x => x.CreateAsync(It.IsAny<CancellationToken>()), Times.Once());
             mock.Mock<IUnitOfWork>().Verify(x => x.GraphRepository, Times.Exactly(2));
             mock.Mock<IGraphParametersRepository>().Verify(x => x.GetAll(), Times.Once());
             Assert.That(result.All(x => graphs.Any(y => y.Id == x.Id)
