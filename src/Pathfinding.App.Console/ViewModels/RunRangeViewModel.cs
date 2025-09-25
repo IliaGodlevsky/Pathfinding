@@ -147,18 +147,11 @@ internal sealed class RunRangeViewModel : BaseViewModel,
         GraphVertexModel model)
     {
         model.WhenAnyValue(expression).Skip(1).Where(x => x)
-            .Do(async _ => await AddRangeToStorage(model))
-            .Subscribe().DisposeWith(shortLifeDisposables);
+            .Subscribe(async _ => await AddRangeToStorage(model))
+            .DisposeWith(shortLifeDisposables);
         model.WhenAnyValue(expression).Skip(1).Where(x => !x)
-            .Do(async _ => await RemoveVertexFromStorage(model))
-            .Subscribe().DisposeWith(shortLifeDisposables);
-    }
-
-    private void SubscribeToEvents(GraphVertexModel vertex)
-    {
-        BindTo(x => x.IsSource, vertex);
-        BindTo(x => x.IsTarget, vertex);
-        BindTo(x => x.IsTransit, vertex);
+            .Subscribe(async _ => await RemoveVertexFromStorage(model))
+            .DisposeWith(shortLifeDisposables);
     }
 
     private async Task AddRangeToStorage(GraphVertexModel vertex)
@@ -221,7 +214,12 @@ internal sealed class RunRangeViewModel : BaseViewModel,
                 .ToList();
             Transit.CollectionChanged += OnCollectionChanged;
             Transit.AddRange(transit);
-            Graph.ForEach(SubscribeToEvents);
+            foreach (var vertex in Graph)
+            {
+                BindTo(x => x.IsSource, vertex);
+                BindTo(x => x.IsTarget, vertex);
+                BindTo(x => x.IsTransit, vertex);
+            }
         }).ConfigureAwait(false);
     }
 

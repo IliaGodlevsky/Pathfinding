@@ -52,4 +52,10 @@ internal abstract class BaseViewModel(ILog log) : ReactiveObject
     {
         return TimeSpan.FromSeconds(Settings.Default.BaseTimeoutSeconds);
     }
+
+    protected static TimeSpan GetTimeout(int multiplicator)
+    {
+        double timeout = Settings.Default.BaseTimeoutSeconds * multiplicator;
+        return TimeSpan.FromSeconds(timeout);
+    }
 }

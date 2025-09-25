@@ -27,7 +27,7 @@ public sealed class InMemoryUnitOfWork : IUnitOfWork
 
     public ValueTask BeginTransactionAsync(CancellationToken token = default)
     {
-        return ValueTask.CompletedTask;
+        return token.IsCancellationRequested ? ValueTask.FromCanceled(token) : ValueTask.CompletedTask;
     }
 
     public Task CommitTransactionAsync(CancellationToken token = default)

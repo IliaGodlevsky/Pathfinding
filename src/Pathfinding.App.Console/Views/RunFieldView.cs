@@ -41,8 +41,7 @@ internal sealed partial class RunFieldView : FrameView
         viewModel.WhenAnyValue(x => x.RunGraph)
             .DistinctUntilChanged()
             .Where(x => x is not null)
-            .Do(RenderGraphState)
-            .Subscribe()
+            .Subscribe(RenderGraphState)
             .DisposeWith(disposables);
         messenger.RegisterHandler<OpenRunFieldMessage>(this, OnOpen).DisposeWith(disposables);
         messenger.RegisterHandler<CloseRunFieldMessage>(this, OnClose).DisposeWith(disposables);
@@ -71,12 +70,9 @@ internal sealed partial class RunFieldView : FrameView
     {
         mainLoop.Invoke(container.RemoveAll);
         vertexDisposables.Clear();
-        var children = new RunVertexView[graph.Count];
-        int i = 0;
-        foreach (var vertex in graph)
-        {
-            children[i++] = new RunVertexView(vertex).DisposeWith(vertexDisposables);
-        }
+        var children = graph
+            .Select(x => new RunVertexView(x).DisposeWith(disposables))
+            .ToArray();
         mainLoop.Invoke(() =>
         {
             container.Add(children);

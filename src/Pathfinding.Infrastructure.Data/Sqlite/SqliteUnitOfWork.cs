@@ -44,13 +44,6 @@ public sealed class SqliteUnitOfWork(string connectionString) : IUnitOfWork
         }
     }
 
-    public void Dispose()
-    {
-        transaction?.Dispose();
-        connection.Close();
-        connection.Dispose();
-    }
-
     public async Task RollbackTransactionAsync(CancellationToken token = default)
     {
         if (transaction is not null)
@@ -59,6 +52,13 @@ public sealed class SqliteUnitOfWork(string connectionString) : IUnitOfWork
             await transaction.DisposeAsync().ConfigureAwait(false);
             transaction = null;
         }
+    }
+
+    public void Dispose()
+    {
+        transaction?.Dispose();
+        connection.Close();
+        connection.Dispose();
     }
 
     public async ValueTask DisposeAsync()

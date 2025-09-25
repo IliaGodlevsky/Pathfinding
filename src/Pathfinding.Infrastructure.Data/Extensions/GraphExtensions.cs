@@ -23,12 +23,6 @@ public static class GraphExtensions
         return graph.DimensionsSizes.ElementAtOrDefault(1);
     }
 
-    public static IEnumerable<TVertex> GetObstacles<TVertex>(this IEnumerable<TVertex> graph)
-        where TVertex : IVertex
-    {
-        return graph.Where(vertex => vertex.IsObstacle);
-    }
-
     public static IEnumerable<Coordinate> GetCoordinates<TVertex>(this IEnumerable<TVertex> graph)
         where TVertex : IVertex
     {

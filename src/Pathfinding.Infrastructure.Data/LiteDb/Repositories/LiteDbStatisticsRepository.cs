@@ -19,6 +19,7 @@ internal sealed class LiteDbStatisticsRepository : IStatisticsRepository
         IReadOnlyCollection<Statistics> statistics,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         collection.InsertBulk(statistics);
         return Task.FromResult(statistics);
     }
@@ -33,6 +34,7 @@ internal sealed class LiteDbStatisticsRepository : IStatisticsRepository
         IReadOnlyCollection<int> ids,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         var deletedCount = collection.DeleteMany(x => ids.Contains(x.Id));
         return Task.FromResult(deletedCount > 0);
     }

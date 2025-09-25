@@ -15,6 +15,7 @@ internal sealed class InMemoryGraphParametersRepository(
     public Task<Graph> CreateAsync(Graph graph,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         graph.Id = ++id;
         set.Add(graph);
         return Task.FromResult(graph);
@@ -23,6 +24,7 @@ internal sealed class InMemoryGraphParametersRepository(
     public async Task<bool> DeleteAsync(int graphId,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         // Order sensitive. Do not change the order of deleting
         // Reason: some repositories need the presence of values in the database
         await rangeRepository.DeleteByGraphIdAsync(graphId, token).ConfigureAwait(false);
@@ -36,6 +38,7 @@ internal sealed class InMemoryGraphParametersRepository(
         IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         foreach (var graphId in graphIds)
         {
             await DeleteAsync(graphId, token).ConfigureAwait(false);
@@ -51,6 +54,7 @@ internal sealed class InMemoryGraphParametersRepository(
     public Task<Graph> ReadAsync(int graphId,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         var equal = new Graph { Id = graphId };
         set.TryGetValue(equal, out var result);
         return Task.FromResult(result);
@@ -59,6 +63,7 @@ internal sealed class InMemoryGraphParametersRepository(
     public Task<bool> UpdateAsync(Graph graph,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         var equal = new Graph { Id = graph.Id };
         if (set.TryGetValue(equal, out var result))
         {
@@ -75,6 +80,7 @@ internal sealed class InMemoryGraphParametersRepository(
         IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         var result = new Dictionary<int, int>();
         foreach (var graphId in graphIds)
         {

@@ -143,13 +143,13 @@ internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel,
 
     private async Task ChangeVertexCost(GraphVertexModel vertex, int delta)
     {
-        var cost = vertex.Cost.CurrentCost;
-        cost += delta;
-        cost = vertex.Cost.CostRange.ReturnInRange(cost);
-        vertex.Cost = new VertexCost(cost, vertex.Cost.CostRange);
-        var request = new UpdateVerticesRequest<GraphVertexModel>(GraphId, [.. vertex.Enumerate()]);
         await ExecuteSafe(async token =>
         {
+            var cost = vertex.Cost.CurrentCost;
+            cost += delta;
+            cost = vertex.Cost.CostRange.ReturnInRange(cost);
+            vertex.Cost = new VertexCost(cost, vertex.Cost.CostRange);
+            var request = new UpdateVerticesRequest<GraphVertexModel>(GraphId, [.. vertex.Enumerate()]);
             await service.UpdateVerticesAsync(request, token).ConfigureAwait(false);
         }).ConfigureAwait(false);
     }

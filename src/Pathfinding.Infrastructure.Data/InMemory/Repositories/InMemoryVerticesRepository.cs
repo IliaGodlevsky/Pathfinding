@@ -1,4 +1,5 @@
-﻿using Pathfinding.Domain.Core.Entities;
+﻿using Newtonsoft.Json.Linq;
+using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Interface.Repositories;
 using Pathfinding.Shared.Extensions;
 
@@ -14,6 +15,7 @@ internal sealed class InMemoryVerticesRepository : IVerticesRepository
         IReadOnlyCollection<Vertex> vertices,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         var result = vertices
             .ForEach(x => x.Id = ++id)
             .ForWhole(set.AddRange)
@@ -30,6 +32,7 @@ internal sealed class InMemoryVerticesRepository : IVerticesRepository
     public Task<Vertex> ReadAsync(long vertexId,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         var vertex = new Vertex { Id = vertexId };
         set.TryGetValue(vertex, out var result);
         return Task.FromResult(result);
@@ -37,15 +40,14 @@ internal sealed class InMemoryVerticesRepository : IVerticesRepository
 
     public IAsyncEnumerable<Vertex> ReadVerticesByGraphIdAsync(int graphId)
     {
-        return set
-            .Where(x => x.GraphId == graphId)
-            .ToAsyncEnumerable();
+        return set.Where(x => x.GraphId == graphId).ToAsyncEnumerable();
     }
 
     public Task<bool> UpdateVerticesAsync(
         IReadOnlyCollection<Vertex> vertices,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         foreach (var vertex in vertices)
         {
             if (set.TryGetValue(vertex, out var result))

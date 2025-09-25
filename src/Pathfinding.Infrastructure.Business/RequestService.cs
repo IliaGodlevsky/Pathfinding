@@ -331,7 +331,8 @@ public sealed class RequestService<T>(IUnitOfWorkFactory factory) : IRequestServ
             .ReadAsync(graphId, token).ConfigureAwait(false);
         var vertices = await unit.VerticesRepository
             .ReadVerticesByGraphIdAsync(graphId)
-            .ToVerticesAsync<T>(token)
+            .Select(x => x.ToVertex<T>())
+            .ToListAsync(token)
             .ConfigureAwait(false);
         return new()
         {

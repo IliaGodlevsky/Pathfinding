@@ -45,22 +45,19 @@ internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewMode
         await ExecuteSafe(async () =>
         {
             await using var stream = streamFactory();
-            if (!stream.IsEmpty)
-            {
-                var serializer = serializers[stream.Format.Value];
-                var histories = await serializer
-                    .DeserializeFromAsync(stream.Stream, CancellationToken.None)
-                    .ConfigureAwait(false);
-                var timeout = GetTimeout() * histories.Histories.Count;
-                using var cts = new CancellationTokenSource(timeout);
-                var result = await service.CreatePathfindingHistoriesAsync(
-                    histories.Histories, cts.Token).ConfigureAwait(false);
-                var graphs = result.Select(x => x.Graph).ToGraphInfo();
-                messenger.Send(new GraphsCreatedMessage(graphs));
-                log.Info(graphs.Length > 0
-                    ? Resource.WasLoadedMsg
-                    : Resource.WereLoadedMsg);
-            }
+            if (stream.IsEmpty) return;
+            var serializer = serializers[stream.Format.Value];
+            var histories = await serializer.DeserializeFromAsync(stream.Stream)
+                .ConfigureAwait(false);
+            var timeout = GetTimeout(histories.Histories.Count);
+            using var cts = new CancellationTokenSource(timeout);
+            var result = await service.CreatePathfindingHistoriesAsync(
+                histories.Histories, cts.Token).ConfigureAwait(false);
+            var graphs = result.Select(x => x.Graph).ToGraphInfo();
+            messenger.Send(new GraphsCreatedMessage(graphs));
+            log.Info(graphs.Length > 0 
+                ? Resource.WasLoadedMsg : Resource.WereLoadedMsg);
+
         }).ConfigureAwait(false);
     }
 }

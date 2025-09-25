@@ -4,8 +4,8 @@ namespace Pathfinding.Domain.Interface.Extensions;
 
 public static class UnitOfWorkFactoryExtensions
 {
-    public static async Task<TParam> TransactionAsync<TParam>(this IUnitOfWorkFactory factory,
-        Func<IUnitOfWork, CancellationToken, Task<TParam>> action,
+    public static async ValueTask<T> TransactionAsync<T>(this IUnitOfWorkFactory factory,
+        Func<IUnitOfWork, CancellationToken, Task<T>> action,
         CancellationToken token)
     {
         var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);

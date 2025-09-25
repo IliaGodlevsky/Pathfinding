@@ -13,16 +13,4 @@ public static class ComparableExtensions
     {
         return first.CompareTo(second) < 0;
     }
-
-    public static bool IsGreaterOrEqualThan<T>(this T first, T second)
-        where T : IComparable<T>
-    {
-        return first.CompareTo(second) >= 0;
-    }
-
-    public static bool IsLessOrEqualThan<T>(this T first, T second)
-        where T : IComparable<T>
-    {
-        return first.CompareTo(second) <= 0;
-    }
 }

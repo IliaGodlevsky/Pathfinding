@@ -14,6 +14,7 @@ internal sealed class InMemoryRangeRepository : IRangeRepository
         IReadOnlyCollection<PathfindingRange> entities,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         foreach (var entity in entities)
         {
             entity.Id = ++id;
@@ -25,6 +26,7 @@ internal sealed class InMemoryRangeRepository : IRangeRepository
     public Task<bool> DeleteByGraphIdAsync(int graphId,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         var result = set.RemoveWhere(x => x.GraphId == graphId);
         return Task.FromResult(result > 0);
     }
@@ -32,6 +34,7 @@ internal sealed class InMemoryRangeRepository : IRangeRepository
     public Task<bool> DeleteByVerticesIdsAsync(IReadOnlyCollection<long> verticesIds,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         var result = set.RemoveWhere(x => verticesIds.Contains(x.VertexId));
         return Task.FromResult(result > 0);
     }
@@ -47,6 +50,7 @@ internal sealed class InMemoryRangeRepository : IRangeRepository
         IReadOnlyCollection<PathfindingRange> entities,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         foreach (var entity in entities)
         {
             if (set.TryGetValue(entity, out var value))

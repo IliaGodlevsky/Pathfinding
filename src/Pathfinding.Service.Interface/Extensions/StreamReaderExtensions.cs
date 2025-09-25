@@ -16,7 +16,7 @@ public static class StreamReaderExtensions
     public static async Task<IReadOnlyCollection<T>> ReadSerializableArrayAsync<T>(this Stream stream, CancellationToken token = default)
         where T : IBinarySerializable, new()
     {
-        var count = await stream.ReadInt32Async(token).ConfigureAwait(false);
+        int count = await stream.ReadInt32Async(token).ConfigureAwait(false);
         var list = new List<T>(count);
         while (count-- > 0)
         {
@@ -59,7 +59,7 @@ public static class StreamReaderExtensions
 
     public static async Task<IReadOnlyList<int>> ReadArrayAsync(this Stream stream, CancellationToken token = default)
     {
-        var count = await stream.ReadInt32Async(token).ConfigureAwait(false);
+        int count = await stream.ReadInt32Async(token).ConfigureAwait(false);
         var list = new List<int>(count);
         while (count-- > 0)
         {

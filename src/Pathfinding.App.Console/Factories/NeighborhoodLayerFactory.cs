@@ -6,17 +6,13 @@ using Pathfinding.Domain.Interface;
 
 namespace Pathfinding.App.Console.Factories;
 
-public sealed class NeighborhoodLayerFactory : INeighborhoodLayerFactory
+public sealed class NeighborhoodLayerFactory(
+    [KeyFilter(KeyFilters.Neighborhoods)] Meta<ILayer>[] layers) : INeighborhoodLayerFactory
 {
-    private readonly Dictionary<Neighborhoods, ILayer> layers;
+    private readonly Dictionary<Neighborhoods, ILayer> layers 
+        = layers.ToDictionary(x => (Neighborhoods)x.Metadata[MetadataKeys.Neighborhoods], x => x.Value);
 
     public IReadOnlyCollection<Neighborhoods> Allowed => layers.Keys;
-
-    public NeighborhoodLayerFactory(
-        [KeyFilter(KeyFilters.Neighborhoods)] Meta<ILayer>[] layers)
-    {
-        this.layers = layers.ToDictionary(x => (Neighborhoods)x.Metadata[MetadataKeys.Neighborhoods], x => x.Value);
-    }
 
     public ILayer CreateNeighborhoodLayer(Neighborhoods neighborhoods)
     {

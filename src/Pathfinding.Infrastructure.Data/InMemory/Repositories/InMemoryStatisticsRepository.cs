@@ -12,6 +12,7 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
         IReadOnlyCollection<Statistics> statistics, 
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         foreach (var entity in statistics)
         {
             entity.Id = ++id;
@@ -27,22 +28,21 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
 
     public Task<bool> DeleteByGraphId(int graphId)
     {
-        var removed = set.RemoveWhere(s => s.GraphId == graphId) > 0;
+        bool removed = set.RemoveWhere(s => s.GraphId == graphId) > 0;
         return Task.FromResult(removed);
     }
 
-    public Task<bool> DeleteByIdsAsync(
-        IReadOnlyCollection<int> ids, 
+    public Task<bool> DeleteByIdsAsync(IReadOnlyCollection<int> ids, 
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         var removed = set.RemoveWhere(s => ids.Contains(s.Id)) > 0;
         return Task.FromResult(removed);
     }
 
-    public Task<Statistics> ReadByIdAsync(
-        int statId,
-        CancellationToken token = default)
+    public Task<Statistics> ReadByIdAsync(int statId, CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         var tracking = new Statistics { Id = statId };
         set.TryGetValue(tracking, out var statistics);
         return Task.FromResult(statistics);
@@ -52,6 +52,7 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
         IReadOnlyCollection<Statistics> entities,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         foreach (var entity in entities)
         {
             if (set.TryGetValue(entity, out var statistics))
@@ -73,8 +74,6 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
     public IAsyncEnumerable<Statistics> ReadByIdsAsync(
         IReadOnlyCollection<int> runIds)
     {
-        return set
-            .Where(x => runIds.Contains(x.Id))
-            .ToAsyncEnumerable();
+        return set.Where(x => runIds.Contains(x.Id)).ToAsyncEnumerable();
     }
 }

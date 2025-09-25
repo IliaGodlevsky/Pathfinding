@@ -24,7 +24,7 @@ public sealed class KnightNeighborhood(Coordinate coordinate) : Neighborhood(coo
                             delta[j] = 1 * s2;
 
                             var coords = SelfCoordinate.Zip(delta, (x, d) => x + d);
-                            neighbors.Add(new Coordinate(coords));
+                            neighbors.Add(new(coords));
                         }
                     }
                 }

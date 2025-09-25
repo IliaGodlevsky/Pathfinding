@@ -96,17 +96,13 @@ internal sealed class RunsTableViewModel : BaseViewModel, IRunsTableViewModel, I
             var toDelete = Runs
                 .Where(x => msg.Value.Contains(x.Id))
                 .ToArray();
-            if (toDelete.Length == Runs.Count)
+            Runs.Remove(toDelete);
+            if (Runs.Count == 0)
             {
-                Runs.Clear();
                 messenger.Send(new GraphStateChangedMessage((ActivatedGraphId, GraphStatuses.Editable)));
                 var graphInfo = await service.ReadGraphInfoAsync(ActivatedGraphId, token).ConfigureAwait(false);
                 graphInfo.Status = GraphStatuses.Editable;
                 await service.UpdateGraphInfoAsync(graphInfo, token).ConfigureAwait(false);
-            }
-            else
-            {
-                Runs.Remove(toDelete);
             }
         }).ConfigureAwait(false);
     }

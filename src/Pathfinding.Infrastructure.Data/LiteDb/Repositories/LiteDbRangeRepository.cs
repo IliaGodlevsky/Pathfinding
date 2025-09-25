@@ -1,4 +1,5 @@
 ﻿using LiteDB;
+using Newtonsoft.Json.Linq;
 using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Interface.Repositories;
 
@@ -19,6 +20,7 @@ internal sealed class LiteDbRangeRepository : IRangeRepository
         IReadOnlyCollection<PathfindingRange> entities,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         collection.Insert(entities);
         return Task.FromResult(entities);
     }
@@ -26,6 +28,7 @@ internal sealed class LiteDbRangeRepository : IRangeRepository
     public  Task<bool> DeleteByGraphIdAsync(int graphId, 
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         int deleted = collection.DeleteMany(x => x.GraphId == graphId);
         return Task.FromResult(deleted > 0);
     }
@@ -33,6 +36,7 @@ internal sealed class LiteDbRangeRepository : IRangeRepository
     public Task<bool> DeleteByVerticesIdsAsync(IReadOnlyCollection<long> verticesIds,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         var ids = verticesIds.Select(x => new BsonValue(x)).ToArray();
         var query = Query.In(nameof(PathfindingRange.VertexId), ids);
         return Task.FromResult(collection.DeleteMany(query) > 0);
@@ -51,6 +55,7 @@ internal sealed class LiteDbRangeRepository : IRangeRepository
         IReadOnlyCollection<PathfindingRange> entities, 
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         collection.Upsert(entities);
         return Task.FromResult(entities);
     }

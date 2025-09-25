@@ -19,6 +19,7 @@ internal sealed class LiteDbVerticesRepository : IVerticesRepository
         IReadOnlyCollection<Vertex> vertices, 
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         collection.InsertBulk(vertices);
         return Task.FromResult(vertices);
     }
@@ -31,6 +32,7 @@ internal sealed class LiteDbVerticesRepository : IVerticesRepository
     public Task<Vertex> ReadAsync(long vertexId,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         return Task.FromResult(collection.FindById(vertexId));
     }
 
@@ -46,6 +48,7 @@ internal sealed class LiteDbVerticesRepository : IVerticesRepository
         IReadOnlyCollection<Vertex> vertices, 
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         return Task.FromResult(collection.Update(vertices) > 0);
     }
 }

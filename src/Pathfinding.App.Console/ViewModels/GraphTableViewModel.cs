@@ -120,7 +120,7 @@ internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel,
             model.SmoothLevel = msg.Value.SmoothLevel;
             if (ActivatedGraphId == model.Id)
             {
-                await ActivatedGraph(ActivatedGraphId);
+                await ActivatedGraph(ActivatedGraphId).ConfigureAwait(false);
             }
         }
     }

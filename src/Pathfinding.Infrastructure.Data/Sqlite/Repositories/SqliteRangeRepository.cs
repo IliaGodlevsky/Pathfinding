@@ -32,10 +32,8 @@ internal sealed class SqliteRangeRepository(SqliteConnection connection,
 
         foreach (var entity in entities)
         {
-            var id = await Connection.ExecuteScalarAsync<int>(
-                    new(query, entity, Transaction, cancellationToken: token))
-                .ConfigureAwait(false);
-            entity.Id = id;
+            var command = new CommandDefinition(query, entity, Transaction, cancellationToken: token);
+            entity.Id = await Connection.ExecuteScalarAsync<int>(command).ConfigureAwait(false);
         }
 
         return entities;
@@ -71,7 +69,7 @@ internal sealed class SqliteRangeRepository(SqliteConnection connection,
         const string query = $"SELECT * FROM {DbTables.Ranges} WHERE GraphId = @GraphId ORDER BY \"Order\"";
         var parameters = new { GraphId = graphId };
         return Connection.QueryUnbufferedAsync<PathfindingRange>(query, 
-            parameters, Transaction);
+            param: parameters, transaction: Transaction);
     }
 
     public async Task<IReadOnlyCollection<PathfindingRange>> UpsertAsync(
@@ -99,11 +97,10 @@ internal sealed class SqliteRangeRepository(SqliteConnection connection,
 
         foreach (var entity in entities.Where(e => e.Id == 0))
         {
-            var newId = await Connection.ExecuteScalarAsync<int>(
-                    new(insertQuery, entity, Transaction, cancellationToken: token))
+            var command = new CommandDefinition(insertQuery, 
+                entity, Transaction, cancellationToken: token);
+            entity.Id = await Connection.ExecuteScalarAsync<int>(command)
                 .ConfigureAwait(false);
-
-            entity.Id = newId;
         }
         return entities;
     }

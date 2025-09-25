@@ -32,6 +32,7 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
     public async Task<bool> DeleteAsync(
         int graphId, CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         // Order sensitive. Do not change the order of deleting
         // Reason: some repositories need the presence of values in the database
         await rangeRepository.DeleteByGraphIdAsync(graphId, token).ConfigureAwait(false);
@@ -44,6 +45,7 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
         IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         foreach (var id in graphIds)
         {
             await DeleteAsync(id, token).ConfigureAwait(false);
@@ -59,6 +61,7 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
     public Task<Graph> ReadAsync(
         int graphId, CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         return Task.FromResult(collection.FindById(graphId));
     }
 
@@ -66,6 +69,7 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
         IReadOnlyCollection<int> graphIds, 
         CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         var result = vertexCollection
             .Find(x => graphIds.Contains(x.GraphId) && x.IsObstacle)
             .GroupBy(x => x.GraphId)
@@ -75,6 +79,7 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
 
     public Task<bool> UpdateAsync(Graph graph, CancellationToken token = default)
     {
+        token.ThrowIfCancellationRequested();
         return Task.FromResult(collection.Update(graph));
     }
 }

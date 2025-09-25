@@ -56,8 +56,7 @@ internal sealed class SqliteVerticesRepository(SqliteConnection connection,
     {
         const string query = $"SELECT * FROM {DbTables.Vertices} WHERE GraphId = @GraphId";
 
-        return Connection.QueryUnbufferedAsync<Vertex>(query,
-            new { GraphId = graphId });
+        return Connection.QueryUnbufferedAsync<Vertex>(query, new { GraphId = graphId });
     }
 
     public async Task<bool> UpdateVerticesAsync(
