@@ -7,19 +7,19 @@ namespace Pathfinding.App.Console.Factories;
 
 internal sealed class AlgorithmsFactory(Meta<IAlgorithmFactory<PathfindingProcess>>[] algorithms) : IAlgorithmsFactory
 {
-    private readonly Dictionary<Algorithms, IAlgorithmFactory<PathfindingProcess>> algorithms 
+    private readonly Dictionary<Algorithms, IAlgorithmFactory<PathfindingProcess>> algorithms
         = algorithms.ToDictionary(
             x => (Algorithms)x.Metadata[MetadataKeys.Algorithm],
             x => x.Value);
 
-    public IReadOnlyCollection<Algorithms> Allowed { get; } 
+    public IReadOnlyCollection<Algorithms> Allowed { get; }
         = [.. algorithms.OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => (Algorithms)x.Metadata[MetadataKeys.Algorithm])];
 
     public IAlgorithmFactory<PathfindingProcess> GetAlgorithmFactory(Algorithms algorithm)
     {
-        return algorithms.TryGetValue(algorithm, out var value) 
-            ? value 
+        return algorithms.TryGetValue(algorithm, out var value)
+            ? value
             : throw new KeyNotFoundException($"{algorithm} was not found");
     }
 }

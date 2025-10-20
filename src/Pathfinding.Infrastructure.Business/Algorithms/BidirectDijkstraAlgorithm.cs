@@ -27,9 +27,9 @@ public class BidirectDijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> p
 
     protected override BidirectGraphPath GetSubPath()
     {
-        return new (
+        return new(
             ForwardTraces.ToFrozenDictionary(),
-            BackwardTraces.ToFrozenDictionary(), 
+            BackwardTraces.ToFrozenDictionary(),
             Intersection,
             StepRule);
     }

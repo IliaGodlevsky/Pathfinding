@@ -1,6 +1,6 @@
-﻿using System.Diagnostics;
-using Pathfinding.Infrastructure.Data.Extensions;
+﻿using Pathfinding.Infrastructure.Data.Extensions;
 using Pathfinding.Shared.Primitives;
+using System.Diagnostics;
 
 namespace Pathfinding.Infrastructure.Data.Pathfinding.Neighborhoods;
 

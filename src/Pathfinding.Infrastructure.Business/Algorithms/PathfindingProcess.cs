@@ -5,7 +5,7 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
-public abstract class PathfindingProcess(IReadOnlyCollection<IPathfindingVertex> range) 
+public abstract class PathfindingProcess(IReadOnlyCollection<IPathfindingVertex> range)
     : IAlgorithm<IGraphPath>
 {
     protected readonly record struct SubRange(
@@ -13,7 +13,7 @@ public abstract class PathfindingProcess(IReadOnlyCollection<IPathfindingVertex>
         IPathfindingVertex Target)
     {
         public static readonly SubRange Default = new(
-            NullPathfindingVertex.Instance, 
+            NullPathfindingVertex.Instance,
             NullPathfindingVertex.Instance);
     }
 

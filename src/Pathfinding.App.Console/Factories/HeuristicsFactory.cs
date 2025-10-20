@@ -6,10 +6,10 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.App.Console.Factories;
 
-public sealed class HeuristicsFactory(IEnumerable<Meta<IHeuristic>> heuristics) 
+public sealed class HeuristicsFactory(IEnumerable<Meta<IHeuristic>> heuristics)
     : IHeuristicsFactory
 {
-    private readonly Dictionary<Heuristics, IHeuristic> heuristics 
+    private readonly Dictionary<Heuristics, IHeuristic> heuristics
         = heuristics.ToDictionary(
             x => (Heuristics)x.Metadata[MetadataKeys.Heuristics],
             x => x.Value);

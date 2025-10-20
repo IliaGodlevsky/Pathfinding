@@ -1,7 +1,7 @@
 ﻿using Autofac.Extras.Moq;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
-using Pathfinding.App.Console.Messages.ViewModel;
+using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Logging.Interface;
@@ -10,7 +10,6 @@ using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Serialization;
 using Pathfinding.Shared.Extensions;
 using System.Reactive.Linq;
-using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 

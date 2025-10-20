@@ -12,7 +12,7 @@ public interface IGraphParametersRepository
 
     Task<Graph> CreateAsync(Graph graph, CancellationToken token = default);
 
-    Task<bool> DeleteAsync(IReadOnlyCollection<int> graphIds, 
+    Task<bool> DeleteAsync(IReadOnlyCollection<int> graphIds,
         CancellationToken token = default);
 
     Task<bool> UpdateAsync(Graph graph, CancellationToken token = default);

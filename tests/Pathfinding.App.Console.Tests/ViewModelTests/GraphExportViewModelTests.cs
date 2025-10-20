@@ -13,7 +13,6 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Serialization;
 using Pathfinding.Shared.Extensions;
-using System.Linq.Expressions;
 using System.Reactive.Linq;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
@@ -36,7 +35,7 @@ internal class GraphExportViewModelTests
 
         mock.Mock<IReadHistoryOptions>()
             .Setup(x => x.ReadHistoryAsync(
-                It.IsAny<ExportOptions>(), 
+                It.IsAny<ExportOptions>(),
                 It.IsAny<IReadOnlyCollection<int>>(),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(histories));

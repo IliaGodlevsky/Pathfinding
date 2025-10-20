@@ -2,5 +2,5 @@
 
 namespace Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
-internal sealed class AwaitGraphUpdatedMessage(GraphInformationModel model) 
+internal sealed class AwaitGraphUpdatedMessage(GraphInformationModel model)
     : AwaitValueChangedMessage<GraphInformationModel>(model);

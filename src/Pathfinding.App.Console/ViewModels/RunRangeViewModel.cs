@@ -172,7 +172,7 @@ internal sealed class RunRangeViewModel : ViewModel,
 
     private async Task RemoveVertexFromStorage(GraphVertexModel vertex)
     {
-        await ExecuteSafe(async token => 
+        await ExecuteSafe(async token =>
         {
             await service.DeleteRangeAsync(vertex.Enumerate(), token).ConfigureAwait(false);
         }).ConfigureAwait(false);

@@ -4,11 +4,11 @@ using Pathfinding.Service.Interface.Models;
 
 namespace Pathfinding.App.Console.Factories.Algos;
 
-public sealed class BidirectRandomAlgorithmFactory 
+public sealed class BidirectRandomAlgorithmFactory
     : IAlgorithmFactory<BidirectRandomAlgorithm>
 {
     public BidirectRandomAlgorithm CreateAlgorithm(
-        IReadOnlyCollection<IPathfindingVertex> range, 
+        IReadOnlyCollection<IPathfindingVertex> range,
         IAlgorithmBuildInfo info)
     {
         return new(range);

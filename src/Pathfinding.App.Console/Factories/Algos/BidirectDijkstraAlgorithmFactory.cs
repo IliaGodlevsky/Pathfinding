@@ -7,7 +7,7 @@ namespace Pathfinding.App.Console.Factories.Algos;
 public sealed class BidirectDijkstraAlgorithmFactory(IStepRuleFactory stepRuleFactory) : IAlgorithmFactory<BidirectDijkstraAlgorithm>
 {
     public BidirectDijkstraAlgorithm CreateAlgorithm(
-        IReadOnlyCollection<IPathfindingVertex> range, 
+        IReadOnlyCollection<IPathfindingVertex> range,
         IAlgorithmBuildInfo info)
     {
         ArgumentNullException.ThrowIfNull(info.StepRule, nameof(info.StepRule));

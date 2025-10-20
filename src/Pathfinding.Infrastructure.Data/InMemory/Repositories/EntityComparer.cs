@@ -14,8 +14,8 @@ internal sealed class EntityComparer<T>
 
     public bool Equals(IEntity<T> x, IEntity<T> y)
     {
-        return x is not null 
-               && y is not null 
+        return x is not null
+               && y is not null
                && x.Id.Equals(y.Id);
     }
 

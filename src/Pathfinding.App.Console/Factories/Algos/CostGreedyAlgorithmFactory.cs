@@ -5,7 +5,7 @@ using Pathfinding.Service.Interface.Models;
 namespace Pathfinding.App.Console.Factories.Algos;
 
 public sealed class CostGreedyAlgorithmFactory(
-    IStepRuleFactory stepRuleFactory) 
+    IStepRuleFactory stepRuleFactory)
     : IAlgorithmFactory<CostGreedyAlgorithm>
 {
     public CostGreedyAlgorithm CreateAlgorithm(

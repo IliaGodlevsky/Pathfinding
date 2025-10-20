@@ -6,11 +6,11 @@ internal sealed partial class GraphTableButtonsFrame
 {
     private void Initialize()
     {
-        Border = new ()
+        Border = new()
         {
             BorderStyle = BorderStyle.Rounded,
             DrawMarginFrame = false,
-            Padding = new (0)
+            Padding = new(0)
         };
         X = 0;
         Y = Pos.Percent(90);

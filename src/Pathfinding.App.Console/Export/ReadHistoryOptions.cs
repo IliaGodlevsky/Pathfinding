@@ -14,13 +14,13 @@ internal sealed class ReadHistoryOptions : IReadHistoryOptions
     public ReadHistoryOptions(Meta<IReadHistoryOption>[] options)
     {
         this.options = options.ToDictionary(
-            x => (ExportOptions)x.Metadata[MetadataKeys.ExportOptions], 
+            x => (ExportOptions)x.Metadata[MetadataKeys.ExportOptions],
             x => x.Value);
         Allowed = [.. this.options.Keys];
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(
-        ExportOptions option, 
+        ExportOptions option,
         IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {

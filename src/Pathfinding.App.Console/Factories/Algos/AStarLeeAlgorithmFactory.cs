@@ -5,7 +5,7 @@ using Pathfinding.Service.Interface.Models;
 namespace Pathfinding.App.Console.Factories.Algos;
 
 public sealed class AStarLeeAlgorithmFactory(
-    IHeuristicsFactory heuristicsFactory) 
+    IHeuristicsFactory heuristicsFactory)
     : IAlgorithmFactory<AStarLeeAlgorithm>
 {
     public AStarLeeAlgorithm CreateAlgorithm(

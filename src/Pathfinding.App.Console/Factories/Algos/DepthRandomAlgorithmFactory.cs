@@ -4,11 +4,11 @@ using Pathfinding.Service.Interface.Models;
 
 namespace Pathfinding.App.Console.Factories.Algos;
 
-internal sealed class DepthRandomAlgorithmFactory 
+internal sealed class DepthRandomAlgorithmFactory
     : IAlgorithmFactory<DepthRandomAlgorithm>
 {
     public DepthRandomAlgorithm CreateAlgorithm(
-        IReadOnlyCollection<IPathfindingVertex> range, 
+        IReadOnlyCollection<IPathfindingVertex> range,
         IAlgorithmBuildInfo info)
     {
         return new(range);

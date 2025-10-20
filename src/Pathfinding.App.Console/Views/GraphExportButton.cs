@@ -24,7 +24,7 @@ internal sealed partial class GraphExportButton
                 var filePath = GetFilePath(viewModel);
                 return string.IsNullOrEmpty(filePath.Path) || filePath.Format == null
                     ? new Func<StreamModel>(() => StreamModel.Empty)
-                    : () => new (OpenWrite(filePath.Path), filePath.Format);
+                    : () => new(OpenWrite(filePath.Path), filePath.Format);
             })
             .InvokeCommand(viewModel, x => x.ExportGraphCommand)
             .DisposeWith(disposables);

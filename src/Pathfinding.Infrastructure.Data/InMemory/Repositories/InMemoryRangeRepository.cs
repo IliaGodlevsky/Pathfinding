@@ -1,6 +1,5 @@
 ﻿using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Interface.Repositories;
-using Pathfinding.Shared.Extensions;
 
 namespace Pathfinding.Infrastructure.Data.InMemory.Repositories;
 

@@ -7,7 +7,7 @@ namespace Pathfinding.App.Console.Factories.Algos;
 public sealed class RandomAlgorithmFactory : IAlgorithmFactory<RandomAlgorithm>
 {
     public RandomAlgorithm CreateAlgorithm(
-        IReadOnlyCollection<IPathfindingVertex> range, 
+        IReadOnlyCollection<IPathfindingVertex> range,
         IAlgorithmBuildInfo info)
     {
         return new(range);

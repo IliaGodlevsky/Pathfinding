@@ -9,7 +9,7 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
     private readonly HashSet<Statistics> set = new(EntityComparer<int>.Instance);
 
     public Task<IReadOnlyCollection<Statistics>> CreateAsync(
-        IReadOnlyCollection<Statistics> statistics, 
+        IReadOnlyCollection<Statistics> statistics,
         CancellationToken token = default)
     {
         token.ThrowIfCancellationRequested();
@@ -32,7 +32,7 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
         return Task.FromResult(removed);
     }
 
-    public Task<bool> DeleteByIdsAsync(IReadOnlyCollection<int> ids, 
+    public Task<bool> DeleteByIdsAsync(IReadOnlyCollection<int> ids,
         CancellationToken token = default)
     {
         token.ThrowIfCancellationRequested();

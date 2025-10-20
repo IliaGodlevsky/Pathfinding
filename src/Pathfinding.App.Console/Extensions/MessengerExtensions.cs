@@ -14,14 +14,14 @@ internal static class MessengerExtensions
             where TMessage : class
             where TToken : IEquatable<TToken>
         {
-            return new UnregisterAdapter(() 
+            return new UnregisterAdapter(()
                 => messenger.Unregister<TMessage, TToken>(recipient, token));
         }
 
         public static IDisposable New<TMessage>(IMessenger messenger, object recipient)
             where TMessage : class
         {
-            return new UnregisterAdapter(() 
+            return new UnregisterAdapter(()
                 => messenger.Unregister<TMessage>(recipient));
         }
 
@@ -33,7 +33,7 @@ internal static class MessengerExtensions
         where TMessage : class, IAwaitableMessage
         where TToken : IEquatable<TToken>
     {
-        messenger.Register<TMessage, TToken>(recipient, token, 
+        messenger.Register<TMessage, TToken>(recipient, token,
             async (_, msg) =>
             {
                 await handler(msg).ConfigureAwait(false);
@@ -43,7 +43,7 @@ internal static class MessengerExtensions
         return UnregisterAdapter.New<TMessage, TToken>(messenger, recipient, token);
     }
 
-    public static IDisposable RegisterHandler<TMessage>(this IMessenger messenger, 
+    public static IDisposable RegisterHandler<TMessage>(this IMessenger messenger,
         object recipient, Action<TMessage> action)
         where TMessage : class
     {
@@ -64,7 +64,7 @@ internal static class MessengerExtensions
         object recipient, Func<TMessage, Task> handler)
         where TMessage : class
     {
-        messenger.Register<TMessage>(recipient, async (_, msg) 
+        messenger.Register<TMessage>(recipient, async (_, msg)
             => await handler(msg).ConfigureAwait(false));
         return UnregisterAdapter.New<TMessage>(messenger, recipient);
     }

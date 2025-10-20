@@ -31,8 +31,8 @@ internal static class ZipArchiveExtensions
         return [];
     }
 
-    private static async Task WriteEntryAsync<T>(this ZipArchive archive, 
-        string entryName, IEnumerable<T> records, 
+    private static async Task WriteEntryAsync<T>(this ZipArchive archive,
+        string entryName, IEnumerable<T> records,
         CancellationToken token = default)
     {
         var toWrite = records.ToList();
@@ -50,7 +50,7 @@ internal static class ZipArchiveExtensions
     }
 
     public static async Task WriteHistoryAsync(this ZipArchive archive,
-        IEnumerable<PathfindingHistorySerializationModel> model, 
+        IEnumerable<PathfindingHistorySerializationModel> model,
         CancellationToken token = default)
     {
         var records = model.ToHistory();
@@ -60,7 +60,7 @@ internal static class ZipArchiveExtensions
         await archive.WriteEntryAsync(Ranges, records.SelectMany(x => x.Range), token).ConfigureAwait(false);
     }
 
-    public static async Task<List<PathfindingHistorySerializationModel>> ReadHistoryAsync(this ZipArchive archive, 
+    public static async Task<List<PathfindingHistorySerializationModel>> ReadHistoryAsync(this ZipArchive archive,
         CancellationToken token = default)
     {
         var graphs = await archive.ReadEntryAsync<CsvGraph>(Graphs, token).ConfigureAwait(false);

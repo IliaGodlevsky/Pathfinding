@@ -44,7 +44,7 @@ internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDi
         this.service = service;
         this.messenger = messenger;
         this.neighborFactory = neighborFactory;
-        messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage, int>(this, 
+        messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage, int>(this,
             Tokens.GraphTable, OnGraphUpdated).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsCreatedMessage>(this, OnGraphCreated).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);

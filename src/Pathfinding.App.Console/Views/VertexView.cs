@@ -34,7 +34,7 @@ internal abstract class VertexView<T> : Label
             .Subscribe()
             .DisposeWith(disposables);
 
-        this.model = model; 
+        this.model = model;
         var labelWidth = GraphFieldView.DistanceBetweenVertices;
         X = model.Position.GetX() * labelWidth;
         Y = model.Position.GetY();

@@ -3,5 +3,5 @@ using Pathfinding.Service.Interface.Models.Read;
 
 namespace Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
-internal sealed class GraphUpdatedMessage(GraphInformationModel model) 
+internal sealed class GraphUpdatedMessage(GraphInformationModel model)
     : ValueChangedMessage<GraphInformationModel>(model);

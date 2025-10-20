@@ -6,12 +6,12 @@ using Pathfinding.Service.Interface.Models;
 namespace Pathfinding.App.Console.Factories.Algos;
 
 public sealed class AStarGreedyAlgorithmFactory(
-    IStepRuleFactory stepRuleFactory, 
-    IHeuristicsFactory heuristicFactory) 
+    IStepRuleFactory stepRuleFactory,
+    IHeuristicsFactory heuristicFactory)
     : IAlgorithmFactory<AStarGreedyAlgorithm>
 {
     public AStarGreedyAlgorithm CreateAlgorithm(
-        IReadOnlyCollection<IPathfindingVertex> range, 
+        IReadOnlyCollection<IPathfindingVertex> range,
         IAlgorithmBuildInfo info)
     {
         ArgumentNullException.ThrowIfNull(info.Heuristics, nameof(info.Heuristics));

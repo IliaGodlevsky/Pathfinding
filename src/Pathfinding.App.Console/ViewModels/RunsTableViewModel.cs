@@ -17,7 +17,7 @@ using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisposable 
+internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly IRequestService<GraphVertexModel> service;
@@ -31,7 +31,7 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
 
     public RunsTableViewModel(IRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        ILog logger) :base(logger)
+        ILog logger) : base(logger)
     {
         this.messenger = messenger;
         this.service = service;

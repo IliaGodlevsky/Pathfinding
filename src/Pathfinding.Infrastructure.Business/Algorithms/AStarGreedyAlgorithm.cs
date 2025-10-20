@@ -17,7 +17,7 @@ public sealed class AStarGreedyAlgorithm(IReadOnlyCollection<IPathfindingVertex>
 
     protected override GraphPath GetSubPath()
     {
-        return new (
+        return new(
             Traces.ToFrozenDictionary(),
             CurrentRange.Target,
             stepRule);

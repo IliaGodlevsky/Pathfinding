@@ -17,7 +17,7 @@ using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class GraphExportViewModel 
+internal sealed class GraphExportViewModel
     : ViewModel, IGraphExportViewModel, IDisposable
 {
     private readonly IReadHistoryOptions options;
@@ -47,7 +47,7 @@ internal sealed class GraphExportViewModel
         this.options = options;
         this.serializers = serializers
             .ToDictionary(
-                x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], 
+                x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat],
                 x => x.Value);
         StreamFormats = [.. serializers
             .OrderBy(x => x.Metadata[MetadataKeys.Order])
@@ -70,13 +70,13 @@ internal sealed class GraphExportViewModel
             await using var stream = streamFactory();
             if (!stream.IsEmpty)
             {
-                var histories = await options.ReadHistoryAsync(Option, 
+                var histories = await options.ReadHistoryAsync(Option,
                     SelectedGraphIds, token).ConfigureAwait(false);
                 var serializer = serializers[stream.Format.Value];
-                await serializer.SerializeToAsync(histories, 
+                await serializer.SerializeToAsync(histories,
                     stream.Stream, token).ConfigureAwait(false);
-                log.Info(histories.Histories.Count == 1 
-                    ? Resource.WasDeletedMsg 
+                log.Info(histories.Histories.Count == 1
+                    ? Resource.WasDeletedMsg
                     : Resource.WereDeletedMsg);
             }
         }).ConfigureAwait(false);

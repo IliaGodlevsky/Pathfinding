@@ -49,7 +49,7 @@ internal class RunModel : ReactiveObject, IDisposable
                 case RunVertexState.Enqueued:
                     Vertex.IsEnqueued = isEnabled;
                     break;
-                case RunVertexState.CrossPath: 
+                case RunVertexState.CrossPath:
                     Vertex.IsCrossedPath = isEnabled;
                     break;
                 case RunVertexState.Path:
@@ -58,7 +58,7 @@ internal class RunModel : ReactiveObject, IDisposable
                 case RunVertexState.Source:
                     Vertex.IsSource = isEnabled;
                     break;
-                case RunVertexState.Target: 
+                case RunVertexState.Target:
                     Vertex.IsTarget = isEnabled;
                     break;
                 case RunVertexState.Transit:
@@ -96,7 +96,7 @@ internal class RunModel : ReactiveObject, IDisposable
         IReadOnlyCollection<SubRunModel> pathfindingResult,
         IReadOnlyCollection<Coordinate> range)
     {
-        verticesStates = GetVerticesStates(vertices, 
+        verticesStates = GetVerticesStates(vertices,
             pathfindingResult, range);
         cursorRange = new(verticesStates.Count - 1);
         Bind(fraction => fraction > 0, Next);

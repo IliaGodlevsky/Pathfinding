@@ -8,6 +8,6 @@ public class VerticesProcessedEventArgs(IPathfindingVertex current,
 {
     public Coordinate Current { get; } = current.Position;
 
-    public IReadOnlyList<Coordinate> Enqueued { get; } 
+    public IReadOnlyList<Coordinate> Enqueued { get; }
         = enqueued.Select(x => x.Position).ToList();
 }

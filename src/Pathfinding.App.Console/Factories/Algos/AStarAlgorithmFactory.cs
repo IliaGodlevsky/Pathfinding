@@ -6,7 +6,7 @@ using Pathfinding.Service.Interface.Models;
 namespace Pathfinding.App.Console.Factories.Algos;
 
 public sealed class AStarAlgorithmFactory(
-    IStepRuleFactory stepRuleFactory, 
+    IStepRuleFactory stepRuleFactory,
     IHeuristicsFactory heuristicFactory)
     : IAlgorithmFactory<AStarAlgorithm>
 {

@@ -47,7 +47,7 @@ internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParameters
     }
 
     public async Task<bool> DeleteAsync(
-        IReadOnlyCollection<int> graphIds, 
+        IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
         const string query = $"DELETE FROM {DbTables.Graphs} WHERE {IdProperty} IN @Ids";
@@ -101,7 +101,7 @@ internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParameters
         const string query = $@"
                 SELECT g.{graphIdProperty}, COALESCE(SUM(v.{nameof(Vertex.IsObstacle)}), 0) AS ObstacleCount
                 FROM (SELECT DISTINCT {graphIdProperty} FROM {DbTables.Vertices} WHERE {graphIdProperty} IN @GraphIds) g
-                LEFT JOIN { DbTables.Vertices } v ON g.{graphIdProperty} = v.{graphIdProperty}
+                LEFT JOIN {DbTables.Vertices} v ON g.{graphIdProperty} = v.{graphIdProperty}
                 GROUP BY g.{graphIdProperty};";
 
         var result = await Connection.QueryAsync<(int GraphId, int ObstacleCount)>(

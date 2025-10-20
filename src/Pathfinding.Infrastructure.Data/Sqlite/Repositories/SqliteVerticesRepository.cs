@@ -23,7 +23,7 @@ internal sealed class SqliteVerticesRepository(SqliteConnection connection,
             CREATE INDEX IF NOT EXISTS idx_vertex_graphid ON {DbTables.Vertices}(GraphId);";
 
     public async Task<IReadOnlyCollection<Vertex>> CreateAsync(
-        IReadOnlyCollection<Vertex> vertices, 
+        IReadOnlyCollection<Vertex> vertices,
         CancellationToken token = default)
     {
         const string query = @$"
@@ -60,7 +60,7 @@ internal sealed class SqliteVerticesRepository(SqliteConnection connection,
     }
 
     public async Task<bool> UpdateVerticesAsync(
-        IReadOnlyCollection<Vertex> vertices, 
+        IReadOnlyCollection<Vertex> vertices,
         CancellationToken token = default)
     {
         const string query = @$"

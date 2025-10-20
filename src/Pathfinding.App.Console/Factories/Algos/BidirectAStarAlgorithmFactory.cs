@@ -6,12 +6,12 @@ using Pathfinding.Service.Interface.Models;
 namespace Pathfinding.App.Console.Factories.Algos;
 
 public sealed class BidirectAStarAlgorithmFactory(
-    IStepRuleFactory stepRuleFactory, 
+    IStepRuleFactory stepRuleFactory,
     IHeuristicsFactory heuristicFactory)
     : IAlgorithmFactory<BidirectAStarAlgorithm>
 {
     public BidirectAStarAlgorithm CreateAlgorithm(
-        IReadOnlyCollection<IPathfindingVertex> range, 
+        IReadOnlyCollection<IPathfindingVertex> range,
         IAlgorithmBuildInfo info)
     {
         ArgumentNullException.ThrowIfNull(info.Heuristics, nameof(info.Heuristics));

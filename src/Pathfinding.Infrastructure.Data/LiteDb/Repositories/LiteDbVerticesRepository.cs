@@ -16,7 +16,7 @@ internal sealed class LiteDbVerticesRepository : IVerticesRepository
     }
 
     public Task<IReadOnlyCollection<Vertex>> CreateAsync(
-        IReadOnlyCollection<Vertex> vertices, 
+        IReadOnlyCollection<Vertex> vertices,
         CancellationToken token = default)
     {
         token.ThrowIfCancellationRequested();
@@ -45,7 +45,7 @@ internal sealed class LiteDbVerticesRepository : IVerticesRepository
     }
 
     public Task<bool> UpdateVerticesAsync(
-        IReadOnlyCollection<Vertex> vertices, 
+        IReadOnlyCollection<Vertex> vertices,
         CancellationToken token = default)
     {
         token.ThrowIfCancellationRequested();

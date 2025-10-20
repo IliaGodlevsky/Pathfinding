@@ -11,13 +11,13 @@ public interface IStatisticsRepository
     Task<Statistics> ReadByIdAsync(int runId, CancellationToken token = default);
 
     Task<IReadOnlyCollection<Statistics>> CreateAsync(
-        IReadOnlyCollection<Statistics> statistics, 
+        IReadOnlyCollection<Statistics> statistics,
         CancellationToken token = default);
 
     Task<bool> DeleteByIdsAsync(
         IReadOnlyCollection<int> ids, CancellationToken token = default);
 
     Task<bool> UpdateAsync(
-        IReadOnlyCollection<Statistics> entities, 
+        IReadOnlyCollection<Statistics> entities,
         CancellationToken token = default);
 }

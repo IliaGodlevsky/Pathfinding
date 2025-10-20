@@ -31,8 +31,8 @@ public abstract class PathfindingAlgorithm<TStorage>(IReadOnlyCollection<IPathfi
 
     protected override GraphPath GetSubPath()
     {
-        return new (
-            Traces.ToFrozenDictionary(), 
+        return new(
+            Traces.ToFrozenDictionary(),
             CurrentRange.Target);
     }
 

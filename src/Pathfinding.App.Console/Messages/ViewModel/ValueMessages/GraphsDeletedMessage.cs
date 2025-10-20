@@ -2,5 +2,5 @@
 
 namespace Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
-internal sealed class GraphsDeletedMessage(int[] graphsIds) 
+internal sealed class GraphsDeletedMessage(int[] graphsIds)
     : ValueChangedMessage<int[]>(graphsIds);

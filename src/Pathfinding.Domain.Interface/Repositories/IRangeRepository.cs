@@ -18,6 +18,6 @@ public interface IRangeRepository
         IReadOnlyCollection<long> verticesIds,
         CancellationToken token = default);
 
-    Task<bool> DeleteByGraphIdAsync(int graphId, 
+    Task<bool> DeleteByGraphIdAsync(int graphId,
         CancellationToken token = default);
 }

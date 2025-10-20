@@ -49,7 +49,7 @@ internal sealed class SqliteStatisticsRepository(SqliteConnection connection,
     {
         const string query = $"SELECT * FROM {DbTables.Statistics} WHERE GraphId = @GraphId";
 
-        return Connection.QueryUnbufferedAsync<Statistics>(query, 
+        return Connection.QueryUnbufferedAsync<Statistics>(query,
             new { GraphId = graphId }, Transaction);
     }
 
@@ -59,7 +59,7 @@ internal sealed class SqliteStatisticsRepository(SqliteConnection connection,
         const string query = $"DELETE FROM {DbTables.Statistics} WHERE Id IN @Ids";
 
         var rowsAffected = await Connection.ExecuteAsync(
-                new (query, new { Ids = ids.ToArray() }, Transaction, cancellationToken: token))
+                new(query, new { Ids = ids.ToArray() }, Transaction, cancellationToken: token))
             .ConfigureAwait(false);
 
         return rowsAffected > 0;
@@ -78,7 +78,7 @@ internal sealed class SqliteStatisticsRepository(SqliteConnection connection,
     }
 
     public async Task<bool> UpdateAsync(
-        IReadOnlyCollection<Statistics> entities, 
+        IReadOnlyCollection<Statistics> entities,
         CancellationToken token = default)
     {
         const string query = @$"

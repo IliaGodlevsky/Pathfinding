@@ -40,8 +40,8 @@ internal sealed class RunTableViewModelTests
         using var mock = AutoMock.GetLoose();
 
         var graph = new AwaitGraphActivatedMessage(
-            new(Graph<GraphVertexModel>.Empty, 
-                default, 
+            new(Graph<GraphVertexModel>.Empty,
+                default,
                 default,
                 GraphStatuses.Editable, 1));
         IReadOnlyCollection<RunStatisticsModel> runs = [.. Enumerable.Range(1, 5)

@@ -33,7 +33,7 @@ internal sealed class GraphAssembleViewModel : ViewModel,
     private static readonly InclusiveValueRange<int> LengthRange = (Settings.Default.MaxGraphLength, 1);
     private static readonly InclusiveValueRange<int> ObstaclesRange = (99, 0);
     private static readonly InclusiveValueRange<int> CostRange = (
-        Settings.Default.UpperValueOfCostRange, 
+        Settings.Default.UpperValueOfCostRange,
         Settings.Default.LowerValueOfCostRange);
 
     private readonly INeighborhoodLayerFactory neighborFactory;
@@ -143,14 +143,14 @@ internal sealed class GraphAssembleViewModel : ViewModel,
 
     private Layers GetLayers()
     {
-        var costLayer = new VertexCostLayer(CostRange, range 
+        var costLayer = new VertexCostLayer(CostRange, range
             => new VertexCost(Random.Shared.Next(
-                range.LowerValueOfRange, 
+                range.LowerValueOfRange,
                 range.UpperValueOfRange + 1), range));
         var obstacleLayer = new ObstacleLayer(Obstacles);
         var smoothLayer = smoothLevelFactory.CreateLayer(SmoothLevel);
         var neighborhoodLayer = neighborFactory.CreateNeighborhoodLayer(Neighborhood);
-        return new (neighborhoodLayer, costLayer, obstacleLayer, smoothLayer);
+        return new(neighborhoodLayer, costLayer, obstacleLayer, smoothLayer);
     }
 
     public void Dispose()

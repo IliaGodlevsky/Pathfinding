@@ -1,5 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
+using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
@@ -9,9 +11,7 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
-using Pathfinding.App.Console.Factories;
 using System.Reactive.Disposables;
-using Pathfinding.App.Console.Extensions;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -36,7 +36,7 @@ internal sealed class GraphUpdateViewModel : ViewModel, IDisposable
         set => this.RaiseAndSetIfChanged(ref neighborhood, value);
     }
 
-    public IReadOnlyCollection<Neighborhoods> Allowed 
+    public IReadOnlyCollection<Neighborhoods> Allowed
         => neighborFactory.Allowed;
 
     private string name;

@@ -7,7 +7,7 @@ namespace Pathfinding.App.Console.Factories.Algos;
 public sealed class BidirectLeeAlgorithmFactory : IAlgorithmFactory<BidirectLeeAlgorithm>
 {
     public BidirectLeeAlgorithm CreateAlgorithm(
-        IReadOnlyCollection<IPathfindingVertex> range, 
+        IReadOnlyCollection<IPathfindingVertex> range,
         IAlgorithmBuildInfo info)
     {
         return new(range);

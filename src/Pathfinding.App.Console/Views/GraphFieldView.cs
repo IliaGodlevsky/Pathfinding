@@ -102,7 +102,7 @@ internal sealed partial class GraphFieldView : FrameView
     }
 
     private void BindTo<T>(GraphVertexView view, T model,
-        ReactiveCommand<T, Unit> command, 
+        ReactiveCommand<T, Unit> command,
         params MouseFlags[] flags)
     {
         view.Events().MouseClick

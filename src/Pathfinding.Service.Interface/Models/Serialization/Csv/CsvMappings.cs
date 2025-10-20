@@ -91,9 +91,9 @@ internal static class CsvMappings
                 LowerValueOfRange = model.LowerValueOfRange
             },
             IsObstacle = model.IsObstacle,
-            Position = new() 
-            { 
-                Coordinate = JsonConvert.DeserializeObject<int[]>(model.Coordinate) 
+            Position = new()
+            {
+                Coordinate = JsonConvert.DeserializeObject<int[]>(model.Coordinate)
             }
         };
     }
@@ -145,7 +145,7 @@ internal static class CsvMappings
         })];
     }
 
-    public static List<PathfindingHistorySerializationModel> ToHistory(this 
+    public static List<PathfindingHistorySerializationModel> ToHistory(this
         (IEnumerable<CsvGraph> Graphs,
         IEnumerable<CsvVertex> Vertices,
         IEnumerable<CsvStatistics> Statistics,

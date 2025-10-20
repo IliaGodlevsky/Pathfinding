@@ -1,16 +1,16 @@
-﻿using System.Globalization;
-using Autofac.Features.AttributeFilters;
+﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
+using System.Globalization;
 using System.Linq.Expressions;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
-using System.Reactive.Disposables;
-using Pathfinding.App.Console.Extensions;
 
 namespace Pathfinding.App.Console.Views;
 

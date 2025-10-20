@@ -107,7 +107,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
     {
         var id = ActivatedGraphId;
         var local = Graph;
-        if ((local != Graph<GraphVertexModel>.Empty 
+        if ((local != Graph<GraphVertexModel>.Empty
             && msg.Value.Id != ActivatedGraphId) || local == Graph<GraphVertexModel>.Empty)
         {
             await ExecuteSafe(async token =>

@@ -88,7 +88,7 @@ internal sealed class RunCreateViewModel : ViewModel,
     }
 
     private StepRules? stepRule;
-    
+
     public StepRules? StepRule
     {
         get => stepRule;
@@ -221,7 +221,7 @@ internal sealed class RunCreateViewModel : ViewModel,
     private AlgorithmBuildInfo[] GetBuildInfo(double? weight)
     {
         return AppliedHeuristics.Count == 0
-            ? [new (Algorithm.Value, null, null, StepRule)]
+            ? [new(Algorithm.Value, null, null, StepRule)]
             : [.. AppliedHeuristics
                 .Where(x => x is not null)
                 .Select(x => new AlgorithmBuildInfo(Algorithm.Value, x, weight, StepRule))];

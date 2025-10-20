@@ -52,7 +52,7 @@ internal sealed class SqliteRangeRepository(SqliteConnection connection,
     }
 
     public async Task<bool> DeleteByVerticesIdsAsync(
-        IReadOnlyCollection<long> verticesIds, 
+        IReadOnlyCollection<long> verticesIds,
         CancellationToken token = default)
     {
         const string query = $"DELETE FROM {DbTables.Ranges} WHERE VertexId IN @VerticesIds";
@@ -68,12 +68,12 @@ internal sealed class SqliteRangeRepository(SqliteConnection connection,
     {
         const string query = $"SELECT * FROM {DbTables.Ranges} WHERE GraphId = @GraphId ORDER BY \"Order\"";
         var parameters = new { GraphId = graphId };
-        return Connection.QueryUnbufferedAsync<PathfindingRange>(query, 
+        return Connection.QueryUnbufferedAsync<PathfindingRange>(query,
             param: parameters, transaction: Transaction);
     }
 
     public async Task<IReadOnlyCollection<PathfindingRange>> UpsertAsync(
-        IReadOnlyCollection<PathfindingRange> entities, 
+        IReadOnlyCollection<PathfindingRange> entities,
         CancellationToken token = default)
     {
         const string updateQuery = @$"
@@ -97,7 +97,7 @@ internal sealed class SqliteRangeRepository(SqliteConnection connection,
 
         foreach (var entity in entities.Where(e => e.Id == 0))
         {
-            var command = new CommandDefinition(insertQuery, 
+            var command = new CommandDefinition(insertQuery,
                 entity, Transaction, cancellationToken: token);
             entity.Id = await Connection.ExecuteScalarAsync<int>(command)
                 .ConfigureAwait(false);

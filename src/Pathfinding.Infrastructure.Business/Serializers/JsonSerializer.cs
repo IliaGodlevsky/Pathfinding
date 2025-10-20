@@ -12,7 +12,7 @@ public sealed class JsonSerializer<T> : ISerializer<T>
     {
         try
         {
-            using var reader = new StreamReader(stream, 
+            using var reader = new StreamReader(stream,
                 Encoding.Default, false, 1024, leaveOpen: true);
             var json = await reader.ReadToEndAsync(token).ConfigureAwait(false);
             return JsonConvert.DeserializeObject<T>(json);

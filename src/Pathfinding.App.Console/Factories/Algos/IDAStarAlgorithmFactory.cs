@@ -7,7 +7,7 @@ namespace Pathfinding.App.Console.Factories.Algos;
 
 public sealed class IdaStarAlgorithmFactory(
     IStepRuleFactory stepRuleFactory,
-    IHeuristicsFactory heuristicFactory) 
+    IHeuristicsFactory heuristicFactory)
     : IAlgorithmFactory<IdaStarAlgorithm>
 {
     public IdaStarAlgorithm CreateAlgorithm(

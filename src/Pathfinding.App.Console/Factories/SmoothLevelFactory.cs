@@ -15,8 +15,8 @@ internal sealed class SmoothLevelFactory(Meta<SmoothLayer>[] layers) : ISmoothLe
 
     public SmoothLayer CreateLayer(SmoothLevels level)
     {
-        return layers.TryGetValue(level, out var value) 
-            ? value 
+        return layers.TryGetValue(level, out var value)
+            ? value
             : throw new KeyNotFoundException($"{level} was not found");
     }
 }

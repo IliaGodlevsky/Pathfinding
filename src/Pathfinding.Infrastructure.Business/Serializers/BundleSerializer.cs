@@ -7,7 +7,7 @@ namespace Pathfinding.Infrastructure.Business.Serializers;
 public sealed class BundleSerializer<T> : ISerializer<T>
     where T : IBundleSerializable, new()
 {
-    public async Task<T> DeserializeFromAsync(Stream stream, 
+    public async Task<T> DeserializeFromAsync(Stream stream,
         CancellationToken token = default)
     {
         try
@@ -23,7 +23,7 @@ public sealed class BundleSerializer<T> : ISerializer<T>
         }
     }
 
-    public async Task SerializeToAsync(T item, 
+    public async Task SerializeToAsync(T item,
         Stream stream, CancellationToken token = default)
     {
         try

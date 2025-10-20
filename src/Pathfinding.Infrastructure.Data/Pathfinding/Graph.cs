@@ -47,8 +47,8 @@ public class Graph<TVertex> : IGraph<TVertex>
 
     public TVertex Get(Coordinate coordinate)
     {
-        return vertices.TryGetValue(coordinate, out var vertex) 
-            ? vertex 
+        return vertices.TryGetValue(coordinate, out var vertex)
+            ? vertex
             : throw new KeyNotFoundException();
     }
 

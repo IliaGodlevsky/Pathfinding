@@ -16,7 +16,7 @@ public sealed class CostGreedyAlgorithm(IReadOnlyCollection<IPathfindingVertex> 
 
     protected override GraphPath GetSubPath()
     {
-        return new (
+        return new(
             Traces.ToFrozenDictionary(),
             CurrentRange.Target,
             stepRule);

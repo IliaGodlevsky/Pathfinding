@@ -66,7 +66,7 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
     }
 
     public Task<IReadOnlyDictionary<int, int>> ReadObstaclesCountAsync(
-        IReadOnlyCollection<int> graphIds, 
+        IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
         token.ThrowIfCancellationRequested();

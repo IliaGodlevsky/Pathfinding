@@ -18,11 +18,11 @@ public class DijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindi
 
     }
 
-    protected override GraphPath GetSubPath() 
+    protected override GraphPath GetSubPath()
     {
-        return new (
+        return new(
             Traces.ToFrozenDictionary(),
-            CurrentRange.Target, 
+            CurrentRange.Target,
             StepRule);
     }
 

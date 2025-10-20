@@ -11,9 +11,6 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using System.Reactive.Linq;
-using Pathfinding.App.Console.Factories;
-using Pathfinding.Domain.Core.Enums;
-using Pathfinding.Infrastructure.Business.Layers;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 
