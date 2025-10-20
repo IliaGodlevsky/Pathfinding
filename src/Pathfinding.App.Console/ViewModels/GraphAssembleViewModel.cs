@@ -21,7 +21,7 @@ using System.Reactive;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class GraphAssembleViewModel : BaseViewModel,
+internal sealed class GraphAssembleViewModel : ViewModel,
     IGraphAssembleViewModel,
     IRequireGraphNameViewModel,
     IRequireGraphParametresViewModel,

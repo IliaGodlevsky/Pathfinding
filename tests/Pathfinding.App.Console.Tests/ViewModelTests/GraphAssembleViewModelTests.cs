@@ -46,11 +46,11 @@ internal class GraphAssembleViewModelTests
             .Returns(new SmoothLayer(0));
         mock.Mock<INeighborhoodLayerFactory>()
             .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
-            .Returns(new Layers());
+            .Returns(new MooreNeighborhoodLayer());
 
         mock.Mock<INeighborhoodLayerFactory>()
             .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
-            .Returns(new Layers());
+            .Returns(new MooreNeighborhoodLayer());
         mock.Mock<ISmoothLevelFactory>()
             .Setup(x => x.CreateLayer(It.IsAny<SmoothLevels>()))
             .Returns(new SmoothLayer(0));

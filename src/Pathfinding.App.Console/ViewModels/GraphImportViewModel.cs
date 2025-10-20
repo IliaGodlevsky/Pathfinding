@@ -15,7 +15,7 @@ using System.Reactive;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class GraphImportViewModel : BaseViewModel, IGraphImportViewModel
+internal sealed class GraphImportViewModel : ViewModel, IGraphImportViewModel
 {
     private readonly Dictionary<StreamFormat, Serializer> serializers;
     private readonly IRequestService<GraphVertexModel> service;

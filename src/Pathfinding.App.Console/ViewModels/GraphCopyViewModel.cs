@@ -13,7 +13,7 @@ using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class GraphCopyViewModel : BaseViewModel, IGraphCopyViewModel, IDisposable
+internal sealed class GraphCopyViewModel : ViewModel, IGraphCopyViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly IRequestService<GraphVertexModel> service;

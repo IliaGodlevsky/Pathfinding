@@ -18,11 +18,8 @@ internal sealed class AlgorithmsFactory(Meta<IAlgorithmFactory<PathfindingProces
 
     public IAlgorithmFactory<PathfindingProcess> GetAlgorithmFactory(Algorithms algorithm)
     {
-        if (algorithms.TryGetValue(algorithm, out var value))
-        {
-            return value;
-        }
-
-        throw new KeyNotFoundException($"{algorithm} was not found");
+        return algorithms.TryGetValue(algorithm, out var value) 
+            ? value 
+            : throw new KeyNotFoundException($"{algorithm} was not found");
     }
 }

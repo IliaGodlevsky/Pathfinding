@@ -235,5 +235,14 @@ namespace Pathfinding.App.Console {
                 return ((float)(this["FractionPerClick"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Production")]
+        public string Environment {
+            get {
+                return ((string)(this["Environment"]));
+            }
+        }
     }
 }

@@ -9,18 +9,20 @@ internal static class MessengerExtensions
 {
     private sealed class UnregisterAdapter(Action handler) : IDisposable
     {
-        public static UnregisterAdapter New<TMessage, TToken>(IMessenger messenger,
+        public static IDisposable New<TMessage, TToken>(IMessenger messenger,
             object recipient, TToken token)
             where TMessage : class
             where TToken : IEquatable<TToken>
         {
-            return new(() => messenger.Unregister<TMessage, TToken>(recipient, token));
+            return new UnregisterAdapter(() 
+                => messenger.Unregister<TMessage, TToken>(recipient, token));
         }
 
-        public static UnregisterAdapter New<TMessage>(IMessenger messenger, object recipient)
+        public static IDisposable New<TMessage>(IMessenger messenger, object recipient)
             where TMessage : class
         {
-            return new(() => messenger.Unregister<TMessage>(recipient));
+            return new UnregisterAdapter(() 
+                => messenger.Unregister<TMessage>(recipient));
         }
 
         public void Dispose() => handler();

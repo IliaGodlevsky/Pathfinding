@@ -23,6 +23,7 @@ using static Pathfinding.App.Console.Models.RunModel;
 
 namespace Pathfinding.App.Console.ViewModels;
 
+[ViewModel]
 internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, IDisposable
 {
     private readonly IMessenger messenger;

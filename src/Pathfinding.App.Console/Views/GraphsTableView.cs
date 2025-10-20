@@ -23,7 +23,8 @@ internal sealed partial class GraphsTableView
     public GraphsTableView(IGraphTableViewModel viewModel,
         [KeyFilter(KeyFilters.Views)] IMessenger messenger) : this()
     {
-        viewModel.Graphs.ActOnEveryObject(AddToTable, RemoveFromTable).DisposeWith(disposables);
+        viewModel.Graphs.ActOnEveryObject(AddToTable, 
+            RemoveFromTable).DisposeWith(disposables);
         this.Events().Initialized
             .Select(_ => Unit.Default)
             .InvokeCommand(viewModel, x => x.LoadGraphsCommand)

@@ -1,9 +1,11 @@
-﻿using Pathfinding.Logging.Interface;
+﻿using Pathfinding.App.Console.Injection;
+using Pathfinding.Logging.Interface;
 using ReactiveUI;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal abstract class BaseViewModel(ILog log) : ReactiveObject
+[ViewModel]
+internal abstract class ViewModel(ILog log) : ReactiveObject
 {
     protected readonly ILog log = log;
 

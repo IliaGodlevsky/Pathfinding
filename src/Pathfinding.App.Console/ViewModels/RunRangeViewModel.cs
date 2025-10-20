@@ -29,7 +29,7 @@ using System.Reactive.Linq;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class RunRangeViewModel : BaseViewModel,
+internal sealed class RunRangeViewModel : ViewModel,
     IPathfindingRange<GraphVertexModel>, IRunRangeViewModel, IDisposable
 {
     private readonly CompositeDisposable disposables = [];

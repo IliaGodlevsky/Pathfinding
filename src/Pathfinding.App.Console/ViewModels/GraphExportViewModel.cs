@@ -18,7 +18,7 @@ using System.Reactive.Disposables;
 namespace Pathfinding.App.Console.ViewModels;
 
 internal sealed class GraphExportViewModel 
-    : BaseViewModel, IGraphExportViewModel, IDisposable
+    : ViewModel, IGraphExportViewModel, IDisposable
 {
     private readonly IReadHistoryOptions options;
     private readonly Dictionary<StreamFormat, Serializer> serializers;

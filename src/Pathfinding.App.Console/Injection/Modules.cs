@@ -25,6 +25,7 @@ using Pathfinding.Logging.Loggers;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Serialization;
 using Terminal.Gui;
+using Attribute = System.Attribute;
 
 namespace Pathfinding.App.Console.Injection;
 
@@ -95,13 +96,13 @@ internal static class Modules
             .WithMetadata(MetadataKeys.Heuristics, Heuristics.Manhattan);
         builder.RegisterType<HeuristicsFactory>().As<IHeuristicsFactory>().SingleInstance();
 
-        builder.RegisterType<MooreNeighborhoodLayer>().Keyed<ILayer>(KeyFilters.Neighborhoods)
+        builder.RegisterType<MooreNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Moore);
-        builder.RegisterType<VonNeumannNeighborhoodLayer>().Keyed<ILayer>(KeyFilters.Neighborhoods)
+        builder.RegisterType<VonNeumannNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.VonNeumann);
-        builder.RegisterType<DiagonalNeighborhoodLayer>().Keyed<ILayer>(KeyFilters.Neighborhoods)
+        builder.RegisterType<DiagonalNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Diagonal);
-        builder.RegisterType<KnightsNeighborhoodLayer>().Keyed<ILayer>(KeyFilters.Neighborhoods)
+        builder.RegisterType<KnightsNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Knight);
         builder.RegisterType<NeighborhoodLayerFactory>().As<INeighborhoodLayerFactory>()
             .WithAttributeFiltering().SingleInstance();
@@ -164,14 +165,14 @@ internal static class Modules
         builder.RegisterType<MessageBoxLog>().As<ILog>().SingleInstance();
         builder.RegisterComposite<Logs, ILog>().As<ILog>().SingleInstance();
 
-        builder.RegisterType<WeakReferenceMessenger>().Keyed<IMessenger>(KeyFilters.Views)
+        builder.RegisterType<StrongReferenceMessenger>().Keyed<IMessenger>(KeyFilters.Views)
             .SingleInstance().WithAttributeFiltering();
-        builder.RegisterType<WeakReferenceMessenger>().Keyed<IMessenger>(KeyFilters.ViewModels)
+        builder.RegisterType<StrongReferenceMessenger>().Keyed<IMessenger>(KeyFilters.ViewModels)
             .SingleInstance().WithAttributeFiltering();
 
-        builder.RegisterAssemblyTypes(typeof(BaseViewModel).Assembly)
-            .SingleInstance().Where(x => x.Name.EndsWith("ViewModel")).AsSelf()
-            .AsImplementedInterfaces().WithAttributeFiltering();
+        builder.RegisterAssemblyTypes(typeof(ViewModel).Assembly)
+            .Where(x => Attribute.IsDefined(x, typeof(ViewModelAttribute)))
+            .SingleInstance().AsSelf().AsImplementedInterfaces().WithAttributeFiltering();
 
         builder.RegisterType<MainView>().AsSelf().WithAttributeFiltering();
 

@@ -87,7 +87,7 @@ internal sealed class GraphTableViewModelTests
             .Returns(Task.FromResult(graph));
         mock.Mock<INeighborhoodLayerFactory>()
             .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
-            .Returns(new Layers());
+            .Returns(new MooreNeighborhoodLayer());
         mock.Mock<IMessenger>()
             .Setup(x => x.Send(It.IsAny<AwaitGraphActivatedMessage>(),
                 It.IsAny<IsAnyToken>()))
@@ -96,7 +96,7 @@ internal sealed class GraphTableViewModelTests
 
         mock.Mock<INeighborhoodLayerFactory>()
             .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
-            .Returns(new Layers());
+            .Returns(new MooreNeighborhoodLayer());
 
         var viewModel = mock.Create<GraphTableViewModel>();
 

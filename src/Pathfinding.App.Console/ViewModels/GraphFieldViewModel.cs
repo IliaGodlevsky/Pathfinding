@@ -20,7 +20,7 @@ using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class GraphFieldViewModel : BaseViewModel, IGraphFieldViewModel, IDisposable
+internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly IRequestService<GraphVertexModel> service;

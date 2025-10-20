@@ -13,7 +13,7 @@ using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class RunDeleteViewModel : BaseViewModel, IRunDeleteViewModel, IDisposable
+internal sealed class RunDeleteViewModel : ViewModel, IRunDeleteViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly IRequestService<GraphVertexModel> service;

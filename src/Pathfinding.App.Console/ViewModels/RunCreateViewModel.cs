@@ -31,7 +31,7 @@ using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class RunCreateViewModel : BaseViewModel,
+internal sealed class RunCreateViewModel : ViewModel,
     IRunCreateViewModel,
     IRequireHeuristicsViewModel,
     IRequireStepRuleViewModel,
@@ -292,8 +292,7 @@ internal sealed class RunCreateViewModel : BaseViewModel,
             }
             await ExecuteSafe(async () =>
             {
-                var timeout = GetTimeout() * list.Count;
-                using var cts = new CancellationTokenSource(timeout);
+                using var cts = new CancellationTokenSource(GetTimeout(list.Count));
                 var result = await service.CreateStatisticsAsync(list, cts.Token)
                     .ConfigureAwait(false);
                 messenger.Send(new RunsCreatedMessaged([.. result]));

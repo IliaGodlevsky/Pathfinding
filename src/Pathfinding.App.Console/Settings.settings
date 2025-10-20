@@ -59,5 +59,8 @@
     <Setting Name="FractionPerClick" Type="System.Single" Scope="Application">
       <Value Profile="(Default)">0.015</Value>
     </Setting>
+    <Setting Name="Environment" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Production</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

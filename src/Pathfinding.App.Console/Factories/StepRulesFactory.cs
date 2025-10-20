@@ -15,11 +15,8 @@ public sealed class StepRulesFactory(IEnumerable<Meta<IStepRule>> stepRules) : I
 
     public IStepRule CreateStepRule(StepRules stepRule)
     {
-        if (stepRules.TryGetValue(stepRule, out var value))
-        {
-            return value;
-        }
-
-        throw new KeyNotFoundException($"{stepRule} was not found");
+        return stepRules.TryGetValue(stepRule, out var value) 
+            ? value 
+            : throw new KeyNotFoundException($"{stepRule} was not found");
     }
 }

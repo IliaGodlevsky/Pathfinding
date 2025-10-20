@@ -15,7 +15,7 @@ using Pathfinding.App.Console.Extensions;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class GraphUpdateViewModel : BaseViewModel, IDisposable
+internal sealed class GraphUpdateViewModel : ViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly INeighborhoodLayerFactory neighborFactory;

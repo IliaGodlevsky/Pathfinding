@@ -18,7 +18,7 @@ using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class GraphTableViewModel : BaseViewModel, IGraphTableViewModel, IDisposable
+internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDisposable
 {
     private readonly IRequestService<GraphVertexModel> service;
     private readonly INeighborhoodLayerFactory neighborFactory;

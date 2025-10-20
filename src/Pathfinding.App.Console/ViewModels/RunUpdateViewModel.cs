@@ -21,7 +21,7 @@ using System.Reactive.Disposables;
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class RunUpdateViewModel : BaseViewModel, IRunUpdateViewModel, IDisposable
+internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly IRequestService<GraphVertexModel> service;
