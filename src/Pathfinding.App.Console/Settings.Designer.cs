@@ -163,7 +163,7 @@ namespace Pathfinding.App.Console {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("51")]
+        [global::System.Configuration.DefaultSettingValueAttribute("52")]
         public int MaxGraphWidth {
             get {
                 return ((int)(this["MaxGraphWidth"]));
@@ -172,7 +172,7 @@ namespace Pathfinding.App.Console {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("48")]
+        [global::System.Configuration.DefaultSettingValueAttribute("51")]
         public int MaxGraphLength {
             get {
                 return ((int)(this["MaxGraphLength"]));
