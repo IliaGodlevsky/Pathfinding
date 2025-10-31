@@ -97,6 +97,15 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Beam search.
+        /// </summary>
+        internal static string BeamSearch {
+            get {
+                return ResourceManager.GetString("BeamSearch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bidirect A*.
         /// </summary>
         internal static string BidirectAStar {
