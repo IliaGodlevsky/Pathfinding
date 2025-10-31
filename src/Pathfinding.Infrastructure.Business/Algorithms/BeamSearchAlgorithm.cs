@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Pathfinding.Infrastructure.Business.Algorithms.Exceptions;
 using Pathfinding.Infrastructure.Business.Algorithms.Heuristics;
 using Pathfinding.Service.Interface;
@@ -9,16 +7,11 @@ namespace Pathfinding.Infrastructure.Business.Algorithms;
 
 public sealed class BeamSearchAlgorithm(
     IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
-    IHeuristic heuristic,
-    int beamWidth = DefaultBeamWidth)
+    IHeuristic heuristic)
     : WaveAlgorithm<List<BeamSearchAlgorithm.BeamEntry>>(pathfindingRange)
 {
-    private const int DefaultBeamWidth = 10;
-
     private readonly IHeuristic heuristicFunction = heuristic ?? throw new ArgumentNullException(nameof(heuristic));
-    private readonly int beamWidthLimit = beamWidth > 0
-        ? beamWidth
-        : throw new ArgumentOutOfRangeException(nameof(beamWidth));
+    private readonly int beamWidthLimit = 10;
 
     private readonly Dictionary<Coordinate, double> frontierPriorities = [];
 
@@ -113,5 +106,5 @@ public sealed class BeamSearchAlgorithm(
         return left.Priority.CompareTo(right.Priority);
     }
 
-    private readonly record struct BeamEntry(IPathfindingVertex Vertex, double Priority);
+    public readonly record struct BeamEntry(IPathfindingVertex Vertex, double Priority);
 }
