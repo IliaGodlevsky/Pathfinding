@@ -129,6 +129,9 @@
   <data name="AStarLee" xml:space="preserve">
     <value>A* Lee</value>
   </data>
+  <data name="BeamSearch" xml:space="preserve">
+    <value>Beam search</value>
+  </data>
   <data name="BidirectAStar" xml:space="preserve">
     <value>Bidirect A*</value>
   </data>

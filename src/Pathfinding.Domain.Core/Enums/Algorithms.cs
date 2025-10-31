@@ -19,5 +19,6 @@ public enum Algorithms
     Random = 12,
     BidirectRandom = 13,
     DepthFirstRandom = 14,
-    IdaStar = 15
+    IdaStar = 15,
+    BeamSearch = 16
 }
