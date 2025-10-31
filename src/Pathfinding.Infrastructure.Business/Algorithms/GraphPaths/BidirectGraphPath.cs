@@ -4,7 +4,9 @@ using Pathfinding.Infrastructure.Data.Extensions;
 using Pathfinding.Service.Interface;
 using Pathfinding.Shared.Primitives;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
 
@@ -51,28 +53,37 @@ public sealed class BidirectGraphPath : IGraphPath
 
     private ReadOnlyCollection<IPathfindingVertex> GetPath()
     {
-        var vertices = new HashSet<IPathfindingVertex>();
+        var forwardPath = new List<IPathfindingVertex>
+        {
+            intersection
+        };
         var vertex = intersection;
-        vertices.Add(vertex);
         var parent = forwardTraces.GetOrNullVertex(vertex.Position);
         while (parent.IsNeighbor(vertex))
         {
-            vertices.Add(parent);
+            forwardPath.Add(parent);
             vertex = parent;
             parent = forwardTraces.GetOrNullVertex(vertex.Position);
         }
+        forwardPath.Reverse();
+
+        var backwardPath = new List<IPathfindingVertex>
+        {
+            intersection
+        };
         vertex = intersection;
         parent = backwardTraces.GetOrNullVertex(vertex.Position);
-        var backward = new HashSet<IPathfindingVertex>();
         while (parent.IsNeighbor(vertex))
         {
-            backward.Add(parent);
+            backwardPath.Add(parent);
             vertex = parent;
             parent = backwardTraces.GetOrNullVertex(vertex.Position);
         }
-        backward.Add(vertex);
-        return backward.Reverse()
-            .Concat(vertices).ToList().AsReadOnly();
+
+        return forwardPath
+            .Concat(backwardPath.Skip(1))
+            .ToList()
+            .AsReadOnly();
     }
 
     private double GetCost()
