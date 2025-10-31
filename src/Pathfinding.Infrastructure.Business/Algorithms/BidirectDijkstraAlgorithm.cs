@@ -2,8 +2,10 @@
 using Pathfinding.Infrastructure.Business.Algorithms.StepRules;
 using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Service.Interface;
+using Pathfinding.Shared.Primitives;
 using Priority_Queue;
 using System.Collections.Frozen;
+using System.Collections.Generic;
 
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
@@ -11,6 +13,11 @@ public class BidirectDijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> p
     IStepRule stepRule) : BidirectWaveAlgorithm<SimplePriorityQueue<IPathfindingVertex, double>>(pathfindingRange)
 {
     protected readonly IStepRule StepRule = stepRule;
+
+    private readonly Dictionary<Coordinate, double> forwardCosts = [];
+    private readonly Dictionary<Coordinate, double> backwardCosts = [];
+
+    private double bestPathCost = double.PositiveInfinity;
 
     public BidirectDijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
         : this(pathfindingRange, new DefaultStepRule())
@@ -23,6 +30,9 @@ public class BidirectDijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> p
         base.PrepareForSubPathfinding(range);
         ForwardStorage.EnqueueOrUpdatePriority(Range.Source, 0);
         BackwardStorage.EnqueueOrUpdatePriority(Range.Target, 0);
+        forwardCosts[Range.Source.Position] = 0;
+        backwardCosts[Range.Target.Position] = 0;
+        bestPathCost = double.PositiveInfinity;
     }
 
     protected override BidirectGraphPath GetSubPath()
@@ -39,6 +49,9 @@ public class BidirectDijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> p
         base.DropState();
         ForwardStorage.Clear();
         BackwardStorage.Clear();
+        forwardCosts.Clear();
+        backwardCosts.Clear();
+        bestPathCost = double.PositiveInfinity;
     }
 
     protected override void MoveNextVertex()
@@ -55,6 +68,7 @@ public class BidirectDijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> p
         if (vertexCost > relaxedCost)
         {
             EnqueueForward(vertex, relaxedCost);
+            forwardCosts[vertex.Position] = relaxedCost;
             SetForwardIntersection(vertex);
             ForwardTraces[vertex.Position] = Current.Source;
         }
@@ -67,9 +81,39 @@ public class BidirectDijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> p
         if (vertexCost > relaxedCost)
         {
             EnqueueBackward(vertex, relaxedCost);
+            backwardCosts[vertex.Position] = relaxedCost;
             SetBackwardIntersections(vertex);
             BackwardTraces[vertex.Position] = Current.Target;
         }
+    }
+
+    protected override void SetForwardIntersection(IPathfindingVertex vertex)
+    {
+        if (BackwardVisited.Contains(vertex))
+        {
+            TryUpdateBestPath(vertex);
+        }
+    }
+
+    protected override void SetBackwardIntersections(IPathfindingVertex vertex)
+    {
+        if (ForwardVisited.Contains(vertex))
+        {
+            TryUpdateBestPath(vertex);
+        }
+    }
+
+    protected override bool IsDestination()
+    {
+        if (double.IsPositiveInfinity(bestPathCost))
+        {
+            return false;
+        }
+
+        var forwardFrontier = GetFrontierCost(ForwardStorage, forwardCosts);
+        var backwardFrontier = GetFrontierCost(BackwardStorage, backwardCosts);
+
+        return forwardFrontier + backwardFrontier >= bestPathCost;
     }
 
     protected virtual void EnqueueForward(IPathfindingVertex vertex, double value)
@@ -84,12 +128,12 @@ public class BidirectDijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> p
 
     protected virtual double GetForwardVertexCurrentCost(IPathfindingVertex vertex)
     {
-        return ForwardStorage.GetPriorityOrInfinity(vertex);
+        return forwardCosts.GetValueOrDefault(vertex.Position, double.PositiveInfinity);
     }
 
     protected virtual double GetBackwardVertexCurrentCost(IPathfindingVertex vertex)
     {
-        return BackwardStorage.GetPriorityOrInfinity(vertex);
+        return backwardCosts.GetValueOrDefault(vertex.Position, double.PositiveInfinity);
     }
 
     protected virtual double GetForwardVertexRelaxedCost(IPathfindingVertex neighbour)
@@ -114,5 +158,30 @@ public class BidirectDijkstraAlgorithm(IReadOnlyCollection<IPathfindingVertex> p
     {
         base.RelaxBackwardNeighbours(vertices);
         BackwardStorage.TryRemove(Current.Target);
+    }
+
+    private void TryUpdateBestPath(IPathfindingVertex vertex)
+    {
+        if (!forwardCosts.TryGetValue(vertex.Position, out var forwardCost)
+            || !backwardCosts.TryGetValue(vertex.Position, out var backwardCost))
+        {
+            return;
+        }
+
+        var totalCost = forwardCost + backwardCost;
+        if (totalCost < bestPathCost)
+        {
+            bestPathCost = totalCost;
+            Intersection = vertex;
+        }
+    }
+
+    private static double GetFrontierCost(
+        SimplePriorityQueue<IPathfindingVertex, double> storage,
+        IReadOnlyDictionary<Coordinate, double> costs)
+    {
+        return storage.TryFirst(out var vertex)
+            ? costs.GetValueOrDefault(vertex.Position, storage.GetPriorityOrInfinity(vertex))
+            : double.PositiveInfinity;
     }
 }
