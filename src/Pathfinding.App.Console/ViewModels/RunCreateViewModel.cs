@@ -229,79 +229,113 @@ internal sealed class RunCreateViewModel : ViewModel,
 
     private async Task CreateAlgorithm()
     {
-        var rangeMessage = new PathfindingRangeRequestMessage();
-        messenger.Send(rangeMessage);
-        var range = rangeMessage.Response;
-
-        if (range.Length > 1)
-        {
-            int visitedCount = 0;
-            void OnVertexProcessed(EventArgs e) => visitedCount++;
-            var status = RunStatuses.Success;
-            double from = FromWeight ?? 0;
-            double to = ToWeight ?? 0;
-            double weightStep = Step ?? 1;
-            int limit = Step == 0 ? 0 : (int)Math.Ceiling((to - from) / weightStep);
-            var list = new List<CreateStatisticsRequest>();
-            for (int i = 0; i <= limit; i++)
-            {
-                double val = from + weightStep * i;
-                double? weight = val == 0 ? null : Math.Round(val, 2);
-                foreach (var buildInfo in GetBuildInfo(weight))
-                {
-                    visitedCount = 0;
-                    var factory = algorithmsFactory.GetAlgorithmFactory(buildInfo.Algorithm);
-                    var algo = factory.CreateAlgorithm(range, buildInfo);
-                    algo.VertexProcessed += OnVertexProcessed;
-                    var path = NullGraphPath.Interface;
-                    var stopwatch = Stopwatch.StartNew();
-                    try
-                    {
-                        path = algo.FindPath();
-                    }
-                    catch (PathfindingException ex)
-                    {
-                        status = RunStatuses.Failure;
-                        log.Warn(ex);
-                    }
-                    catch (Exception ex)
-                    {
-                        status = RunStatuses.Failure;
-                        log.Error(ex);
-                    }
-                    finally
-                    {
-                        stopwatch.Stop();
-                        algo.VertexProcessed -= OnVertexProcessed;
-                    }
-
-                    list.Add(new()
-                    {
-                        Algorithm = buildInfo.Algorithm,
-                        Cost = path.Cost,
-                        Steps = path.Count,
-                        StepRule = buildInfo.StepRule,
-                        Heuristics = buildInfo.Heuristics,
-                        Weight = buildInfo.Weight,
-                        Visited = visitedCount,
-                        Elapsed = stopwatch.Elapsed,
-                        ResultStatus = status,
-                        GraphId = ActivatedGraphId
-                    });
-                }
-            }
-            await ExecuteSafe(async () =>
-            {
-                using var cts = new CancellationTokenSource(GetTimeout(list.Count));
-                var result = await service.CreateStatisticsAsync(list, cts.Token)
-                    .ConfigureAwait(false);
-                messenger.Send(new RunsCreatedMessaged([.. result]));
-            }).ConfigureAwait(false);
-        }
-        else
+        var range = RequestRange();
+        if (!IsRangeValid(range))
         {
             log.Info(Resource.RangeIsNotSetMsg);
+            return;
         }
+
+        var statistics = BuildStatistics(range);
+
+        await ExecuteSafe(async () =>
+        {
+            using var cts = new CancellationTokenSource(GetTimeout(statistics.Count));
+            var result = await service.CreateStatisticsAsync(statistics, cts.Token)
+                .ConfigureAwait(false);
+            messenger.Send(new RunsCreatedMessaged([.. result]));
+        }).ConfigureAwait(false);
+    }
+
+    private GraphVertexModel[] RequestRange()
+    {
+        var rangeMessage = new PathfindingRangeRequestMessage();
+        messenger.Send(rangeMessage);
+        return rangeMessage.Response;
+    }
+
+    private static bool IsRangeValid(GraphVertexModel[] range)
+    {
+        return range.Length > 1;
+    }
+
+    private IReadOnlyCollection<CreateStatisticsRequest> BuildStatistics(GraphVertexModel[] range)
+    {
+        var requests = new List<CreateStatisticsRequest>();
+        var status = RunStatuses.Success;
+        foreach (var weight in EnumerateWeights())
+        {
+            foreach (var buildInfo in GetBuildInfo(weight))
+            {
+                requests.Add(CreateStatistics(range, buildInfo, ref status));
+            }
+        }
+
+        return requests;
+    }
+
+    private IEnumerable<double?> EnumerateWeights()
+    {
+        double from = FromWeight ?? 0;
+        double to = ToWeight ?? 0;
+        double weightStep = Step ?? 1;
+        int limit = Step == 0 ? 0 : (int)Math.Ceiling((to - from) / weightStep);
+
+        for (int i = 0; i <= limit; i++)
+        {
+            double val = from + weightStep * i;
+            yield return val == 0 ? null : Math.Round(val, 2);
+        }
+    }
+
+    private CreateStatisticsRequest CreateStatistics(
+        GraphVertexModel[] range,
+        AlgorithmBuildInfo buildInfo,
+        ref RunStatuses status)
+    {
+        int visitedCount = 0;
+        void OnVertexProcessed(EventArgs e) => visitedCount++;
+
+        var factory = algorithmsFactory.GetAlgorithmFactory(buildInfo.Algorithm);
+        var algo = factory.CreateAlgorithm(range, buildInfo);
+        algo.VertexProcessed += OnVertexProcessed;
+
+        var path = NullGraphPath.Interface;
+        var stopwatch = Stopwatch.StartNew();
+
+        try
+        {
+            path = algo.FindPath();
+        }
+        catch (PathfindingException ex)
+        {
+            status = RunStatuses.Failure;
+            log.Warn(ex);
+        }
+        catch (Exception ex)
+        {
+            status = RunStatuses.Failure;
+            log.Error(ex);
+        }
+        finally
+        {
+            stopwatch.Stop();
+            algo.VertexProcessed -= OnVertexProcessed;
+        }
+
+        return new CreateStatisticsRequest
+        {
+            Algorithm = buildInfo.Algorithm,
+            Cost = path.Cost,
+            Steps = path.Count,
+            StepRule = buildInfo.StepRule,
+            Heuristics = buildInfo.Heuristics,
+            Weight = buildInfo.Weight,
+            Visited = visitedCount,
+            Elapsed = stopwatch.Elapsed,
+            ResultStatus = status,
+            GraphId = ActivatedGraphId
+        };
     }
 
     private static InclusiveValueRange<double> GetWeightRange()
