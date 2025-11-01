@@ -36,13 +36,15 @@ internal sealed class RunCreateViewModel : ViewModel,
     IRequireHeuristicsViewModel,
     IRequireStepRuleViewModel,
     IRequirePopulationViewModel,
+    IRequireBeamWidthViewModel,
     IDisposable
 {
     private sealed record AlgorithmBuildInfo(
         Algorithms Algorithm,
         Heuristics? Heuristics,
         double? Weight,
-        StepRules? StepRule) : IAlgorithmBuildInfo;
+        StepRules? StepRule,
+        int? BeamWidth) : IAlgorithmBuildInfo;
 
     private readonly IRequestService<GraphVertexModel> service;
     private readonly IMessenger messenger;
@@ -95,6 +97,13 @@ internal sealed class RunCreateViewModel : ViewModel,
         set => this.RaiseAndSetIfChanged(ref stepRule, value);
     }
 
+    private int? beamWidth;
+    public int? BeamWidth
+    {
+        get => beamWidth;
+        set => this.RaiseAndSetIfChanged(ref beamWidth, value);
+    }
+
     private int ActivatedGraphId { get; set; }
 
     private Graph<GraphVertexModel> graph = Graph<GraphVertexModel>.Empty;
@@ -130,11 +139,16 @@ internal sealed class RunCreateViewModel : ViewModel,
             x => x.Graph, x => x.AppliedHeuristics.Count,
             x => x.FromWeight, x => x.ToWeight,
             x => x.Step, x => x.Algorithm,
-            (g, count, weight, to, s, algo) =>
+            x => x.BeamWidth,
+            (g, count, weight, to, s, algo, beamWidth) =>
             {
                 var canExecute = g != Graph<GraphVertexModel>.Empty
                     && algo != null
                     && Enum.IsDefined(algo.Value);
+                if (algo == Algorithms.BeamSearch)
+                {
+                    canExecute = canExecute && beamWidth is > 0;
+                }
                 if (count > 0)
                 {
                     canExecute = canExecute && count > 1;
@@ -220,11 +234,12 @@ internal sealed class RunCreateViewModel : ViewModel,
 
     private AlgorithmBuildInfo[] GetBuildInfo(double? weight)
     {
+        var beamWidth = BeamWidth;
         return AppliedHeuristics.Count == 0
-            ? [new(Algorithm.Value, null, null, StepRule)]
+            ? [new(Algorithm.Value, null, null, StepRule, beamWidth)]
             : [.. AppliedHeuristics
                 .Where(x => x is not null)
-                .Select(x => new AlgorithmBuildInfo(Algorithm.Value, x, weight, StepRule))];
+                .Select(x => new AlgorithmBuildInfo(Algorithm.Value, x, weight, StepRule, beamWidth))];
     }
 
     private async Task CreateAlgorithm()

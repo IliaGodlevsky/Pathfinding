@@ -16,6 +16,8 @@ public record RunStatisticsModel : IAlgorithmBuildInfo
 
     public StepRules? StepRule { get; set; } = null;
 
+    public int? BeamWidth { get; set; } = null;
+
     public int Visited { get; set; }
 
     public RunStatuses ResultStatus { get; set; }

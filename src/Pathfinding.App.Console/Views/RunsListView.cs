@@ -44,6 +44,7 @@ internal sealed partial class RunsListView : FrameView
                         messenger.Send(new OpenStepRuleViewMessage());
                         messenger.Send(new OpenRunsPopulateViewMessage());
                         messenger.Send(new OpenHeuristicsViewMessage());
+                        messenger.Send(new CloseBeamWidthViewMessage());
                         break;
                     case Algorithms.Dijkstra:
                     case Algorithms.BidirectDijkstra:
@@ -51,18 +52,26 @@ internal sealed partial class RunsListView : FrameView
                         messenger.Send(new OpenStepRuleViewMessage());
                         messenger.Send(new CloseRunPopulateViewMessage());
                         messenger.Send(new CloseHeuristicsViewMessage());
+                        messenger.Send(new CloseBeamWidthViewMessage());
                         break;
                     case Algorithms.DistanceFirst:
                     case Algorithms.AStarLee:
+                        messenger.Send(new CloseStepRulesViewMessage());
+                        messenger.Send(new CloseRunPopulateViewMessage());
+                        messenger.Send(new OpenHeuristicsViewMessage());
+                        messenger.Send(new CloseBeamWidthViewMessage());
+                        break;
                     case Algorithms.BeamSearch:
                         messenger.Send(new CloseStepRulesViewMessage());
                         messenger.Send(new CloseRunPopulateViewMessage());
                         messenger.Send(new OpenHeuristicsViewMessage());
+                        messenger.Send(new OpenBeamWidthViewMessage());
                         break;
                     default:
                         messenger.Send(new CloseStepRulesViewMessage());
                         messenger.Send(new CloseRunPopulateViewMessage());
                         messenger.Send(new CloseHeuristicsViewMessage());
+                        messenger.Send(new CloseBeamWidthViewMessage());
                         break;
                 }
             })

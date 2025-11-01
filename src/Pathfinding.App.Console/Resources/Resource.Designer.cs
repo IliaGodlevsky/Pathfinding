@@ -104,7 +104,16 @@ namespace Pathfinding.App.Console.Resources {
                 return ResourceManager.GetString("BeamSearch", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Beam width.
+        /// </summary>
+        internal static string BeamWidth {
+            get {
+                return ResourceManager.GetString("BeamWidth", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Bidirect A*.
         /// </summary>

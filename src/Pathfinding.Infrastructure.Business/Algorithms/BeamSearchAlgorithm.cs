@@ -7,16 +7,30 @@ namespace Pathfinding.Infrastructure.Business.Algorithms;
 
 public sealed class BeamSearchAlgorithm(
     IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
-    IHeuristic heuristic)
+    IHeuristic heuristic,
+    int beamWidth = DefaultBeamWidth)
     : WaveAlgorithm<List<BeamSearchAlgorithm.BeamEntry>>(pathfindingRange)
 {
+    public const int DefaultBeamWidth = 10;
+
     private readonly IHeuristic heuristicFunction = heuristic ?? throw new ArgumentNullException(nameof(heuristic));
-    private readonly int beamWidthLimit = 10;
+    private readonly int beamWidthLimit = beamWidth > 0
+        ? beamWidth
+        : throw new ArgumentOutOfRangeException(nameof(beamWidth));
 
     private readonly Dictionary<Coordinate, double> frontierPriorities = [];
 
-    public BeamSearchAlgorithm(IReadOnlyCollection<IPathfindingVertex> pathfindingRange)
-        : this(pathfindingRange, new ManhattanDistance())
+    public BeamSearchAlgorithm(
+        IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
+        int beamWidthLimit = DefaultBeamWidth)
+        : this(pathfindingRange, new ManhattanDistance(), beamWidthLimit)
+    {
+    }
+
+    public BeamSearchAlgorithm(
+        IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
+        IHeuristic heuristic)
+        : this(pathfindingRange, heuristic, DefaultBeamWidth)
     {
     }
 
