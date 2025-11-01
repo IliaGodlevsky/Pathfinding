@@ -7,11 +7,14 @@ namespace Pathfinding.Infrastructure.Business.Algorithms;
 
 public sealed class BeamSearchAlgorithm(
     IReadOnlyCollection<IPathfindingVertex> pathfindingRange,
-    IHeuristic heuristic)
+    IHeuristic heuristic,
+    double beamWidthPercentage = DefaultBeamWidthPercentage)
     : WaveAlgorithm<List<BeamSearchAlgorithm.BeamEntry>>(pathfindingRange)
 {
+    public const double DefaultBeamWidthPercentage = 10;
+
     private readonly IHeuristic heuristicFunction = heuristic ?? throw new ArgumentNullException(nameof(heuristic));
-    private readonly int beamWidthLimit = 10;
+    private readonly double beamWidthFraction = ValidateBeamWidth(beamWidthPercentage);
 
     private readonly Dictionary<Coordinate, double> frontierPriorities = [];
 
@@ -80,6 +83,12 @@ public sealed class BeamSearchAlgorithm(
 
     private void TrimBeam()
     {
+        if (Storage.Count == 0)
+        {
+            return;
+        }
+
+        int beamWidthLimit = CalculateBeamWidthLimit();
         while (Storage.Count > beamWidthLimit)
         {
             var removed = Storage[^1];
@@ -87,6 +96,28 @@ public sealed class BeamSearchAlgorithm(
             Traces.Remove(removed.Vertex.Position);
             Storage.RemoveAt(Storage.Count - 1);
         }
+    }
+
+    private int CalculateBeamWidthLimit()
+    {
+        int limit = (int)Math.Ceiling(Storage.Count * beamWidthFraction);
+        return Math.Clamp(limit, 1, Storage.Count);
+    }
+
+    private static double ValidateBeamWidth(double beamWidthPercentage)
+    {
+        if (double.IsNaN(beamWidthPercentage) || double.IsInfinity(beamWidthPercentage))
+        {
+            throw new ArgumentOutOfRangeException(nameof(beamWidthPercentage));
+        }
+
+        if (beamWidthPercentage <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(beamWidthPercentage));
+        }
+
+        double clampedPercentage = Math.Min(beamWidthPercentage, 100);
+        return clampedPercentage / 100d;
     }
 
     private void RemoveVertex(IPathfindingVertex vertex)
