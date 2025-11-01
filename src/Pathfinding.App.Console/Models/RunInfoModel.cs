@@ -46,6 +46,8 @@ internal sealed class RunInfoModel : ReactiveObject, IAlgorithmBuildInfo
 
     public double? Weight { get; init; }
 
+    public int? BeamWidth { get; init; }
+
     private RunStatuses status;
     public RunStatuses ResultStatus
     {

@@ -11,4 +11,6 @@ public interface IAlgorithmBuildInfo
     double? Weight { get; }
 
     StepRules? StepRule { get; }
+
+    int? BeamWidth { get; }
 }

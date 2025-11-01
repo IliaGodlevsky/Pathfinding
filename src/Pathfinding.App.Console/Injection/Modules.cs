@@ -224,6 +224,7 @@ internal static class Modules
 
         builder.RegisterType<RunStepRulesView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
         builder.RegisterType<RunHeuristicsView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
+        builder.RegisterType<BeamWidthView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
         builder.RegisterType<RunsPopulateView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
 
         return builder.Build();

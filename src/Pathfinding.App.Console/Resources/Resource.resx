@@ -132,6 +132,9 @@
   <data name="BeamSearch" xml:space="preserve">
     <value>Beam search</value>
   </data>
+  <data name="BeamWidth" xml:space="preserve">
+    <value>Beam width</value>
+  </data>
   <data name="BidirectAStar" xml:space="preserve">
     <value>Bidirect A*</value>
   </data>
