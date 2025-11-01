@@ -15,8 +15,8 @@ public sealed class BeamSearchAlgorithmFactory(IHeuristicsFactory heuristicsFact
     {
         ArgumentNullException.ThrowIfNull(info.Heuristics, nameof(info.Heuristics));
 
-        var weight = info.Weight ?? 1;
-        var heuristic = heuristicsFactory.CreateHeuristic(info.Heuristics.Value, weight);
-        return new(range, heuristic);
+        var heuristic = heuristicsFactory.CreateHeuristic(info.Heuristics.Value, 1);
+        var beamWidthPercentage = info.Weight ?? BeamSearchAlgorithm.DefaultBeamWidthPercentage;
+        return new(range, heuristic, beamWidthPercentage);
     }
 }
