@@ -78,12 +78,14 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
 
     private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
-        if (Graph != null && msg.Value.Contains(ActivatedGraphId))
+        if (Graph == Graph<GraphVertexModel>.Empty || !msg.Value.Contains(ActivatedGraphId))
         {
-            Selected = [];
-            Graph = Graph<GraphVertexModel>.Empty;
-            ActivatedGraphId = 0;
+            return;
         }
+
+        Selected = [];
+        Graph = Graph<GraphVertexModel>.Empty;
+        ActivatedGraphId = 0;
     }
 
     private IObservable<bool> CanUpdate()
@@ -105,29 +107,47 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
 
     private async Task OnGraphUpdated(AwaitGraphUpdatedMessage msg)
     {
-        var id = ActivatedGraphId;
-        var local = Graph;
-        if ((local != Graph<GraphVertexModel>.Empty
-            && msg.Value.Id != ActivatedGraphId) || local == Graph<GraphVertexModel>.Empty)
+        var (graphToUpdate, graphId) = await EnsureGraphLoadedAsync(msg).ConfigureAwait(false);
+        if (graphToUpdate == Graph<GraphVertexModel>.Empty)
         {
-            await ExecuteSafe(async token =>
-            {
-                var model = await service.ReadGraphAsync(msg.Value.Id, token).ConfigureAwait(false);
-                local = model.CreateGraph();
-                id = model.Id;
-                var layer = neighborFactory.CreateNeighborhoodLayer(model.Neighborhood);
-                await layer.OverlayAsync(local, token).ConfigureAwait(false);
-            }).ConfigureAwait(false);
+            return;
         }
-        if (local != Graph<GraphVertexModel>.Empty)
+
+        await NotifyRunsUpdatedAsync(graphId, graphToUpdate).ConfigureAwait(false);
+    }
+
+    private async Task<(Graph<GraphVertexModel> Graph, int GraphId)> EnsureGraphLoadedAsync(AwaitGraphUpdatedMessage msg)
+    {
+        var localGraph = Graph;
+        var graphId = ActivatedGraphId;
+        var shouldReloadGraph = localGraph == Graph<GraphVertexModel>.Empty
+            || msg.Value.Id != graphId;
+
+        if (!shouldReloadGraph)
         {
-            await ExecuteSafe(async token =>
-            {
-                var models = await service.ReadStatisticsAsync(id, token).ConfigureAwait(false);
-                var updated = await UpdateRunsAsync(models, local, id).ConfigureAwait(false);
-                messenger.Send(new RunsUpdatedMessage(updated));
-            }).ConfigureAwait(false);
+            return (localGraph, graphId);
         }
+
+        await ExecuteSafe(async token =>
+        {
+            var model = await service.ReadGraphAsync(msg.Value.Id, token).ConfigureAwait(false);
+            localGraph = model.CreateGraph();
+            graphId = model.Id;
+            var layer = neighborFactory.CreateNeighborhoodLayer(model.Neighborhood);
+            await layer.OverlayAsync(localGraph, token).ConfigureAwait(false);
+        }).ConfigureAwait(false);
+
+        return (localGraph, graphId);
+    }
+
+    private async Task NotifyRunsUpdatedAsync(int graphId, Graph<GraphVertexModel> graphToUpdate)
+    {
+        await ExecuteSafe(async token =>
+        {
+            var models = await service.ReadStatisticsAsync(graphId, token).ConfigureAwait(false);
+            var updated = await UpdateRunsAsync(models, graphToUpdate, graphId).ConfigureAwait(false);
+            messenger.Send(new RunsUpdatedMessage(updated));
+        }).ConfigureAwait(false);
     }
 
     private async Task<RunStatisticsModel[]> UpdateRunsAsync(
