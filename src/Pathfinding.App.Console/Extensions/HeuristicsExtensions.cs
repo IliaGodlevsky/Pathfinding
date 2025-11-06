@@ -13,6 +13,8 @@ internal static class HeuristicsExtensions
             Heuristics.Chebyshev => Resource.Chebyshev,
             Heuristics.Diagonal => Resource.Diagonal,
             Heuristics.Manhattan => Resource.Manhattan,
+            Heuristics.Canberra => Resource.Canberra,
+            Heuristics.Hamming => Resource.Hamming,
             _ => string.Empty
         };
     }

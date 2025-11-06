@@ -7,5 +7,7 @@ public enum Heuristics
     Euclidean,
     Chebyshev,
     Diagonal,
-    Manhattan
+    Manhattan,
+    Canberra,
+    Hamming
 }

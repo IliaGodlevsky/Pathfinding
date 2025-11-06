@@ -185,7 +185,16 @@ namespace Pathfinding.App.Console.Resources {
                 return ResourceManager.GetString("Cosine", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Canberra.
+        /// </summary>
+        internal static string Canberra {
+            get {
+                return ResourceManager.GetString("Canberra", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to DFS cost.
         /// </summary>
@@ -311,7 +320,16 @@ namespace Pathfinding.App.Console.Resources {
                 return ResourceManager.GetString("Failure", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Hamming.
+        /// </summary>
+        internal static string Hamming {
+            get {
+                return ResourceManager.GetString("Hamming", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Graph field.
         /// </summary>
@@ -338,7 +356,16 @@ namespace Pathfinding.App.Console.Resources {
                 return ResourceManager.GetString("High", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Hexagonal.
+        /// </summary>
+        internal static string Hexagonal {
+            get {
+                return ResourceManager.GetString("Hexagonal", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Import.
         /// </summary>
@@ -428,7 +455,16 @@ namespace Pathfinding.App.Console.Resources {
                 return ResourceManager.GetString("Moore", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Extended Moore.
+        /// </summary>
+        internal static string ExtendedMoore {
+            get {
+                return ResourceManager.GetString("ExtendedMoore", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to No.
         /// </summary>

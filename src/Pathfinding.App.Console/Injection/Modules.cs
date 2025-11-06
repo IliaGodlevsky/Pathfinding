@@ -93,6 +93,10 @@ internal static class Modules
             .WithMetadata(MetadataKeys.Heuristics, Heuristics.Chebyshev);
         builder.RegisterType<ManhattanDistance>().As<IHeuristic>().SingleInstance()
             .WithMetadata(MetadataKeys.Heuristics, Heuristics.Manhattan);
+        builder.RegisterType<CanberraDistance>().As<IHeuristic>().SingleInstance()
+            .WithMetadata(MetadataKeys.Heuristics, Heuristics.Canberra);
+        builder.RegisterType<HammingDistance>().As<IHeuristic>().SingleInstance()
+            .WithMetadata(MetadataKeys.Heuristics, Heuristics.Hamming);
         builder.RegisterType<HeuristicsFactory>().As<IHeuristicsFactory>().SingleInstance();
 
         builder.RegisterType<MooreNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
@@ -103,6 +107,10 @@ internal static class Modules
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Diagonal);
         builder.RegisterType<KnightsNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Knight);
+        builder.RegisterType<HexagonalNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Hexagonal);
+        builder.RegisterType<ExtendedMooreNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.ExtendedMoore);
         builder.RegisterType<NeighborhoodLayerFactory>().As<INeighborhoodLayerFactory>()
             .WithAttributeFiltering().SingleInstance();
 
