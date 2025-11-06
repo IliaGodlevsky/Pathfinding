@@ -7,7 +7,7 @@ internal sealed partial class RunsPanel
     private void Initialize()
     {
         X = 0;
-        Y = Pos.Percent(50);
+        Y = Pos.Percent(35);
         Width = Dim.Fill();
         Height = Dim.Fill();
         Border = new Border()

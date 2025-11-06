@@ -138,8 +138,6 @@ internal static class Modules
             .WithMetadata(MetadataKeys.Order, 12).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<DistanceFirstAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.DistanceFirst)
             .WithMetadata(MetadataKeys.Order, 11).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
-        builder.RegisterType<BeamSearchAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.BeamSearch)
-            .WithMetadata(MetadataKeys.Order, 17).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<AStarGreedyAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.AStarGreedy)
             .WithMetadata(MetadataKeys.Order, 7).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<AStarLeeAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.AStarLee)

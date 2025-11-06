@@ -9,7 +9,7 @@ internal sealed partial class GraphPanel : FrameView
         X = 0;
         Y = Pos.Percent(0);
         Width = Dim.Fill();
-        Height = Dim.Percent(50);
+        Height = Dim.Percent(35);
         Border = new Border()
         {
             BorderStyle = BorderStyle.Rounded,

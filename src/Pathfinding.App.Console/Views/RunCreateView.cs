@@ -68,7 +68,7 @@ internal sealed class RunCreateView : FrameView
         buttonFrame.X = 0;
         buttonFrame.Width = Dim.Fill();
         buttonFrame.Height = Dim.Fill();
-        buttonFrame.Y = Pos.Percent(90);
+        buttonFrame.Y = Pos.Percent(93);
         buttonFrame.Add(createButton, cancelButton);
         X = Pos.Center();
         Y = Pos.Center();

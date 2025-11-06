@@ -13,8 +13,8 @@ internal partial class RunsTableButtonsFrame
             Padding = new Thickness(0)
         };
         X = 0;
-        Y = Pos.Percent(90);
+        Y = Pos.Percent(93);
         Width = Dim.Fill();
-        Height = Dim.Fill();
+        Height = Dim.Percent(10);
     }
 }

@@ -15,7 +15,7 @@ internal sealed partial class GraphAssembleView
             BorderStyle = BorderStyle.Rounded
         };
         buttonsFrame.X = 0;
-        buttonsFrame.Y = Pos.Percent(90);
+        buttonsFrame.Y = Pos.Percent(85);
         buttonsFrame.Width = Dim.Fill();
         buttonsFrame.Height = Dim.Fill();
         X = Pos.Center();

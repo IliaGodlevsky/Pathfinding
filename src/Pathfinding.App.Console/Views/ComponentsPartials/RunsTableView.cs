@@ -122,6 +122,6 @@ internal sealed partial class RunsTableView : TableView
         X = 0;
         Y = Pos.Percent(0);
         Width = Dim.Fill();
-        Height = Dim.Percent(90);
+        Height = Dim.Percent(93);
     }
 }

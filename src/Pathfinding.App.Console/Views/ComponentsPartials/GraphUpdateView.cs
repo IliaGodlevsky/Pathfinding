@@ -20,7 +20,7 @@ internal sealed partial class GraphUpdateView
             BorderThickness = new Thickness(0)
         };
 
-        updateButton.X = Pos.Percent(35);
+        updateButton.X = Pos.Percent(30);
         updateButton.Y = Pos.Percent(85) + 1;
         cancelButton.X = Pos.Right(updateButton) + 2;
         cancelButton.Y = Pos.Percent(85) + 1;

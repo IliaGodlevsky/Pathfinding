@@ -54,7 +54,6 @@ internal sealed partial class RunsListView : FrameView
                         break;
                     case Algorithms.DistanceFirst:
                     case Algorithms.AStarLee:
-                    case Algorithms.BeamSearch:
                         messenger.Send(new CloseStepRulesViewMessage());
                         messenger.Send(new CloseRunPopulateViewMessage());
                         messenger.Send(new OpenHeuristicsViewMessage());

@@ -25,7 +25,6 @@ internal static class AlgorithmExtensions
             Algorithms.BidirectRandom => Resource.BidirectRandom,
             Algorithms.DepthFirstRandom => Resource.DepthRandom,
             Algorithms.IdaStar => "IDA*",
-            Algorithms.BeamSearch => Resource.BeamSearch,
             _ => string.Empty
         };
     }

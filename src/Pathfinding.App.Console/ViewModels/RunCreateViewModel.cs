@@ -230,17 +230,20 @@ internal sealed class RunCreateViewModel : ViewModel,
     private async Task CreateAlgorithm()
     {
         var range = RequestRange();
-        if (!IsRangeValid(range))
+        if (range.Length < 2)
         {
             log.Info(Resource.RangeIsNotSetMsg);
             return;
         }
 
-        var statistics = BuildStatistics(range);
+        var statistics = EnumerateWeights()
+            .SelectMany(x => GetBuildInfo(x))
+            .Select(x => CreateStatistics(range, x))
+            .ToArray();
 
         await ExecuteSafe(async () =>
         {
-            using var cts = new CancellationTokenSource(GetTimeout(statistics.Count));
+            using var cts = new CancellationTokenSource(GetTimeout(statistics.Length));
             var result = await service.CreateStatisticsAsync(statistics, cts.Token)
                 .ConfigureAwait(false);
             messenger.Send(new RunsCreatedMessaged([.. result]));
@@ -252,26 +255,6 @@ internal sealed class RunCreateViewModel : ViewModel,
         var rangeMessage = new PathfindingRangeRequestMessage();
         messenger.Send(rangeMessage);
         return rangeMessage.Response;
-    }
-
-    private static bool IsRangeValid(GraphVertexModel[] range)
-    {
-        return range.Length > 1;
-    }
-
-    private IReadOnlyCollection<CreateStatisticsRequest> BuildStatistics(GraphVertexModel[] range)
-    {
-        var requests = new List<CreateStatisticsRequest>();
-        var status = RunStatuses.Success;
-        foreach (var weight in EnumerateWeights())
-        {
-            foreach (var buildInfo in GetBuildInfo(weight))
-            {
-                requests.Add(CreateStatistics(range, buildInfo, ref status));
-            }
-        }
-
-        return requests;
     }
 
     private IEnumerable<double?> EnumerateWeights()
@@ -290,8 +273,7 @@ internal sealed class RunCreateViewModel : ViewModel,
 
     private CreateStatisticsRequest CreateStatistics(
         GraphVertexModel[] range,
-        AlgorithmBuildInfo buildInfo,
-        ref RunStatuses status)
+        AlgorithmBuildInfo buildInfo)
     {
         int visitedCount = 0;
         void OnVertexProcessed(EventArgs e) => visitedCount++;
@@ -299,7 +281,7 @@ internal sealed class RunCreateViewModel : ViewModel,
         var factory = algorithmsFactory.GetAlgorithmFactory(buildInfo.Algorithm);
         var algo = factory.CreateAlgorithm(range, buildInfo);
         algo.VertexProcessed += OnVertexProcessed;
-
+        var status = RunStatuses.Success;
         var path = NullGraphPath.Interface;
         var stopwatch = Stopwatch.StartNew();
 
@@ -323,7 +305,7 @@ internal sealed class RunCreateViewModel : ViewModel,
             algo.VertexProcessed -= OnVertexProcessed;
         }
 
-        return new CreateStatisticsRequest
+        return new()
         {
             Algorithm = buildInfo.Algorithm,
             Cost = path.Cost,

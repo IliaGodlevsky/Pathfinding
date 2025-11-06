@@ -13,8 +13,8 @@ internal sealed partial class GraphTableButtonsFrame
             Padding = new(0)
         };
         X = 0;
-        Y = Pos.Percent(90);
+        Y = Pos.Percent(85);
         Width = Dim.Fill();
-        Height = Dim.Percent(15);
+        Height = Dim.Percent(20);
     }
 }
