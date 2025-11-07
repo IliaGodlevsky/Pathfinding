@@ -1,4 +1,3 @@
-using Autofac.Extras.Moq;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
 using Pathfinding.App.Console.Messages;
@@ -15,6 +14,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Pathfinding.Logging.Interface;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 
@@ -24,7 +24,9 @@ internal sealed class GraphFieldViewModelTests
     [Test]
     public async Task GraphActivatedMessage_EditableGraph_ShouldEnableCommands()
     {
-        using var mock = AutoMock.GetLoose();
+        using var messenger = new StrongReferenceMessenger();
+        var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
+        using var viewModel = CreateViewModel(messenger, serviceMock);
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
@@ -35,17 +37,9 @@ internal sealed class GraphFieldViewModelTests
             GraphStatuses.Editable,
             1));
 
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.Is<int>(token => token == Tokens.GraphField),
-                It.IsAny<MessageHandler<object, GraphActivatedMessage>>()))
-            .Callback<object, int, MessageHandler<object, GraphActivatedMessage>>((recipient, _, handler)
-                => handler(recipient, message));
+        messenger.Send(message, Tokens.GraphField);
 
-        var viewModel = mock.Create<GraphFieldViewModel>();
-
-        var canExecute = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync();
+        var canExecute = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => value);
 
         Assert.Multiple(() =>
         {
@@ -57,7 +51,9 @@ internal sealed class GraphFieldViewModelTests
     [Test]
     public async Task GraphActivatedMessage_ReadonlyGraph_ShouldDisableCommands()
     {
-        using var mock = AutoMock.GetLoose();
+        using var messenger = new StrongReferenceMessenger();
+        var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
+        using var viewModel = CreateViewModel(messenger, serviceMock);
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
@@ -68,17 +64,9 @@ internal sealed class GraphFieldViewModelTests
             GraphStatuses.Readonly,
             1));
 
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.Is<int>(token => token == Tokens.GraphField),
-                It.IsAny<MessageHandler<object, GraphActivatedMessage>>()))
-            .Callback<object, int, MessageHandler<object, GraphActivatedMessage>>((recipient, _, handler)
-                => handler(recipient, message));
+        messenger.Send(message, Tokens.GraphField);
 
-        var viewModel = mock.Create<GraphFieldViewModel>();
-
-        var canExecute = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync();
+        var canExecute = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => !value);
 
         Assert.Multiple(() =>
         {
@@ -90,7 +78,15 @@ internal sealed class GraphFieldViewModelTests
     [Test]
     public async Task ChangeVertexPolarityCommand_VertexNotInRange_ShouldUpdateVertex()
     {
-        using var mock = AutoMock.GetLoose();
+        using var messenger = new StrongReferenceMessenger();
+        var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
+        serviceMock
+            .Setup(x => x.UpdateVerticesAsync(
+                It.IsAny<UpdateVerticesRequest<GraphVertexModel>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        using var viewModel = CreateViewModel(messenger, serviceMock);
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
@@ -101,50 +97,35 @@ internal sealed class GraphFieldViewModelTests
             GraphStatuses.Editable,
             2));
 
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.Is<int>(token => token == Tokens.GraphField),
-                It.IsAny<MessageHandler<object, GraphActivatedMessage>>()))
-            .Callback<object, int, MessageHandler<object, GraphActivatedMessage>>((recipient, _, handler)
-                => handler(recipient, message));
+        ObstaclesCountChangedMessage? obstaclesMessage = null;
+        messenger.Register<ObstaclesCountChangedMessage>(this, (_, msg) => obstaclesMessage = msg);
+        messenger.Register<IsVertexInRangeRequestMessage>(this, (_, request) => request.Reply(false));
 
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Send(It.IsAny<IsVertexInRangeRequestMessage>()))
-            .Callback<IsVertexInRangeRequestMessage>(request => request.Reply(false))
-            .Returns((IsVertexInRangeRequestMessage request) => request);
-
-        mock.Mock<IRequestService<GraphVertexModel>>()
-            .Setup(x => x.UpdateVerticesAsync(
-                It.IsAny<UpdateVerticesRequest<GraphVertexModel>>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        var viewModel = mock.Create<GraphFieldViewModel>();
+        messenger.Send(message, Tokens.GraphField);
 
         await viewModel.ChangeVertexPolarityCommand.Execute(vertex);
 
         Assert.Multiple(() =>
         {
             Assert.That(vertex.IsObstacle, Is.True);
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            serviceMock
                 .Verify(x => x.UpdateVerticesAsync(
                     It.Is<UpdateVerticesRequest<GraphVertexModel>>(request
                         => request.GraphId == 2
                         && request.Vertices.Single() == vertex),
                     It.IsAny<CancellationToken>()), Times.Once);
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Send(
-                    It.Is<ObstaclesCountChangedMessage>(msg
-                        => msg.Value.GraphId == 2
-                        && msg.Value.Delta == 1)), Times.Once);
+            Assert.That(obstaclesMessage, Is.Not.Null);
+            Assert.That(obstaclesMessage!.Value.GraphId, Is.EqualTo(2));
+            Assert.That(obstaclesMessage!.Value.Delta, Is.EqualTo(1));
         });
     }
 
     [Test]
     public async Task ChangeVertexPolarityCommand_VertexInRange_ShouldNotUpdateVertex()
     {
-        using var mock = AutoMock.GetLoose();
+        using var messenger = new StrongReferenceMessenger();
+        var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
+        using var viewModel = CreateViewModel(messenger, serviceMock);
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
@@ -155,39 +136,37 @@ internal sealed class GraphFieldViewModelTests
             GraphStatuses.Editable,
             3));
 
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.Is<int>(token => token == Tokens.GraphField),
-                It.IsAny<MessageHandler<object, GraphActivatedMessage>>()))
-            .Callback<object, int, MessageHandler<object, GraphActivatedMessage>>((recipient, _, handler)
-                => handler(recipient, message));
+        var obstaclesSent = false;
+        messenger.Register<ObstaclesCountChangedMessage>(this, (_, _) => obstaclesSent = true);
+        messenger.Register<IsVertexInRangeRequestMessage>(this, (_, request) => request.Reply(true));
 
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Send(It.IsAny<IsVertexInRangeRequestMessage>()))
-            .Callback<IsVertexInRangeRequestMessage>(request => request.Reply(true))
-            .Returns((IsVertexInRangeRequestMessage request) => request);
-
-        var viewModel = mock.Create<GraphFieldViewModel>();
+        messenger.Send(message, Tokens.GraphField);
 
         await viewModel.ChangeVertexPolarityCommand.Execute(vertex);
 
         Assert.Multiple(() =>
         {
             Assert.That(vertex.IsObstacle, Is.False);
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            serviceMock
                 .Verify(x => x.UpdateVerticesAsync(
                     It.IsAny<UpdateVerticesRequest<GraphVertexModel>>(),
                     It.IsAny<CancellationToken>()), Times.Never);
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Send(It.IsAny<ObstaclesCountChangedMessage>()), Times.Never);
+            Assert.That(obstaclesSent, Is.False);
         });
     }
 
     [Test]
     public async Task ChangeVertexCostCommand_ShouldClampAndPersistCost()
     {
-        using var mock = AutoMock.GetLoose();
+        using var messenger = new StrongReferenceMessenger();
+        var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
+        serviceMock
+            .Setup(x => x.UpdateVerticesAsync(
+                It.IsAny<UpdateVerticesRequest<GraphVertexModel>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        using var viewModel = CreateViewModel(messenger, serviceMock);
 
         var vertex = CreateVertex();
         vertex.Cost = new VertexCost(9, new InclusiveValueRange<int>(10, 0));
@@ -199,28 +178,14 @@ internal sealed class GraphFieldViewModelTests
             GraphStatuses.Editable,
             4));
 
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.Is<int>(token => token == Tokens.GraphField),
-                It.IsAny<MessageHandler<object, GraphActivatedMessage>>()))
-            .Callback<object, int, MessageHandler<object, GraphActivatedMessage>>((recipient, _, handler)
-                => handler(recipient, message));
-
-        mock.Mock<IRequestService<GraphVertexModel>>()
-            .Setup(x => x.UpdateVerticesAsync(
-                It.IsAny<UpdateVerticesRequest<GraphVertexModel>>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        var viewModel = mock.Create<GraphFieldViewModel>();
+        messenger.Send(message, Tokens.GraphField);
 
         await viewModel.IncreaseVertexCostCommand.Execute(vertex);
 
         Assert.Multiple(() =>
         {
             Assert.That(vertex.Cost.CurrentCost, Is.EqualTo(10));
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            serviceMock
                 .Verify(x => x.UpdateVerticesAsync(
                     It.Is<UpdateVerticesRequest<GraphVertexModel>>(request
                         => request.GraphId == 4
@@ -232,7 +197,15 @@ internal sealed class GraphFieldViewModelTests
     [Test]
     public async Task InverseVertexCommand_ShouldDecreaseObstaclesCount()
     {
-        using var mock = AutoMock.GetLoose();
+        using var messenger = new StrongReferenceMessenger();
+        var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
+        serviceMock
+            .Setup(x => x.UpdateVerticesAsync(
+                It.IsAny<UpdateVerticesRequest<GraphVertexModel>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        using var viewModel = CreateViewModel(messenger, serviceMock);
 
         var vertex = CreateVertex();
         vertex.IsObstacle = true;
@@ -244,44 +217,29 @@ internal sealed class GraphFieldViewModelTests
             GraphStatuses.Editable,
             5));
 
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.Is<int>(token => token == Tokens.GraphField),
-                It.IsAny<MessageHandler<object, GraphActivatedMessage>>()))
-            .Callback<object, int, MessageHandler<object, GraphActivatedMessage>>((recipient, _, handler)
-                => handler(recipient, message));
+        ObstaclesCountChangedMessage? obstaclesMessage = null;
+        messenger.Register<ObstaclesCountChangedMessage>(this, (_, msg) => obstaclesMessage = msg);
+        messenger.Register<IsVertexInRangeRequestMessage>(this, (_, request) => request.Reply(false));
 
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Send(It.IsAny<IsVertexInRangeRequestMessage>()))
-            .Callback<IsVertexInRangeRequestMessage>(request => request.Reply(false))
-            .Returns((IsVertexInRangeRequestMessage request) => request);
-
-        mock.Mock<IRequestService<GraphVertexModel>>()
-            .Setup(x => x.UpdateVerticesAsync(
-                It.IsAny<UpdateVerticesRequest<GraphVertexModel>>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        var viewModel = mock.Create<GraphFieldViewModel>();
+        messenger.Send(message, Tokens.GraphField);
 
         await viewModel.InverseVertexCommand.Execute(vertex);
 
         Assert.Multiple(() =>
         {
             Assert.That(vertex.IsObstacle, Is.False);
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Send(
-                    It.Is<ObstaclesCountChangedMessage>(msg
-                        => msg.Value.GraphId == 5
-                        && msg.Value.Delta == -1)), Times.Once);
+            Assert.That(obstaclesMessage, Is.Not.Null);
+            Assert.That(obstaclesMessage!.Value.GraphId, Is.EqualTo(5));
+            Assert.That(obstaclesMessage!.Value.Delta, Is.EqualTo(-1));
         });
     }
 
     [Test]
     public async Task GraphStateChangedMessage_ShouldToggleCommandAvailability()
     {
-        using var mock = AutoMock.GetLoose();
+        using var messenger = new StrongReferenceMessenger();
+        var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
+        using var viewModel = CreateViewModel(messenger, serviceMock);
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
@@ -292,28 +250,11 @@ internal sealed class GraphFieldViewModelTests
             GraphStatuses.Editable,
             6));
 
-        MessageHandler<object, GraphStateChangedMessage>? handler = null;
-
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.Is<int>(token => token == Tokens.GraphField),
-                It.IsAny<MessageHandler<object, GraphActivatedMessage>>()))
-            .Callback<object, int, MessageHandler<object, GraphActivatedMessage>>((recipient, _, action)
-                => action(recipient, activatedMessage));
-
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.IsAny<MessageHandler<object, GraphStateChangedMessage>>()))
-            .Callback<object, MessageHandler<object, GraphStateChangedMessage>>((_, action)
-                => handler = action);
-
-        var viewModel = mock.Create<GraphFieldViewModel>();
+        messenger.Send(activatedMessage, Tokens.GraphField);
 
         var enabled = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => value);
 
-        handler?.Invoke(viewModel, new GraphStateChangedMessage((6, GraphStatuses.Readonly)));
+        messenger.Send(new GraphStateChangedMessage((6, GraphStatuses.Readonly)));
 
         var disabled = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => !value);
 
@@ -327,7 +268,9 @@ internal sealed class GraphFieldViewModelTests
     [Test]
     public async Task GraphsDeletedMessage_ShouldResetGraphAndDisableCommands()
     {
-        using var mock = AutoMock.GetLoose();
+        using var messenger = new StrongReferenceMessenger();
+        var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
+        using var viewModel = CreateViewModel(messenger, serviceMock);
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
@@ -338,29 +281,12 @@ internal sealed class GraphFieldViewModelTests
             GraphStatuses.Editable,
             7));
 
-        MessageHandler<object, GraphsDeletedMessage>? handler = null;
-
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.Is<int>(token => token == Tokens.GraphField),
-                It.IsAny<MessageHandler<object, GraphActivatedMessage>>()))
-            .Callback<object, int, MessageHandler<object, GraphActivatedMessage>>((recipient, _, action)
-                => action(recipient, activatedMessage));
-
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.IsAny<MessageHandler<object, GraphsDeletedMessage>>()))
-            .Callback<object, MessageHandler<object, GraphsDeletedMessage>>((_, action)
-                => handler = action);
-
-        var viewModel = mock.Create<GraphFieldViewModel>();
+        messenger.Send(activatedMessage, Tokens.GraphField);
 
         var enabled = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => value);
         Assert.That(enabled, Is.True);
 
-        handler?.Invoke(viewModel, new GraphsDeletedMessage([7]));
+        messenger.Send(new GraphsDeletedMessage([7]));
 
         var disabled = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => !value);
 
@@ -369,6 +295,12 @@ internal sealed class GraphFieldViewModelTests
             Assert.That(viewModel.Graph, Is.SameAs(Graph<GraphVertexModel>.Empty));
             Assert.That(disabled, Is.False);
         });
+    }
+
+    private static GraphFieldViewModel CreateViewModel(StrongReferenceMessenger messenger,
+        Mock<IRequestService<GraphVertexModel>> serviceMock)
+    {
+        return new GraphFieldViewModel(messenger, serviceMock.Object, Mock.Of<ILog>());
     }
 
     private static GraphVertexModel CreateVertex()
