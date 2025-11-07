@@ -24,7 +24,7 @@ internal class DeleteRunViewModelTests
             new() { Id = 3 },
         };
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IStatisticsRequestService>()
             .Setup(x => x.DeleteRunsAsync(
                 It.IsAny<IEnumerable<int>>(),
                 It.IsAny<CancellationToken>()))
@@ -49,7 +49,7 @@ internal class DeleteRunViewModelTests
         Assert.Multiple(() =>
         {
             Assert.That(canExecute, Is.True);
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            mock.Mock<IStatisticsRequestService>()
                 .Verify(x => x.DeleteRunsAsync(
                     It.IsAny<IEnumerable<int>>(),
                     It.IsAny<CancellationToken>()), Times.Once);
@@ -70,7 +70,7 @@ internal class DeleteRunViewModelTests
     {
         using var mock = AutoMock.GetLoose();
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IStatisticsRequestService>()
             .Setup(x => x.DeleteRunsAsync(
                 It.IsAny<IEnumerable<int>>(),
                 It.IsAny<CancellationToken>()))
@@ -103,7 +103,7 @@ internal class DeleteRunViewModelTests
         Assert.Multiple(() =>
         {
             Assert.That(canExecute, Is.False);
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            mock.Mock<IStatisticsRequestService>()
                 .Verify(x => x.DeleteRunsAsync(
                     It.IsAny<IEnumerable<int>>(),
                     It.IsAny<CancellationToken>()), Times.Never);

@@ -28,7 +28,7 @@ internal sealed class GraphTableViewModelTests
             Id = x,
             Dimensions = []
         })];
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IGraphInfoRequestService>()
             .Setup(x => x.ReadAllGraphInfoAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(graphs));
 
@@ -38,7 +38,7 @@ internal sealed class GraphTableViewModelTests
 
         Assert.Multiple(() =>
         {
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            mock.Mock<IGraphInfoRequestService>()
                 .Verify(x => x.ReadAllGraphInfoAsync(
                     It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(viewModel.Graphs, Has.Count.EqualTo(graphs.Count));
@@ -50,7 +50,7 @@ internal sealed class GraphTableViewModelTests
     {
         using var mock = AutoMock.GetLoose();
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IGraphInfoRequestService>()
             .Setup(x => x.ReadAllGraphInfoAsync(It.IsAny<CancellationToken>()))
             .Throws(new Exception());
 
@@ -77,7 +77,7 @@ internal sealed class GraphTableViewModelTests
             DimensionSizes = []
         };
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IGraphRequestService<GraphVertexModel>>()
             .Setup(x => x.ReadGraphAsync(
                 It.Is<int>(z => z == 1),
                 It.IsAny<CancellationToken>()))
@@ -101,7 +101,7 @@ internal sealed class GraphTableViewModelTests
 
         Assert.Multiple(() =>
         {
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            mock.Mock<IGraphRequestService<GraphVertexModel>>()
                 .Verify(x => x.ReadGraphAsync(
                     It.Is<int>(z => z == 1),
                     It.IsAny<CancellationToken>()), Times.Once);
@@ -121,7 +121,7 @@ internal sealed class GraphTableViewModelTests
     {
         using var mock = AutoMock.GetLoose();
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IGraphRequestService<GraphVertexModel>>()
             .Setup(x => x.ReadGraphAsync(
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))

@@ -23,7 +23,7 @@ namespace Pathfinding.App.Console.ViewModels;
 internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDisposable
 {
     private readonly IMessenger messenger;
-    private readonly IRequestService<GraphVertexModel> service;
+    private readonly IGraphRequestService<GraphVertexModel> service;
     private readonly CompositeDisposable disposables = [];
 
     private int graphId;
@@ -59,7 +59,7 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
 
     public GraphFieldViewModel(
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        IRequestService<GraphVertexModel> service,
+        IGraphRequestService<GraphVertexModel> service,
         ILog logger) : base(logger)
     {
         this.messenger = messenger;

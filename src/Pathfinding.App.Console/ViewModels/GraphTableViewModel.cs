@@ -20,7 +20,8 @@ namespace Pathfinding.App.Console.ViewModels;
 
 internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDisposable
 {
-    private readonly IRequestService<GraphVertexModel> service;
+    private readonly IGraphRequestService<GraphVertexModel> graphService;
+    private readonly IGraphInfoRequestService graphInfoService;
     private readonly INeighborhoodLayerFactory neighborFactory;
     private readonly IMessenger messenger;
     private readonly CompositeDisposable disposables = [];
@@ -36,12 +37,14 @@ internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDi
     private int ActivatedGraphId { get; set; }
 
     public GraphTableViewModel(
-        IRequestService<GraphVertexModel> service,
+        IGraphRequestService<GraphVertexModel> graphService,
+        IGraphInfoRequestService graphInfoService,
         INeighborhoodLayerFactory neighborFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         ILog logger) : base(logger)
     {
-        this.service = service;
+        this.graphService = graphService;
+        this.graphInfoService = graphInfoService;
         this.messenger = messenger;
         this.neighborFactory = neighborFactory;
         messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage, int>(this,
@@ -65,7 +68,7 @@ internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDi
     {
         await ExecuteSafe(async token =>
         {
-            var graphModel = await service.ReadGraphAsync(model, token).ConfigureAwait(false);
+            var graphModel = await graphService.ReadGraphAsync(model, token).ConfigureAwait(false);
             var graph = graphModel.CreateGraph();
             var activated = new ActivatedGraphModel(graph,
                 graphModel.Neighborhood,
@@ -87,7 +90,7 @@ internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDi
         await ExecuteSafe(async token =>
         {
             Graphs.Clear();
-            var infos = await service.ReadAllGraphInfoAsync(token).ConfigureAwait(false);
+            var infos = await graphInfoService.ReadAllGraphInfoAsync(token).ConfigureAwait(false);
             Graphs.Add(infos.ToGraphInfo());
         }).ConfigureAwait(false);
     }

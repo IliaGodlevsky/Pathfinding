@@ -16,7 +16,7 @@ namespace Pathfinding.App.Console.ViewModels;
 internal sealed class GraphCopyViewModel : ViewModel, IGraphCopyViewModel, IDisposable
 {
     private readonly IMessenger messenger;
-    private readonly IRequestService<GraphVertexModel> service;
+    private readonly IGraphRequestService<GraphVertexModel> service;
     private readonly CompositeDisposable disposables = [];
 
     public ReactiveCommand<Unit, Unit> CopyGraphCommand { get; }
@@ -30,7 +30,7 @@ internal sealed class GraphCopyViewModel : ViewModel, IGraphCopyViewModel, IDisp
 
     public GraphCopyViewModel(
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        IRequestService<GraphVertexModel> service,
+        IGraphRequestService<GraphVertexModel> service,
         ILog log) : base(log)
     {
         this.messenger = messenger;

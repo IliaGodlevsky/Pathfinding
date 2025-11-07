@@ -9,7 +9,6 @@ using Pathfinding.App.Console.ViewModels;
 using Pathfinding.App.Console.Views;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface.Factories;
-using Pathfinding.Infrastructure.Business;
 using Pathfinding.Infrastructure.Business.Algorithms;
 using Pathfinding.Infrastructure.Business.Algorithms.Heuristics;
 using Pathfinding.Infrastructure.Business.Algorithms.StepRules;
@@ -17,6 +16,7 @@ using Pathfinding.Infrastructure.Business.Commands;
 using Pathfinding.Infrastructure.Business.Layers;
 using Pathfinding.Infrastructure.Business.Serializers;
 using Pathfinding.Infrastructure.Business.Serializers.Decorators;
+using Pathfinding.Infrastructure.Business.Services;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Infrastructure.Data.Sqlite;
 using Pathfinding.Logging.Interface;
@@ -39,7 +39,10 @@ internal static class Modules
 
         builder.RegisterInstance(new SqliteUnitOfWorkFactory(Settings.Default.ConnectionString)).As<IUnitOfWorkFactory>().SingleInstance();
 
-        builder.RegisterType<RequestService<GraphVertexModel>>().As<IRequestService<GraphVertexModel>>().SingleInstance();
+        builder.RegisterType<GraphRequestService<GraphVertexModel>>().As<IGraphRequestService<GraphVertexModel>>().SingleInstance();
+        builder.RegisterType<RangeRequestService<GraphVertexModel>>().As<IRangeRequestService<GraphVertexModel>>().SingleInstance();
+        builder.RegisterType<StatisticsRequestService>().As<IStatisticsRequestService>().SingleInstance();
+        builder.RegisterType<GraphInfoRequestService>().As<IGraphInfoRequestService>().SingleInstance();
 
         builder.RegisterType<IncludeSourceVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
             .WithMetadata(MetadataKeys.Order, 2).Keyed<Command>(KeyFilters.IncludeCommands);

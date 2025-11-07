@@ -38,7 +38,7 @@ internal sealed class GraphAssembleViewModel : ViewModel,
 
     private readonly INeighborhoodLayerFactory neighborFactory;
     private readonly ISmoothLevelFactory smoothLevelFactory;
-    private readonly IRequestService<GraphVertexModel> service;
+    private readonly IGraphRequestService<GraphVertexModel> service;
     private readonly IGraphAssemble<GraphVertexModel> graphAssemble;
     private readonly IMessenger messenger;
 
@@ -91,7 +91,7 @@ internal sealed class GraphAssembleViewModel : ViewModel,
     public ReactiveCommand<Unit, Unit> AssembleGraphCommand { get; }
 
     public GraphAssembleViewModel(
-        IRequestService<GraphVertexModel> service,
+        IGraphRequestService<GraphVertexModel> service,
         IGraphAssemble<GraphVertexModel> graphAssemble,
         ISmoothLevelFactory smoothLevelFactory,
         INeighborhoodLayerFactory neighborFactory,

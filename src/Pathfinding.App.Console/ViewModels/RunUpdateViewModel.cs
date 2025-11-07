@@ -24,7 +24,9 @@ namespace Pathfinding.App.Console.ViewModels;
 internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisposable
 {
     private readonly IMessenger messenger;
-    private readonly IRequestService<GraphVertexModel> service;
+    private readonly IGraphRequestService<GraphVertexModel> graphService;
+    private readonly IRangeRequestService<GraphVertexModel> rangeService;
+    private readonly IStatisticsRequestService statisticsService;
     private readonly IAlgorithmsFactory algorithmsFactory;
     private readonly INeighborhoodLayerFactory neighborFactory;
     private readonly CompositeDisposable disposables = [];
@@ -47,14 +49,18 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
 
     public ReactiveCommand<Unit, Unit> UpdateRunsCommand { get; }
 
-    public RunUpdateViewModel(IRequestService<GraphVertexModel> service,
+    public RunUpdateViewModel(IGraphRequestService<GraphVertexModel> graphService,
+        IRangeRequestService<GraphVertexModel> rangeService,
+        IStatisticsRequestService statisticsService,
         IAlgorithmsFactory algorithmsFactory,
         INeighborhoodLayerFactory neighborFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         ILog log) : base(log)
     {
         this.messenger = messenger;
-        this.service = service;
+        this.graphService = graphService;
+        this.rangeService = rangeService;
+        this.statisticsService = statisticsService;
         this.neighborFactory = neighborFactory;
         this.algorithmsFactory = algorithmsFactory;
         UpdateRunsCommand = ReactiveCommand.CreateFromTask(ExecuteUpdate, CanUpdate()).DisposeWith(disposables);
@@ -98,7 +104,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
     {
         await ExecuteSafe(async token =>
         {
-            var models = await service.ReadStatisticsAsync(
+            var models = await statisticsService.ReadStatisticsAsync(
                 Selected.Select(x => x.Id), token).ConfigureAwait(false);
             var updated = await UpdateRunsAsync(models, Graph, ActivatedGraphId).ConfigureAwait(false);
             messenger.Send(new RunsUpdatedMessage(updated));
@@ -130,7 +136,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
 
         await ExecuteSafe(async token =>
         {
-            var model = await service.ReadGraphAsync(msg.Value.Id, token).ConfigureAwait(false);
+            var model = await graphService.ReadGraphAsync(msg.Value.Id, token).ConfigureAwait(false);
             localGraph = model.CreateGraph();
             graphId = model.Id;
             var layer = neighborFactory.CreateNeighborhoodLayer(model.Neighborhood);
@@ -144,7 +150,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
     {
         await ExecuteSafe(async token =>
         {
-            var models = await service.ReadStatisticsAsync(graphId, token).ConfigureAwait(false);
+            var models = await statisticsService.ReadStatisticsAsync(graphId, token).ConfigureAwait(false);
             var updated = await UpdateRunsAsync(models, graphToUpdate, graphId).ConfigureAwait(false);
             messenger.Send(new RunsUpdatedMessage(updated));
         }).ConfigureAwait(false);
@@ -155,14 +161,14 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         Graph<GraphVertexModel> graphToUpdate,
         int graphId)
     {
-        var rangeModels = await service.ReadRangeAsync(graphId).ConfigureAwait(false);
+        var rangeModels = await rangeService.ReadRangeAsync(graphId).ConfigureAwait(false);
         var range = rangeModels.Select(x => graphToUpdate.Get(x.Position)).ToList();
         var updatedRuns = new List<RunStatisticsModel>();
         if (range.Count > 1)
         {
             using var cts = new CancellationTokenSource(GetTimeout());
             var ids = selectedStatistics.Select(x => x.Id).ToArray();
-            var infos = await service.ReadStatisticsAsync(ids, cts.Token).ConfigureAwait(false);
+            var infos = await statisticsService.ReadStatisticsAsync(ids, cts.Token).ConfigureAwait(false);
             foreach (var info in infos)
             {
                 var visitedCount = 0;
@@ -195,7 +201,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
             }
             await ExecuteSafe(async token =>
             {
-                await service.UpdateStatisticsAsync(updatedRuns, token).ConfigureAwait(false);
+                await statisticsService.UpdateStatisticsAsync(updatedRuns, token).ConfigureAwait(false);
             }, updatedRuns.Clear).ConfigureAwait(false);
         }
         return [.. updatedRuns];

@@ -7,11 +7,12 @@ using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Domain.Interface.Repositories;
+using Pathfinding.Infrastructure.Business.Services;
 
 namespace Pathfinding.Infrastructure.Business.Tests;
 
 [Category("Unit")]
-internal class RequestServiceTests
+internal class GraphInfoRequestServiceTests
 {
     [Test]
     public async Task ReadAllGraphInfoAsync_ShouldReturnValidInfo()
@@ -42,7 +43,7 @@ internal class RequestServiceTests
             .Setup(x => x.CreateAsync(It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(mock.Container.Resolve<IUnitOfWork>()));
 
-        var requestService = mock.Create<RequestService<FakeVertex>>();
+        var requestService = mock.Create<GraphInfoRequestService>();
 
         var result = await requestService.ReadAllGraphInfoAsync();
 

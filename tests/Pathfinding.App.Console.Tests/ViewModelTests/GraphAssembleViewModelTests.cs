@@ -27,7 +27,7 @@ internal class GraphAssembleViewModelTests
         mock.Mock<IGraphAssemble<GraphVertexModel>>()
             .Setup(x => x.AssembleGraph(It.IsAny<IReadOnlyList<int>>()))
             .Returns(Graph<GraphVertexModel>.Empty);
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IGraphRequestService<GraphVertexModel>>()
             .Setup(x => x.CreateGraphAsync(
                 It.IsAny<CreateGraphRequest<GraphVertexModel>>(),
                 It.IsAny<CancellationToken>()))
@@ -73,7 +73,7 @@ internal class GraphAssembleViewModelTests
         Assert.Multiple(() =>
         {
             Assert.That(canExecute, Is.True);
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            mock.Mock<IGraphRequestService<GraphVertexModel>>()
                 .Verify(x => x.CreateGraphAsync(
                     It.IsAny<CreateGraphRequest<GraphVertexModel>>(),
                     It.IsAny<CancellationToken>()), Times.Once);
