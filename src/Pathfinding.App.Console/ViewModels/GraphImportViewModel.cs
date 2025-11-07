@@ -18,14 +18,14 @@ namespace Pathfinding.App.Console.ViewModels;
 internal sealed class GraphImportViewModel : ViewModel, IGraphImportViewModel
 {
     private readonly Dictionary<StreamFormat, Serializer> serializers;
-    private readonly IRequestService<GraphVertexModel> service;
+    private readonly IGraphRequestService<GraphVertexModel> service;
     private readonly IMessenger messenger;
 
     public ReactiveCommand<Func<StreamModel>, Unit> ImportGraphCommand { get; }
 
     public IReadOnlyCollection<StreamFormat> StreamFormats { get; }
 
-    public GraphImportViewModel(IRequestService<GraphVertexModel> service,
+    public GraphImportViewModel(IGraphRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         Meta<Serializer>[] serializers,
         ILog logger) : base(logger)

@@ -16,7 +16,7 @@ namespace Pathfinding.App.Console.ViewModels;
 internal sealed class GraphDeleteViewModel : ViewModel, IGraphDeleteViewModel, IDisposable
 {
     private readonly IMessenger messenger;
-    private readonly IRequestService<GraphVertexModel> service;
+    private readonly IGraphInfoRequestService service;
     private readonly CompositeDisposable disposables = [];
 
     private int[] selectedGraphIds = [];
@@ -30,7 +30,7 @@ internal sealed class GraphDeleteViewModel : ViewModel, IGraphDeleteViewModel, I
 
     public GraphDeleteViewModel(
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        IRequestService<GraphVertexModel> service,
+        IGraphInfoRequestService service,
         ILog logger) : base(logger)
     {
         DeleteGraphCommand = ReactiveCommand.CreateFromTask(DeleteGraph, CanDelete()).DisposeWith(disposables);

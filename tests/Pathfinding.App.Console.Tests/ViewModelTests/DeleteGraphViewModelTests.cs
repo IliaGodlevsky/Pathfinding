@@ -19,7 +19,7 @@ internal sealed class DeleteGraphViewModelTests
         using var mock = AutoMock.GetLoose();
         var models = Generators.GenerateGraphInfos(3).ToArray();
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IGraphInfoRequestService>()
             .Setup(x => x.DeleteGraphsAsync(
                 It.IsAny<IEnumerable<int>>(),
                 It.IsAny<CancellationToken>()))
@@ -44,7 +44,7 @@ internal sealed class DeleteGraphViewModelTests
         Assert.Multiple(() =>
         {
             Assert.That(canExecute, Is.True);
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            mock.Mock<IGraphInfoRequestService>()
                 .Verify(x => x.DeleteGraphsAsync(
                     It.IsAny<IEnumerable<int>>(),
                     It.IsAny<CancellationToken>()), Times.Once);
@@ -65,7 +65,7 @@ internal sealed class DeleteGraphViewModelTests
     {
         using var mock = AutoMock.GetLoose();
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IGraphInfoRequestService>()
             .Setup(x => x.DeleteGraphsAsync(
                 It.IsAny<IEnumerable<int>>(),
                 It.IsAny<CancellationToken>()))
@@ -99,7 +99,7 @@ internal sealed class DeleteGraphViewModelTests
         Assert.Multiple(() =>
         {
             Assert.That(canExecute, Is.False);
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            mock.Mock<IGraphInfoRequestService>()
                 .Verify(x => x.DeleteGraphsAsync(
                     It.IsAny<IEnumerable<int>>(),
                     It.IsAny<CancellationToken>()), Times.Never);

@@ -44,7 +44,7 @@ internal sealed class RunCreateViewModel : ViewModel,
         double? Weight,
         StepRules? StepRule) : IAlgorithmBuildInfo;
 
-    private readonly IRequestService<GraphVertexModel> service;
+    private readonly IStatisticsRequestService statisticsService;
     private readonly IMessenger messenger;
     private readonly IAlgorithmsFactory algorithmsFactory;
     private readonly CompositeDisposable disposables = [];
@@ -106,7 +106,7 @@ internal sealed class RunCreateViewModel : ViewModel,
     }
 
     public RunCreateViewModel(
-        IRequestService<GraphVertexModel> service,
+        IStatisticsRequestService statisticsService,
         IAlgorithmsFactory algorithmsFactory,
         IHeuristicsFactory heuristicsFactory,
         IStepRuleFactory stepRuleFactory,
@@ -114,7 +114,7 @@ internal sealed class RunCreateViewModel : ViewModel,
         ILog logger) : base(logger)
     {
         this.messenger = messenger;
-        this.service = service;
+        this.statisticsService = statisticsService;
         this.algorithmsFactory = algorithmsFactory;
         AllowedHeuristics = heuristicsFactory.Allowed;
         AllowedAlgorithms = algorithmsFactory.Allowed;
@@ -244,7 +244,7 @@ internal sealed class RunCreateViewModel : ViewModel,
         await ExecuteSafe(async () =>
         {
             using var cts = new CancellationTokenSource(GetTimeout(statistics.Length));
-            var result = await service.CreateStatisticsAsync(statistics, cts.Token)
+            var result = await statisticsService.CreateStatisticsAsync(statistics, cts.Token)
                 .ConfigureAwait(false);
             messenger.Send(new RunsCreatedMessaged([.. result]));
         }).ConfigureAwait(false);

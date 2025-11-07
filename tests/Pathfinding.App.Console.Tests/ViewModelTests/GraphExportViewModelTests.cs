@@ -103,7 +103,7 @@ internal class GraphExportViewModelTests
 
         Assert.Multiple(() =>
         {
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            mock.Mock<IGraphRequestService<GraphVertexModel>>()
                 .Verify(x => x.ReadSerializationHistoriesAsync(
                     It.IsAny<IEnumerable<int>>(),
                     It.IsAny<CancellationToken>()), Times.Never);
@@ -126,7 +126,7 @@ internal class GraphExportViewModelTests
                 .WithMetadata(MetadataKeys.Order, 1);
         });
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IGraphRequestService<GraphVertexModel>>()
             .Setup(x => x.ReadSerializationHistoriesAsync(
                 It.IsAny<IEnumerable<int>>(),
                 It.IsAny<CancellationToken>()))

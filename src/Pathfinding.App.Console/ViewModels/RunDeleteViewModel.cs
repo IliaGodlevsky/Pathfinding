@@ -16,7 +16,7 @@ namespace Pathfinding.App.Console.ViewModels;
 internal sealed class RunDeleteViewModel : ViewModel, IRunDeleteViewModel, IDisposable
 {
     private readonly IMessenger messenger;
-    private readonly IRequestService<GraphVertexModel> service;
+    private readonly IStatisticsRequestService statisticsService;
     private readonly CompositeDisposable disposables = [];
 
     private int[] selectedRunsIds = [];
@@ -32,11 +32,11 @@ internal sealed class RunDeleteViewModel : ViewModel, IRunDeleteViewModel, IDisp
 
     public RunDeleteViewModel(
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        IRequestService<GraphVertexModel> service,
+        IStatisticsRequestService statisticsService,
         ILog logger) : base(logger)
     {
         this.messenger = messenger;
-        this.service = service;
+        this.statisticsService = statisticsService;
         messenger.RegisterHandler<RunsSelectedMessage>(this, OnRunsSelected).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphsDeleted).DisposeWith(disposables);
         messenger.RegisterHandler<GraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
@@ -53,7 +53,7 @@ internal sealed class RunDeleteViewModel : ViewModel, IRunDeleteViewModel, IDisp
     {
         await ExecuteSafe(async token =>
         {
-            var isDeleted = await service.DeleteRunsAsync(
+            var isDeleted = await statisticsService.DeleteRunsAsync(
                 SelectedRunsIds, token).ConfigureAwait(false);
             if (isDeleted)
             {

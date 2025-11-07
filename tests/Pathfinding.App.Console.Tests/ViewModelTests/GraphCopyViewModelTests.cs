@@ -41,13 +41,13 @@ internal class GraphCopyViewModelTests
                     }
                 })];
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IGraphRequestService<GraphVertexModel>>()
             .Setup(x => x.ReadSerializationHistoriesAsync(
                 It.IsAny<IEnumerable<int>>(),
                 It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(histories));
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IGraphRequestService<GraphVertexModel>>()
             .Setup(x => x.CreatePathfindingHistoriesAsync(
                 It.IsAny<IEnumerable<PathfindingHistorySerializationModel>>(),
                 It.IsAny<CancellationToken>()))
@@ -71,12 +71,12 @@ internal class GraphCopyViewModelTests
 
         Assert.Multiple(() =>
         {
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            mock.Mock<IGraphRequestService<GraphVertexModel>>()
                 .Verify(x => x.ReadSerializationHistoriesAsync(
                     It.IsAny<IEnumerable<int>>(),
                     It.IsAny<CancellationToken>()), Times.Once);
 
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            mock.Mock<IGraphRequestService<GraphVertexModel>>()
                 .Verify(x => x.CreatePathfindingHistoriesAsync(
                     It.IsAny<IEnumerable<PathfindingHistorySerializationModel>>(),
                     It.IsAny<CancellationToken>()), Times.Once);
@@ -93,7 +93,7 @@ internal class GraphCopyViewModelTests
     {
         using var mock = AutoMock.GetLoose();
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IGraphRequestService<GraphVertexModel>>()
             .Setup(x => x.ReadSerializationHistoriesAsync(
                 It.IsAny<IEnumerable<int>>(),
                 It.IsAny<CancellationToken>()))

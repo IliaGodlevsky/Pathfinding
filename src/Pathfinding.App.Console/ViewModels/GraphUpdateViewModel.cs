@@ -19,7 +19,7 @@ internal sealed class GraphUpdateViewModel : ViewModel, IDisposable
 {
     private readonly IMessenger messenger;
     private readonly INeighborhoodLayerFactory neighborFactory;
-    private readonly IRequestService<GraphVertexModel> service;
+    private readonly IGraphInfoRequestService service;
     private readonly CompositeDisposable disposables = [];
 
     private GraphInfoModel[] selectedGraph = [];
@@ -55,7 +55,7 @@ internal sealed class GraphUpdateViewModel : ViewModel, IDisposable
 
     public ReactiveCommand<Unit, Unit> UpdateGraphCommand { get; }
 
-    public GraphUpdateViewModel(IRequestService<GraphVertexModel> service,
+    public GraphUpdateViewModel(IGraphInfoRequestService service,
         INeighborhoodLayerFactory neighborFactory,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         ILog log) : base(log)

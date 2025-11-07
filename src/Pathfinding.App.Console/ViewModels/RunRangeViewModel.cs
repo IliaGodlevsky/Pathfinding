@@ -34,7 +34,7 @@ internal sealed class RunRangeViewModel : ViewModel,
 {
     private readonly CompositeDisposable disposables = [];
     private readonly CompositeDisposable shortLifeDisposables = [];
-    private readonly IRequestService<GraphVertexModel> service;
+    private readonly IRangeRequestService<GraphVertexModel> rangeService;
     private readonly IEnumerable<Command> includeCommands;
     private readonly IEnumerable<Command> excludeCommands;
     private readonly IPathfindingRange<GraphVertexModel> pathfindingRange;
@@ -104,11 +104,11 @@ internal sealed class RunRangeViewModel : ViewModel,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
         [KeyFilter(KeyFilters.IncludeCommands)] Meta<Command>[] includeCommands,
         [KeyFilter(KeyFilters.ExcludeCommands)] Meta<Command>[] excludeCommands,
-        IRequestService<GraphVertexModel> service,
+        IRangeRequestService<GraphVertexModel> rangeService,
         ILog logger) : base(logger)
     {
         pathfindingRange = this;
-        this.service = service;
+        this.rangeService = rangeService;
         this.includeCommands = includeCommands
             .OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => x.Value)
@@ -160,7 +160,7 @@ internal sealed class RunRangeViewModel : ViewModel,
         {
             var vertices = pathfindingRange.ToList();
             var index = vertices.IndexOf(vertex);
-            await service.CreatePathfindingVertexAsync(GraphId,
+            await rangeService.CreatePathfindingVertexAsync(GraphId,
                 vertex.Id, index, token).ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
@@ -174,7 +174,7 @@ internal sealed class RunRangeViewModel : ViewModel,
     {
         await ExecuteSafe(async token =>
         {
-            await service.DeleteRangeAsync(vertex.Enumerate(), token).ConfigureAwait(false);
+            await rangeService.DeleteRangeAsync(vertex.Enumerate(), token).ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
 
@@ -187,7 +187,7 @@ internal sealed class RunRangeViewModel : ViewModel,
 
     private async Task DeleteRange()
     {
-        var result = await service.DeleteRangeAsync(GraphId).ConfigureAwait(false);
+        var result = await rangeService.DeleteRangeAsync(GraphId).ConfigureAwait(false);
         if (result)
         {
             ClearRange();
@@ -204,7 +204,7 @@ internal sealed class RunRangeViewModel : ViewModel,
             Graph = msg.Value.Graph;
             GraphId = msg.Value.GraphId;
             IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
-            var range = await service.ReadRangeAsync(GraphId, token).ConfigureAwait(false);
+            var range = await rangeService.ReadRangeAsync(GraphId, token).ConfigureAwait(false);
             var src = range.FirstOrDefault(x => x.IsSource);
             Source = src != null ? Graph.Get(src.Position) : null;
             var tgt = range.FirstOrDefault(x => x.IsTarget);

@@ -29,6 +29,17 @@ internal sealed class RunTableViewModelTests
                 It.IsAny<MessageHandler<object, RunsCreatedMessaged>>()))
             .Callback<object, object, MessageHandler<object, RunsCreatedMessaged>>((r, _, handler) => handler(r, new(run)));
 
+        mock.Mock<IGraphInfoRequestService>()
+            .Setup(x => x.ReadGraphInfoAsync(
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new GraphInformationModel());
+        mock.Mock<IGraphInfoRequestService>()
+            .Setup(x => x.UpdateGraphInfoAsync(
+                It.IsAny<GraphInformationModel>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
         var viewModel = mock.Create<RunsTableViewModel>();
 
         Assert.That(viewModel.Runs, Has.Count.EqualTo(1));
@@ -54,7 +65,7 @@ internal sealed class RunTableViewModelTests
                 It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()))
             .Callback<object, object, MessageHandler<object, AwaitGraphActivatedMessage>>((r, _, handler) => handler(r, graph));
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IStatisticsRequestService>()
             .Setup(x => x.ReadStatisticsAsync(
                 It.Is<int>(y => y == 1),
                 It.IsAny<CancellationToken>()))
@@ -105,7 +116,7 @@ internal sealed class RunTableViewModelTests
             .Callback<object, object, MessageHandler<object, AwaitGraphActivatedMessage>>((r, _, handler)
                 => handler(r, graph));
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IStatisticsRequestService>()
             .Setup(x => x.ReadStatisticsAsync(
                 It.Is<int>(y => y == 1),
                 It.IsAny<CancellationToken>()))
@@ -119,6 +130,17 @@ internal sealed class RunTableViewModelTests
             .Callback<object, object, MessageHandler<object, GraphsDeletedMessage>>((r, _, handler) =>
                 handler(r, new([1])));
 
+        mock.Mock<IGraphInfoRequestService>()
+            .Setup(x => x.ReadGraphInfoAsync(
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new GraphInformationModel());
+        mock.Mock<IGraphInfoRequestService>()
+            .Setup(x => x.UpdateGraphInfoAsync(
+                It.IsAny<GraphInformationModel>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
         var viewModel = mock.Create<RunsTableViewModel>();
 
         Assert.Multiple(() =>
@@ -129,7 +151,7 @@ internal sealed class RunTableViewModelTests
                     It.IsAny<IsAnyToken>(),
                     It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()), Times.Once);
 
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            mock.Mock<IStatisticsRequestService>()
                 .Verify(x => x.ReadStatisticsAsync(
                     It.Is<int>(y => y == 1),
                     It.IsAny<CancellationToken>()), Times.Once);
@@ -165,7 +187,7 @@ internal sealed class RunTableViewModelTests
             .Callback<object, object, MessageHandler<object, AwaitGraphActivatedMessage>>((r, _, handler)
                 => handler(r, graph));
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IStatisticsRequestService>()
             .Setup(x => x.ReadStatisticsAsync(
                 It.Is<int>(y => y == 1),
                 It.IsAny<CancellationToken>()))
@@ -179,6 +201,17 @@ internal sealed class RunTableViewModelTests
             .Callback<object, object, MessageHandler<object, RunsDeletedMessage>>((r, _, handler)
                 => handler(r, new([.. runs.Select(x => x.Id)])));
 
+        mock.Mock<IGraphInfoRequestService>()
+            .Setup(x => x.ReadGraphInfoAsync(
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new GraphInformationModel());
+        mock.Mock<IGraphInfoRequestService>()
+            .Setup(x => x.UpdateGraphInfoAsync(
+                It.IsAny<GraphInformationModel>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
         var viewModel = mock.Create<RunsTableViewModel>();
 
         Assert.Multiple(() =>
@@ -189,7 +222,7 @@ internal sealed class RunTableViewModelTests
                     It.IsAny<IsAnyToken>(),
                     It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()), Times.Once);
 
-            mock.Mock<IRequestService<GraphVertexModel>>()
+            mock.Mock<IStatisticsRequestService>()
                 .Verify(x => x.ReadStatisticsAsync(
                     It.Is<int>(y => y == 1),
                     It.IsAny<CancellationToken>()), Times.Once);
@@ -220,7 +253,7 @@ internal sealed class RunTableViewModelTests
                 default,
                 GraphStatuses.Editable, 1));
 
-        mock.Mock<IRequestService<GraphVertexModel>>()
+        mock.Mock<IStatisticsRequestService>()
             .Setup(x => x.ReadStatisticsAsync(
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
