@@ -7,14 +7,11 @@ using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Data.Pathfinding;
+using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Requests.Update;
 using Pathfinding.Shared.Primitives;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Pathfinding.Logging.Interface;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 
@@ -24,7 +21,7 @@ internal sealed class GraphFieldViewModelTests
     [Test]
     public async Task GraphActivatedMessage_EditableGraph_ShouldEnableCommands()
     {
-        using var messenger = new StrongReferenceMessenger();
+        var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
         using var viewModel = CreateViewModel(messenger, serviceMock);
 
@@ -51,7 +48,7 @@ internal sealed class GraphFieldViewModelTests
     [Test]
     public async Task GraphActivatedMessage_ReadonlyGraph_ShouldDisableCommands()
     {
-        using var messenger = new StrongReferenceMessenger();
+        var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
         using var viewModel = CreateViewModel(messenger, serviceMock);
 
@@ -78,7 +75,7 @@ internal sealed class GraphFieldViewModelTests
     [Test]
     public async Task ChangeVertexPolarityCommand_VertexNotInRange_ShouldUpdateVertex()
     {
-        using var messenger = new StrongReferenceMessenger();
+        var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
         serviceMock
             .Setup(x => x.UpdateVerticesAsync(
@@ -97,7 +94,7 @@ internal sealed class GraphFieldViewModelTests
             GraphStatuses.Editable,
             2));
 
-        ObstaclesCountChangedMessage? obstaclesMessage = null;
+        ObstaclesCountChangedMessage obstaclesMessage = null;
         messenger.Register<ObstaclesCountChangedMessage>(this, (_, msg) => obstaclesMessage = msg);
         messenger.Register<IsVertexInRangeRequestMessage>(this, (_, request) => request.Reply(false));
 
@@ -123,7 +120,7 @@ internal sealed class GraphFieldViewModelTests
     [Test]
     public async Task ChangeVertexPolarityCommand_VertexInRange_ShouldNotUpdateVertex()
     {
-        using var messenger = new StrongReferenceMessenger();
+        var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
         using var viewModel = CreateViewModel(messenger, serviceMock);
 
@@ -158,7 +155,7 @@ internal sealed class GraphFieldViewModelTests
     [Test]
     public async Task ChangeVertexCostCommand_ShouldClampAndPersistCost()
     {
-        using var messenger = new StrongReferenceMessenger();
+        var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
         serviceMock
             .Setup(x => x.UpdateVerticesAsync(
@@ -197,7 +194,7 @@ internal sealed class GraphFieldViewModelTests
     [Test]
     public async Task InverseVertexCommand_ShouldDecreaseObstaclesCount()
     {
-        using var messenger = new StrongReferenceMessenger();
+        var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
         serviceMock
             .Setup(x => x.UpdateVerticesAsync(
@@ -217,7 +214,7 @@ internal sealed class GraphFieldViewModelTests
             GraphStatuses.Editable,
             5));
 
-        ObstaclesCountChangedMessage? obstaclesMessage = null;
+        ObstaclesCountChangedMessage obstaclesMessage = null;
         messenger.Register<ObstaclesCountChangedMessage>(this, (_, msg) => obstaclesMessage = msg);
         messenger.Register<IsVertexInRangeRequestMessage>(this, (_, request) => request.Reply(false));
 
@@ -237,7 +234,7 @@ internal sealed class GraphFieldViewModelTests
     [Test]
     public async Task GraphStateChangedMessage_ShouldToggleCommandAvailability()
     {
-        using var messenger = new StrongReferenceMessenger();
+        var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
         using var viewModel = CreateViewModel(messenger, serviceMock);
 
@@ -268,7 +265,7 @@ internal sealed class GraphFieldViewModelTests
     [Test]
     public async Task GraphsDeletedMessage_ShouldResetGraphAndDisableCommands()
     {
-        using var messenger = new StrongReferenceMessenger();
+        var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
         using var viewModel = CreateViewModel(messenger, serviceMock);
 
