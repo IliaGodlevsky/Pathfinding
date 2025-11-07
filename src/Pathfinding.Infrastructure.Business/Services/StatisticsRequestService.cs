@@ -1,5 +1,6 @@
 using Pathfinding.Domain.Interface.Extensions;
 using Pathfinding.Domain.Interface.Factories;
+using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Infrastructure.Data.InMemory;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Undefined;

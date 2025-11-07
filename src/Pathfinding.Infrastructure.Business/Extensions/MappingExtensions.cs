@@ -9,7 +9,7 @@ using Pathfinding.Service.Interface.Models.Undefined;
 using Pathfinding.Service.Interface.Requests.Create;
 using Pathfinding.Shared.Primitives;
 
-namespace Pathfinding.Infrastructure.Business.Services;
+namespace Pathfinding.Infrastructure.Business.Extensions;
 
 internal static class MappingExtensions
 {
