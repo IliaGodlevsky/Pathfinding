@@ -4,18 +4,18 @@ using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Extensions;
 using Pathfinding.Domain.Interface.Factories;
+using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Infrastructure.Data.InMemory;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Serialization;
-using Pathfinding.Service.Interface.Models.Undefined;
 using Pathfinding.Service.Interface.Requests.Create;
 using Pathfinding.Service.Interface.Requests.Update;
 using Pathfinding.Shared.Extensions;
 using Pathfinding.Shared.Primitives;
 
-namespace Pathfinding.Infrastructure.Business;
+namespace Pathfinding.Infrastructure.Business.Services;
 
 public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphRequestService<T>
     where T : IVertex, IEntity<long>, new()
@@ -45,7 +45,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
                     Name = graphModel.Name,
                     Status = graphModel.Status
                 };
-                var model = await RequestServiceHelpers.CreateGraphAsyncInternal(unitOfWork, createGraphRequest, t)
+                var model = await unitOfWork.CreateGraphAsyncInternal(createGraphRequest, t)
                     .ConfigureAwait(false);
                 var statistics = history.Statistics.ToStatistics();
                 statistics.ForEach(x => x.GraphId = model.Id);
@@ -102,7 +102,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
     public async Task<GraphModel<T>> ReadGraphAsync(int graphId, CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unitOfWork, t)
-                => await RequestServiceHelpers.ReadGraphInternalAsync<T>(unitOfWork, graphId, t).ConfigureAwait(false), token)
+                => await unitOfWork.ReadGraphInternalAsync<T>(graphId, t).ConfigureAwait(false), token)
             .ConfigureAwait(false);
     }
 
@@ -110,7 +110,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unit, t)
-                => await RequestServiceHelpers.CreateGraphAsyncInternal(unit, graph, t).ConfigureAwait(false), token)
+                => await unit.CreateGraphAsyncInternal(graph, t).ConfigureAwait(false), token)
             .ConfigureAwait(false);
     }
 
@@ -123,9 +123,9 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
             var result = new List<PathfindingHistorySerializationModel>();
             foreach (var graphId in graphIds)
             {
-                var graph = await RequestServiceHelpers.ReadGraphInternalAsync<T>(unitOfWork, graphId, t)
+                var graph = await unitOfWork.ReadGraphInternalAsync<T>(graphId, t)
                     .ConfigureAwait(false);
-                var range = await RequestServiceHelpers.ReadRangeAsyncInternal<T>(unitOfWork, graphId, t)
+                var range = await unitOfWork.ReadRangeAsyncInternal<T>(graphId, t)
                     .ConfigureAwait(false);
                 var statistics = await unitOfWork.StatisticsRepository
                     .ReadByGraphIdAsync(graphId)
@@ -153,7 +153,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
             var result = new List<PathfindingHistorySerializationModel>();
             foreach (var graphId in graphIds)
             {
-                var graph = await RequestServiceHelpers.ReadGraphInternalAsync<T>(unitOfWork, graphId, t)
+                var graph = await unitOfWork.ReadGraphInternalAsync<T>(graphId, t)
                     .ConfigureAwait(false);
                 graph.Status = GraphStatuses.Editable;
                 result.Add(new PathfindingHistorySerializationModel
@@ -178,10 +178,10 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
             var result = new List<PathfindingHistorySerializationModel>();
             foreach (var graphId in graphIds)
             {
-                var graph = await RequestServiceHelpers.ReadGraphInternalAsync<T>(unitOfWork, graphId, t)
+                var graph = await unitOfWork.ReadGraphInternalAsync<T>(graphId, t)
                     .ConfigureAwait(false);
                 graph.Status = GraphStatuses.Editable;
-                var range = await RequestServiceHelpers.ReadRangeAsyncInternal<T>(unitOfWork, graphId, t)
+                var range = await unitOfWork.ReadRangeAsyncInternal<T>(graphId, t)
                     .ConfigureAwait(false);
                 result.Add(new PathfindingHistorySerializationModel
                 {

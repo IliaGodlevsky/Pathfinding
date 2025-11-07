@@ -2,11 +2,13 @@ using Pathfinding.Domain.Core;
 using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Extensions;
+using Pathfinding.Domain.Interface.Factories;
+using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Infrastructure.Data.InMemory;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 
-namespace Pathfinding.Infrastructure.Business;
+namespace Pathfinding.Infrastructure.Business.Services;
 
 public sealed class RangeRequestService<T>(IUnitOfWorkFactory factory) : IRangeRequestService<T>
     where T : IVertex, IEntity<long>, new()
@@ -19,7 +21,7 @@ public sealed class RangeRequestService<T>(IUnitOfWorkFactory factory) : IRangeR
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unit, t)
-                => await RequestServiceHelpers.ReadRangeAsyncInternal<T>(unit, graphId, t).ConfigureAwait(false), token)
+                => await unit.ReadRangeAsyncInternal<T>(graphId, t).ConfigureAwait(false), token)
             .ConfigureAwait(false);
     }
 

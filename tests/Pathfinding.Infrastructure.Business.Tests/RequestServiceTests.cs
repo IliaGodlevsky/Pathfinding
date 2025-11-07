@@ -7,7 +7,7 @@ using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Domain.Interface.Repositories;
-using Pathfinding.Infrastructure.Business;
+using Pathfinding.Infrastructure.Business.Services;
 
 namespace Pathfinding.Infrastructure.Business.Tests;
 

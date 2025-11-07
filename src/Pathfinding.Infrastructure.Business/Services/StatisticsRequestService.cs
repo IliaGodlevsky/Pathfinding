@@ -1,14 +1,11 @@
-using System.Linq;
-using Pathfinding.Domain.Core.Entities;
-using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Extensions;
+using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Data.InMemory;
 using Pathfinding.Service.Interface;
-using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Undefined;
 using Pathfinding.Service.Interface.Requests.Create;
 
-namespace Pathfinding.Infrastructure.Business;
+namespace Pathfinding.Infrastructure.Business.Services;
 
 public sealed class StatisticsRequestService(IUnitOfWorkFactory factory) : IStatisticsRequestService
 {
