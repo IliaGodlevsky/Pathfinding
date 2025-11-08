@@ -1,4 +1,3 @@
-﻿using Autofac.Extras.Moq;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
@@ -11,106 +10,97 @@ using System.Reactive.Linq;
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 
 [Category("Unit")]
-internal class DeleteRunViewModelTests
+internal sealed class DeleteRunViewModelTests
 {
     [Test]
-    public async Task DeleteRuns_SeveralRunIds_ShouldDelete()
+    public async Task DeleteRunsCommand_SeveralRunIds_ShouldDelete()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var serviceMock = new Mock<IStatisticsRequestService>();
+        serviceMock
+            .Setup(x => x.DeleteRunsAsync(
+                It.IsAny<IEnumerable<int>>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        using var viewModel = CreateViewModel(messenger, serviceMock);
+
         var runModels = new RunInfoModel[]
         {
             new() { Id = 1 },
             new() { Id = 2 },
-            new() { Id = 3 },
+            new() { Id = 3 }
         };
 
-        mock.Mock<IStatisticsRequestService>()
-            .Setup(x => x.DeleteRunsAsync(
-                It.IsAny<IEnumerable<int>>(),
-                It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(true));
+        RunsDeletedMessage deletedMessage = null;
+        messenger.Register<RunsDeletedMessage>(this, (_, msg) => deletedMessage = msg);
 
-        mock.Mock<IMessenger>().Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.IsAny<IsAnyToken>(),
-                It.IsAny<MessageHandler<object, RunsSelectedMessage>>()))
-            .Callback<object, object, MessageHandler<object, RunsSelectedMessage>>((r, t, handler)
-                => handler(r, new RunsSelectedMessage(runModels)));
+        messenger.Send(new RunsSelectedMessage(runModels));
 
-        var viewModel = mock.Create<RunDeleteViewModel>();
+        var canExecute = await viewModel.DeleteRunsCommand.CanExecute.FirstAsync(value => value);
 
-        var command = viewModel.DeleteRunsCommand;
-        var canExecute = await command.CanExecute.FirstOrDefaultAsync();
-        if (canExecute)
-        {
-            await command.Execute();
-        }
+        await viewModel.DeleteRunsCommand.Execute();
 
         Assert.Multiple(() =>
         {
             Assert.That(canExecute, Is.True);
-            mock.Mock<IStatisticsRequestService>()
+            serviceMock
                 .Verify(x => x.DeleteRunsAsync(
                     It.IsAny<IEnumerable<int>>(),
                     It.IsAny<CancellationToken>()), Times.Once);
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Register(
-                    It.IsAny<RunDeleteViewModel>(),
-                    It.IsAny<IsAnyToken>(),
-                    It.IsAny<MessageHandler<object, RunsSelectedMessage>>()), Times.Once);
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Send(
-                    It.Is<RunsDeletedMessage>(x => runModels.Select(x => x.Id).SequenceEqual(x.Value)),
-                    It.IsAny<IsAnyToken>()), Times.Once);
+            Assert.That(deletedMessage, Is.Not.Null);
+            Assert.That(deletedMessage!.Value, Is.EqualTo(runModels.Select(x => x.Id).ToArray()));
         });
     }
 
     [Test]
-    public async Task DeletRunCommand_ThrowsException_ShouldLogError()
+    public async Task DeleteRunsCommand_ThrowsException_ShouldLogError()
     {
-        using var mock = AutoMock.GetLoose();
-
-        mock.Mock<IStatisticsRequestService>()
+        var messenger = new StrongReferenceMessenger();
+        var serviceMock = new Mock<IStatisticsRequestService>();
+        serviceMock
             .Setup(x => x.DeleteRunsAsync(
                 It.IsAny<IEnumerable<int>>(),
                 It.IsAny<CancellationToken>()))
-            .Throws(new Exception());
+            .ThrowsAsync(new Exception());
 
-        var viewModel = mock.Create<RunDeleteViewModel>();
+        var logMock = new Mock<ILog>();
+
+        using var viewModel = CreateViewModel(messenger, serviceMock, logMock.Object);
+
+        messenger.Send(new RunsSelectedMessage([new RunInfoModel { Id = 1 }]));
 
         await viewModel.DeleteRunsCommand.Execute();
 
-        mock.Mock<ILog>()
+        logMock
             .Verify(x => x.Error(
                 It.IsAny<Exception>(),
                 It.IsAny<string>()), Times.Once);
     }
 
     [Test]
-    public async Task DeleteGraphCommand_NoGraphs_ShouldNotExecute()
+    public async Task DeleteRunsCommand_NoRuns_ShouldNotExecute()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var serviceMock = new Mock<IStatisticsRequestService>();
 
-        var viewModel = mock.Create<RunDeleteViewModel>();
+        using var viewModel = CreateViewModel(messenger, serviceMock);
 
-        var command = viewModel.DeleteRunsCommand;
-        var canExecute = await command.CanExecute.FirstOrDefaultAsync();
-        if (canExecute)
-        {
-            await command.Execute();
-        }
+        var canExecute = await viewModel.DeleteRunsCommand.CanExecute.FirstAsync(value => !value);
 
         Assert.Multiple(() =>
         {
             Assert.That(canExecute, Is.False);
-            mock.Mock<IStatisticsRequestService>()
+            serviceMock
                 .Verify(x => x.DeleteRunsAsync(
                     It.IsAny<IEnumerable<int>>(),
                     It.IsAny<CancellationToken>()), Times.Never);
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Send(
-                    It.IsAny<RunsDeletedMessage>(),
-                    It.IsAny<IsAnyToken>()), Times.Never);
         });
+    }
+
+    private static RunDeleteViewModel CreateViewModel(StrongReferenceMessenger messenger,
+        Mock<IStatisticsRequestService> serviceMock, ILog logger = null)
+    {
+        return new RunDeleteViewModel(messenger, serviceMock.Object, logger ?? Mock.Of<ILog>());
     }
 }

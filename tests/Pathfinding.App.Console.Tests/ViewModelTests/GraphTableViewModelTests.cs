@@ -1,7 +1,7 @@
-﻿using Autofac.Extras.Moq;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
 using Pathfinding.App.Console.Factories;
+using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
@@ -20,25 +20,29 @@ internal sealed class GraphTableViewModelTests
     [Test]
     public async Task LoadGraphsCommand_ShouldAddGraphs()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var graphServiceMock = new Mock<IGraphRequestService<GraphVertexModel>>();
+        var graphInfoServiceMock = new Mock<IGraphInfoRequestService>();
+        var neighborFactoryMock = new Mock<INeighborhoodLayerFactory>();
 
         IReadOnlyCollection<GraphInformationModel> graphs =
-        [.. Enumerable.Range(1, 5).Select(x => new GraphInformationModel
-        {
-            Id = x,
-            Dimensions = []
-        })];
-        mock.Mock<IGraphInfoRequestService>()
-            .Setup(x => x.ReadAllGraphInfoAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(graphs));
+            [.. Enumerable.Range(1, 5).Select(x => new GraphInformationModel { Id = x, Dimensions = [] })];
 
-        var viewModel = mock.Create<GraphTableViewModel>();
+        graphInfoServiceMock
+            .Setup(x => x.ReadAllGraphInfoAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(graphs);
+
+        using var viewModel = CreateViewModel(
+            messenger,
+            graphServiceMock,
+            graphInfoServiceMock,
+            neighborFactoryMock);
 
         await viewModel.LoadGraphsCommand.Execute();
 
         Assert.Multiple(() =>
         {
-            mock.Mock<IGraphInfoRequestService>()
+            graphInfoServiceMock
                 .Verify(x => x.ReadAllGraphInfoAsync(
                     It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(viewModel.Graphs, Has.Count.EqualTo(graphs.Count));
@@ -48,17 +52,26 @@ internal sealed class GraphTableViewModelTests
     [Test]
     public async Task LoadGraphsCommand_ThrowsException_ShouldLogError()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var graphServiceMock = new Mock<IGraphRequestService<GraphVertexModel>>();
+        var graphInfoServiceMock = new Mock<IGraphInfoRequestService>();
+        var neighborFactoryMock = new Mock<INeighborhoodLayerFactory>();
+        var logMock = new Mock<ILog>();
 
-        mock.Mock<IGraphInfoRequestService>()
+        graphInfoServiceMock
             .Setup(x => x.ReadAllGraphInfoAsync(It.IsAny<CancellationToken>()))
-            .Throws(new Exception());
+            .ThrowsAsync(new Exception());
 
-        var viewModel = mock.Create<GraphTableViewModel>();
+        using var viewModel = CreateViewModel(
+            messenger,
+            graphServiceMock,
+            graphInfoServiceMock,
+            neighborFactoryMock,
+            logMock.Object);
 
         await viewModel.LoadGraphsCommand.Execute();
 
-        mock.Mock<ILog>()
+        logMock
             .Verify(x => x.Error(
                 It.IsAny<Exception>(),
                 It.IsAny<string>()), Times.Once);
@@ -67,9 +80,12 @@ internal sealed class GraphTableViewModelTests
     [Test]
     public async Task ActivateGraphCommand_ShouldSendMessage()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var graphServiceMock = new Mock<IGraphRequestService<GraphVertexModel>>();
+        var graphInfoServiceMock = new Mock<IGraphInfoRequestService>();
+        var neighborFactoryMock = new Mock<INeighborhoodLayerFactory>();
 
-        var graph = new GraphModel<GraphVertexModel>()
+        var graph = new GraphModel<GraphVertexModel>
         {
             Id = 1,
             Name = "Test",
@@ -77,61 +93,79 @@ internal sealed class GraphTableViewModelTests
             DimensionSizes = []
         };
 
-        mock.Mock<IGraphRequestService<GraphVertexModel>>()
+        graphServiceMock
             .Setup(x => x.ReadGraphAsync(
-                It.Is<int>(z => z == 1),
+                It.Is<int>(id => id == 1),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(graph));
-        mock.Mock<INeighborhoodLayerFactory>()
-            .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
-            .Returns(new MooreNeighborhoodLayer());
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Send(It.IsAny<AwaitGraphActivatedMessage>(),
-                It.IsAny<IsAnyToken>()))
-            .Returns<AwaitGraphActivatedMessage, object>((x, _) => x)
-            .Callback<AwaitGraphActivatedMessage, object>((m, _) => m.SetCompleted());
+            .ReturnsAsync(graph);
 
-        mock.Mock<INeighborhoodLayerFactory>()
+        neighborFactoryMock
             .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
             .Returns(new MooreNeighborhoodLayer());
 
-        var viewModel = mock.Create<GraphTableViewModel>();
+        var runsTableMessages = new List<AwaitGraphActivatedMessage>();
+        messenger.Register<AwaitGraphActivatedMessage, int>(this, Tokens.RunsTable, (_, msg) =>
+        {
+            runsTableMessages.Add(msg);
+            msg.SetCompleted();
+        });
+        var pathfindingMessages = new List<AwaitGraphActivatedMessage>();
+        messenger.Register<AwaitGraphActivatedMessage, int>(this, Tokens.PathfindingRange, (_, msg) =>
+        {
+            pathfindingMessages.Add(msg);
+            msg.SetCompleted();
+        });
+        var fieldMessages = new List<GraphActivatedMessage>();
+        messenger.Register<GraphActivatedMessage, int>(this, Tokens.GraphField, (_, msg) => fieldMessages.Add(msg));
+        var broadcastMessages = new List<GraphActivatedMessage>();
+        messenger.Register<GraphActivatedMessage>(this, (_, msg) => broadcastMessages.Add(msg));
+
+        using var viewModel = CreateViewModel(
+            messenger,
+            graphServiceMock,
+            graphInfoServiceMock,
+            neighborFactoryMock);
 
         await viewModel.ActivateGraphCommand.Execute(1);
 
         Assert.Multiple(() =>
         {
-            mock.Mock<IGraphRequestService<GraphVertexModel>>()
+            graphServiceMock
                 .Verify(x => x.ReadGraphAsync(
                     It.Is<int>(z => z == 1),
                     It.IsAny<CancellationToken>()), Times.Once);
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Send(
-                    It.IsAny<AwaitGraphActivatedMessage>(),
-                    It.IsAny<IsAnyToken>()), Times.Exactly(2));
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Send(
-                    It.IsAny<GraphActivatedMessage>(),
-                    It.IsAny<IsAnyToken>()), Times.Exactly(2));
+            Assert.That(fieldMessages, Has.Count.EqualTo(1));
+            Assert.That(runsTableMessages, Has.Count.EqualTo(1));
+            Assert.That(pathfindingMessages, Has.Count.EqualTo(1));
+            Assert.That(broadcastMessages, Has.Count.EqualTo(1));
         });
     }
 
     [Test]
     public async Task ActivateGraphCommand_ThrowException_ShouldLogError()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var graphServiceMock = new Mock<IGraphRequestService<GraphVertexModel>>();
+        var graphInfoServiceMock = new Mock<IGraphInfoRequestService>();
+        var neighborFactoryMock = new Mock<INeighborhoodLayerFactory>();
+        var logMock = new Mock<ILog>();
 
-        mock.Mock<IGraphRequestService<GraphVertexModel>>()
+        graphServiceMock
             .Setup(x => x.ReadGraphAsync(
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
-            .Throws(new Exception());
+            .ThrowsAsync(new Exception());
 
-        var viewModel = mock.Create<GraphTableViewModel>();
+        using var viewModel = CreateViewModel(
+            messenger,
+            graphServiceMock,
+            graphInfoServiceMock,
+            neighborFactoryMock,
+            logMock.Object);
 
-        await viewModel.ActivateGraphCommand.Execute(new());
+        await viewModel.ActivateGraphCommand.Execute(1);
 
-        mock.Mock<ILog>()
+        logMock
             .Verify(x => x.Error(
                 It.IsAny<Exception>(),
                 It.IsAny<string>()), Times.Once);
@@ -140,17 +174,43 @@ internal sealed class GraphTableViewModelTests
     [Test]
     public async Task SelectedGraphsCommand_ShouldSendMessage()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var graphServiceMock = new Mock<IGraphRequestService<GraphVertexModel>>();
+        var graphInfoServiceMock = new Mock<IGraphInfoRequestService>();
+        var neighborFactoryMock = new Mock<INeighborhoodLayerFactory>();
 
-        var models = Enumerable.Range(1, 5).ToArray();
+        using var viewModel = CreateViewModel(
+            messenger,
+            graphServiceMock,
+            graphInfoServiceMock,
+            neighborFactoryMock);
 
-        var viewModel = mock.Create<GraphTableViewModel>();
+        GraphsSelectedMessage selectedMessage = null;
+        messenger.Register<GraphsSelectedMessage>(this, (_, msg) => selectedMessage = msg);
 
-        await viewModel.SelectGraphsCommand.Execute(models);
+        await viewModel.SelectGraphsCommand.Execute([1, 2, 3]);
 
-        mock.Mock<IMessenger>()
-            .Verify(x => x.Send(
-                It.IsAny<GraphsSelectedMessage>(),
-                It.IsAny<IsAnyToken>()), Times.Once);
+        Assert.That(selectedMessage, Is.Not.Null);
+    }
+
+    private static GraphTableViewModel CreateViewModel(
+        StrongReferenceMessenger messenger,
+        Mock<IGraphRequestService<GraphVertexModel>> graphServiceMock,
+        Mock<IGraphInfoRequestService> graphInfoServiceMock,
+        Mock<INeighborhoodLayerFactory> neighborFactoryMock,
+        ILog logger = null)
+    {
+        neighborFactoryMock
+            .SetupGet(x => x.Allowed)
+            .Returns(Enum.GetValues<Neighborhoods>());
+        neighborFactoryMock
+            .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
+            .Returns(new MooreNeighborhoodLayer());
+        return new GraphTableViewModel(
+            graphServiceMock.Object,
+            graphInfoServiceMock.Object,
+            neighborFactoryMock.Object,
+            messenger,
+            logger ?? Mock.Of<ILog>());
     }
 }

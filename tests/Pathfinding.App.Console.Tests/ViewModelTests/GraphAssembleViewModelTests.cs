@@ -1,4 +1,3 @@
-﻿using Autofac.Extras.Moq;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
 using Pathfinding.App.Console.Factories;
@@ -9,6 +8,7 @@ using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Business.Layers;
 using Pathfinding.Infrastructure.Data.Pathfinding;
+using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Requests.Create;
@@ -17,21 +17,26 @@ using System.Reactive.Linq;
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 
 [Category("Unit")]
-internal class GraphAssembleViewModelTests
+internal sealed class GraphAssembleViewModelTests
 {
     [Test]
     public async Task CreateCommand_ValidInputs_ShouldCreateValidGraph()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var graphServiceMock = new Mock<IGraphRequestService<GraphVertexModel>>();
+        var assembleMock = new Mock<IGraphAssemble<GraphVertexModel>>();
+        var smoothFactoryMock = new Mock<ISmoothLevelFactory>();
+        var neighborFactoryMock = new Mock<INeighborhoodLayerFactory>();
 
-        mock.Mock<IGraphAssemble<GraphVertexModel>>()
+        assembleMock
             .Setup(x => x.AssembleGraph(It.IsAny<IReadOnlyList<int>>()))
             .Returns(Graph<GraphVertexModel>.Empty);
-        mock.Mock<IGraphRequestService<GraphVertexModel>>()
+
+        graphServiceMock
             .Setup(x => x.CreateGraphAsync(
                 It.IsAny<CreateGraphRequest<GraphVertexModel>>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(new GraphModel<GraphVertexModel>()
+            .ReturnsAsync(new GraphModel<GraphVertexModel>
             {
                 Id = 1,
                 Name = "Demo",
@@ -40,22 +45,29 @@ internal class GraphAssembleViewModelTests
                 Status = GraphStatuses.Editable,
                 Vertices = [],
                 DimensionSizes = [15, 15]
-            }));
-        mock.Mock<ISmoothLevelFactory>()
-            .Setup(x => x.CreateLayer(It.IsAny<SmoothLevels>()))
-            .Returns(new SmoothLayer(0));
-        mock.Mock<INeighborhoodLayerFactory>()
-            .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
-            .Returns(new MooreNeighborhoodLayer());
+            });
 
-        mock.Mock<INeighborhoodLayerFactory>()
-            .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
-            .Returns(new MooreNeighborhoodLayer());
-        mock.Mock<ISmoothLevelFactory>()
+        smoothFactoryMock
+            .SetupGet(x => x.Allowed)
+            .Returns(Enum.GetValues<SmoothLevels>());
+        smoothFactoryMock
             .Setup(x => x.CreateLayer(It.IsAny<SmoothLevels>()))
             .Returns(new SmoothLayer(0));
 
-        var viewModel = mock.Create<GraphAssembleViewModel>();
+        neighborFactoryMock
+            .SetupGet(x => x.Allowed)
+            .Returns(Enum.GetValues<Neighborhoods>());
+        neighborFactoryMock
+            .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
+            .Returns(new MooreNeighborhoodLayer());
+
+        using var viewModel = CreateViewModel(
+            messenger,
+            graphServiceMock,
+            assembleMock,
+            smoothFactoryMock,
+            neighborFactoryMock);
+
         viewModel.SmoothLevel = SmoothLevels.No;
         viewModel.Length = 15;
         viewModel.Width = 15;
@@ -63,26 +75,40 @@ internal class GraphAssembleViewModelTests
         viewModel.Obstacles = 10;
         viewModel.Name = "Demo";
 
-        var command = viewModel.AssembleGraphCommand;
-        bool canExecute = await command.CanExecute.FirstOrDefaultAsync();
-        if (canExecute)
-        {
-            await command.Execute();
-        }
+        GraphsCreatedMessage createdMessage = null;
+        messenger.Register<GraphsCreatedMessage>(this, (_, msg) => createdMessage = msg);
+
+        var canExecute = await viewModel.AssembleGraphCommand.CanExecute.FirstAsync(value => value);
+
+        await viewModel.AssembleGraphCommand.Execute();
 
         Assert.Multiple(() =>
         {
             Assert.That(canExecute, Is.True);
-            mock.Mock<IGraphRequestService<GraphVertexModel>>()
+            graphServiceMock
                 .Verify(x => x.CreateGraphAsync(
                     It.IsAny<CreateGraphRequest<GraphVertexModel>>(),
                     It.IsAny<CancellationToken>()), Times.Once);
-            mock.Mock<IMessenger>().Verify(x => x.Send(
-                It.IsAny<GraphsCreatedMessage>(),
-                It.IsAny<IsAnyToken>()), Times.Once);
-            mock.Mock<IGraphAssemble<GraphVertexModel>>()
+            assembleMock
                 .Verify(x => x.AssembleGraph(
                     It.IsAny<IReadOnlyList<int>>()), Times.Once);
+            Assert.That(createdMessage, Is.Not.Null);
         });
+    }
+
+    private static GraphAssembleViewModel CreateViewModel(StrongReferenceMessenger messenger,
+        Mock<IGraphRequestService<GraphVertexModel>> serviceMock,
+        Mock<IGraphAssemble<GraphVertexModel>> assembleMock,
+        Mock<ISmoothLevelFactory> smoothFactoryMock,
+        Mock<INeighborhoodLayerFactory> neighborFactoryMock,
+        ILog logger = null)
+    {
+        return new GraphAssembleViewModel(
+            serviceMock.Object,
+            assembleMock.Object,
+            smoothFactoryMock.Object,
+            neighborFactoryMock.Object,
+            messenger,
+            logger ?? Mock.Of<ILog>());
     }
 }
