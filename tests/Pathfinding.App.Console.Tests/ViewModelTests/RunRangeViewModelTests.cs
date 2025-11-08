@@ -8,11 +8,15 @@ using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface;
+using Pathfinding.Infrastructure.Business.Commands;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
+using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Shared.Primitives;
 using System.Reactive.Linq;
+using System.Linq;
+using System.Threading.Tasks;
 using Command = Pathfinding.Service.Interface.IPathfindingRangeCommand<Pathfinding.App.Console.Models.GraphVertexModel>;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
@@ -21,15 +25,19 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests;
 internal sealed class RunRangeViewModelTests
 {
     [Test]
-    public void AddToRangeCommand_ShouldExecuteFirstAvailableCommand()
+    public async Task AddToRangeCommand_ShouldExecuteFirstAvailableCommand()
     {
         var messenger = new StrongReferenceMessenger();
         var rangeServiceMock = new Mock<IRangeRequestService<GraphVertexModel>>();
+        rangeServiceMock
+            .Setup(x => x.ReadRangeAsync(
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<PathfindingRangeModel>());
         var includeCommands = new[]
         {
             CreateCommandMeta(new StubCommand(canExecute: false)),
-            CreateCommandMeta(new StubCommand(canExecute: true,
-                execute: (range, vertex) => range.Source = vertex))
+            CreateCommandMeta(new IncludeSourceVertex<GraphVertexModel>(), order: 2)
         };
         var excludeCommands = Array.Empty<Meta<Command>>();
 
@@ -39,7 +47,10 @@ internal sealed class RunRangeViewModelTests
             includeCommands,
             excludeCommands);
 
-        var vertex = new GraphVertexModel { Position = new Coordinate(0) };
+        var graph = CreateGraph();
+        await ActivateGraphAsync(messenger, graph);
+
+        var vertex = graph.First();
 
         viewModel.AddToRangeCommand.Execute(vertex);
 
@@ -47,19 +58,23 @@ internal sealed class RunRangeViewModelTests
     }
 
     [Test]
-    public void RemoveFromRangeCommand_ShouldExecuteFirstAvailableCommand()
+    public async Task RemoveFromRangeCommand_ShouldExecuteFirstAvailableCommand()
     {
         var messenger = new StrongReferenceMessenger();
         var rangeServiceMock = new Mock<IRangeRequestService<GraphVertexModel>>();
+        rangeServiceMock
+            .Setup(x => x.ReadRangeAsync(
+                It.IsAny<int>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Array.Empty<PathfindingRangeModel>());
         var includeCommands = new[]
         {
-            CreateCommandMeta(new StubCommand(canExecute: true,
-                execute: (range, vertex) => range.Source = vertex))
+            CreateCommandMeta(new IncludeSourceVertex<GraphVertexModel>())
         };
         var excludeCommands = new[]
         {
-            CreateCommandMeta(new StubCommand(canExecute: true,
-                execute: (range, _) => range.Source = null))
+            CreateCommandMeta(new StubCommand(canExecute: false)),
+            CreateCommandMeta(new ExcludeSourceVertex<GraphVertexModel>(), order: 2)
         };
 
         using var viewModel = CreateViewModel(
@@ -68,7 +83,10 @@ internal sealed class RunRangeViewModelTests
             includeCommands,
             excludeCommands);
 
-        var vertex = new GraphVertexModel { Position = new Coordinate(0) };
+        var graph = CreateGraph();
+        await ActivateGraphAsync(messenger, graph);
+
+        var vertex = graph.First();
         viewModel.AddToRangeCommand.Execute(vertex);
         viewModel.RemoveFromRangeCommand.Execute(vertex);
 
@@ -114,12 +132,7 @@ internal sealed class RunRangeViewModelTests
             excludeCommands);
 
         var graph = CreateGraph();
-        await messenger.Send(new AwaitGraphActivatedMessage(new ActivatedGraphModel(
-            graph,
-            Neighborhoods.Moore,
-            SmoothLevels.No,
-            GraphStatuses.Editable,
-            GraphId: 12)), Tokens.PathfindingRange);
+        await ActivateGraphAsync(messenger, graph, graphId: 12);
 
         Assert.Multiple(() =>
         {
@@ -136,6 +149,20 @@ internal sealed class RunRangeViewModelTests
             Assert.That(viewModel.Target, Is.Null);
             Assert.That(viewModel.Transit, Is.Empty);
         });
+    }
+
+    private static Task ActivateGraphAsync(
+        IMessenger messenger,
+        Graph<GraphVertexModel> graph,
+        int graphId = 12,
+        GraphStatuses status = GraphStatuses.Editable)
+    {
+        return messenger.Send(new AwaitGraphActivatedMessage(new ActivatedGraphModel(
+            graph,
+            Neighborhoods.Moore,
+            SmoothLevels.No,
+            status,
+            GraphId: graphId)), Tokens.PathfindingRange);
     }
 
     private static RunRangeViewModel CreateViewModel(
@@ -155,8 +182,16 @@ internal sealed class RunRangeViewModelTests
 
     private static Graph<GraphVertexModel> CreateGraph()
     {
-        var first = new GraphVertexModel { Position = new Coordinate(0) };
-        var second = new GraphVertexModel { Position = new Coordinate(1) };
+        var first = new GraphVertexModel
+        {
+            Position = new Coordinate(0),
+            Cost = new StubVertexCost()
+        };
+        var second = new GraphVertexModel
+        {
+            Position = new Coordinate(1),
+            Cost = new StubVertexCost()
+        };
         first.Neighbors.Add(second);
         second.Neighbors.Add(first);
         return new Graph<GraphVertexModel>([first, second], [2]);
@@ -183,6 +218,22 @@ internal sealed class RunRangeViewModelTests
         public bool CanExecute(IPathfindingRange<GraphVertexModel> range, GraphVertexModel vertex)
         {
             return canExecute;
+        }
+    }
+
+    private sealed class StubVertexCost : IVertexCost
+    {
+        public InclusiveValueRange<int> CostRange { get; set; } = new(0, 0);
+
+        public int CurrentCost { get; set; }
+
+        public IVertexCost Clone()
+        {
+            return new StubVertexCost
+            {
+                CostRange = CostRange,
+                CurrentCost = CurrentCost
+            };
         }
     }
 }
