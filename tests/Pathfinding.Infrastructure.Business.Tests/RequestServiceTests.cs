@@ -1,3 +1,4 @@
+using Autofac;
 using Autofac.Extras.Moq;
 using Bogus;
 using Moq;
@@ -71,9 +72,9 @@ internal class GraphInfoRequestServiceTests
         {
             Id = 7,
             Name = "test",
-            Neighborhood = Neighborhoods.Eight,
+            Neighborhood = Neighborhoods.Moore,
             SmoothLevel = SmoothLevels.High,
-            Status = GraphStatuses.ReadOnly,
+            Status = GraphStatuses.Readonly,
             Dimensions = "[3,4]"
         };
 
@@ -112,7 +113,7 @@ internal class GraphInfoRequestServiceTests
         {
             Id = 9,
             Name = "graph",
-            Neighborhood = Neighborhoods.Four,
+            Neighborhood = Neighborhoods.Moore,
             SmoothLevel = SmoothLevels.Low,
             Status = GraphStatuses.Editable,
             Dimensions = new[] { 5, 6 }
@@ -191,7 +192,7 @@ internal class GraphRequestServiceTests
         {
             Graph = graph,
             Name = "graph",
-            Neighborhood = Neighborhoods.Four,
+            Neighborhood = Neighborhoods.Moore,
             SmoothLevel = SmoothLevels.Low,
             Status = GraphStatuses.Editable
         };
@@ -245,8 +246,8 @@ internal class GraphRequestServiceTests
             Id = graphId,
             Name = "graph",
             SmoothLevel = SmoothLevels.Low,
-            Neighborhood = Neighborhoods.Eight,
-            Status = GraphStatuses.ReadOnly,
+            Neighborhood = Neighborhoods.Moore,
+            Status = GraphStatuses.Readonly,
             Dimensions = "[2,2]"
         };
         var vertexEntities = new List<Vertex>
@@ -322,7 +323,7 @@ internal class GraphRequestServiceTests
             Graph = new GraphSerializationModel
             {
                 Name = "graph",
-                Neighborhood = Neighborhoods.Four,
+                Neighborhood = Neighborhoods.Moore,
                 SmoothLevel = SmoothLevels.Medium,
                 Status = GraphStatuses.Editable,
                 DimensionSizes = new[] { 2, 2 }
@@ -346,12 +347,12 @@ internal class GraphRequestServiceTests
             {
                 new()
                 {
-                    Algorithm = Algorithms.AStar,
+                    Algorithm = Domain.Core.Enums.Algorithms.AStar,
                     Cost = 1,
                     Steps = 2,
                     Visited = 3,
                     Elapsed = TimeSpan.FromMilliseconds(10),
-                    ResultStatus = RunStatuses.Completed
+                    ResultStatus = RunStatuses.Success
                 }
             },
             Range = new List<CoordinateModel>
@@ -427,7 +428,7 @@ internal class GraphRequestServiceTests
             Id = graphId,
             Name = "graph",
             SmoothLevel = SmoothLevels.Low,
-            Neighborhood = Neighborhoods.Four,
+            Neighborhood = Neighborhoods.Moore,
             Status = GraphStatuses.Editable,
             Dimensions = "[2,2]"
         };
@@ -443,7 +444,7 @@ internal class GraphRequestServiceTests
         };
         var stats = new List<Statistics>
         {
-            new() { Id = 6, GraphId = graphId, Algorithm = Algorithms.AStar, ResultStatus = RunStatuses.Completed, Steps = 2, Visited = 3, Cost = 4, Elapsed = 5 }
+            new() { Id = 6, GraphId = graphId, Algorithm = Domain.Core.Enums.Algorithms.AStar, ResultStatus = RunStatuses.Success, Steps = 2, Visited = 3, Cost = 4, Elapsed = 5 }
         };
 
         UnitOfWorkMockHelper.SetupUnitOfWork(mock, unit =>
@@ -494,8 +495,8 @@ internal class GraphRequestServiceTests
             Id = graphId,
             Name = "graph",
             SmoothLevel = SmoothLevels.High,
-            Neighborhood = Neighborhoods.Eight,
-            Status = GraphStatuses.ReadOnly,
+            Neighborhood = Neighborhoods.Moore,
+            Status = GraphStatuses.Readonly,
             Dimensions = "[3,3]"
         };
         var vertices = new List<Vertex>
@@ -539,8 +540,8 @@ internal class GraphRequestServiceTests
             Id = graphId,
             Name = "graph",
             SmoothLevel = SmoothLevels.Low,
-            Neighborhood = Neighborhoods.Four,
-            Status = GraphStatuses.ReadOnly,
+            Neighborhood = Neighborhoods.Moore,
+            Status = GraphStatuses.Readonly,
             Dimensions = "[2,2]"
         };
         var vertices = new List<Vertex>
@@ -761,8 +762,8 @@ internal class StatisticsRequestServiceTests
         {
             Id = 7,
             GraphId = 3,
-            Algorithm = Algorithms.AStar,
-            ResultStatus = RunStatuses.Completed,
+            Algorithm = Domain.Core.Enums.Algorithms.AStar,
+            ResultStatus = RunStatuses.Success,
             Steps = 5,
             Visited = 8,
             Cost = 9,
@@ -796,7 +797,7 @@ internal class StatisticsRequestServiceTests
         var repository = mock.Mock<IStatisticsRepository>();
         var stats = new List<Statistics>
         {
-            new() { Id = 1, GraphId = 2, Algorithm = Algorithms.AStar, ResultStatus = RunStatuses.Completed, Steps = 1, Visited = 1, Cost = 1, Elapsed = 1 }
+            new() { Id = 1, GraphId = 2, Algorithm = Domain.Core.Enums.Algorithms.AStar, ResultStatus = RunStatuses.Success, Steps = 1, Visited = 1, Cost = 1, Elapsed = 1 }
         };
         repository
             .Setup(x => x.ReadByIdsAsync(It.IsAny<IReadOnlyCollection<int>>()))
@@ -821,7 +822,7 @@ internal class StatisticsRequestServiceTests
         var repository = mock.Mock<IStatisticsRepository>();
         var stats = new List<Statistics>
         {
-            new() { Id = 3, GraphId = 4, Algorithm = Algorithms.Dijkstra, ResultStatus = RunStatuses.Completed, Steps = 2, Visited = 2, Cost = 2, Elapsed = 2 }
+            new() { Id = 3, GraphId = 4, Algorithm = Domain.Core.Enums.Algorithms.AStar, ResultStatus = RunStatuses.Success, Steps = 2, Visited = 2, Cost = 2, Elapsed = 2 }
         };
         repository
             .Setup(x => x.ReadByGraphIdAsync(4))
@@ -857,9 +858,9 @@ internal class StatisticsRequestServiceTests
         {
             new()
             {
-                Algorithm = Algorithms.AStar,
+                Algorithm = Domain.Core.Enums.Algorithms.AStar,
                 GraphId = 1,
-                ResultStatus = RunStatuses.Completed,
+                ResultStatus = RunStatuses.Success,
                 Steps = 1,
                 Visited = 1,
                 Cost = 1,
@@ -895,8 +896,8 @@ internal class StatisticsRequestServiceTests
             {
                 Id = 1,
                 GraphId = 2,
-                Algorithm = Algorithms.Dijkstra,
-                ResultStatus = RunStatuses.Completed,
+                Algorithm = Domain.Core.Enums.Algorithms.AStar,
+                ResultStatus = RunStatuses.Success,
                 Steps = 2,
                 Visited = 3,
                 Cost = 4,
