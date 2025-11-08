@@ -1,4 +1,3 @@
-﻿using Autofac.Extras.Moq;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
@@ -14,98 +13,103 @@ using System.Reactive.Linq;
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 
 [Category("Unit")]
-internal class GraphCopyViewModelTests
+internal sealed class GraphCopyViewModelTests
 {
     [Test]
     public async Task CopyCommand_CanExecute_ShouldCopy()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var serviceMock = new Mock<IGraphRequestService<GraphVertexModel>>();
 
         var models = Generators.GenerateGraphInfos(3).ToArray();
 
-        PathfindingHistoriesSerializationModel histories
-            = Enumerable.Range(1, 5)
-                .Select(x => new PathfindingHistorySerializationModel())
-                .ToArray()
-                .To(x => new PathfindingHistoriesSerializationModel() { Histories = [.. x] });
-        IReadOnlyCollection<PathfindingHistoryModel<GraphVertexModel>> result
-            = [.. Enumerable.Range(1, 5)
-                .Select(x => new PathfindingHistoryModel<GraphVertexModel>()
+        var histories = Enumerable.Range(1, 5)
+            .Select(_ => new PathfindingHistorySerializationModel())
+            .ToArray()
+            .To(x => new PathfindingHistoriesSerializationModel { Histories = [.. x] });
+        var createdHistories = Enumerable.Range(1, 5)
+            .Select(index => new PathfindingHistoryModel<GraphVertexModel>
+            {
+                Graph = new GraphModel<GraphVertexModel>
                 {
-                    Graph = new()
-                    {
-                        Id = x,
-                        Vertices = [],
-                        DimensionSizes = [],
-                        Name = string.Empty
-                    }
-                })];
+                    Id = index,
+                    Vertices = [],
+                    DimensionSizes = [],
+                    Name = string.Empty
+                }
+            })
+            .ToArray()
+            .To<IReadOnlyCollection<PathfindingHistoryModel<GraphVertexModel>>>();
 
-        mock.Mock<IGraphRequestService<GraphVertexModel>>()
+        serviceMock
             .Setup(x => x.ReadSerializationHistoriesAsync(
                 It.IsAny<IEnumerable<int>>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(histories));
+            .ReturnsAsync(histories);
 
-        mock.Mock<IGraphRequestService<GraphVertexModel>>()
+        serviceMock
             .Setup(x => x.CreatePathfindingHistoriesAsync(
                 It.IsAny<IEnumerable<PathfindingHistorySerializationModel>>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(result));
+            .ReturnsAsync(createdHistories);
 
-        mock.Mock<IMessenger>().Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.IsAny<IsAnyToken>(),
-                It.IsAny<MessageHandler<object, GraphsSelectedMessage>>()))
-            .Callback<object, object, MessageHandler<object, GraphsSelectedMessage>>((r, t, handler)
-                => handler(r, new GraphsSelectedMessage(models)));
+        using var viewModel = CreateViewModel(messenger, serviceMock);
 
-        var viewModel = mock.Create<GraphCopyViewModel>();
+        GraphsCreatedMessage? createdMessage = null;
+        messenger.Register<GraphsCreatedMessage>(this, (_, msg) => createdMessage = msg);
 
-        var command = viewModel.CopyGraphCommand;
+        messenger.Send(new GraphsSelectedMessage(models));
 
-        if (await command.CanExecute.FirstOrDefaultAsync())
+        if (await viewModel.CopyGraphCommand.CanExecute.FirstAsync(value => value))
         {
-            await command.Execute();
+            await viewModel.CopyGraphCommand.Execute();
         }
 
         Assert.Multiple(() =>
         {
-            mock.Mock<IGraphRequestService<GraphVertexModel>>()
+            serviceMock
                 .Verify(x => x.ReadSerializationHistoriesAsync(
                     It.IsAny<IEnumerable<int>>(),
                     It.IsAny<CancellationToken>()), Times.Once);
 
-            mock.Mock<IGraphRequestService<GraphVertexModel>>()
+            serviceMock
                 .Verify(x => x.CreatePathfindingHistoriesAsync(
                     It.IsAny<IEnumerable<PathfindingHistorySerializationModel>>(),
                     It.IsAny<CancellationToken>()), Times.Once);
 
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Send(
-                    It.IsAny<GraphsCreatedMessage>(),
-                    It.IsAny<IsAnyToken>()), Times.Once);
+            Assert.That(createdMessage, Is.Not.Null);
         });
     }
 
     [Test]
     public async Task CopyGraphCommand_ThrowsException_ShouldLogError()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var serviceMock = new Mock<IGraphRequestService<GraphVertexModel>>();
 
-        mock.Mock<IGraphRequestService<GraphVertexModel>>()
+        serviceMock
             .Setup(x => x.ReadSerializationHistoriesAsync(
                 It.IsAny<IEnumerable<int>>(),
                 It.IsAny<CancellationToken>()))
-            .Throws(new Exception());
+            .ThrowsAsync(new Exception());
 
-        var viewModel = mock.Create<GraphCopyViewModel>();
+        var logMock = new Mock<ILog>();
+
+        using var viewModel = CreateViewModel(messenger, serviceMock, logMock.Object);
+
+        messenger.Send(new GraphsSelectedMessage(Generators.GenerateGraphInfos(1).ToArray()));
 
         await viewModel.CopyGraphCommand.Execute();
 
-        mock.Mock<ILog>()
+        logMock
             .Verify(x => x.Error(
                 It.IsAny<Exception>(),
                 It.IsAny<string>()), Times.Once);
+    }
+
+    private static GraphCopyViewModel CreateViewModel(StrongReferenceMessenger messenger,
+        Mock<IGraphRequestService<GraphVertexModel>> serviceMock, ILog? logger = null)
+    {
+        return new GraphCopyViewModel(messenger, serviceMock.Object, logger ?? Mock.Of<ILog>());
     }
 }

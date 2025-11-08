@@ -1,6 +1,6 @@
-﻿using Autofac.Extras.Moq;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
+using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
@@ -10,8 +10,9 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Undefined;
-using Pathfinding.Shared.Extensions;
-using System.Reactive.Linq;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 
@@ -19,60 +20,55 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests;
 internal sealed class RunTableViewModelTests
 {
     [Test]
-    public void OnRunCreated_ValidRun_ShouldAdd()
+    public async Task OnRunCreated_ValidRun_ShouldAdd()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var statisticsMock = new Mock<IStatisticsRequestService>();
+        var graphInfoMock = new Mock<IGraphInfoRequestService>();
 
-        var run = new RunStatisticsModel() { Id = 1 }.Enumerate().ToArray();
-        mock.Mock<IMessenger>().Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.IsAny<IsAnyToken>(),
-                It.IsAny<MessageHandler<object, RunsCreatedMessaged>>()))
-            .Callback<object, object, MessageHandler<object, RunsCreatedMessaged>>((r, _, handler) => handler(r, new(run)));
-
-        mock.Mock<IGraphInfoRequestService>()
+        graphInfoMock
             .Setup(x => x.ReadGraphInfoAsync(
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(new GraphInformationModel());
-        mock.Mock<IGraphInfoRequestService>()
+        graphInfoMock
             .Setup(x => x.UpdateGraphInfoAsync(
                 It.IsAny<GraphInformationModel>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        var viewModel = mock.Create<RunsTableViewModel>();
+        using var viewModel = CreateViewModel(messenger, statisticsMock, graphInfoMock);
+
+        var completion = new TaskCompletionSource();
+        messenger.Register<GraphStateChangedMessage>(this, (_, _) => completion.TrySetResult());
+
+        var run = new RunStatisticsModel { Id = 1 };
+        messenger.Send(new RunsCreatedMessaged([run]));
+
+        await completion.Task.ConfigureAwait(false);
 
         Assert.That(viewModel.Runs, Has.Count.EqualTo(1));
     }
 
     [Test]
-    public void OnGraphActivated_ValidGraph_ShouldGetRuns()
+    public async Task OnGraphActivated_ValidGraph_ShouldGetRuns()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var statisticsMock = new Mock<IStatisticsRequestService>();
+        var graphInfoMock = new Mock<IGraphInfoRequestService>();
 
-        var graph = new AwaitGraphActivatedMessage(
-            new(Graph<GraphVertexModel>.Empty,
-                default,
-                default,
-                GraphStatuses.Editable, 1));
-        IReadOnlyCollection<RunStatisticsModel> runs = [.. Enumerable.Range(1, 5)
-            .Select(x => new RunStatisticsModel { Id = x })];
+        IReadOnlyCollection<RunStatisticsModel> runs =
+            [.. Enumerable.Range(1, 5).Select(x => new RunStatisticsModel { Id = x })];
 
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.IsAny<IsAnyToken>(),
-                It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()))
-            .Callback<object, object, MessageHandler<object, AwaitGraphActivatedMessage>>((r, _, handler) => handler(r, graph));
-
-        mock.Mock<IStatisticsRequestService>()
+        statisticsMock
             .Setup(x => x.ReadStatisticsAsync(
-                It.Is<int>(y => y == 1),
+                It.Is<int>(id => id == 1),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(runs));
+            .ReturnsAsync(runs);
 
-        var viewModel = mock.Create<RunsTableViewModel>();
+        using var viewModel = CreateViewModel(messenger, statisticsMock, graphInfoMock);
+
+        await messenger.Send(CreateActivatedMessage(1), Tokens.RunsTable);
 
         Assert.Multiple(() =>
         {
@@ -84,195 +80,151 @@ internal sealed class RunTableViewModelTests
     [Test]
     public async Task SelectRunCommand_ShouldSendMessage()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var statisticsMock = new Mock<IStatisticsRequestService>();
+        var graphInfoMock = new Mock<IGraphInfoRequestService>();
 
-        var viewModel = mock.Create<RunsTableViewModel>();
+        using var viewModel = CreateViewModel(messenger, statisticsMock, graphInfoMock);
+
+        RunsSelectedMessage? selectedMessage = null;
+        messenger.Register<RunsSelectedMessage>(this, (_, msg) => selectedMessage = msg);
 
         await viewModel.SelectRunsCommand.Execute([]);
 
-        mock.Mock<IMessenger>()
-            .Verify(x => x.Send(
-                It.IsAny<RunsSelectedMessage>(),
-                It.IsAny<IsAnyToken>()), Times.Once);
+        Assert.That(selectedMessage, Is.Not.Null);
     }
 
     [Test]
-    public void DeleteGraphsMessage_ActivatedGraph_ShouldClearRuns()
+    public async Task DeleteGraphsMessage_ActivatedGraph_ShouldClearRuns()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var statisticsMock = new Mock<IStatisticsRequestService>();
+        var graphInfoMock = new Mock<IGraphInfoRequestService>();
 
-        var graph = new AwaitGraphActivatedMessage(
-            new(Graph<GraphVertexModel>.Empty,
-                default,
-                default,
-                GraphStatuses.Editable, 1));
-        IReadOnlyCollection<RunStatisticsModel> runs = [.. Enumerable.Range(1, 5)
-            .Select(x => new RunStatisticsModel { Id = x })];
+        IReadOnlyCollection<RunStatisticsModel> runs =
+            [.. Enumerable.Range(1, 5).Select(x => new RunStatisticsModel { Id = x })];
 
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.IsAny<IsAnyToken>(),
-                It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()))
-            .Callback<object, object, MessageHandler<object, AwaitGraphActivatedMessage>>((r, _, handler)
-                => handler(r, graph));
-
-        mock.Mock<IStatisticsRequestService>()
+        statisticsMock
             .Setup(x => x.ReadStatisticsAsync(
-                It.Is<int>(y => y == 1),
+                It.Is<int>(id => id == 1),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(runs));
+            .ReturnsAsync(runs);
 
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.IsAny<IsAnyToken>(),
-                It.IsAny<MessageHandler<object, GraphsDeletedMessage>>()))
-            .Callback<object, object, MessageHandler<object, GraphsDeletedMessage>>((r, _, handler) =>
-                handler(r, new([1])));
+        using var viewModel = CreateViewModel(messenger, statisticsMock, graphInfoMock);
 
-        mock.Mock<IGraphInfoRequestService>()
+        await messenger.Send(CreateActivatedMessage(1), Tokens.RunsTable);
+
+        messenger.Send(new GraphsDeletedMessage([1]));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(viewModel.Runs, Is.Empty);
+            statisticsMock
+                .Verify(x => x.ReadStatisticsAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<CancellationToken>()), Times.Once);
+        });
+    }
+
+    [Test]
+    public async Task DeleteRunsMessage_SendAllRuns_ShouldDeleteAllAndSendEditableState()
+    {
+        var messenger = new StrongReferenceMessenger();
+        var statisticsMock = new Mock<IStatisticsRequestService>();
+        var graphInfoMock = new Mock<IGraphInfoRequestService>();
+
+        IReadOnlyCollection<RunStatisticsModel> runs =
+            [.. Enumerable.Range(1, 5).Select(x => new RunStatisticsModel { Id = x })];
+
+        statisticsMock
+            .Setup(x => x.ReadStatisticsAsync(
+                It.Is<int>(id => id == 1),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(runs);
+
+        graphInfoMock
             .Setup(x => x.ReadGraphInfoAsync(
-                It.IsAny<int>(),
+                It.Is<int>(id => id == 1),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new GraphInformationModel());
-        mock.Mock<IGraphInfoRequestService>()
+            .ReturnsAsync(new GraphInformationModel { Id = 1 });
+        graphInfoMock
             .Setup(x => x.UpdateGraphInfoAsync(
                 It.IsAny<GraphInformationModel>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
-        var viewModel = mock.Create<RunsTableViewModel>();
+        using var viewModel = CreateViewModel(messenger, statisticsMock, graphInfoMock);
+
+        await messenger.Send(CreateActivatedMessage(1), Tokens.RunsTable);
+
+        var stateChanged = new TaskCompletionSource();
+        messenger.Register<GraphStateChangedMessage>(this, (_, msg) =>
+        {
+            if (msg.Value.Id == 1 && msg.Value.Status == GraphStatuses.Editable)
+            {
+                stateChanged.TrySetResult();
+            }
+        });
+
+        messenger.Send(new RunsDeletedMessage([.. runs.Select(x => x.Id)]));
+
+        await stateChanged.Task.ConfigureAwait(false);
 
         Assert.Multiple(() =>
         {
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Register(
-                    It.IsAny<object>(),
-                    It.IsAny<IsAnyToken>(),
-                    It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()), Times.Once);
-
-            mock.Mock<IStatisticsRequestService>()
-                .Verify(x => x.ReadStatisticsAsync(
-                    It.Is<int>(y => y == 1),
-                    It.IsAny<CancellationToken>()), Times.Once);
-
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Register(
-                    It.IsAny<object>(),
-                    It.IsAny<IsAnyToken>(),
-                    It.IsAny<MessageHandler<object, GraphsDeletedMessage>>()), Times.Once);
-
             Assert.That(viewModel.Runs, Is.Empty);
+            graphInfoMock
+                .Verify(x => x.UpdateGraphInfoAsync(
+                    It.IsAny<GraphInformationModel>(),
+                    It.IsAny<CancellationToken>()), Times.Once);
         });
     }
 
     [Test]
-    public void DeleteRunsMessage_SendAllRuns_ShouldDeleteAllAndSendFalseReadOnlyMessage()
+    public async Task ActivateGraph_ThrowsException_ShouldLogError()
     {
-        using var mock = AutoMock.GetLoose();
+        var messenger = new StrongReferenceMessenger();
+        var statisticsMock = new Mock<IStatisticsRequestService>();
+        var graphInfoMock = new Mock<IGraphInfoRequestService>();
+        var logMock = new Mock<ILog>();
 
-        var graph = new AwaitGraphActivatedMessage(
-            new(Graph<GraphVertexModel>.Empty,
-                default,
-                default,
-                GraphStatuses.Editable, 1));
-        IReadOnlyCollection<RunStatisticsModel> runs = [.. Enumerable.Range(1, 5)
-            .Select(x => new RunStatisticsModel { Id = x })];
-
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.IsAny<IsAnyToken>(),
-                It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()))
-            .Callback<object, object, MessageHandler<object, AwaitGraphActivatedMessage>>((r, _, handler)
-                => handler(r, graph));
-
-        mock.Mock<IStatisticsRequestService>()
-            .Setup(x => x.ReadStatisticsAsync(
-                It.Is<int>(y => y == 1),
-                It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(runs));
-
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.IsAny<IsAnyToken>(),
-                It.IsAny<MessageHandler<object, RunsDeletedMessage>>()))
-            .Callback<object, object, MessageHandler<object, RunsDeletedMessage>>((r, _, handler)
-                => handler(r, new([.. runs.Select(x => x.Id)])));
-
-        mock.Mock<IGraphInfoRequestService>()
-            .Setup(x => x.ReadGraphInfoAsync(
-                It.IsAny<int>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new GraphInformationModel());
-        mock.Mock<IGraphInfoRequestService>()
-            .Setup(x => x.UpdateGraphInfoAsync(
-                It.IsAny<GraphInformationModel>(),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-
-        var viewModel = mock.Create<RunsTableViewModel>();
-
-        Assert.Multiple(() =>
-        {
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Register(
-                    It.IsAny<object>(),
-                    It.IsAny<IsAnyToken>(),
-                    It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()), Times.Once);
-
-            mock.Mock<IStatisticsRequestService>()
-                .Verify(x => x.ReadStatisticsAsync(
-                    It.Is<int>(y => y == 1),
-                    It.IsAny<CancellationToken>()), Times.Once);
-
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Register(
-                    It.IsAny<object>(),
-                    It.IsAny<IsAnyToken>(),
-                    It.IsAny<MessageHandler<object, RunsDeletedMessage>>()), Times.Once);
-
-            mock.Mock<IMessenger>()
-                .Verify(x => x.Send(
-                    It.Is<GraphStateChangedMessage>(y => y.Value.Id == 1 && y.Value.Status == GraphStatuses.Editable),
-                    It.IsAny<IsAnyToken>()), Times.Once);
-
-            Assert.That(viewModel.Runs, Is.Empty);
-        });
-    }
-
-    [Test]
-    public void ActivateGraph_ThrowsException_ShouldLogError()
-    {
-        using var mock = AutoMock.GetLoose();
-
-        var graph = new AwaitGraphActivatedMessage(
-            new(Graph<GraphVertexModel>.Empty,
-                default,
-                default,
-                GraphStatuses.Editable, 1));
-
-        mock.Mock<IStatisticsRequestService>()
+        statisticsMock
             .Setup(x => x.ReadStatisticsAsync(
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
-            .Throws(new Exception());
+            .ThrowsAsync(new Exception());
 
-        mock.Mock<IMessenger>()
-            .Setup(x => x.Register(
-                It.IsAny<object>(),
-                It.IsAny<IsAnyToken>(),
-                It.IsAny<MessageHandler<object, AwaitGraphActivatedMessage>>()))
-            .Callback<object, object, MessageHandler<object, AwaitGraphActivatedMessage>>((r, _, handler)
-                => handler(r, graph));
+        using var viewModel = CreateViewModel(messenger, statisticsMock, graphInfoMock, logMock.Object);
 
-        _ = mock.Create<RunsTableViewModel>();
+        await messenger.Send(CreateActivatedMessage(1), Tokens.RunsTable);
 
-        mock.Mock<ILog>()
+        logMock
             .Verify(x => x.Error(
                 It.IsAny<Exception>(),
                 It.IsAny<string>()), Times.Once);
+    }
+
+    private static RunsTableViewModel CreateViewModel(
+        StrongReferenceMessenger messenger,
+        Mock<IStatisticsRequestService> statisticsMock,
+        Mock<IGraphInfoRequestService> graphInfoMock,
+        ILog? logger = null)
+    {
+        return new RunsTableViewModel(
+            statisticsMock.Object,
+            graphInfoMock.Object,
+            messenger,
+            logger ?? Mock.Of<ILog>());
+    }
+
+    private static AwaitGraphActivatedMessage CreateActivatedMessage(int graphId)
+    {
+        var activated = new ActivatedGraphModel(
+            Graph<GraphVertexModel>.Empty,
+            default,
+            default,
+            GraphStatuses.Editable,
+            graphId);
+        return new AwaitGraphActivatedMessage(activated);
     }
 }
