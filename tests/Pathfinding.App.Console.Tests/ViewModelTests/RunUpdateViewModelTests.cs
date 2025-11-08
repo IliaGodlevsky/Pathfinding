@@ -42,8 +42,8 @@ internal sealed class RunUpdateViewModelTests
             graph,
             Neighborhoods.Moore,
             SmoothLevels.No,
-            GraphStatuses.Active,
-            graphId: 10)));
+            GraphStatuses.Editable,
+            GraphId: 10)));
 
         var runInfo = new RunInfoModel { Id = 1, Algorithm = Algorithms.AStar };
         messenger.Send(new RunsSelectedMessage([runInfo]));
@@ -78,10 +78,10 @@ internal sealed class RunUpdateViewModelTests
             .Setup(x => x.ReadStatisticsAsync(
                 It.IsAny<IEnumerable<int>>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<RunStatisticsModel>
-            {
+            .ReturnsAsync(
+            [
                 new() { Id = 1, GraphId = 10, Algorithm = Algorithms.AStar }
-            });
+            ]);
 
         statisticsServiceMock
             .Setup(x => x.UpdateStatisticsAsync(
@@ -101,8 +101,8 @@ internal sealed class RunUpdateViewModelTests
             graph,
             Neighborhoods.Moore,
             SmoothLevels.No,
-            GraphStatuses.Active,
-            graphId: 10)));
+            GraphStatuses.Editable,
+            GraphId: 10)));
 
         var runInfo = new RunInfoModel { Id = 1, Algorithm = Algorithms.AStar };
         messenger.Send(new RunsSelectedMessage([runInfo]));
@@ -147,8 +147,8 @@ internal sealed class RunUpdateViewModelTests
             graph,
             Neighborhoods.Moore,
             SmoothLevels.No,
-            GraphStatuses.Active,
-            graphId: 5)));
+            GraphStatuses.Editable,
+            GraphId: 5)));
 
         messenger.Send(new RunsSelectedMessage([
             new RunInfoModel { Id = 1, Algorithm = Algorithms.AStar }
@@ -156,7 +156,7 @@ internal sealed class RunUpdateViewModelTests
 
         messenger.Send(new GraphsDeletedMessage([5]));
 
-        Assert.That(await viewModel.UpdateRunsCommand.CanExecute.FirstAsync(x => !x), Is.True);
+        Assert.That(await viewModel.UpdateRunsCommand.CanExecute.FirstAsync(), Is.False);
     }
 
     private static RunUpdateViewModel CreateViewModel(
@@ -182,7 +182,7 @@ internal sealed class RunUpdateViewModelTests
     {
         var factory = new TestAlgorithmFactory();
         var algorithmsFactoryMock = new Mock<IAlgorithmsFactory>();
-        algorithmsFactoryMock.SetupGet(x => x.Allowed).Returns(new[] { Algorithms.AStar });
+        algorithmsFactoryMock.SetupGet(x => x.Allowed).Returns([Algorithms.AStar]);
         algorithmsFactoryMock
             .Setup(x => x.GetAlgorithmFactory(It.IsAny<Algorithms>()))
             .Returns(factory);

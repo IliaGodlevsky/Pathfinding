@@ -27,9 +27,9 @@ internal sealed class RunCreateViewModelTests
         var statisticsServiceMock = new Mock<IStatisticsRequestService>();
         var algorithmsFactoryMock = CreateAlgorithmsFactoryMock();
         var heuristicsFactoryMock = new Mock<IHeuristicsFactory>();
-        heuristicsFactoryMock.SetupGet(x => x.Allowed).Returns(Array.Empty<Heuristics>());
+        heuristicsFactoryMock.SetupGet(x => x.Allowed).Returns([]);
         var stepRuleFactoryMock = new Mock<IStepRuleFactory>();
-        stepRuleFactoryMock.SetupGet(x => x.Allowed).Returns(Array.Empty<StepRules>());
+        stepRuleFactoryMock.SetupGet(x => x.Allowed).Returns([]);
 
         using var viewModel = CreateViewModel(
             messenger,
@@ -43,16 +43,16 @@ internal sealed class RunCreateViewModelTests
             graph,
             Neighborhoods.Moore,
             SmoothLevels.No,
-            GraphStatuses.Active,
-            graphId: 42)));
+            GraphStatuses.Editable,
+            GraphId: 42)));
 
         viewModel.Algorithm = Algorithms.AStar;
 
-        Assert.That(await viewModel.CreateRunCommand.CanExecute.FirstAsync(x => x), Is.True);
+        Assert.That(await viewModel.CreateRunCommand.CanExecute.FirstAsync(), Is.True);
 
         messenger.Send(new GraphsDeletedMessage([42]));
 
-        Assert.That(await viewModel.CreateRunCommand.CanExecute.FirstAsync(x => !x), Is.True);
+        Assert.That(await viewModel.CreateRunCommand.CanExecute.FirstAsync(), Is.False);
     }
 
     [Test]
@@ -62,9 +62,9 @@ internal sealed class RunCreateViewModelTests
         var statisticsServiceMock = new Mock<IStatisticsRequestService>();
         var algorithmsFactoryMock = CreateAlgorithmsFactoryMock();
         var heuristicsFactoryMock = new Mock<IHeuristicsFactory>();
-        heuristicsFactoryMock.SetupGet(x => x.Allowed).Returns(Array.Empty<Heuristics>());
+        heuristicsFactoryMock.SetupGet(x => x.Allowed).Returns([]);
         var stepRuleFactoryMock = new Mock<IStepRuleFactory>();
-        stepRuleFactoryMock.SetupGet(x => x.Allowed).Returns(Array.Empty<StepRules>());
+        stepRuleFactoryMock.SetupGet(x => x.Allowed).Returns([]);
         var logMock = new Mock<ILog>();
 
         var createdRuns = new[]
@@ -91,11 +91,11 @@ internal sealed class RunCreateViewModelTests
             graph,
             Neighborhoods.Moore,
             SmoothLevels.No,
-            GraphStatuses.Active,
-            graphId: 42)));
+            GraphStatuses.Editable,
+            GraphId: 42)));
 
         messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
-            => msg.Reply(graph.Select(v => v).ToArray()));
+            => msg.Reply([.. graph.Select(v => v)]));
 
         viewModel.Algorithm = Algorithms.AStar;
 
@@ -120,9 +120,9 @@ internal sealed class RunCreateViewModelTests
         var statisticsServiceMock = new Mock<IStatisticsRequestService>();
         var algorithmsFactoryMock = CreateAlgorithmsFactoryMock();
         var heuristicsFactoryMock = new Mock<IHeuristicsFactory>();
-        heuristicsFactoryMock.SetupGet(x => x.Allowed).Returns(Array.Empty<Heuristics>());
+        heuristicsFactoryMock.SetupGet(x => x.Allowed).Returns([]);
         var stepRuleFactoryMock = new Mock<IStepRuleFactory>();
-        stepRuleFactoryMock.SetupGet(x => x.Allowed).Returns(Array.Empty<StepRules>());
+        stepRuleFactoryMock.SetupGet(x => x.Allowed).Returns([]);
         var logMock = new Mock<ILog>();
 
         using var viewModel = CreateViewModel(
@@ -138,11 +138,11 @@ internal sealed class RunCreateViewModelTests
             graph,
             Neighborhoods.Moore,
             SmoothLevels.No,
-            GraphStatuses.Active,
-            graphId: 42)));
+            GraphStatuses.Editable,
+            GraphId: 42)));
 
         messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
-            => msg.Reply(new[] { graph.First() }));
+            => msg.Reply([graph.First()]));
 
         viewModel.Algorithm = Algorithms.AStar;
 
@@ -175,7 +175,7 @@ internal sealed class RunCreateViewModelTests
     {
         var factory = new TestAlgorithmFactory();
         var algorithmsFactoryMock = new Mock<IAlgorithmsFactory>();
-        algorithmsFactoryMock.SetupGet(x => x.Allowed).Returns(new[] { Algorithms.AStar });
+        algorithmsFactoryMock.SetupGet(x => x.Allowed).Returns([Algorithms.AStar]);
         algorithmsFactoryMock
             .Setup(x => x.GetAlgorithmFactory(It.IsAny<Algorithms>()))
             .Returns(factory);

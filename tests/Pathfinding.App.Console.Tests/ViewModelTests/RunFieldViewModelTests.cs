@@ -33,8 +33,8 @@ internal sealed class RunFieldViewModelTests
             graph,
             Neighborhoods.Moore,
             SmoothLevels.No,
-            GraphStatuses.Active,
-            graphId: 1)));
+            GraphStatuses.Editable,
+            GraphId: 1)));
 
         Assert.That(viewModel.RunGraph, Is.Not.EqualTo(Graph<RunVertexModel>.Empty));
     }
@@ -56,11 +56,11 @@ internal sealed class RunFieldViewModelTests
             graph,
             Neighborhoods.Moore,
             SmoothLevels.No,
-            GraphStatuses.Active,
-            graphId: 1)));
+            GraphStatuses.Editable,
+            GraphId: 1)));
 
         messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
-            => msg.Reply(graph.ToArray()));
+            => msg.Reply([.. graph]));
 
         var runInfo = new RunInfoModel { Id = 7, Algorithm = Algorithms.AStar };
         messenger.Send(new RunsSelectedMessage([runInfo]));
@@ -85,11 +85,11 @@ internal sealed class RunFieldViewModelTests
             graph,
             Neighborhoods.Moore,
             SmoothLevels.No,
-            GraphStatuses.Active,
-            graphId: 1)));
+            GraphStatuses.Editable,
+            GraphId: 1)));
 
         messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
-            => msg.Reply(graph.ToArray()));
+            => msg.Reply([.. graph]));
 
         var runInfo = new RunInfoModel { Id = 4, Algorithm = Algorithms.AStar };
         messenger.Send(new RunsSelectedMessage([runInfo]));
@@ -101,8 +101,8 @@ internal sealed class RunFieldViewModelTests
 
     private static Graph<GraphVertexModel> CreateGraph()
     {
-        var first = new GraphVertexModel { Position = new Coordinate(0) };
-        var second = new GraphVertexModel { Position = new Coordinate(1) };
+        var first = new GraphVertexModel { Position = new Coordinate(0), Cost = new VertexCost(1, (1,2)) };
+        var second = new GraphVertexModel { Position = new Coordinate(1), Cost = new VertexCost(3, (2, 4)) };
         first.Neighbors.Add(second);
         second.Neighbors.Add(first);
         return new Graph<GraphVertexModel>([first, second], [2]);
@@ -112,7 +112,7 @@ internal sealed class RunFieldViewModelTests
     {
         var factory = new TestAlgorithmFactory();
         var algorithmsFactoryMock = new Mock<IAlgorithmsFactory>();
-        algorithmsFactoryMock.SetupGet(x => x.Allowed).Returns(new[] { Algorithms.AStar });
+        algorithmsFactoryMock.SetupGet(x => x.Allowed).Returns([Algorithms.AStar]);
         algorithmsFactoryMock
             .Setup(x => x.GetAlgorithmFactory(It.IsAny<Algorithms>()))
             .Returns(factory);

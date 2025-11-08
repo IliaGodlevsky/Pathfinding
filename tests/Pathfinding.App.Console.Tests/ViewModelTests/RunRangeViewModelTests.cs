@@ -7,12 +7,12 @@ using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Domain.Core.Enums;
+using Pathfinding.Domain.Interface;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
-using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Shared.Primitives;
-using System.Collections.Generic;
+using System.Reactive.Linq;
 using Command = Pathfinding.Service.Interface.IPathfindingRangeCommand<Pathfinding.App.Console.Models.GraphVertexModel>;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
@@ -40,6 +40,7 @@ internal sealed class RunRangeViewModelTests
             excludeCommands);
 
         var vertex = new GraphVertexModel { Position = new Coordinate(0) };
+
         viewModel.AddToRangeCommand.Execute(vertex);
 
         Assert.That(viewModel.Source, Is.EqualTo(vertex));
@@ -83,11 +84,11 @@ internal sealed class RunRangeViewModelTests
             .Setup(x => x.ReadRangeAsync(
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<PathfindingRangeModel>
-            {
+            .ReturnsAsync(
+            [
                 new() { Position = new Coordinate(0), IsSource = true },
                 new() { Position = new Coordinate(1), IsTarget = true }
-            });
+            ]);
 
         rangeServiceMock
             .Setup(x => x.DeleteRangeAsync(
@@ -117,11 +118,14 @@ internal sealed class RunRangeViewModelTests
             graph,
             Neighborhoods.Moore,
             SmoothLevels.No,
-            GraphStatuses.Active,
-            graphId: 12)), Tokens.PathfindingRange);
+            GraphStatuses.Editable,
+            GraphId: 12)), Tokens.PathfindingRange);
 
-        Assert.That(viewModel.Source, Is.Not.Null);
-        Assert.That(viewModel.Target, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(viewModel.Source, Is.Not.Null);
+            Assert.That(viewModel.Target, Is.Not.Null);
+        });
 
         await viewModel.DeletePathfindingRange.Execute();
 
@@ -167,16 +171,9 @@ internal sealed class RunRangeViewModelTests
         return new Meta<Command>(command, metadata);
     }
 
-    private sealed class StubCommand : Command
+    private sealed class StubCommand(bool canExecute, Action<IPathfindingRange<GraphVertexModel>, GraphVertexModel> execute = null) : Command
     {
-        private readonly bool canExecute;
-        private readonly Action<IPathfindingRange<GraphVertexModel>, GraphVertexModel> execute;
-
-        public StubCommand(bool canExecute, Action<IPathfindingRange<GraphVertexModel>, GraphVertexModel> execute = null)
-        {
-            this.canExecute = canExecute;
-            this.execute = execute ?? ((_, _) => { });
-        }
+        private readonly Action<IPathfindingRange<GraphVertexModel>, GraphVertexModel> execute = execute ?? ((_, _) => { });
 
         public void Execute(IPathfindingRange<GraphVertexModel> range, GraphVertexModel vertex)
         {

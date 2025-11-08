@@ -9,6 +9,7 @@ using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
+using System.Reactive.Linq;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 
@@ -22,7 +23,7 @@ internal sealed class GraphUpdateViewModelTests
         var serviceMock = new Mock<IGraphInfoRequestService>();
         var neighborhoodFactoryMock = new Mock<INeighborhoodLayerFactory>();
         neighborhoodFactoryMock.SetupGet(x => x.Allowed)
-            .Returns(new[] { Neighborhoods.Moore, Neighborhoods.Diagonal });
+            .Returns([Neighborhoods.Moore, Neighborhoods.Diagonal]);
 
         using var viewModel = CreateViewModel(messenger, serviceMock, neighborhoodFactoryMock);
 
@@ -44,7 +45,7 @@ internal sealed class GraphUpdateViewModelTests
         var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IGraphInfoRequestService>();
         var neighborhoodFactoryMock = new Mock<INeighborhoodLayerFactory>();
-        neighborhoodFactoryMock.SetupGet(x => x.Allowed).Returns(Array.Empty<Neighborhoods>());
+        neighborhoodFactoryMock.SetupGet(x => x.Allowed).Returns([]);
 
         using var viewModel = CreateViewModel(messenger, serviceMock, neighborhoodFactoryMock);
 
@@ -68,7 +69,7 @@ internal sealed class GraphUpdateViewModelTests
         var serviceMock = new Mock<IGraphInfoRequestService>();
         var neighborhoodFactoryMock = new Mock<INeighborhoodLayerFactory>();
         neighborhoodFactoryMock.SetupGet(x => x.Allowed)
-            .Returns(new[] { Neighborhoods.Moore });
+            .Returns([Neighborhoods.Moore]);
 
         var graphInfoModel = Generators.GenerateGraphInfos(1).Single();
         var newName = graphInfoModel.Name + "_updated";
@@ -91,7 +92,7 @@ internal sealed class GraphUpdateViewModelTests
             .Setup(x => x.UpdateGraphInfoAsync(
                 It.IsAny<GraphInformationModel>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .Returns(Task.FromResult(true));
 
         var graphTableMessages = new List<AwaitGraphUpdatedMessage>();
         messenger.Register<AwaitGraphUpdatedMessage, int>(this, Tokens.GraphTable, (_, msg) =>

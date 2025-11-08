@@ -10,6 +10,7 @@ using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Serialization;
 using System.Collections.Generic;
 using System.IO;
+using System.Reactive.Linq;
 using Serializer = Pathfinding.Service.Interface.ISerializer<Pathfinding.Service.Interface.Models.Serialization.PathfindingHistoriesSerializationModel>;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
@@ -27,22 +28,20 @@ internal sealed class GraphImportViewModelTests
 
         var serializationModel = new PathfindingHistoriesSerializationModel
         {
-            Histories = new[]
-            {
+            Histories =
+            [
                 new PathfindingHistorySerializationModel
                 {
-                    Graph = new GraphModel<GraphVertexModel>
+                    Graph = new GraphSerializationModel
                     {
-                        Id = 5,
                         Name = "Imported",
                         Neighborhood = Neighborhoods.Moore,
-                        Status = GraphStatuses.Active,
+                        Status = GraphStatuses.Editable,
                         SmoothLevel = SmoothLevels.No,
-                        Vertices = [],
                         DimensionSizes = []
                     }
                 }
-            }
+            ]
         };
 
         var created = new[]
@@ -54,7 +53,7 @@ internal sealed class GraphImportViewModelTests
                     Id = 5,
                     Name = "Imported",
                     Neighborhood = Neighborhoods.Moore,
-                    Status = GraphStatuses.Active,
+                    Status = GraphStatuses.Editable,
                     SmoothLevel = SmoothLevels.No,
                     Vertices = [],
                     DimensionSizes = []
@@ -85,7 +84,7 @@ internal sealed class GraphImportViewModelTests
                 })
         };
 
-        using var viewModel = new GraphImportViewModel(
+        var viewModel = new GraphImportViewModel(
             serviceMock.Object,
             messenger,
             serializerMeta,
@@ -95,7 +94,7 @@ internal sealed class GraphImportViewModelTests
         messenger.Register<GraphsCreatedMessage>(this, (_, msg) => createdMessage = msg);
 
         await viewModel.ImportGraphCommand.Execute(() =>
-            new StreamModel(new MemoryStream(new byte[] { 1, 2, 3 }), StreamFormat.Json));
+            new StreamModel(new MemoryStream([1, 2, 3]), StreamFormat.Json));
 
         Assert.Multiple(() =>
         {
@@ -128,7 +127,7 @@ internal sealed class GraphImportViewModelTests
                 })
         };
 
-        using var viewModel = new GraphImportViewModel(
+        var viewModel = new GraphImportViewModel(
             serviceMock.Object,
             messenger,
             serializerMeta,
