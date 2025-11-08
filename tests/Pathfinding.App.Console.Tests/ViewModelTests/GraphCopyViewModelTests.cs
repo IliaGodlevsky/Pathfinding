@@ -38,8 +38,7 @@ internal sealed class GraphCopyViewModelTests
                     Name = string.Empty
                 }
             })
-            .ToArray()
-            .To<IReadOnlyCollection<PathfindingHistoryModel<GraphVertexModel>>>();
+            .ToArray();
 
         serviceMock
             .Setup(x => x.ReadSerializationHistoriesAsync(
@@ -55,7 +54,7 @@ internal sealed class GraphCopyViewModelTests
 
         using var viewModel = CreateViewModel(messenger, serviceMock);
 
-        GraphsCreatedMessage? createdMessage = null;
+        GraphsCreatedMessage createdMessage = null;
         messenger.Register<GraphsCreatedMessage>(this, (_, msg) => createdMessage = msg);
 
         messenger.Send(new GraphsSelectedMessage(models));
@@ -108,7 +107,7 @@ internal sealed class GraphCopyViewModelTests
     }
 
     private static GraphCopyViewModel CreateViewModel(StrongReferenceMessenger messenger,
-        Mock<IGraphRequestService<GraphVertexModel>> serviceMock, ILog? logger = null)
+        Mock<IGraphRequestService<GraphVertexModel>> serviceMock, ILog logger = null)
     {
         return new GraphCopyViewModel(messenger, serviceMock.Object, logger ?? Mock.Of<ILog>());
     }

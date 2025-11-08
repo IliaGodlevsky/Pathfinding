@@ -10,8 +10,7 @@ using Pathfinding.Infrastructure.Business.Layers;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
-using System.Collections.Generic;
-using System.Linq;
+using System.Reactive.Linq;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 
@@ -186,7 +185,7 @@ internal sealed class GraphTableViewModelTests
             graphInfoServiceMock,
             neighborFactoryMock);
 
-        GraphsSelectedMessage? selectedMessage = null;
+        GraphsSelectedMessage selectedMessage = null;
         messenger.Register<GraphsSelectedMessage>(this, (_, msg) => selectedMessage = msg);
 
         await viewModel.SelectGraphsCommand.Execute([1, 2, 3]);
@@ -199,7 +198,7 @@ internal sealed class GraphTableViewModelTests
         Mock<IGraphRequestService<GraphVertexModel>> graphServiceMock,
         Mock<IGraphInfoRequestService> graphInfoServiceMock,
         Mock<INeighborhoodLayerFactory> neighborFactoryMock,
-        ILog? logger = null)
+        ILog logger = null)
     {
         neighborFactoryMock
             .SetupGet(x => x.Allowed)

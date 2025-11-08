@@ -10,9 +10,7 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Undefined;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Reactive.Linq;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 
@@ -86,7 +84,7 @@ internal sealed class RunTableViewModelTests
 
         using var viewModel = CreateViewModel(messenger, statisticsMock, graphInfoMock);
 
-        RunsSelectedMessage? selectedMessage = null;
+        RunsSelectedMessage selectedMessage = null;
         messenger.Register<RunsSelectedMessage>(this, (_, msg) => selectedMessage = msg);
 
         await viewModel.SelectRunsCommand.Execute([]);
@@ -208,7 +206,7 @@ internal sealed class RunTableViewModelTests
         StrongReferenceMessenger messenger,
         Mock<IStatisticsRequestService> statisticsMock,
         Mock<IGraphInfoRequestService> graphInfoMock,
-        ILog? logger = null)
+        ILog logger = null)
     {
         return new RunsTableViewModel(
             statisticsMock.Object,

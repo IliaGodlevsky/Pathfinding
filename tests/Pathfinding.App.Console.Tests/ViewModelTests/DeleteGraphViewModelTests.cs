@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
-using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
@@ -26,7 +25,7 @@ internal sealed class DeleteGraphViewModelTests
         using var viewModel = CreateViewModel(messenger, serviceMock);
 
         var models = Generators.GenerateGraphInfos(3).ToArray();
-        GraphsDeletedMessage? deletedMessage = null;
+        GraphsDeletedMessage deletedMessage = null;
         messenger.Register<GraphsDeletedMessage>(this, (_, msg) => deletedMessage = msg);
 
         messenger.Send(new GraphsSelectedMessage(models));
@@ -62,7 +61,7 @@ internal sealed class DeleteGraphViewModelTests
 
         using var viewModel = CreateViewModel(messenger, serviceMock, logMock.Object);
 
-        messenger.Send(new GraphsSelectedMessage(Generators.GenerateGraphInfos(1).ToArray()));
+        messenger.Send(new GraphsSelectedMessage([.. Generators.GenerateGraphInfos(1)]));
 
         await viewModel.DeleteGraphCommand.Execute();
 
@@ -93,7 +92,7 @@ internal sealed class DeleteGraphViewModelTests
     }
 
     private static GraphDeleteViewModel CreateViewModel(StrongReferenceMessenger messenger,
-        Mock<IGraphInfoRequestService> serviceMock, ILog? logger = null)
+        Mock<IGraphInfoRequestService> serviceMock, ILog logger = null)
     {
         return new GraphDeleteViewModel(messenger, serviceMock.Object, logger ?? Mock.Of<ILog>());
     }

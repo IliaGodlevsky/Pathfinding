@@ -75,7 +75,7 @@ internal sealed class GraphAssembleViewModelTests
         viewModel.Obstacles = 10;
         viewModel.Name = "Demo";
 
-        GraphsCreatedMessage? createdMessage = null;
+        GraphsCreatedMessage createdMessage = null;
         messenger.Register<GraphsCreatedMessage>(this, (_, msg) => createdMessage = msg);
 
         var canExecute = await viewModel.AssembleGraphCommand.CanExecute.FirstAsync(value => value);
@@ -101,7 +101,7 @@ internal sealed class GraphAssembleViewModelTests
         Mock<IGraphAssemble<GraphVertexModel>> assembleMock,
         Mock<ISmoothLevelFactory> smoothFactoryMock,
         Mock<INeighborhoodLayerFactory> neighborFactoryMock,
-        ILog? logger = null)
+        ILog logger = null)
     {
         return new GraphAssembleViewModel(
             serviceMock.Object,

@@ -32,7 +32,7 @@ internal sealed class DeleteRunViewModelTests
             new() { Id = 3 }
         };
 
-        RunsDeletedMessage? deletedMessage = null;
+        RunsDeletedMessage deletedMessage = null;
         messenger.Register<RunsDeletedMessage>(this, (_, msg) => deletedMessage = msg);
 
         messenger.Send(new RunsSelectedMessage(runModels));
@@ -99,7 +99,7 @@ internal sealed class DeleteRunViewModelTests
     }
 
     private static RunDeleteViewModel CreateViewModel(StrongReferenceMessenger messenger,
-        Mock<IStatisticsRequestService> serviceMock, ILog? logger = null)
+        Mock<IStatisticsRequestService> serviceMock, ILog logger = null)
     {
         return new RunDeleteViewModel(messenger, serviceMock.Object, logger ?? Mock.Of<ILog>());
     }
