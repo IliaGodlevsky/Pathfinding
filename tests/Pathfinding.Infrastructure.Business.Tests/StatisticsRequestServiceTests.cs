@@ -7,6 +7,7 @@ using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Domain.Interface.Repositories;
 using Pathfinding.Infrastructure.Business.Services;
 using Pathfinding.Service.Interface.Models.Read;
+using Pathfinding.Service.Interface.Models.Undefined;
 using Pathfinding.Service.Interface.Requests.Create;
 
 namespace Pathfinding.Infrastructure.Business.Tests;
@@ -58,7 +59,7 @@ internal class StatisticsRequestServiceTests
             Elapsed = 2
         };
         repository
-            .Setup(x => x.ReadAsync(3, It.IsAny<CancellationToken>()))
+            .Setup(x => x.ReadByIdAsync(3, It.IsAny<CancellationToken>()))
             .ReturnsAsync(entity);
 
         UnitOfWorkMockHelper.SetupUnitOfWork(mock, unit =>
@@ -73,7 +74,7 @@ internal class StatisticsRequestServiceTests
         Assert.Multiple(() =>
         {
             Assert.That(result.Id, Is.EqualTo(3));
-            repository.Verify(x => x.ReadAsync(3, It.IsAny<CancellationToken>()), Times.Once());
+            repository.Verify(x => x.ReadByIdAsync(3, It.IsAny<CancellationToken>()), Times.Once());
         });
     }
 

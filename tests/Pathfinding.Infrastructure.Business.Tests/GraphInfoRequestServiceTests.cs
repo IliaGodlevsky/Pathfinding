@@ -1,3 +1,4 @@
+using Autofac;
 using Autofac.Extras.Moq;
 using Bogus;
 using Moq;
@@ -57,6 +58,7 @@ internal class GraphInfoRequestServiceTests
             Assert.That(result, Has.Count.EqualTo(graphs.Count));
         });
     }
+    internal static readonly int[] expected = [3, 4];
 
     [Test]
     public async Task ReadGraphInfoAsync_ShouldReturnGraphInfo()
@@ -93,7 +95,7 @@ internal class GraphInfoRequestServiceTests
             Assert.That(result.Neighborhood, Is.EqualTo(graph.Neighborhood));
             Assert.That(result.SmoothLevel, Is.EqualTo(graph.SmoothLevel));
             Assert.That(result.Status, Is.EqualTo(graph.Status));
-            Assert.That(result.Dimensions, Is.EquivalentTo(new[] { 3, 4 }));
+            Assert.That(result.Dimensions, Is.EquivalentTo(expected));
             mock.Mock<IGraphParametersRepository>()
                 .Verify(x => x.ReadAsync(graph.Id, It.IsAny<CancellationToken>()), Times.Once());
         });
@@ -110,7 +112,7 @@ internal class GraphInfoRequestServiceTests
             Neighborhood = Neighborhoods.Moore,
             SmoothLevel = SmoothLevels.Low,
             Status = GraphStatuses.Editable,
-            Dimensions = new[] { 5, 6 }
+            Dimensions = [5, 6]
         };
 
         var repositoryMock = mock.Mock<IGraphParametersRepository>();

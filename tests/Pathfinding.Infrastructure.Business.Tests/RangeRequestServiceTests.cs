@@ -1,3 +1,4 @@
+using Autofac;
 using Autofac.Extras.Moq;
 using Moq;
 using Pathfinding.Domain.Core.Entities;
@@ -47,6 +48,7 @@ internal class RangeRequestServiceTests
 
         Assert.That(result.Select(x => x.VertexId), Is.EqualTo(range.Select(r => r.VertexId)));
     }
+    internal static readonly long[] expected = [1L, 99L, 2L];
 
     [Test]
     public async Task CreatePathfindingVertexAsync_ShouldInsertVertexAndReorder()
@@ -82,7 +84,7 @@ internal class RangeRequestServiceTests
             Assert.That(result, Is.True);
             Assert.That(resultRange, Is.Not.Null);
             var ordered = resultRange.OrderBy(x => x.Order).ToList();
-            Assert.That(ordered.Select(x => x.VertexId), Is.EqualTo(new[] { 1L, 99L, 2L }));
+            Assert.That(ordered.Select(x => x.VertexId), Is.EqualTo(expected));
             Assert.That(ordered.First().IsSource, Is.True);
             Assert.That(ordered.Last().IsTarget, Is.True);
         });

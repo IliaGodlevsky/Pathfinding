@@ -1,3 +1,4 @@
+using Autofac;
 using Autofac.Extras.Moq;
 using Moq;
 using Pathfinding.Domain.Core.Entities;
@@ -19,6 +20,12 @@ namespace Pathfinding.Infrastructure.Business.Tests;
 [Category("Unit")]
 internal class GraphRequestServiceTests
 {
+    internal static readonly long[] expected = [1L, 2L];
+    internal static readonly int[] expectedArray = [2, 2];
+    internal static readonly long[] expectedArray0 = [1L, 2L];
+    internal static readonly string[] expectedArray1 = ["(0,0)", "(0,1)"];
+    internal static readonly long[] expectedArray2 = [1L, 2L];
+
     [Test]
     public async Task CreateGraphAsync_ShouldPersistGraphAndVertices()
     {
@@ -71,7 +78,7 @@ internal class GraphRequestServiceTests
         {
             Assert.That(result.Id, Is.EqualTo(11));
             Assert.That(result.DimensionSizes, Is.EqualTo(graph.DimensionsSizes));
-            Assert.That(result.Vertices.Select(v => v.Id), Is.EqualTo(new[] { 1L, 2L }));
+            Assert.That(result.Vertices.Select(v => v.Id), Is.EqualTo(expected));
             repository.Verify(x => x.CreateAsync(It.IsAny<Graph>(), It.IsAny<CancellationToken>()), Times.Once());
             verticesRepository.Verify(x => x.CreateAsync(It.IsAny<IReadOnlyCollection<Vertex>>(), It.IsAny<CancellationToken>()), Times.Once());
         });
@@ -119,7 +126,7 @@ internal class GraphRequestServiceTests
             Assert.That(result.Id, Is.EqualTo(graphId));
             Assert.That(result.Name, Is.EqualTo(graphEntity.Name));
             Assert.That(result.Vertices.Select(x => x.Id), Is.EqualTo(vertexEntities.Select(v => v.Id)));
-            Assert.That(result.DimensionSizes, Is.EqualTo(new[] { 2, 2 }));
+            Assert.That(result.DimensionSizes, Is.EqualTo(expectedArray));
         });
     }
 
@@ -244,18 +251,18 @@ internal class GraphRequestServiceTests
 
         var service = mock.Create<GraphRequestService<FakeVertex>>();
 
-        var result = await service.CreatePathfindingHistoriesAsync(new[] { history });
+        var result = await service.CreatePathfindingHistoriesAsync([history]);
 
         Assert.Multiple(() =>
         {
             Assert.That(result, Has.Count.EqualTo(1));
             var created = result.Single();
             Assert.That(created.Graph.Id, Is.EqualTo(42));
-            Assert.That(created.Graph.Vertices.Select(v => v.Id), Is.EqualTo(new[] { 1L, 2L }));
+            Assert.That(created.Graph.Vertices.Select(v => v.Id), Is.EqualTo(expectedArray0));
             Assert.That(created.Statistics.Single().GraphId, Is.EqualTo(42));
-            Assert.That(created.Range.Select(c => c.ToString()), Is.EqualTo(new[] { "(0,0)", "(0,1)" }));
+            Assert.That(created.Range.Select(c => c.ToString()), Is.EqualTo(expectedArray1));
             Assert.That(createdRange, Is.Not.Null);
-            Assert.That(createdRange.Select(r => r.VertexId), Is.EqualTo(new[] { 1L, 2L }));
+            Assert.That(createdRange.Select(r => r.VertexId), Is.EqualTo(expectedArray2));
         });
     }
 
@@ -302,7 +309,7 @@ internal class GraphRequestServiceTests
 
         var service = mock.Create<GraphRequestService<FakeVertex>>();
 
-        var result = await service.ReadSerializationGraphsAsync(new[] { graphId });
+        var result = await service.ReadSerializationGraphsAsync([graphId]);
 
         Assert.Multiple(() =>
         {
@@ -358,7 +365,7 @@ internal class GraphRequestServiceTests
 
         var service = mock.Create<GraphRequestService<FakeVertex>>();
 
-        var result = await service.ReadSerializationGraphsWithRangeAsync(new[] { graphId });
+        var result = await service.ReadSerializationGraphsWithRangeAsync([graphId]);
 
         Assert.Multiple(() =>
         {

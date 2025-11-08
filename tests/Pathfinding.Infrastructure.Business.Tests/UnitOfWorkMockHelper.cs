@@ -1,6 +1,7 @@
 using Autofac.Extras.Moq;
 using Moq;
 using Pathfinding.Domain.Interface;
+using Pathfinding.Domain.Interface.Factories;
 
 namespace Pathfinding.Infrastructure.Business.Tests;
 
