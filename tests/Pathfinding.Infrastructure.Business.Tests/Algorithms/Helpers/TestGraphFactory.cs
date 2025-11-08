@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using Pathfinding.Infrastructure.Business.Tests.Algorithms.Helpers;
 using Pathfinding.Service.Interface;
 using Pathfinding.Shared.Primitives;
 
@@ -19,7 +17,7 @@ internal static class TestGraphFactory
         return new TestGraph(
             start,
             target,
-            new[] { start, middle, target });
+            [start, middle, target]);
     }
 
     public static TestGraph CreateBranchingGraph()
@@ -37,7 +35,7 @@ internal static class TestGraphFactory
         return new TestGraph(
             start,
             target,
-            new IPathfindingVertex[] { start, cheapMiddle, expensiveMiddle, target });
+            [start, cheapMiddle, expensiveMiddle, target]);
     }
 }
 
@@ -46,5 +44,5 @@ internal sealed record TestGraph(
     IPathfindingVertex Target,
     IReadOnlyCollection<IPathfindingVertex> Vertices)
 {
-    public IReadOnlyCollection<IPathfindingVertex> Range => new[] { Start, Target };
+    public IReadOnlyCollection<IPathfindingVertex> Range => [Start, Target];
 }
