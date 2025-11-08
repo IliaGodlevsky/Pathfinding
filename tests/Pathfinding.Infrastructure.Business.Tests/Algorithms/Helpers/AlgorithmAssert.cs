@@ -10,7 +10,7 @@ internal static class AlgorithmAssert
 {
     public static IReadOnlyList<Coordinate> Enumerate(IGraphPath path)
     {
-        return path.ToList();
+        return [.. path];
     }
 
     public static void PathHasExpectedMetrics(
@@ -20,12 +20,15 @@ internal static class AlgorithmAssert
         double expectedCost,
         double tolerance = 1e-6)
     {
-        Assert.That(path.Count, Is.EqualTo(expectedLength));
+        Assert.That(path, Has.Count.EqualTo(expectedLength));
         Assert.That(path.Cost, Is.EqualTo(expectedCost).Within(tolerance));
 
         var coordinates = Enumerate(path);
-        Assert.That(coordinates.Count, Is.EqualTo(expectedLength));
-        Assert.That(coordinates[0], Is.EqualTo(graph.Target.Position));
-        Assert.That(coordinates, Does.Contain(graph.Target.Position));
+        Assert.That(coordinates, Has.Count.EqualTo(expectedLength));
+        Assert.Multiple(() =>
+        {
+            Assert.That(coordinates[0], Is.EqualTo(graph.Target.Position));
+            Assert.That(coordinates, Does.Contain(graph.Target.Position));
+        });
     }
 }

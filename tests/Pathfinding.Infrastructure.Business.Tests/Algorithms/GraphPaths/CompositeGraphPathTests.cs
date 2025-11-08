@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
+using Pathfinding.Service.Interface;
 using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Infrastructure.Business.Tests.Algorithms.GraphPaths;
@@ -21,33 +22,27 @@ public class CompositeGraphPathTests
             new Coordinate(0, 0)
         ], count: 1, cost: 1);
 
-        var composite = new CompositeGraphPath(new[] { first, second });
+        var composite = new CompositeGraphPath([first, second]);
 
-        Assert.That(composite.Count, Is.EqualTo(3));
-        Assert.That(composite.Cost, Is.EqualTo(4));
-        Assert.That(composite.ToList(), Is.EqualTo(new[]
+        Assert.That(composite, Has.Count.EqualTo(3));
+        Assert.Multiple(() =>
         {
+            Assert.That(composite.Cost, Is.EqualTo(4));
+            Assert.That(composite.ToList(), Is.EqualTo(new[]
+            {
             new Coordinate(1, 0),
             new Coordinate(2, 0),
             new Coordinate(0, 0),
             new Coordinate(1, 0)
         }));
+        });
     }
 
-    private sealed class FakeGraphPath : IGraphPath
+    private sealed class FakeGraphPath(IReadOnlyList<Coordinate> coordinates, int count, double cost) : IGraphPath
     {
-        private readonly IReadOnlyList<Coordinate> coordinates;
+        public double Cost { get; } = cost;
 
-        public FakeGraphPath(IReadOnlyList<Coordinate> coordinates, int count, double cost)
-        {
-            this.coordinates = coordinates;
-            Count = count;
-            Cost = cost;
-        }
-
-        public double Cost { get; }
-
-        public int Count { get; }
+        public int Count { get; } = count;
 
         public IEnumerator<Coordinate> GetEnumerator()
         {

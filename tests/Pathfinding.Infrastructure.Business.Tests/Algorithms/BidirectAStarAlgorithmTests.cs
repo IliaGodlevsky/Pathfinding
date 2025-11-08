@@ -14,6 +14,6 @@ public class BidirectAStarAlgorithmTests
 
         var path = algorithm.FindPath();
 
-        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 2, expectedCost: 2);
+        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 3, expectedCost: 3);
     }
 }

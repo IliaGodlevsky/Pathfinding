@@ -23,7 +23,7 @@ public class GraphPathTests
 
         var path = new GraphPath(traces, graph.Target);
 
-        Assert.That(path.Count, Is.EqualTo(2));
+        Assert.That(path, Has.Count.EqualTo(2));
         Assert.That(path.Cost, Is.EqualTo(2));
 
         var sequence = path.ToList();
