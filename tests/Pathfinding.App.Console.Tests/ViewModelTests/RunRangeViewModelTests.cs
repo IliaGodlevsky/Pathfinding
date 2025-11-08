@@ -12,13 +12,9 @@ using Pathfinding.Infrastructure.Business.Commands;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
-using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Shared.Primitives;
 using System.Reactive.Linq;
-using System.Linq;
-using System.Threading.Tasks;
 using Command = Pathfinding.Service.Interface.IPathfindingRangeCommand<Pathfinding.App.Console.Models.GraphVertexModel>;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 

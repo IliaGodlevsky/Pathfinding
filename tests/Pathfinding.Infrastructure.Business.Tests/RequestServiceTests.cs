@@ -187,7 +187,7 @@ internal class GraphRequestServiceTests
             new() { Position = new Coordinate(0, 0) },
             new() { Position = new Coordinate(0, 1) }
         };
-        var graph = new Graph<FakeVertex>(vertices, new[] { 1, 2 });
+        var graph = new Graph<FakeVertex>(vertices, [1, 2]);
         var request = new CreateGraphRequest<FakeVertex>
         {
             Graph = graph,
@@ -326,25 +326,25 @@ internal class GraphRequestServiceTests
                 Neighborhood = Neighborhoods.Moore,
                 SmoothLevel = SmoothLevels.Medium,
                 Status = GraphStatuses.Editable,
-                DimensionSizes = new[] { 2, 2 }
+                DimensionSizes = [2, 2]
             },
-            Vertices = new List<VertexSerializationModel>
-            {
+            Vertices =
+            [
                 new()
                 {
-                    Position = new CoordinateModel { Coordinate = new[] { 0, 0 } },
+                    Position = new CoordinateModel { Coordinate = [0, 0] },
                     Cost = new VertexCostModel { Cost = 1, UpperValueOfRange = 9, LowerValueOfRange = 1 },
                     IsObstacle = false
                 },
                 new()
                 {
-                    Position = new CoordinateModel { Coordinate = new[] { 0, 1 } },
+                    Position = new CoordinateModel { Coordinate = [0, 1] },
                     Cost = new VertexCostModel { Cost = 2, UpperValueOfRange = 9, LowerValueOfRange = 1 },
                     IsObstacle = true
                 }
-            },
-            Statistics = new List<RunStatisticsSerializationModel>
-            {
+            ],
+            Statistics =
+            [
                 new()
                 {
                     Algorithm = Domain.Core.Enums.Algorithms.AStar,
@@ -354,12 +354,12 @@ internal class GraphRequestServiceTests
                     Elapsed = TimeSpan.FromMilliseconds(10),
                     ResultStatus = RunStatuses.Success
                 }
-            },
-            Range = new List<CoordinateModel>
-            {
-                new() { Coordinate = new[] { 0, 0 } },
-                new() { Coordinate = new[] { 0, 1 } }
-            }
+            ],
+            Range =
+            [
+                new() { Coordinate = [0, 0] },
+                new() { Coordinate = [0, 1] }
+            ]
         };
 
         var graphRepository = mock.Mock<IGraphParametersRepository>();
