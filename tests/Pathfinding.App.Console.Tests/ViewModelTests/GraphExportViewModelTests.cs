@@ -17,6 +17,8 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Serializer = Pathfinding.Service.Interface.ISerializer<Pathfinding.Service.Interface.Models.Serialization.PathfindingHistoriesSerializationModel>;
+
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 
 [Category("Unit")]
