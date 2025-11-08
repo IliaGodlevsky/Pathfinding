@@ -9,13 +9,7 @@ using Pathfinding.App.Console.Resources;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface.Models.Serialization;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Serializer = Pathfinding.Service.Interface.ISerializer<Pathfinding.Service.Interface.Models.Serialization.PathfindingHistoriesSerializationModel>;
 
@@ -34,11 +28,11 @@ internal sealed class GraphExportViewModelTests
 
         optionsMock
             .SetupGet(x => x.Allowed)
-            .Returns(new[] { ExportOptions.GraphOnly, ExportOptions.WithRuns });
+            .Returns([ExportOptions.GraphOnly, ExportOptions.WithRuns]);
 
         var histories = new PathfindingHistoriesSerializationModel
         {
-            Histories = new[] { new PathfindingHistorySerializationModel() }
+            Histories = [new PathfindingHistorySerializationModel()]
         };
 
         var graphs = Generators.GenerateGraphInfos(3).ToArray();
@@ -108,7 +102,7 @@ internal sealed class GraphExportViewModelTests
 
         viewModel.Option = ExportOptions.GraphOnly;
 
-        messenger.Send(new GraphsSelectedMessage(Generators.GenerateGraphInfos(1).ToArray()));
+        messenger.Send(new GraphsSelectedMessage([.. Generators.GenerateGraphInfos(1)]));
 
         if (await viewModel.ExportGraphCommand.CanExecute.FirstAsync(value => value))
         {
@@ -151,7 +145,7 @@ internal sealed class GraphExportViewModelTests
 
         viewModel.Option = ExportOptions.WithRange;
 
-        messenger.Send(new GraphsSelectedMessage(Generators.GenerateGraphInfos(1).ToArray()));
+        messenger.Send(new GraphsSelectedMessage([.. Generators.GenerateGraphInfos(1)]));
 
         if (await viewModel.ExportGraphCommand.CanExecute.FirstAsync(value => value))
         {
