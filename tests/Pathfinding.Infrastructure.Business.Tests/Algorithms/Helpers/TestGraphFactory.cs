@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Infrastructure.Business.Layers;
 using Pathfinding.Infrastructure.Data.Pathfinding;
-using Pathfinding.Shared.Primitives;
 using Pathfinding.Service.Interface;
+using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Infrastructure.Business.Tests.Algorithms.Helpers;
 
@@ -13,85 +14,77 @@ internal static class TestGraphFactory
 {
     private const int GridSize = 10;
 
-    private static readonly Coordinate StartCoordinate = new(0, 0);
+    private static readonly Coordinate SourceCoordinate = new(0, 0);
     private static readonly Coordinate TargetCoordinate = new(GridSize - 1, GridSize - 1);
-    private static readonly InclusiveValueRange<int> DefaultCostRange = new(1, 9);
+    private static readonly InclusiveValueRange<int> CostRange = new(1, 9);
 
     private static readonly int[,] CostMatrix = new int[GridSize, GridSize]
     {
-        { 1, 1, 2, 2, 3, 3, 2, 2, 1, 1 },
-        { 8, 4, 5, 6, 5, 6, 5, 6, 4, 2 },
-        { 9, 5, 6, 7, 6, 7, 6, 7, 5, 2 },
-        { 9, 6, 7, 8, 7, 8, 7, 8, 6, 2 },
-        { 9, 7, 8, 9, 8, 9, 8, 9, 7, 3 },
-        { 9, 8, 9, 8, 9, 8, 9, 8, 8, 3 },
-        { 9, 9, 8, 7, 6, 7, 8, 9, 7, 2 },
-        { 8, 8, 7, 6, 5, 6, 7, 8, 6, 2 },
-        { 7, 7, 6, 5, 4, 5, 6, 7, 5, 2 },
-        { 6, 6, 5, 4, 3, 4, 5, 6, 4, 2 },
+        { 4, 7, 2, 8, 3, 6, 5, 9, 1, 2 },
+        { 6, 5, 9, 4, 2, 7, 8, 3, 5, 3 },
+        { 7, 3, 8, 6, 9, 5, 4, 2, 6, 4 },
+        { 5, 8, 4, 7, 6, 9, 3, 4, 7, 5 },
+        { 8, 9, 6, 5, 7, 2, 6, 5, 8, 6 },
+        { 9, 4, 7, 3, 8, 6, 7, 9, 2, 5 },
+        { 3, 6, 5, 9, 4, 8, 2, 7, 3, 6 },
+        { 2, 7, 3, 5, 9, 4, 5, 6, 4, 7 },
+        { 1, 8, 2, 4, 5, 3, 9, 8, 6, 8 },
+        { 5, 9, 4, 6, 3, 5, 8, 4, 7, 9 },
     };
 
-    private static readonly bool[,] LinearObstacles = new bool[GridSize, GridSize]
+    private static readonly bool[,] ObstacleMatrix = new bool[GridSize, GridSize]
     {
-        { false, false, false, false, false, false, false, false, false, false },
-        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
-    };
-
-    private static readonly bool[,] BranchObstacles = new bool[GridSize, GridSize]
-    {
-        { false, false, false, false, false, false, false, false, false, false },
-        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
-        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { false, true,  false, true,  false, true,  false, true,  false, true  },
+        { false, true,  true,  false, true,  false, true,  true,  false, true  },
+        { false, true,  false, true,  true,  false, true,  false, true,  true  },
+        { false, true,  true,  true,  false, true,  false, true,  false, true  },
+        { false, true,  false, false, true,  true,  true,  false, true,  true  },
+        { false, true,  true,  false, true,  false, true,  true,  false, true  },
+        { false, true,  false, true,  false, true,  true,  false, true,  true  },
+        { false, true,  true,  false, true,  true,  false, true,  false, true  },
+        { false, true,  true,  true,  true,  true,  true,  true,  true,  true  },
         { false, false, false, false, false, false, false, false, false, false },
     };
 
-    public static TestGraph CreateLinearGraph()
+    private static readonly ReadOnlyCollection<Coordinate> PathCoordinates = Array.AsReadOnly(new[]
     {
-        var graph = AssembleGraph(new MatrixLayer(CostMatrix, LinearObstacles));
+        new Coordinate(0, 0),
+        new Coordinate(1, 0),
+        new Coordinate(2, 0),
+        new Coordinate(3, 0),
+        new Coordinate(4, 0),
+        new Coordinate(5, 0),
+        new Coordinate(6, 0),
+        new Coordinate(7, 0),
+        new Coordinate(8, 0),
+        new Coordinate(9, 0),
+        new Coordinate(9, 1),
+        new Coordinate(9, 2),
+        new Coordinate(9, 3),
+        new Coordinate(9, 4),
+        new Coordinate(9, 5),
+        new Coordinate(9, 6),
+        new Coordinate(9, 7),
+        new Coordinate(9, 8),
+        new Coordinate(9, 9),
+    });
+
+    private static readonly double ExpectedPathCost = CalculatePathCost(PathCoordinates);
+
+    public static int ExpectedPathLength => PathCoordinates.Count - 1;
+
+    public static TestGraph CreateGraph()
+    {
+        var graph = AssembleGraph(new MatrixLayer(CostMatrix, ObstacleMatrix));
         return CreateTestGraph(graph);
     }
 
-    public static TestGraph CreateBranchingGraph()
+    public static IReadOnlyList<Coordinate> GetExpectedPathCoordinates()
     {
-        var graph = AssembleGraph(new MatrixLayer(CostMatrix, BranchObstacles));
-        return CreateTestGraph(graph);
+        return PathCoordinates;
     }
 
-    internal static IReadOnlyList<Coordinate> GetLinearPathCoordinates()
-    {
-        var coordinates = new List<Coordinate>(GridSize * 2 - 1);
-
-        for (int x = 0; x < GridSize; x++)
-        {
-            coordinates.Add(new Coordinate(x, 0));
-        }
-
-        for (int y = 1; y < GridSize; y++)
-        {
-            coordinates.Add(new Coordinate(GridSize - 1, y));
-        }
-
-        return coordinates;
-    }
-
-    internal static double GetLinearPathCost()
-    {
-        return CalculatePathCost(GetLinearPathCoordinates());
-    }
+    public static double GetExpectedPathCost() => ExpectedPathCost;
 
     private static IGraph<TestVertex> AssembleGraph(params ILayer[] overlays)
     {
@@ -108,14 +101,14 @@ internal static class TestGraphFactory
 
     private static TestGraph CreateTestGraph(IGraph<TestVertex> graph)
     {
-        var start = (IPathfindingVertex)graph.Get(StartCoordinate);
+        var source = (IPathfindingVertex)graph.Get(SourceCoordinate);
         var target = (IPathfindingVertex)graph.Get(TargetCoordinate);
         var vertices = graph
             .Where(vertex => !vertex.IsObstacle)
             .Cast<IPathfindingVertex>()
             .ToList();
 
-        return new TestGraph(start, target, vertices);
+        return new TestGraph(source, target, vertices);
     }
 
     private static double CalculatePathCost(IEnumerable<Coordinate> coordinates)
@@ -140,7 +133,7 @@ internal static class TestGraphFactory
                 var y = vertex.Position[1];
 
                 vertex.IsObstacle = obstacles[x, y];
-                vertex.Cost = new VertexCost(costs[x, y], DefaultCostRange);
+                vertex.Cost = new VertexCost(costs[x, y], CostRange);
             }
         }
     }
@@ -151,7 +144,7 @@ internal static class TestGraphFactory
 
         public bool IsObstacle { get; set; }
 
-        public IVertexCost Cost { get; set; } = new VertexCost(1, DefaultCostRange);
+        public IVertexCost Cost { get; set; } = new VertexCost(1, CostRange);
 
         public Coordinate Position { get; set; } = new Coordinate(0, 0);
 
@@ -180,10 +173,24 @@ internal static class TestGraphFactory
     }
 }
 
-internal sealed record TestGraph(
-    IPathfindingVertex Start,
-    IPathfindingVertex Target,
-    IReadOnlyCollection<IPathfindingVertex> Vertices)
+internal sealed class TestGraph
 {
-    public IReadOnlyCollection<IPathfindingVertex> Range => [Start, Target];
+    public TestGraph(
+        IPathfindingVertex source,
+        IPathfindingVertex target,
+        IReadOnlyCollection<IPathfindingVertex> vertices)
+    {
+        Source = source;
+        Target = target;
+        Vertices = vertices;
+        Range = new[] { Source, Target };
+    }
+
+    public IPathfindingVertex Source { get; }
+
+    public IPathfindingVertex Target { get; }
+
+    public IReadOnlyCollection<IPathfindingVertex> Vertices { get; }
+
+    public IReadOnlyCollection<IPathfindingVertex> Range { get; }
 }

@@ -13,8 +13,8 @@ public class GraphPathTests
     [Test]
     public void GraphPath_BuildsSequenceFromTraces()
     {
-        var graph = TestGraphFactory.CreateLinearGraph();
-        var linearPath = TestGraphFactory.GetLinearPathCoordinates().ToList();
+        var graph = TestGraphFactory.CreateGraph();
+        var linearPath = TestGraphFactory.GetExpectedPathCoordinates().ToList();
         var verticesByCoordinate = graph.Vertices.ToDictionary(vertex => vertex.Position);
         var traces = new Dictionary<Coordinate, IPathfindingVertex>();
 
@@ -28,7 +28,7 @@ public class GraphPathTests
         var path = new GraphPath(traces, graph.Target);
 
         var expectedCount = linearPath.Count - 1;
-        var expectedCost = TestGraphFactory.GetLinearPathCost();
+        var expectedCost = TestGraphFactory.GetExpectedPathCost();
         Assert.That(path, Has.Count.EqualTo(expectedCount));
         Assert.That(path.Cost, Is.EqualTo(expectedCost));
 

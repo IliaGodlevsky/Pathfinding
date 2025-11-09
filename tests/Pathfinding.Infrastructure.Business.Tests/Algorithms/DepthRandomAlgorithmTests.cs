@@ -9,11 +9,11 @@ public class DepthRandomAlgorithmTests
     [Test]
     public void FindPath_WithLinearGraph_HandlesRandomSelection()
     {
-        var graph = TestGraphFactory.CreateLinearGraph();
+        var graph = TestGraphFactory.CreateGraph();
         var algorithm = new DepthRandomAlgorithm(graph.Range);
 
         var path = algorithm.FindPath();
 
-        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 18, expectedCost: TestGraphFactory.GetLinearPathCost());
+        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: TestGraphFactory.ExpectedPathLength, expectedCost: TestGraphFactory.GetExpectedPathCost());
     }
 }
