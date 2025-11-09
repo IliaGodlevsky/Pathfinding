@@ -1,5 +1,6 @@
 using Pathfinding.Domain.Interface;
 using Pathfinding.Infrastructure.Business.Layers;
+using Pathfinding.Infrastructure.Data.Extensions;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
 using Pathfinding.Shared.Primitives;
@@ -10,8 +11,6 @@ internal static class TestGraphFactory
 {
     private const int GridSize = 10;
 
-    private static readonly Coordinate SourceCoordinate = new(0, 0);
-    private static readonly Coordinate TargetCoordinate = new(GridSize - 1, GridSize - 1);
     private static readonly InclusiveValueRange<int> CostRange = new(1, 9);
 
     private static readonly int[,] CostMatrix = new int[GridSize, GridSize]
@@ -44,24 +43,15 @@ internal static class TestGraphFactory
 
     public static TestGraph CreateGraph()
     {
-        var graph = AssembleGraph(new MatrixLayer(CostMatrix, ObstacleMatrix));
-        var source = (IPathfindingVertex)graph.Get(SourceCoordinate);
-        var target = (IPathfindingVertex)graph.Get(TargetCoordinate);
+        var matrices = new MatrixLayer(CostMatrix, ObstacleMatrix);
+        var neighborhoodLayer = new MooreNeighborhoodLayer();
+        var layers = new Layers.Layers(matrices, neighborhoodLayer);
+        var graph = new GraphAssemble<TestVertex>().AssembleGraph([GridSize, GridSize]);
+        layers.Overlay(graph);
+        var source = graph.Get(0, 0);
+        var target = graph.Get(GridSize - 1, GridSize - 1);
 
         return new TestGraph(source, target, graph);
-    }
-
-    private static IGraph<TestVertex> AssembleGraph(params ILayer[] overlays)
-    {
-        var graph = new GraphAssemble<TestVertex>().AssembleGraph([GridSize, GridSize]);
-        var neighborhoodLayer = new MooreNeighborhoodLayer();
-
-        foreach (var overlay in overlays.Append(neighborhoodLayer))
-        {
-            overlay.Overlay(graph);
-        }
-
-        return graph;
     }
 
     private sealed class MatrixLayer(int[,] costs, bool[,] obstacles) : ILayer
