@@ -28,8 +28,9 @@ public class GraphPathTests
         var path = new GraphPath(traces, graph.Target);
 
         var expectedCount = linearPath.Count - 1;
+        var expectedCost = TestGraphFactory.GetLinearPathCost();
         Assert.That(path, Has.Count.EqualTo(expectedCount));
-        Assert.That(path.Cost, Is.EqualTo(expectedCount));
+        Assert.That(path.Cost, Is.EqualTo(expectedCost));
 
         var sequence = path.ToList();
         var expectedSequence = linearPath

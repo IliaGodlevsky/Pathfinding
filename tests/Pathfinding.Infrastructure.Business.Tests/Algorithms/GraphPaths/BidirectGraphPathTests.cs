@@ -34,8 +34,9 @@ public class BidirectGraphPathTests
         var path = new BidirectGraphPath(forwardTraces, backwardTraces, intersection);
 
         var expectedCount = linearPath.Count - 1;
+        var expectedCost = TestGraphFactory.GetLinearPathCost();
         Assert.That(path, Has.Count.EqualTo(expectedCount));
-        Assert.That(path.Cost, Is.EqualTo(expectedCount));
+        Assert.That(path.Cost, Is.EqualTo(expectedCost));
 
         var coordinates = path.ToList();
         var expectedCoordinates = linearPath

@@ -15,21 +15,59 @@ internal static class TestGraphFactory
 
     private static readonly Coordinate StartCoordinate = new(0, 0);
     private static readonly Coordinate TargetCoordinate = new(GridSize - 1, GridSize - 1);
-    private static readonly InclusiveValueRange<int> DefaultCostRange = new(1, 10);
-    private static readonly int[,] CostMatrix = CreateCostMatrix();
-    private static readonly bool[,] LinearAccessibility = CreateAccessibilityMap(GetLinearPathCoordinates());
-    private static readonly bool[,] BranchAccessibility = CreateAccessibilityMap(
-        GetLinearPathCoordinates().Concat(GetAlternativeBranchCoordinates()));
+    private static readonly InclusiveValueRange<int> DefaultCostRange = new(1, 9);
+
+    private static readonly int[,] CostMatrix = new int[GridSize, GridSize]
+    {
+        { 1, 1, 2, 2, 3, 3, 2, 2, 1, 1 },
+        { 8, 4, 5, 6, 5, 6, 5, 6, 4, 2 },
+        { 9, 5, 6, 7, 6, 7, 6, 7, 5, 2 },
+        { 9, 6, 7, 8, 7, 8, 7, 8, 6, 2 },
+        { 9, 7, 8, 9, 8, 9, 8, 9, 7, 3 },
+        { 9, 8, 9, 8, 9, 8, 9, 8, 8, 3 },
+        { 9, 9, 8, 7, 6, 7, 8, 9, 7, 2 },
+        { 8, 8, 7, 6, 5, 6, 7, 8, 6, 2 },
+        { 7, 7, 6, 5, 4, 5, 6, 7, 5, 2 },
+        { 6, 6, 5, 4, 3, 4, 5, 6, 4, 2 },
+    };
+
+    private static readonly bool[,] LinearObstacles = new bool[GridSize, GridSize]
+    {
+        { false, false, false, false, false, false, false, false, false, false },
+        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { true,  true,  true,  true,  true,  true,  true,  true,  true,  false },
+    };
+
+    private static readonly bool[,] BranchObstacles = new bool[GridSize, GridSize]
+    {
+        { false, false, false, false, false, false, false, false, false, false },
+        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { false, true,  true,  true,  true,  true,  true,  true,  true,  false },
+        { false, false, false, false, false, false, false, false, false, false },
+    };
 
     public static TestGraph CreateLinearGraph()
     {
-        var graph = AssembleGraph(new MatrixLayer(CostMatrix, LinearAccessibility));
+        var graph = AssembleGraph(new MatrixLayer(CostMatrix, LinearObstacles));
         return CreateTestGraph(graph);
     }
 
     public static TestGraph CreateBranchingGraph()
     {
-        var graph = AssembleGraph(new MatrixLayer(CostMatrix, BranchAccessibility));
+        var graph = AssembleGraph(new MatrixLayer(CostMatrix, BranchObstacles));
         return CreateTestGraph(graph);
     }
 
@@ -50,21 +88,9 @@ internal static class TestGraphFactory
         return coordinates;
     }
 
-    private static IReadOnlyList<Coordinate> GetAlternativeBranchCoordinates()
+    internal static double GetLinearPathCost()
     {
-        var coordinates = new List<Coordinate>(GridSize * 2 - 1);
-
-        for (int y = 0; y < GridSize; y++)
-        {
-            coordinates.Add(new Coordinate(0, y));
-        }
-
-        for (int x = 1; x < GridSize; x++)
-        {
-            coordinates.Add(new Coordinate(x, GridSize - 1));
-        }
-
-        return coordinates;
+        return CalculatePathCost(GetLinearPathCoordinates());
     }
 
     private static IGraph<TestVertex> AssembleGraph(params ILayer[] overlays)
@@ -92,41 +118,19 @@ internal static class TestGraphFactory
         return new TestGraph(start, target, vertices);
     }
 
-    private static bool[,] CreateAccessibilityMap(IEnumerable<Coordinate> allowedCoordinates)
+    private static double CalculatePathCost(IEnumerable<Coordinate> coordinates)
     {
-        var accessibility = new bool[GridSize, GridSize];
-        foreach (var coordinate in allowedCoordinates)
+        double totalCost = 0;
+
+        foreach (var coordinate in coordinates.Skip(1))
         {
-            accessibility[coordinate[0], coordinate[1]] = true;
+            totalCost += CostMatrix[coordinate[0], coordinate[1]];
         }
 
-        return accessibility;
+        return totalCost;
     }
 
-    private static int[,] CreateCostMatrix()
-    {
-        var matrix = new int[GridSize, GridSize];
-
-        for (int x = 0; x < GridSize; x++)
-        {
-            for (int y = 0; y < GridSize; y++)
-            {
-                matrix[x, y] = 1;
-            }
-        }
-
-        foreach (var coordinate in GetAlternativeBranchCoordinates())
-        {
-            if (!coordinate.Equals(StartCoordinate) && !coordinate.Equals(TargetCoordinate))
-            {
-                matrix[coordinate[0], coordinate[1]] = 5;
-            }
-        }
-
-        return matrix;
-    }
-
-    private sealed class MatrixLayer(int[,] costs, bool[,] accessibility) : ILayer
+    private sealed class MatrixLayer(int[,] costs, bool[,] obstacles) : ILayer
     {
         public void Overlay(IGraph<IVertex> graph)
         {
@@ -135,7 +139,7 @@ internal static class TestGraphFactory
                 var x = vertex.Position[0];
                 var y = vertex.Position[1];
 
-                vertex.IsObstacle = !accessibility[x, y];
+                vertex.IsObstacle = obstacles[x, y];
                 vertex.Cost = new VertexCost(costs[x, y], DefaultCostRange);
             }
         }
