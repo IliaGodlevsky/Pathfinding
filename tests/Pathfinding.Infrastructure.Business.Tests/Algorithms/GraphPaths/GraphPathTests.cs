@@ -14,23 +14,29 @@ public class GraphPathTests
     public void GraphPath_BuildsSequenceFromTraces()
     {
         var graph = TestGraphFactory.CreateLinearGraph();
-        var middle = graph.Vertices.Single(v => v.Position.Equals(new Coordinate(1, 0)));
-        var traces = new Dictionary<Coordinate, IPathfindingVertex>
+        var linearPath = TestGraphFactory.GetLinearPathCoordinates().ToList();
+        var verticesByCoordinate = graph.Vertices.ToDictionary(vertex => vertex.Position);
+        var traces = new Dictionary<Coordinate, IPathfindingVertex>();
+
+        for (int index = linearPath.Count - 1; index > 0; index--)
         {
-            [graph.Target.Position] = middle,
-            [middle.Position] = graph.Start,
-        };
+            var current = linearPath[index];
+            var parent = linearPath[index - 1];
+            traces[current] = verticesByCoordinate[parent];
+        }
 
         var path = new GraphPath(traces, graph.Target);
 
-        Assert.That(path, Has.Count.EqualTo(2));
-        Assert.That(path.Cost, Is.EqualTo(2));
+        var expectedCount = linearPath.Count - 1;
+        Assert.That(path, Has.Count.EqualTo(expectedCount));
+        Assert.That(path.Cost, Is.EqualTo(expectedCount));
 
         var sequence = path.ToList();
-        Assert.That(sequence, Is.EqualTo(new[]
-        {
-            graph.Target.Position,
-            middle.Position,
-        }));
+        var expectedSequence = linearPath
+            .AsEnumerable()
+            .Reverse()
+            .Take(expectedCount)
+            .ToArray();
+        Assert.That(sequence, Is.EqualTo(expectedSequence));
     }
 }

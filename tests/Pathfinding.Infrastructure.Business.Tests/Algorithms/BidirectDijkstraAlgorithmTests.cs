@@ -14,6 +14,6 @@ public class BidirectDijkstraAlgorithmTests
 
         var path = algorithm.FindPath();
 
-        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 3, expectedCost: 3);
+        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 18, expectedCost: 18);
     }
 }

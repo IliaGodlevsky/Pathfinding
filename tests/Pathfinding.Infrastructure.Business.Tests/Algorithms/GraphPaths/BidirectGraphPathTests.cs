@@ -14,27 +14,34 @@ public class BidirectGraphPathTests
     public void BidirectGraphPath_CombinesForwardAndBackwardTraces()
     {
         var graph = TestGraphFactory.CreateLinearGraph();
-        var middle = graph.Vertices.Single(v => v.Position.Equals(new Coordinate(1, 0)));
+        var linearPath = TestGraphFactory.GetLinearPathCoordinates().ToList();
+        var verticesByCoordinate = graph.Vertices.ToDictionary(vertex => vertex.Position);
+        var intersectionIndex = linearPath.Count / 2;
+        var intersection = verticesByCoordinate[linearPath[intersectionIndex]];
 
-        var forwardTraces = new Dictionary<Coordinate, IPathfindingVertex>
+        var forwardTraces = new Dictionary<Coordinate, IPathfindingVertex>();
+        for (int index = 1; index <= intersectionIndex; index++)
         {
-            [middle.Position] = graph.Start
-        };
-        var backwardTraces = new Dictionary<Coordinate, IPathfindingVertex>
+            forwardTraces[linearPath[index]] = verticesByCoordinate[linearPath[index - 1]];
+        }
+
+        var backwardTraces = new Dictionary<Coordinate, IPathfindingVertex>();
+        for (int index = linearPath.Count - 2; index >= intersectionIndex; index--)
         {
-            [middle.Position] = graph.Target
-        };
+            backwardTraces[linearPath[index]] = verticesByCoordinate[linearPath[index + 1]];
+        }
 
-        var path = new BidirectGraphPath(forwardTraces, backwardTraces, middle);
+        var path = new BidirectGraphPath(forwardTraces, backwardTraces, intersection);
 
-        Assert.That(path, Has.Count.EqualTo(2));
-        Assert.That(path.Cost, Is.EqualTo(2));
+        var expectedCount = linearPath.Count - 1;
+        Assert.That(path, Has.Count.EqualTo(expectedCount));
+        Assert.That(path.Cost, Is.EqualTo(expectedCount));
 
         var coordinates = path.ToList();
-        Assert.That(coordinates, Is.EquivalentTo(new[]
-        {
-            graph.Target.Position,
-            middle.Position
-        }));
+        var expectedCoordinates = linearPath
+            .AsEnumerable()
+            .Reverse()
+            .Take(expectedCount);
+        Assert.That(coordinates, Is.EquivalentTo(expectedCoordinates));
     }
 }
