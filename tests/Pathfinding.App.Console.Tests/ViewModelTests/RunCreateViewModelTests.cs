@@ -9,7 +9,6 @@ using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
-using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Undefined;
 using Pathfinding.Service.Interface.Requests.Create;
 using Pathfinding.Shared.Primitives;

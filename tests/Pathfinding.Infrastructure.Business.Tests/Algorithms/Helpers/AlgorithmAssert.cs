@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using Pathfinding.Infrastructure.Business.Tests.Algorithms.Helpers;
 using Pathfinding.Service.Interface;
 using Pathfinding.Shared.Primitives;
 

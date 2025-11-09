@@ -6,9 +6,7 @@ using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Domain.Core.Enums;
-using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Data.Pathfinding;
-using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
@@ -101,7 +99,7 @@ internal sealed class RunFieldViewModelTests
 
     private static Graph<GraphVertexModel> CreateGraph()
     {
-        var first = new GraphVertexModel { Position = new Coordinate(0), Cost = new VertexCost(1, (1,2)) };
+        var first = new GraphVertexModel { Position = new Coordinate(0), Cost = new VertexCost(1, (1, 2)) };
         var second = new GraphVertexModel { Position = new Coordinate(1), Cost = new VertexCost(3, (2, 4)) };
         first.Neighbors.Add(second);
         second.Neighbors.Add(first);

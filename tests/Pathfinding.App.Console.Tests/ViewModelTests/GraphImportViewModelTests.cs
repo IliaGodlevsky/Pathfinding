@@ -8,8 +8,6 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Serialization;
-using System.Collections.Generic;
-using System.IO;
 using System.Reactive.Linq;
 using Serializer = Pathfinding.Service.Interface.ISerializer<Pathfinding.Service.Interface.Models.Serialization.PathfindingHistoriesSerializationModel>;
 

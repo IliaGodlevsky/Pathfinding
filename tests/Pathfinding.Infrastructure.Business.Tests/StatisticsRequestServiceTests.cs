@@ -2,11 +2,8 @@ using Autofac.Extras.Moq;
 using Moq;
 using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Core.Enums;
-using Pathfinding.Domain.Interface;
-using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Domain.Interface.Repositories;
 using Pathfinding.Infrastructure.Business.Services;
-using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Undefined;
 using Pathfinding.Service.Interface.Requests.Create;
 

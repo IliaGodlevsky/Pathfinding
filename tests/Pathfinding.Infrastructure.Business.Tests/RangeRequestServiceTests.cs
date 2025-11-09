@@ -2,11 +2,8 @@ using Autofac;
 using Autofac.Extras.Moq;
 using Moq;
 using Pathfinding.Domain.Core.Entities;
-using Pathfinding.Domain.Interface;
-using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Domain.Interface.Repositories;
 using Pathfinding.Infrastructure.Business.Services;
-using Pathfinding.Infrastructure.Data.Pathfinding;
 
 namespace Pathfinding.Infrastructure.Business.Tests;
 

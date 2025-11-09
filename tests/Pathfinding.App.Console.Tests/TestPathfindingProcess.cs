@@ -4,7 +4,6 @@ using Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models;
-using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.App.Console.Tests;
 
