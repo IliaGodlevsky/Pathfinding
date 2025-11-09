@@ -5,11 +5,6 @@ namespace Pathfinding.Infrastructure.Business.Tests.Algorithms.Helpers;
 
 internal static class AlgorithmAssert
 {
-    public static IReadOnlyList<Coordinate> Enumerate(IGraphPath path)
-    {
-        return [.. path];
-    }
-
     public static void PathHasExpectedMetrics(
         IGraphPath path,
         TestGraph graph,
@@ -20,7 +15,7 @@ internal static class AlgorithmAssert
         Assert.That(path, Has.Count.EqualTo(expectedLength));
         Assert.That(path.Cost, Is.EqualTo(expectedCost).Within(tolerance));
 
-        var coordinates = Enumerate(path);
+        IReadOnlyList<Coordinate> coordinates = [.. path];
         Assert.That(coordinates, Has.Count.EqualTo(expectedLength));
         Assert.Multiple(() =>
         {

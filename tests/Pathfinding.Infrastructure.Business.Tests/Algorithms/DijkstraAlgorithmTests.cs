@@ -10,11 +10,11 @@ public class DijkstraAlgorithmTests
     [Test]
     public void FindPath_WithBranchingGraph_ChoosesLowestCostRoute()
     {
-        var graph = TestGraphFactory.CreateBranchingGraph();
+        var graph = TestGraphFactory.CreateGraph();
         var algorithm = new DijkstraAlgorithm(graph.Range, new DefaultStepRule());
 
         var path = algorithm.FindPath();
 
-        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 2, expectedCost: 2);
+        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 11, expectedCost: 61);
     }
 }

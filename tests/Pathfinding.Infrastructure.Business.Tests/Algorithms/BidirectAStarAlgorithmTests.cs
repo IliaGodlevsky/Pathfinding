@@ -9,11 +9,11 @@ public class BidirectAStarAlgorithmTests
     [Test]
     public void FindPath_WithLinearGraph_CombinesFrontiersAtMeetingPoint()
     {
-        var graph = TestGraphFactory.CreateLinearGraph();
+        var graph = TestGraphFactory.CreateGraph();
         var algorithm = new BidirectAStarAlgorithm(graph.Range);
 
         var path = algorithm.FindPath();
 
-        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 3, expectedCost: 3);
+        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 12, expectedCost: 61);
     }
 }

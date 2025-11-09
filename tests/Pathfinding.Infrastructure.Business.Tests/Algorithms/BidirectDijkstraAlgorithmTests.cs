@@ -9,11 +9,11 @@ public class BidirectDijkstraAlgorithmTests
     [Test]
     public void FindPath_WithLinearGraph_FindsShortestIntersection()
     {
-        var graph = TestGraphFactory.CreateLinearGraph();
+        var graph = TestGraphFactory.CreateGraph();
         var algorithm = new BidirectDijkstraAlgorithm(graph.Range);
 
         var path = algorithm.FindPath();
 
-        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 3, expectedCost: 3);
+        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 10, expectedCost: 61);
     }
 }

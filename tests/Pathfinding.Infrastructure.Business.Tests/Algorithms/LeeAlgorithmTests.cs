@@ -9,11 +9,11 @@ public class LeeAlgorithmTests
     [Test]
     public void FindPath_WithLinearGraph_PerformsBreadthFirstTraversal()
     {
-        var graph = TestGraphFactory.CreateLinearGraph();
+        var graph = TestGraphFactory.CreateGraph();
         var algorithm = new LeeAlgorithm(graph.Range);
 
         var path = algorithm.FindPath();
 
-        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 2, expectedCost: 2);
+        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 10, expectedCost: 69);
     }
 }

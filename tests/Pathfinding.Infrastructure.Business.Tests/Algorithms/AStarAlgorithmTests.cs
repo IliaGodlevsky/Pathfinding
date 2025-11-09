@@ -9,11 +9,11 @@ public class AStarAlgorithmTests
     [Test]
     public void FindPath_WithBranchingGraph_RespectsHeuristicAndCost()
     {
-        var graph = TestGraphFactory.CreateBranchingGraph();
+        var graph = TestGraphFactory.CreateGraph();
         var algorithm = new AStarAlgorithm(graph.Range);
 
         var path = algorithm.FindPath();
 
-        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 2, expectedCost: 2);
+        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 11, expectedCost: 61);
     }
 }
