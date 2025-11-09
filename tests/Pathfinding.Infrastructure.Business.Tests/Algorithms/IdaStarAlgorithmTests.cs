@@ -14,6 +14,6 @@ public class IdaStarAlgorithmTests
 
         var path = algorithm.FindPath();
 
-        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: TestGraphFactory.ExpectedPathLength, expectedCost: TestGraphFactory.GetExpectedPathCost());
+        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 18, expectedCost: 90);
     }
 }

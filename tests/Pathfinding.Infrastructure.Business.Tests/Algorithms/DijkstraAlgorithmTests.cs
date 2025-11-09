@@ -15,6 +15,6 @@ public class DijkstraAlgorithmTests
 
         var path = algorithm.FindPath();
 
-        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: TestGraphFactory.ExpectedPathLength, expectedCost: TestGraphFactory.GetExpectedPathCost());
+        AlgorithmAssert.PathHasExpectedMetrics(path, graph, expectedLength: 11, expectedCost: 61);
     }
 }

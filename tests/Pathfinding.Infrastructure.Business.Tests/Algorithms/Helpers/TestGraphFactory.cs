@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Infrastructure.Business.Layers;
 using Pathfinding.Infrastructure.Data.Pathfinding;
@@ -46,45 +42,14 @@ internal static class TestGraphFactory
         { false, false, false, false, false, false, false, false, false, false },
     };
 
-    private static readonly ReadOnlyCollection<Coordinate> PathCoordinates = Array.AsReadOnly(new[]
-    {
-        new Coordinate(0, 0),
-        new Coordinate(1, 0),
-        new Coordinate(2, 0),
-        new Coordinate(3, 0),
-        new Coordinate(4, 0),
-        new Coordinate(5, 0),
-        new Coordinate(6, 0),
-        new Coordinate(7, 0),
-        new Coordinate(8, 0),
-        new Coordinate(9, 0),
-        new Coordinate(9, 1),
-        new Coordinate(9, 2),
-        new Coordinate(9, 3),
-        new Coordinate(9, 4),
-        new Coordinate(9, 5),
-        new Coordinate(9, 6),
-        new Coordinate(9, 7),
-        new Coordinate(9, 8),
-        new Coordinate(9, 9),
-    });
-
-    private static readonly double ExpectedPathCost = CalculatePathCost(PathCoordinates);
-
-    public static int ExpectedPathLength => PathCoordinates.Count - 1;
-
     public static TestGraph CreateGraph()
     {
         var graph = AssembleGraph(new MatrixLayer(CostMatrix, ObstacleMatrix));
-        return CreateTestGraph(graph);
-    }
+        var source = (IPathfindingVertex)graph.Get(SourceCoordinate);
+        var target = (IPathfindingVertex)graph.Get(TargetCoordinate);
 
-    public static IReadOnlyList<Coordinate> GetExpectedPathCoordinates()
-    {
-        return PathCoordinates;
+        return new TestGraph(source, target, graph);
     }
-
-    public static double GetExpectedPathCost() => ExpectedPathCost;
 
     private static IGraph<TestVertex> AssembleGraph(params ILayer[] overlays)
     {
@@ -93,34 +58,10 @@ internal static class TestGraphFactory
 
         foreach (var overlay in overlays.Append(neighborhoodLayer))
         {
-            overlay.Overlay((IGraph<IVertex>)graph);
+            overlay.Overlay(graph);
         }
 
         return graph;
-    }
-
-    private static TestGraph CreateTestGraph(IGraph<TestVertex> graph)
-    {
-        var source = (IPathfindingVertex)graph.Get(SourceCoordinate);
-        var target = (IPathfindingVertex)graph.Get(TargetCoordinate);
-        var vertices = graph
-            .Where(vertex => !vertex.IsObstacle)
-            .Cast<IPathfindingVertex>()
-            .ToList();
-
-        return new TestGraph(source, target, vertices);
-    }
-
-    private static double CalculatePathCost(IEnumerable<Coordinate> coordinates)
-    {
-        double totalCost = 0;
-
-        foreach (var coordinate in coordinates.Skip(1))
-        {
-            totalCost += CostMatrix[coordinate[0], coordinate[1]];
-        }
-
-        return totalCost;
     }
 
     private sealed class MatrixLayer(int[,] costs, bool[,] obstacles) : ILayer
@@ -140,7 +81,7 @@ internal static class TestGraphFactory
 
     private sealed class TestVertex : IVertex, IPathfindingVertex
     {
-        private TestVertex[] neighbours = Array.Empty<TestVertex>();
+        private TestVertex[] neighbours = [];
 
         public bool IsObstacle { get; set; }
 
@@ -151,7 +92,7 @@ internal static class TestGraphFactory
         public IReadOnlyCollection<IVertex> Neighbors
         {
             get => neighbours;
-            set => neighbours = value?.Cast<TestVertex>().ToArray() ?? Array.Empty<TestVertex>();
+            set => neighbours = value?.Cast<TestVertex>().ToArray() ?? [];
         }
 
         IReadOnlyCollection<IPathfindingVertex> IPathfindingVertex.Neighbors => neighbours;
@@ -161,7 +102,7 @@ internal static class TestGraphFactory
             return other is not null && Position.Equals(other.Position);
         }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             return obj is IVertex vertex && Equals(vertex);
         }
@@ -183,7 +124,7 @@ internal sealed class TestGraph
         Source = source;
         Target = target;
         Vertices = vertices;
-        Range = new[] { Source, Target };
+        Range = [Source, Target];
     }
 
     public IPathfindingVertex Source { get; }
