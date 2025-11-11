@@ -21,12 +21,13 @@ internal sealed partial class RunParametresView : FrameView
         Height = Dim.Percent(90);
         Border = new();
         Add(children);
-        foreach (var child in children)
+        for (int i = 0; i < children.Length; i++)
         {
+            children[i].Y = i == 0 ? 1 : Pos.Bottom(children[i - 1]);
             this.Events().VisibleChanged
                 .Where(x => !Visible)
                 .Select(x => Visible)
-                .BindTo(child, x => x.Visible)
+                .BindTo(children[i], x => x.Visible)
                 .DisposeWith(disposables);
         }
     }

@@ -232,7 +232,7 @@ internal sealed class RunRangeViewModel : ViewModel,
     {
         if (msg.Value.Contains(GraphId))
         {
-            disposables.Clear();
+            shortLifeDisposables.Clear();
             ClearRange();
             GraphId = 0;
             IsReadOnly = false;

@@ -5,8 +5,8 @@ using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
+using Pathfinding.Shared.Extensions;
 using ReactiveMarbles.ObservableEvents;
-using ReactiveUI;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
@@ -16,57 +16,137 @@ namespace Pathfinding.App.Console.Views;
 internal sealed partial class RunsListView : FrameView
 {
     private readonly CompositeDisposable disposables = [];
+    private readonly List<CheckBox> algorithms = [];
+    private readonly IMessenger messenger;
+    private readonly IList<Algorithms> selectedAlgorithms;
+    private readonly Dictionary<Algorithms, (HashSet<Algorithms> Group, Action Action)> requirementGroups;
+
+    private HashSet<Algorithms> RequirementGroup { get; set; } = [];
 
     public RunsListView([KeyFilter(KeyFilters.Views)] IMessenger messenger,
         IRunCreateViewModel viewModel)
     {
         Initialize();
-        var source = viewModel.AllowedAlgorithms
-            .ToDictionary(x => (object)x.ToStringRepresentation());
-        this.Events().VisibleChanged
-            .Where(_ => Visible)
-            .Do(x => runList.SelectedItem = runList.SelectedItem)
-            .Subscribe()
-            .DisposeWith(disposables);
-        runList.SetSource(source.Keys.ToList());
-        runList.Events().SelectedItemChanged
-            .Where(x => x.Item > -1)
-            .Select(x => source[x.Value])
-            .Do(algorithm =>
+        this.messenger = messenger;
+        requirementGroups = CreateRequirementsGroup();
+        selectedAlgorithms = viewModel.SelectedAlgorithms;
+        foreach (var algorithm in viewModel.AllowedAlgorithms)
+        {
+            var text = algorithm.ToStringRepresentation();
+            var checkBox = new CheckBox(text) { Y = algorithms.Count };
+            checkBox.Events().Toggled.Do(toggled =>
             {
-                // Don't change order of the messages
-                switch (algorithm)
+                if (!toggled && RequirementGroup.Count > 0)
                 {
-                    case Algorithms.AStar:
-                    case Algorithms.IdaStar:
-                    case Algorithms.BidirectAStar:
-                    case Algorithms.AStarGreedy:
-                        messenger.Send(new OpenStepRuleViewMessage());
-                        messenger.Send(new OpenRunsPopulateViewMessage());
-                        messenger.Send(new OpenHeuristicsViewMessage());
-                        break;
-                    case Algorithms.Dijkstra:
-                    case Algorithms.BidirectDijkstra:
-                    case Algorithms.CostGreedy:
-                        messenger.Send(new OpenStepRuleViewMessage());
-                        messenger.Send(new CloseRunPopulateViewMessage());
-                        messenger.Send(new CloseHeuristicsViewMessage());
-                        break;
-                    case Algorithms.DistanceFirst:
-                    case Algorithms.AStarLee:
-                        messenger.Send(new CloseStepRulesViewMessage());
-                        messenger.Send(new CloseRunPopulateViewMessage());
-                        messenger.Send(new OpenHeuristicsViewMessage());
-                        break;
-                    default:
-                        messenger.Send(new CloseStepRulesViewMessage());
-                        messenger.Send(new CloseRunPopulateViewMessage());
-                        messenger.Send(new CloseHeuristicsViewMessage());
-                        break;
+                    if (!RequirementGroup.Contains(algorithm))
+                    {
+                        checkBox.Checked = false;
+                    }
+                    else
+                    {
+                        viewModel.SelectedAlgorithms.Add(algorithm);
+                    }
                 }
-            })
-            .BindTo(viewModel, x => x.Algorithm)
-            .DisposeWith(disposables);
+                else if (toggled && RequirementGroup.Count > 0)
+                {
+                    viewModel.SelectedAlgorithms.Remove(algorithm);
+                    if (viewModel.SelectedAlgorithms.Count == 0)
+                    {
+                        RequirementGroup = [];
+                        HideAllParametresViews();
+                    }
+                    else
+                    {
+                        var algo = viewModel.SelectedAlgorithms.First();
+                        RequirementGroup = requirementGroups[algo].Group;
+                    }
+                }
+                else if (!toggled && RequirementGroup.Count == 0)
+                {
+                    RequirementGroup = requirementGroups[algorithm].Group;
+                    viewModel.SelectedAlgorithms.Add(algorithm);
+                    requirementGroups[algorithm].Action();
+                }
+            })  .Subscribe()
+                .DisposeWith(disposables);
+            algorithms.Add(checkBox);
+        }
+        VisibleChanged += RunsListView_VisibleChanged;
+        Add([.. algorithms]);
+    }
+
+    private void RunsListView_VisibleChanged()
+    {
+        if (!Visible)
+        {
+            foreach (var checkBox in algorithms.Where(x => x.Checked))
+            {
+                checkBox.Checked = false;
+            }
+        }
+        else
+        {
+            selectedAlgorithms.Clear();
+            RequirementGroup = [];
+        }
+    }
+
+    private Dictionary<Algorithms, (HashSet<Algorithms>, Action)> CreateRequirementsGroup()
+    {
+        var result = new Dictionary<Algorithms, (HashSet<Algorithms>, Action)>();
+        result.AddRange(CreateRequirementGroup(
+            () =>
+            {
+                messenger.Send(new OpenStepRuleViewMessage());
+                messenger.Send(new OpenRunsPopulateViewMessage());
+                messenger.Send(new OpenHeuristicsViewMessage());
+            },
+            Algorithms.AStar,
+            Algorithms.IdaStar,
+            Algorithms.BidirectAStar,
+            Algorithms.AStarGreedy));
+        result.AddRange(CreateRequirementGroup(
+            () =>
+            {
+                messenger.Send(new OpenStepRuleViewMessage());
+                messenger.Send(new CloseRunPopulateViewMessage());
+                messenger.Send(new CloseHeuristicsViewMessage());
+            },
+            Algorithms.Dijkstra,
+            Algorithms.BidirectDijkstra,
+            Algorithms.CostGreedy));
+        result.AddRange(CreateRequirementGroup(
+            () =>
+            {
+                messenger.Send(new CloseStepRulesViewMessage());
+                messenger.Send(new CloseRunPopulateViewMessage());
+                messenger.Send(new OpenHeuristicsViewMessage());
+            },
+            Algorithms.DistanceFirst,
+            Algorithms.AStarLee));
+        result.AddRange(CreateRequirementGroup(
+            HideAllParametresViews,
+            Algorithms.Lee,
+            Algorithms.BidirectLee,
+            Algorithms.DepthFirst,
+            Algorithms.Snake,
+            Algorithms.Random,
+            Algorithms.BidirectRandom,
+            Algorithms.DepthFirstRandom
+            ));
+        return result;
+    }
+
+    private static Dictionary<Algorithms, (HashSet<Algorithms>, Action)> CreateRequirementGroup(Action action, params Algorithms[] algorithms)
+    {
+        return algorithms.ToDictionary(x => x, _ => (new HashSet<Algorithms>(algorithms), action));
+    }
+
+    private void HideAllParametresViews()
+    {
+        messenger.Send(new CloseStepRulesViewMessage());
+        messenger.Send(new CloseRunPopulateViewMessage());
+        messenger.Send(new CloseHeuristicsViewMessage());
     }
 
     protected override void Dispose(bool disposing)

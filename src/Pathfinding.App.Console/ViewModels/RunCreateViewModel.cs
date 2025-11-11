@@ -40,9 +40,9 @@ internal sealed class RunCreateViewModel : ViewModel,
 {
     private sealed record AlgorithmBuildInfo(
         Algorithms Algorithm,
-        Heuristics? Heuristics,
-        double? Weight,
-        StepRules? StepRule) : IAlgorithmBuildInfo;
+        StepRules? StepRule,
+        Heuristics? Heuristics = null,
+        double? Weight = null) : IAlgorithmBuildInfo;
 
     private readonly IStatisticsRequestService statisticsService;
     private readonly IMessenger messenger;
@@ -51,12 +51,9 @@ internal sealed class RunCreateViewModel : ViewModel,
 
     public ReactiveCommand<Unit, Unit> CreateRunCommand { get; }
 
-    private Algorithms? algorithm;
-    public Algorithms? Algorithm
-    {
-        get => algorithm;
-        set => this.RaiseAndSetIfChanged(ref algorithm, value);
-    }
+    public ObservableCollection<Algorithms> SelectedAlgorithms { get; } = [];
+
+    IList<Algorithms> IRunCreateViewModel.SelectedAlgorithms => SelectedAlgorithms;
 
     public IReadOnlyCollection<Heuristics> AllowedHeuristics { get; }
 
@@ -105,6 +102,8 @@ internal sealed class RunCreateViewModel : ViewModel,
         set => this.RaiseAndSetIfChanged(ref graph, value);
     }
 
+    
+
     public RunCreateViewModel(
         IStatisticsRequestService statisticsService,
         IAlgorithmsFactory algorithmsFactory,
@@ -129,12 +128,11 @@ internal sealed class RunCreateViewModel : ViewModel,
         return this.WhenAnyValue(
             x => x.Graph, x => x.AppliedHeuristics.Count,
             x => x.FromWeight, x => x.ToWeight,
-            x => x.Step, x => x.Algorithm,
+            x => x.Step, x => x.SelectedAlgorithms.Count,
             (g, count, weight, to, s, algo) =>
             {
                 var canExecute = g != Graph<GraphVertexModel>.Empty
-                    && algo != null
-                    && Enum.IsDefined(algo.Value);
+                    && algo > 0;
                 if (count > 0)
                 {
                     canExecute = canExecute && count > 1;
@@ -220,11 +218,16 @@ internal sealed class RunCreateViewModel : ViewModel,
 
     private AlgorithmBuildInfo[] GetBuildInfo(double? weight)
     {
-        return AppliedHeuristics.Count == 0
-            ? [new(Algorithm.Value, null, null, StepRule)]
-            : [.. AppliedHeuristics
-                .Where(x => x is not null)
-                .Select(x => new AlgorithmBuildInfo(Algorithm.Value, x, weight, StepRule))];
+        if (AppliedHeuristics.Count == 0)
+        {
+            return [.. SelectedAlgorithms.SelectMany(algo => new AlgorithmBuildInfo[]
+            {
+                new(algo, StepRule)
+            })];
+        }
+        return [.. AppliedHeuristics.Where(x => x is not null)
+            .SelectMany(heuristic => SelectedAlgorithms
+                .Select(algo => new AlgorithmBuildInfo(algo,StepRule, heuristic, weight)))];
     }
 
     private async Task CreateAlgorithm()
@@ -237,8 +240,8 @@ internal sealed class RunCreateViewModel : ViewModel,
         }
 
         var statistics = EnumerateWeights()
-            .SelectMany(x => GetBuildInfo(x))
-            .Select(x => CreateStatistics(range, x))
+            .SelectMany(weight => GetBuildInfo(weight))
+            .Select(buildInfo => CreateStatistics(range, buildInfo))
             .ToArray();
 
         await ExecuteSafe(async () =>

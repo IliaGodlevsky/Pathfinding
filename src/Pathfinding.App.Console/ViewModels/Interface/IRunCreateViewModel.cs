@@ -6,7 +6,7 @@ namespace Pathfinding.App.Console.ViewModels.Interface;
 
 internal interface IRunCreateViewModel
 {
-    Algorithms? Algorithm { get; set; }
+    IList<Algorithms> SelectedAlgorithms { get; }
 
     IReadOnlyCollection<Algorithms> AllowedAlgorithms { get; }
 

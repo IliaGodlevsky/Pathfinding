@@ -125,7 +125,7 @@ internal static class Modules
         builder.RegisterType<RandomAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Random)
             .WithMetadata(MetadataKeys.Order, 15).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<AStarAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.AStar)
-            .WithMetadata(MetadataKeys.Order, 2).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+            .WithMetadata(MetadataKeys.Order, 3).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<SnakeAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Snake)
             .WithMetadata(MetadataKeys.Order, 14).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<CostGreedyAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.CostGreedy)
@@ -135,7 +135,7 @@ internal static class Modules
         builder.RegisterType<LeeAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Lee)
             .WithMetadata(MetadataKeys.Order, 8).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<BidirectDijkstraAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.BidirectDijkstra)
-            .WithMetadata(MetadataKeys.Order, 3).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+            .WithMetadata(MetadataKeys.Order, 2).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<BidirectAStarAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.BidirectAStar)
             .WithMetadata(MetadataKeys.Order, 4).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<DepthFirstAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.DepthFirst)
