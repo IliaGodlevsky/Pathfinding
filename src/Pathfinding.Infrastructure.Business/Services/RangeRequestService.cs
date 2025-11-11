@@ -4,7 +4,6 @@ using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Extensions;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Business.Extensions;
-using Pathfinding.Infrastructure.Data.InMemory;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 
@@ -13,10 +12,6 @@ namespace Pathfinding.Infrastructure.Business.Services;
 public sealed class RangeRequestService<T>(IUnitOfWorkFactory factory) : IRangeRequestService<T>
     where T : IVertex, IEntity<long>, new()
 {
-    public RangeRequestService() : this(new InMemoryUnitOfWorkFactory())
-    {
-    }
-
     public async Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeAsync(int graphId,
         CancellationToken token = default)
     {

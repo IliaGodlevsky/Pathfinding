@@ -17,6 +17,7 @@ using Pathfinding.Infrastructure.Business.Layers;
 using Pathfinding.Infrastructure.Business.Serializers;
 using Pathfinding.Infrastructure.Business.Serializers.Decorators;
 using Pathfinding.Infrastructure.Business.Services;
+using Pathfinding.Infrastructure.Data.InMemory;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Infrastructure.Data.Sqlite;
 using Pathfinding.Logging.Interface;
@@ -151,8 +152,6 @@ internal static class Modules
             .WithMetadata(MetadataKeys.Order, 16).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<DijkstraAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Dijkstra)
             .WithMetadata(MetadataKeys.Order, 1).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
-        //builder.RegisterType<IDAStarAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.IdaStar)
-        //    .WithMetadata(MetadataKeys.Order, 5).SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<AlgorithmsFactory>().As<IAlgorithmsFactory>().SingleInstance();
 
         builder.RegisterType<ReadGraphOnlyOption>().As<IReadHistoryOption>().SingleInstance()
@@ -226,6 +225,8 @@ internal static class Modules
         builder.RegisterType<RunStepRulesView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
         builder.RegisterType<RunHeuristicsView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
         builder.RegisterType<RunsPopulateView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
+
+        builder.RegisterType<InMemoryUnitOfWorkFactory>().As<IUnitOfWorkFactory>().SingleInstance().IfNotRegistered(typeof(IUnitOfWorkFactory));
 
         return builder.Build();
     }

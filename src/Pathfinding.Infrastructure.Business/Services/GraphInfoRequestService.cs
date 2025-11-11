@@ -1,7 +1,6 @@
 using Pathfinding.Domain.Interface.Extensions;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Business.Extensions;
-using Pathfinding.Infrastructure.Data.InMemory;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Shared.Extensions;
@@ -10,10 +9,6 @@ namespace Pathfinding.Infrastructure.Business.Services;
 
 public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory) : IGraphInfoRequestService
 {
-    public GraphInfoRequestService() : this(new InMemoryUnitOfWorkFactory())
-    {
-    }
-
     public async Task<IReadOnlyCollection<GraphInformationModel>> ReadAllGraphInfoAsync(
         CancellationToken token = default)
     {

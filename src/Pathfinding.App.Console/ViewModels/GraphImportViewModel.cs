@@ -57,7 +57,6 @@ internal sealed class GraphImportViewModel : ViewModel, IGraphImportViewModel
             messenger.Send(new GraphsCreatedMessage(graphs));
             log.Info(graphs.Length > 0
                 ? Resource.WasLoadedMsg : Resource.WereLoadedMsg);
-
         }).ConfigureAwait(false);
     }
 }
