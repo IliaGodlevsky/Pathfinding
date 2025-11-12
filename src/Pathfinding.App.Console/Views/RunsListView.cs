@@ -57,7 +57,7 @@ internal sealed partial class RunsListView : FrameView
                     }
                     else
                     {
-                        var algo = viewModel.SelectedAlgorithms.First();
+                        var algo = viewModel.SelectedAlgorithms[0];
                         RequirementGroup = requirementGroups[algo].Group;
                     }
                 }

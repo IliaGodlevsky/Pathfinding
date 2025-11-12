@@ -102,8 +102,6 @@ internal sealed class RunCreateViewModel : ViewModel,
         set => this.RaiseAndSetIfChanged(ref graph, value);
     }
 
-    
-
     public RunCreateViewModel(
         IStatisticsRequestService statisticsService,
         IAlgorithmsFactory algorithmsFactory,
@@ -131,8 +129,7 @@ internal sealed class RunCreateViewModel : ViewModel,
             x => x.Step, x => x.SelectedAlgorithms.Count,
             (g, count, weight, to, s, algo) =>
             {
-                var canExecute = g != Graph<GraphVertexModel>.Empty
-                    && algo > 0;
+                var canExecute = g != Graph<GraphVertexModel>.Empty && algo > 0;
                 if (count > 0)
                 {
                     canExecute = canExecute && count > 1;
