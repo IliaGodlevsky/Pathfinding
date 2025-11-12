@@ -44,6 +44,14 @@ internal sealed class LiteDbVerticesRepository : IVerticesRepository
             .ToAsyncEnumerable();
     }
 
+    public IAsyncEnumerable<Vertex> ReadVerticesByIdsAsync(IReadOnlyCollection<long> vertexIds)
+    {
+        return collection.Query()
+            .Where(x => vertexIds.Contains(x.Id))
+            .ToEnumerable()
+            .ToAsyncEnumerable();
+    }
+
     public Task<bool> UpdateVerticesAsync(
         IReadOnlyCollection<Vertex> vertices,
         CancellationToken token = default)

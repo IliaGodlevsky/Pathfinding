@@ -15,4 +15,6 @@ public interface IVerticesRepository
         CancellationToken token = default);
 
     Task<Vertex> ReadAsync(long vertexId, CancellationToken token = default);
+
+    IAsyncEnumerable<Vertex> ReadVerticesByIdsAsync(IReadOnlyCollection<long> vertexIds);
 }

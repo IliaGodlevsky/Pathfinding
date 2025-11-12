@@ -59,6 +59,12 @@ internal sealed class SqliteVerticesRepository(SqliteConnection connection,
         return Connection.QueryUnbufferedAsync<Vertex>(query, new { GraphId = graphId });
     }
 
+    public IAsyncEnumerable<Vertex> ReadVerticesByIdsAsync(IReadOnlyCollection<long> vertexIds)
+    {
+        const string query = $"SELECT * FROM {DbTables.Vertices} WHERE Id IN @Ids";
+        return Connection.QueryUnbufferedAsync<Vertex>(query, new { Ids = vertexIds });
+    }
+
     public async Task<bool> UpdateVerticesAsync(
         IReadOnlyCollection<Vertex> vertices,
         CancellationToken token = default)

@@ -62,14 +62,17 @@ internal static class UnitOfWorkExtensions
             .ReadByGraphIdAsync(graphId)
             .ToListAsync(token)
             .ConfigureAwait(false);
+        var rangeVerticesIds = range.Select(x => x.VertexId).ToHashSet();
+        var vertices = await unit.VerticesRepository
+            .ReadVerticesByIdsAsync(rangeVerticesIds)
+            .Select(x => new { x.Id, Coordinates = x.Coordinates.ToCoordinates() })
+            .ToDictionaryAsync(x => x.Id, x => x.Coordinates, token)
+            .ConfigureAwait(false);
         var result = new List<PathfindingRangeModel>(range.Count);
         foreach (var rangeVertex in range)
         {
-            var vertex = await unit.VerticesRepository
-                .ReadAsync(rangeVertex.VertexId, token)
-                .ConfigureAwait(false);
             var model = rangeVertex.ToRangeModel();
-            model.Position = vertex.Coordinates.ToCoordinates();
+            model.Position = vertices[rangeVertex.VertexId];
             result.Add(model);
         }
         return result.AsReadOnly();
