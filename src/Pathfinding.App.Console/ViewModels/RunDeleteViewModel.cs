@@ -25,7 +25,7 @@ internal sealed class RunDeleteViewModel : ViewModel, IRunDeleteViewModel, IDisp
         set => this.RaiseAndSetIfChanged(ref selectedRunsIds, value);
     }
 
-    private int ActivatedGraph { get; set; }
+    private ActiveGraph ActivatedGraph { get; set; }
 
     public ReactiveCommand<Unit, Unit> DeleteRunsCommand { get; }
 
@@ -75,14 +75,14 @@ internal sealed class RunDeleteViewModel : ViewModel, IRunDeleteViewModel, IDisp
 
     private void OnGraphActivated(GraphActivatedMessage msg)
     {
-        ActivatedGraph = msg.Value.GraphId;
+        ActivatedGraph = msg.Value.ActiveGraph;
     }
 
     private void OnGraphsDeleted(GraphsDeletedMessage msg)
     {
-        if (msg.Value.Contains(ActivatedGraph))
+        if (msg.Value.Contains(ActivatedGraph.Id))
         {
-            ActivatedGraph = 0;
+            ActivatedGraph = ActiveGraph.Empty;
             SelectedRunsIds = [];
         }
     }

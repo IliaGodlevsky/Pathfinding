@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
 using Pathfinding.App.Console.Factories;
+using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.Requests;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
@@ -38,14 +39,13 @@ internal sealed class RunCreateViewModelTests
             stepRuleFactoryMock);
 
         var graph = CreateGraph();
-        messenger.Send(new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
-            Neighborhoods.Moore,
-            SmoothLevels.No,
-            GraphStatuses.Editable,
-            GraphId: 42)));
+        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+            new(42, graph, false),
+            default,
+            default));
+        messenger.Send(message);
 
-        viewModel.Algorithm = Algorithms.AStar;
+        viewModel.SelectedAlgorithms.Add(Algorithms.AStar);
 
         Assert.That(await viewModel.CreateRunCommand.CanExecute.FirstAsync(), Is.True);
 
@@ -86,17 +86,16 @@ internal sealed class RunCreateViewModelTests
             logMock.Object);
 
         var graph = CreateGraph();
-        messenger.Send(new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
-            Neighborhoods.Moore,
-            SmoothLevels.No,
-            GraphStatuses.Editable,
-            GraphId: 42)));
+        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+            new(42, graph, false),
+            default,
+            default));
+        messenger.Send(message);
 
         messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
             => msg.Reply([.. graph.Select(v => v)]));
 
-        viewModel.Algorithm = Algorithms.AStar;
+        viewModel.SelectedAlgorithms.Add(Algorithms.AStar);
 
         RunsCreatedMessaged createdMessage = null;
         messenger.Register<RunsCreatedMessaged>(this, (_, msg) => createdMessage = msg);
@@ -133,17 +132,17 @@ internal sealed class RunCreateViewModelTests
             logMock.Object);
 
         var graph = CreateGraph();
-        messenger.Send(new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
-            Neighborhoods.Moore,
-            SmoothLevels.No,
-            GraphStatuses.Editable,
-            GraphId: 42)));
+
+        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+            new(42, graph, false),
+            default,
+            default));
+        messenger.Send(message);
 
         messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
             => msg.Reply([graph.First()]));
 
-        viewModel.Algorithm = Algorithms.AStar;
+        viewModel.SelectedAlgorithms.Add(Algorithms.AStar);
 
         await viewModel.CreateRunCommand.Execute();
 

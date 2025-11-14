@@ -28,11 +28,9 @@ internal sealed class GraphFieldViewModelTests
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
         var message = new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
+            new(1, graph, false),
             default,
-            default,
-            GraphStatuses.Editable,
-            1));
+            default));
 
         messenger.Send(message, Tokens.GraphField);
 
@@ -40,7 +38,7 @@ internal sealed class GraphFieldViewModelTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(viewModel.Graph, Is.EqualTo(graph));
+            Assert.That(viewModel.ActivatedGraph.Graph, Is.EqualTo(graph));
             Assert.That(canExecute, Is.True);
         });
     }
@@ -55,11 +53,9 @@ internal sealed class GraphFieldViewModelTests
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
         var message = new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
+            new(1, graph, true),
             default,
-            default,
-            GraphStatuses.Readonly,
-            1));
+            default));
 
         messenger.Send(message, Tokens.GraphField);
 
@@ -67,7 +63,7 @@ internal sealed class GraphFieldViewModelTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(viewModel.Graph, Is.EqualTo(graph));
+            Assert.That(viewModel.ActivatedGraph.Graph, Is.EqualTo(graph));
             Assert.That(canExecute, Is.False);
         });
     }
@@ -88,11 +84,9 @@ internal sealed class GraphFieldViewModelTests
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
         var message = new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
+            new(2, graph, false),
             default,
-            default,
-            GraphStatuses.Editable,
-            2));
+            default));
 
         ObstaclesCountChangedMessage obstaclesMessage = null;
         messenger.Register<ObstaclesCountChangedMessage>(this, (_, msg) => obstaclesMessage = msg);
@@ -127,11 +121,9 @@ internal sealed class GraphFieldViewModelTests
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
         var message = new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
+            new(3, graph, false),
             default,
-            default,
-            GraphStatuses.Editable,
-            3));
+            default));
 
         var obstaclesSent = false;
         messenger.Register<ObstaclesCountChangedMessage>(this, (_, _) => obstaclesSent = true);
@@ -169,11 +161,9 @@ internal sealed class GraphFieldViewModelTests
         vertex.Cost = new VertexCost(9, new InclusiveValueRange<int>(10, 0));
         var graph = new Graph<GraphVertexModel>([vertex], 1);
         var message = new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
+            new(4, graph, false),
             default,
-            default,
-            GraphStatuses.Editable,
-            4));
+            default));
 
         messenger.Send(message, Tokens.GraphField);
 
@@ -208,11 +198,9 @@ internal sealed class GraphFieldViewModelTests
         vertex.IsObstacle = true;
         var graph = new Graph<GraphVertexModel>([vertex], 1);
         var message = new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
+            new(5, graph, false),
             default,
-            default,
-            GraphStatuses.Editable,
-            5));
+            default));
 
         ObstaclesCountChangedMessage obstaclesMessage = null;
         messenger.Register<ObstaclesCountChangedMessage>(this, (_, msg) => obstaclesMessage = msg);
@@ -240,14 +228,12 @@ internal sealed class GraphFieldViewModelTests
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
-        var activatedMessage = new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
+        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+            new(6, graph, false),
             default,
-            default,
-            GraphStatuses.Editable,
-            6));
+            default));
 
-        messenger.Send(activatedMessage, Tokens.GraphField);
+        messenger.Send(message, Tokens.GraphField);
 
         var enabled = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => value);
 
@@ -271,14 +257,12 @@ internal sealed class GraphFieldViewModelTests
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
-        var activatedMessage = new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
+        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+            new(7, graph, false),
             default,
-            default,
-            GraphStatuses.Editable,
-            7));
+            default));
 
-        messenger.Send(activatedMessage, Tokens.GraphField);
+        messenger.Send(message, Tokens.GraphField);
 
         var enabled = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => value);
         Assert.That(enabled, Is.True);
@@ -289,7 +273,7 @@ internal sealed class GraphFieldViewModelTests
 
         Assert.Multiple(() =>
         {
-            Assert.That(viewModel.Graph, Is.SameAs(Graph<GraphVertexModel>.Empty));
+            Assert.That(viewModel.ActivatedGraph.Graph, Is.SameAs(Graph<GraphVertexModel>.Empty));
             Assert.That(disabled, Is.False);
         });
     }

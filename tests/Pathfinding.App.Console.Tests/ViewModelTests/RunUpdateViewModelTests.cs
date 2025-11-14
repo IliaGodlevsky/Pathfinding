@@ -37,12 +37,11 @@ internal sealed class RunUpdateViewModelTests
             neighborhoodFactoryMock);
 
         var graph = CreateGraph();
+
         messenger.Send(new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
+            new(10, graph, false),
             Neighborhoods.Moore,
-            SmoothLevels.No,
-            GraphStatuses.Editable,
-            GraphId: 10)));
+            SmoothLevels.No)));
 
         var runInfo = new RunInfoModel { Id = 1, Algorithm = Algorithms.AStar };
         messenger.Send(new RunsSelectedMessage([runInfo]));
@@ -97,11 +96,9 @@ internal sealed class RunUpdateViewModelTests
             neighborhoodFactoryMock);
 
         messenger.Send(new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
-            Neighborhoods.Moore,
-            SmoothLevels.No,
-            GraphStatuses.Editable,
-            GraphId: 10)));
+            new(10, graph, false),
+            default,
+            default)));
 
         var runInfo = new RunInfoModel { Id = 1, Algorithm = Algorithms.AStar };
         messenger.Send(new RunsSelectedMessage([runInfo]));
@@ -143,11 +140,9 @@ internal sealed class RunUpdateViewModelTests
 
         var graph = CreateGraph();
         messenger.Send(new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
-            Neighborhoods.Moore,
-            SmoothLevels.No,
-            GraphStatuses.Editable,
-            GraphId: 5)));
+            new(5, graph, false),
+            default,
+            default)));
 
         messenger.Send(new RunsSelectedMessage([
             new RunInfoModel { Id = 1, Algorithm = Algorithms.AStar }

@@ -28,7 +28,7 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
 
     public ReactiveCommand<int[], Unit> SelectRunsCommand { get; }
 
-    private int ActivatedGraphId { get; set; }
+    private ActiveGraph ActivatedGraph { get; set; } = ActiveGraph.Empty;
 
     public RunsTableViewModel(IStatisticsRequestService statisticsService,
         IGraphInfoRequestService graphInfoService,
@@ -58,10 +58,11 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
     {
         await ExecuteSafe(async token =>
         {
+            ActivatedGraph = msg.Value.ActiveGraph;
             var statistics = await statisticsService
-                .ReadStatisticsAsync(msg.Value.GraphId, token)
+                .ReadStatisticsAsync(ActivatedGraph.Id, token)
                 .ConfigureAwait(false);
-            ActivatedGraphId = msg.Value.GraphId;
+            
             Runs.Clear();
             Runs.Add(statistics.ToRunInfo());
         }).ConfigureAwait(false);
@@ -69,10 +70,10 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
 
     private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
-        if (msg.Value.Contains(ActivatedGraphId))
+        if (msg.Value.Contains(ActivatedGraph.Id))
         {
             Runs.Clear();
-            ActivatedGraphId = 0;
+            ActivatedGraph = ActiveGraph.Empty;
         }
     }
 
@@ -102,8 +103,8 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
             Runs.Remove(toDelete);
             if (Runs.Count == 0)
             {
-                messenger.Send(new GraphStateChangedMessage((ActivatedGraphId, GraphStatuses.Editable)));
-                var graphInfo = await graphInfoService.ReadGraphInfoAsync(ActivatedGraphId, token).ConfigureAwait(false);
+                messenger.Send(new GraphStateChangedMessage((ActivatedGraph.Id, GraphStatuses.Editable)));
+                var graphInfo = await graphInfoService.ReadGraphInfoAsync(ActivatedGraph.Id, token).ConfigureAwait(false);
                 graphInfo.Status = GraphStatuses.Editable;
                 await graphInfoService.UpdateGraphInfoAsync(graphInfo, token).ConfigureAwait(false);
             }
@@ -118,8 +119,8 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
             Runs.Add(msg.Value.ToRunInfo());
             if (previousCount == 0)
             {
-                messenger.Send(new GraphStateChangedMessage((ActivatedGraphId, GraphStatuses.Readonly)));
-                var graphInfo = await graphInfoService.ReadGraphInfoAsync(ActivatedGraphId, token).ConfigureAwait(false);
+                messenger.Send(new GraphStateChangedMessage((ActivatedGraph.Id, GraphStatuses.Readonly)));
+                var graphInfo = await graphInfoService.ReadGraphInfoAsync(ActivatedGraph.Id, token).ConfigureAwait(false);
                 graphInfo.Status = GraphStatuses.Readonly;
                 await graphInfoService.UpdateGraphInfoAsync(graphInfo, token).ConfigureAwait(false);
             }

@@ -6,7 +6,7 @@ namespace Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
 
 public sealed class CompositeGraphPath : IGraphPath
 {
-    private readonly IEnumerable<IGraphPath> paths;
+    private readonly IReadOnlyCollection<IGraphPath> paths;
     private readonly Lazy<IReadOnlyCollection<Coordinate>> path;
     private readonly Lazy<int> count;
     private readonly Lazy<double> cost;

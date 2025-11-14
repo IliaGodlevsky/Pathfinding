@@ -39,15 +39,11 @@ internal sealed class RunRangeViewModel : ViewModel,
     private readonly IEnumerable<Command> excludeCommands;
     private readonly IPathfindingRange<GraphVertexModel> pathfindingRange;
 
-    private int GraphId { get; set; }
-
-    private Graph<GraphVertexModel> Graph { get; set; }
-
-    private bool isReadOnly;
-    public bool IsReadOnly
+    private ActiveGraph activeGraph;
+    private ActiveGraph ActivatedGraph
     {
-        get => isReadOnly;
-        set => this.RaiseAndSetIfChanged(ref isReadOnly, value);
+        get => activeGraph;
+        set => this.RaiseAndSetIfChanged(ref activeGraph, value);
     }
 
     private GraphVertexModel source;
@@ -130,7 +126,7 @@ internal sealed class RunRangeViewModel : ViewModel,
 
     private IObservable<bool> CanExecute()
     {
-        return this.WhenAnyValue(x => x.IsReadOnly, isRead => !isRead);
+        return this.WhenAnyValue(x => x.ActivatedGraph, g => !g.IsReadonly);
     }
 
     public IEnumerator<GraphVertexModel> GetEnumerator()
@@ -160,7 +156,7 @@ internal sealed class RunRangeViewModel : ViewModel,
         {
             var vertices = pathfindingRange.ToList();
             var index = vertices.IndexOf(vertex);
-            await rangeService.CreatePathfindingVertexAsync(GraphId,
+            await rangeService.CreatePathfindingVertexAsync(ActivatedGraph.Id,
                 vertex.Id, index, token).ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
@@ -187,7 +183,7 @@ internal sealed class RunRangeViewModel : ViewModel,
 
     private async Task DeleteRange()
     {
-        var result = await rangeService.DeleteRangeAsync(GraphId).ConfigureAwait(false);
+        var result = await rangeService.DeleteRangeAsync(ActivatedGraph.Id).ConfigureAwait(false);
         if (result)
         {
             ClearRange();
@@ -201,20 +197,18 @@ internal sealed class RunRangeViewModel : ViewModel,
             shortLifeDisposables.Clear();
             Transit.CollectionChanged -= OnCollectionChanged;
             ClearRange();
-            Graph = msg.Value.Graph;
-            GraphId = msg.Value.GraphId;
-            IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
-            var range = await rangeService.ReadRangeAsync(GraphId, token).ConfigureAwait(false);
+            ActivatedGraph = msg.Value.ActiveGraph;
+            var range = await rangeService.ReadRangeAsync(ActivatedGraph.Id, token).ConfigureAwait(false);
             var src = range.FirstOrDefault(x => x.IsSource);
-            Source = src != null ? Graph.Get(src.Position) : null;
+            Source = src != null ? ActivatedGraph.Graph.Get(src.Position) : null;
             var tgt = range.FirstOrDefault(x => x.IsTarget);
-            Target = tgt != null ? Graph.Get(tgt.Position) : null;
+            Target = tgt != null ? ActivatedGraph.Graph.Get(tgt.Position) : null;
             var transit = range.Where(x => !x.IsSource && !x.IsTarget)
-                .Select(x => Graph.Get(x.Position))
+                .Select(x => ActivatedGraph.Graph.Get(x.Position))
                 .ToList();
             Transit.CollectionChanged += OnCollectionChanged;
             Transit.AddRange(transit);
-            foreach (var vertex in Graph)
+            foreach (var vertex in ActivatedGraph.Graph)
             {
                 BindTo(x => x.IsSource, vertex);
                 BindTo(x => x.IsTarget, vertex);
@@ -225,18 +219,17 @@ internal sealed class RunRangeViewModel : ViewModel,
 
     private void OnGraphBecameReadonly(GraphStateChangedMessage msg)
     {
-        IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
+        bool isReadonly = msg.Value.Status == GraphStatuses.Readonly;
+        ActivatedGraph = new ActiveGraph(ActivatedGraph.Id, ActivatedGraph.Graph, isReadonly);
     }
 
     private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
-        if (msg.Value.Contains(GraphId))
+        if (msg.Value.Contains(ActivatedGraph.Id))
         {
             shortLifeDisposables.Clear();
             ClearRange();
-            GraphId = 0;
-            IsReadOnly = false;
-            Graph = Graph<GraphVertexModel>.Empty;
+            ActivatedGraph = ActiveGraph.Empty;
         }
     }
 

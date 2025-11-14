@@ -17,15 +17,10 @@ internal sealed class TestAlgorithmFactory : IAlgorithmFactory<PathfindingProces
     }
 }
 
-internal sealed class TestPathfindingProcess : PathfindingProcess
+internal sealed class TestPathfindingProcess(IReadOnlyCollection<IPathfindingVertex> range) : PathfindingProcess(range)
 {
     private SubRange currentRange;
     private bool isDestination;
-
-    public TestPathfindingProcess(IReadOnlyCollection<IPathfindingVertex> range)
-        : base(range)
-    {
-    }
 
     protected override void PrepareForSubPathfinding(SubRange range)
     {
@@ -49,7 +44,7 @@ internal sealed class TestPathfindingProcess : PathfindingProcess
         if (currentRange.Source != NullPathfindingVertex.Interface)
         {
             var neighbors = currentRange.Target == NullPathfindingVertex.Interface
-                ? Array.Empty<IPathfindingVertex>()
+                ? []
                 : new[] { currentRange.Target };
             RaiseVertexProcessed(currentRange.Source, neighbors);
         }

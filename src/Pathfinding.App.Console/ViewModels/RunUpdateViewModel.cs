@@ -38,14 +38,12 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         set => this.RaiseAndSetIfChanged(ref selected, value);
     }
 
-    private Graph<GraphVertexModel> graph = Graph<GraphVertexModel>.Empty;
-    private Graph<GraphVertexModel> Graph
+    private ActiveGraph activatedGraph;
+    private ActiveGraph ActivatedGraph 
     {
-        get => graph;
-        set => this.RaiseAndSetIfChanged(ref graph, value);
+        get => activatedGraph;
+        set => this.RaiseAndSetIfChanged(ref activatedGraph, value);
     }
-
-    private int ActivatedGraphId { get; set; }
 
     public ReactiveCommand<Unit, Unit> UpdateRunsCommand { get; }
 
@@ -78,26 +76,24 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
 
     private void OnGraphActivated(GraphActivatedMessage msg)
     {
-        Graph = msg.Value.Graph;
-        ActivatedGraphId = msg.Value.GraphId;
+        ActivatedGraph = msg.Value.ActiveGraph;
     }
 
     private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
-        if (Graph == Graph<GraphVertexModel>.Empty || !msg.Value.Contains(ActivatedGraphId))
+        if (!msg.Value.Contains(ActivatedGraph.Id))
         {
             return;
         }
 
         Selected = [];
-        Graph = Graph<GraphVertexModel>.Empty;
-        ActivatedGraphId = 0;
+        ActivatedGraph = ActiveGraph.Empty;
     }
 
     private IObservable<bool> CanUpdate()
     {
         return this.WhenAnyValue(x => x.Selected,
-            x => x.Graph, (s, g) => s.Length > 0 && g != Graph<GraphVertexModel>.Empty);
+            x => x.ActivatedGraph, (s, g) => s.Length > 0 && g != ActiveGraph.Empty);
     }
 
     private async Task ExecuteUpdate()
@@ -106,7 +102,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         {
             var models = await statisticsService.ReadStatisticsAsync(
                 Selected.Select(x => x.Id), token).ConfigureAwait(false);
-            var updated = await UpdateRunsAsync(models, Graph, ActivatedGraphId).ConfigureAwait(false);
+            var updated = await UpdateRunsAsync(models, ActivatedGraph.Graph, ActivatedGraph.Id).ConfigureAwait(false);
             messenger.Send(new RunsUpdatedMessage(updated));
         }).ConfigureAwait(false);
     }
@@ -124,8 +120,8 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
 
     private async Task<(Graph<GraphVertexModel> Graph, int GraphId)> EnsureGraphLoadedAsync(AwaitGraphUpdatedMessage msg)
     {
-        var localGraph = Graph;
-        var graphId = ActivatedGraphId;
+        var localGraph = ActivatedGraph.Graph;
+        var graphId = ActivatedGraph.Id;
         var shouldReloadGraph = localGraph == Graph<GraphVertexModel>.Empty
             || msg.Value.Id != graphId;
 

@@ -3,6 +3,7 @@ using Autofac.Extras.Moq;
 using Moq;
 using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Core.Enums;
+using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Repositories;
 using Pathfinding.Infrastructure.Business.Services;
 using Pathfinding.Infrastructure.Data.Pathfinding;
@@ -356,6 +357,9 @@ internal class GraphRequestServiceTests
         mock.Mock<IRangeRepository>()
             .Setup(x => x.ReadByGraphIdAsync(graphId))
             .Returns(range.ToAsyncEnumerable());
+        mock.Mock<IVerticesRepository>()
+            .Setup(x => x.ReadVerticesByIdsAsync(It.Is<IReadOnlyCollection<long>>(ids => ids.SequenceEqual(range.Select(r => r.VertexId)))))
+            .Returns(vertices.ToAsyncEnumerable());
         mock.Mock<IVerticesRepository>()
             .Setup(x => x.ReadAsync(range[0].VertexId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(vertices[0]);
