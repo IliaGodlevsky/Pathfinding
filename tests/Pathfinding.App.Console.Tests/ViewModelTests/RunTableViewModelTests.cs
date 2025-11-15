@@ -4,6 +4,7 @@ using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
+using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
@@ -218,11 +219,9 @@ internal sealed class RunTableViewModelTests
     private static AwaitGraphActivatedMessage CreateActivatedMessage(int graphId)
     {
         var activated = new ActivatedGraphModel(
-            Graph<GraphVertexModel>.Empty,
+            new(graphId, Graph<GraphVertexModel>.Empty, false),
             default,
-            default,
-            GraphStatuses.Editable,
-            graphId);
+            default);
         return new AwaitGraphActivatedMessage(activated);
     }
 }

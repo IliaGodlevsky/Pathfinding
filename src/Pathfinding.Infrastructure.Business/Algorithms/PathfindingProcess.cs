@@ -20,9 +20,7 @@ public abstract class PathfindingProcess(IReadOnlyCollection<IPathfindingVertex>
     public event VertexProcessedEventHandler VertexProcessed;
     public event SubPathFoundEventHandler SubPathFound;
 
-    private readonly Lazy<SubRange[]> ranges = new(() => GetSubRanges(range));
-
-    private SubRange[] Ranges => ranges.Value;
+    private SubRange[] Ranges { get; } = GetSubRanges(range);
 
     public IGraphPath FindPath()
     {
@@ -69,7 +67,7 @@ public abstract class PathfindingProcess(IReadOnlyCollection<IPathfindingVertex>
         SubPathFound?.Invoke(new(subPath));
     }
 
-    private static SubRange[] GetSubRanges(IEnumerable<IPathfindingVertex> range)
+    private static SubRange[] GetSubRanges(IReadOnlyCollection<IPathfindingVertex> range)
     {
         return [.. range.Zip(range.Skip(1), (s, t) => new SubRange(s, t))];
     }

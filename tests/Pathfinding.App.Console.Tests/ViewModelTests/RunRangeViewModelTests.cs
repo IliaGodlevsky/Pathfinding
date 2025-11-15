@@ -45,7 +45,7 @@ internal sealed class RunRangeViewModelTests
             excludeCommands);
 
         var graph = CreateGraph();
-        ActivateGraph(messenger, graph);
+        await ActivateGraph(messenger, graph);
 
         var vertex = graph.First();
 
@@ -81,7 +81,7 @@ internal sealed class RunRangeViewModelTests
             excludeCommands);
 
         var graph = CreateGraph();
-        ActivateGraph(messenger, graph);
+        await ActivateGraph(messenger, graph);
 
         var vertex = graph.First();
         await viewModel.AddToRangeCommand.Execute(vertex);
@@ -129,7 +129,7 @@ internal sealed class RunRangeViewModelTests
             excludeCommands);
 
         var graph = CreateGraph();
-        ActivateGraph(messenger, graph, graphId: 12);
+        await ActivateGraph(messenger, graph, graphId: 12);
 
         Assert.Multiple(() =>
         {
@@ -148,18 +148,17 @@ internal sealed class RunRangeViewModelTests
         });
     }
 
-    private static void ActivateGraph(
+    private static async Task ActivateGraph(
         IMessenger messenger,
         Graph<GraphVertexModel> graph,
         int graphId = 12,
         GraphStatuses status = GraphStatuses.Editable)
     {
-        messenger.Send(new AwaitGraphActivatedMessage(new ActivatedGraphModel(
-            graph,
-            Neighborhoods.Moore,
-            SmoothLevels.No,
-            status,
-            GraphId: graphId)), Tokens.PathfindingRange);
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
+            new(graphId, graph, status == GraphStatuses.Readonly),
+            default,
+            default));
+        await messenger.Send(message, Tokens.PathfindingRange);
     }
 
     private static RunRangeViewModel CreateViewModel(

@@ -1,11 +1,10 @@
 ﻿using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Data.Pathfinding;
+using static Pathfinding.App.Console.ViewModels.ViewModel;
 
 namespace Pathfinding.App.Console.Models;
 
 internal record ActivatedGraphModel(
-    Graph<GraphVertexModel> Graph,
+    ActiveGraph ActiveGraph,
     Neighborhoods Neighborhood,
-    SmoothLevels SmoothLevel,
-    GraphStatuses Status,
-    int GraphId);
+    SmoothLevels SmoothLevel);

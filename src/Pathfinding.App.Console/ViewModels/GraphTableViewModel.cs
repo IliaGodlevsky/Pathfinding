@@ -8,6 +8,7 @@ using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
+using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
@@ -70,11 +71,10 @@ internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDi
         {
             var graphModel = await graphService.ReadGraphAsync(model, token).ConfigureAwait(false);
             var graph = graphModel.CreateGraph();
-            var activated = new ActivatedGraphModel(graph,
+            var activatedGraph = new ActiveGraph(graphModel.Id, graph, graphModel.Status == GraphStatuses.Readonly);
+            var activated = new ActivatedGraphModel(activatedGraph,
                 graphModel.Neighborhood,
-                graphModel.SmoothLevel,
-                graphModel.Status,
-                graphModel.Id);
+                graphModel.SmoothLevel);
             var layer = neighborFactory.CreateNeighborhoodLayer(graphModel.Neighborhood);
             await layer.OverlayAsync(graph, token).ConfigureAwait(false);
             messenger.Send(new GraphActivatedMessage(activated), Tokens.GraphField);

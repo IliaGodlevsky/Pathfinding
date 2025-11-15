@@ -27,12 +27,11 @@ internal sealed class RunFieldViewModelTests
             messenger);
 
         var graph = CreateGraph();
-        messenger.Send(new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
-            Neighborhoods.Moore,
-            SmoothLevels.No,
-            GraphStatuses.Editable,
-            GraphId: 1)));
+        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+            new(1, graph, false),
+            default,
+            default));
+        messenger.Send(message);
 
         Assert.That(viewModel.RunGraph, Is.Not.EqualTo(Graph<RunVertexModel>.Empty));
     }
@@ -50,12 +49,11 @@ internal sealed class RunFieldViewModelTests
             messenger);
 
         var graph = CreateGraph();
-        messenger.Send(new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
-            Neighborhoods.Moore,
-            SmoothLevels.No,
-            GraphStatuses.Editable,
-            GraphId: 1)));
+        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+            new(42, graph, false),
+            default,
+            default));
+        messenger.Send(message);
 
         messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
             => msg.Reply([.. graph]));
@@ -79,12 +77,11 @@ internal sealed class RunFieldViewModelTests
             messenger);
 
         var graph = CreateGraph();
-        messenger.Send(new GraphActivatedMessage(new ActivatedGraphModel(
-            graph,
-            Neighborhoods.Moore,
-            SmoothLevels.No,
-            GraphStatuses.Editable,
-            GraphId: 1)));
+        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+            new(42, graph, false),
+            default,
+            default));
+        messenger.Send(message);
 
         messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
             => msg.Reply([.. graph]));

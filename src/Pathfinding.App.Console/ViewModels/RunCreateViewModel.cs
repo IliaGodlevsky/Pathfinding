@@ -11,7 +11,6 @@ using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Business.Algorithms.Exceptions;
 using Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
-using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models;
@@ -92,14 +91,11 @@ internal sealed class RunCreateViewModel : ViewModel,
         set => this.RaiseAndSetIfChanged(ref stepRule, value);
     }
 
-    private int ActivatedGraphId { get; set; }
-
-    private Graph<GraphVertexModel> graph = Graph<GraphVertexModel>.Empty;
-
-    private Graph<GraphVertexModel> Graph
+    private ActiveGraph activatedGraph = ActiveGraph.Empty;
+    private ActiveGraph ActivatedGraph
     {
-        get => graph;
-        set => this.RaiseAndSetIfChanged(ref graph, value);
+        get => activatedGraph;
+        set => this.RaiseAndSetIfChanged(ref activatedGraph, value);
     }
 
     public RunCreateViewModel(
@@ -124,12 +120,12 @@ internal sealed class RunCreateViewModel : ViewModel,
     private IObservable<bool> CanCreateAlgorithm()
     {
         return this.WhenAnyValue(
-            x => x.Graph, x => x.AppliedHeuristics.Count,
+            x => x.ActivatedGraph, x => x.AppliedHeuristics.Count,
             x => x.FromWeight, x => x.ToWeight,
             x => x.Step, x => x.SelectedAlgorithms.Count,
             (g, count, weight, to, s, algo) =>
             {
-                var canExecute = g != Graph<GraphVertexModel>.Empty && algo > 0;
+                var canExecute = g != ActiveGraph.Empty && algo > 0;
                 if (count > 0)
                 {
                     canExecute = canExecute && count > 1;
@@ -152,16 +148,14 @@ internal sealed class RunCreateViewModel : ViewModel,
 
     private void OnGraphActivated(GraphActivatedMessage msg)
     {
-        Graph = msg.Value.Graph;
-        ActivatedGraphId = msg.Value.GraphId;
+        ActivatedGraph = msg.Value.ActiveGraph;
     }
 
     private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
-        if (msg.Value.Contains(ActivatedGraphId))
+        if (msg.Value.Contains(ActivatedGraph.Id))
         {
-            Graph = Graph<GraphVertexModel>.Empty;
-            ActivatedGraphId = 0;
+            ActivatedGraph = ActiveGraph.Empty;
         }
     }
 
@@ -217,10 +211,7 @@ internal sealed class RunCreateViewModel : ViewModel,
     {
         if (AppliedHeuristics.Count == 0)
         {
-            return [.. SelectedAlgorithms.SelectMany(algo => new AlgorithmBuildInfo[]
-            {
-                new(algo, StepRule)
-            })];
+            return [.. SelectedAlgorithms.Select(algo => new AlgorithmBuildInfo(algo, StepRule))];
         }
         return [.. AppliedHeuristics.Where(x => x is not null)
             .SelectMany(heuristic => SelectedAlgorithms
@@ -237,7 +228,7 @@ internal sealed class RunCreateViewModel : ViewModel,
         }
 
         var statistics = EnumerateWeights()
-            .SelectMany(weight => GetBuildInfo(weight))
+            .SelectMany(GetBuildInfo)
             .Select(buildInfo => CreateStatistics(range, buildInfo))
             .ToArray();
 
@@ -316,7 +307,7 @@ internal sealed class RunCreateViewModel : ViewModel,
             Visited = visitedCount,
             Elapsed = stopwatch.Elapsed,
             ResultStatus = status,
-            GraphId = ActivatedGraphId
+            GraphId = ActivatedGraph.Id
         };
     }
 

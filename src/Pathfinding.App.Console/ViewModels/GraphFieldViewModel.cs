@@ -8,7 +8,6 @@ using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
-using Pathfinding.Domain.Interface;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
@@ -26,25 +25,11 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
     private readonly IGraphRequestService<GraphVertexModel> service;
     private readonly CompositeDisposable disposables = [];
 
-    private int graphId;
-    private int GraphId
+    private ActiveGraph activatedGraph = ActiveGraph.Empty;
+    public ActiveGraph ActivatedGraph
     {
-        get => graphId;
-        set => this.RaiseAndSetIfChanged(ref graphId, value);
-    }
-
-    private bool isReadOnly;
-    private bool IsReadOnly
-    {
-        get => isReadOnly;
-        set => this.RaiseAndSetIfChanged(ref isReadOnly, value);
-    }
-
-    private IGraph<GraphVertexModel> graph = Graph<GraphVertexModel>.Empty;
-    public IGraph<GraphVertexModel> Graph
-    {
-        get => graph;
-        private set => this.RaiseAndSetIfChanged(ref graph, value);
+        get => activatedGraph;
+        private set => this.RaiseAndSetIfChanged(ref activatedGraph, value);
     }
 
     public ReactiveCommand<GraphVertexModel, Unit> ChangeVertexPolarityCommand { get; }
@@ -70,30 +55,15 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
         ChangeVertexPolarityCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(ChangePolarity, CanExecute()).DisposeWith(disposables);
         InverseVertexCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(InverseVertex, CanExecute()).DisposeWith(disposables);
         ReverseVertexCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(ReverseVertex, CanExecute()).DisposeWith(disposables);
-        IncreaseVertexCostCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(IncreaseVertexCost, CanChangeCost()).DisposeWith(disposables);
-        DecreaseVertexCostCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(DecreaseVertexCost, CanChangeCost()).DisposeWith(disposables);
+        IncreaseVertexCostCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(IncreaseVertexCost, CanExecute()).DisposeWith(disposables);
+        DecreaseVertexCostCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(DecreaseVertexCost, CanExecute()).DisposeWith(disposables);
     }
 
     private IObservable<bool> CanExecute()
     {
         return this.WhenAnyValue(
-            x => x.GraphId,
-            x => x.Graph,
-            x => x.IsReadOnly,
-            (id, x, isRead) => id > 0
-                && x != Graph<GraphVertexModel>.Empty
-                && !isRead);
-    }
-
-    private IObservable<bool> CanChangeCost()
-    {
-        return this.WhenAnyValue(
-            x => x.GraphId,
-            x => x.Graph,
-            x => x.IsReadOnly,
-            (id, x, isRead) => id > 0
-                && x != Graph<GraphVertexModel>.Empty
-                && !isRead);
+            x => x.ActivatedGraph,
+            (g) => g != ActiveGraph.Empty && !g.IsReadonly);
     }
 
     private async Task ReverseVertex(GraphVertexModel vertex)
@@ -120,6 +90,7 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
             if (!inRangeRequest.Response)
             {
                 vertex.IsObstacle = polarity;
+                int graphId = activatedGraph.Id;
                 messenger.Send(new ObstaclesCountChangedMessage((graphId, vertex.IsObstacle ? 1 : -1)));
                 var request = new UpdateVerticesRequest<GraphVertexModel>(graphId,
                     [.. vertex.Enumerate()]);
@@ -149,30 +120,28 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
             cost += delta;
             cost = vertex.Cost.CostRange.ReturnInRange(cost);
             vertex.Cost = new VertexCost(cost, vertex.Cost.CostRange);
-            var request = new UpdateVerticesRequest<GraphVertexModel>(GraphId, [.. vertex.Enumerate()]);
+            var request = new UpdateVerticesRequest<GraphVertexModel>(ActivatedGraph.Id, [.. vertex.Enumerate()]);
             await service.UpdateVerticesAsync(request, token).ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
 
     private void OnGraphActivated(GraphActivatedMessage msg)
     {
-        Graph = msg.Value.Graph;
-        GraphId = msg.Value.GraphId;
-        IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
+        ActivatedGraph = msg.Value.ActiveGraph;
     }
 
     private void OnGraphBecameReadonly(GraphStateChangedMessage msg)
     {
-        IsReadOnly = msg.Value.Status == GraphStatuses.Readonly;
+        ActivatedGraph = new ActiveGraph(ActivatedGraph.Id,
+            ActivatedGraph.Graph,
+            msg.Value.Status == GraphStatuses.Readonly);
     }
 
     private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
-        if (msg.Value.Contains(GraphId))
+        if (msg.Value.Contains(ActivatedGraph.Id))
         {
-            GraphId = 0;
-            Graph = Graph<GraphVertexModel>.Empty;
-            IsReadOnly = false;
+            ActivatedGraph = ActiveGraph.Empty;
         }
     }
 

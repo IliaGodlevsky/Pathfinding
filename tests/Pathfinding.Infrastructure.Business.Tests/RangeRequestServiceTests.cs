@@ -38,6 +38,9 @@ internal class RangeRequestServiceTests
         mock.Mock<IVerticesRepository>()
             .Setup(x => x.ReadAsync(It.IsAny<long>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((long id, CancellationToken _) => vertices[id]);
+        mock.Mock<IVerticesRepository>()
+            .Setup(x => x.ReadVerticesByIdsAsync(It.IsAny<IReadOnlyCollection<long>>()))
+            .Returns(vertices.Values.ToAsyncEnumerable());
 
         var service = mock.Create<RangeRequestService<FakeVertex>>();
 
@@ -45,6 +48,7 @@ internal class RangeRequestServiceTests
 
         Assert.That(result.Select(x => x.VertexId), Is.EqualTo(range.Select(r => r.VertexId)));
     }
+
     internal static readonly long[] expected = [1L, 99L, 2L];
 
     [Test]

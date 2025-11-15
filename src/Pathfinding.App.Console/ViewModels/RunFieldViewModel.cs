@@ -19,6 +19,7 @@ using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using static Pathfinding.App.Console.Models.RunModel;
+using static Pathfinding.App.Console.ViewModels.ViewModel;
 // ReSharper disable AccessToModifiedClosure
 
 namespace Pathfinding.App.Console.ViewModels;
@@ -33,7 +34,7 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
     private readonly CompositeDisposable disposables = [];
     private readonly CompositeDisposable shortTermDisposables = [];
 
-    private int graphId;
+    private ActiveGraph activeGraph;
 
     private RunModel selected = Empty;
     public RunModel SelectedRun
@@ -102,9 +103,9 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
 
     private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
-        if (msg.Value.Contains(graphId))
+        if (msg.Value.Contains(activeGraph.Id))
         {
-            graphId = 0;
+            activeGraph = ActiveGraph.Empty;
             RunGraph = Graph<RunVertexModel>.Empty;
             this.RaisePropertyChanged(nameof(RunGraph));
             Clear();
@@ -113,14 +114,14 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
 
     private void OnGraphActivated(GraphActivatedMessage msg)
     {
-        graphId = msg.Value.GraphId;
-        var runGraph = graphAssemble.AssembleGraph(msg.Value.Graph,
-            msg.Value.Graph.DimensionsSizes);
+        activeGraph = msg.Value.ActiveGraph;
+        var runGraph = graphAssemble.AssembleGraph(activeGraph.Graph,
+            activeGraph.Graph.DimensionsSizes);
         RunGraph = Graph<RunVertexModel>.Empty;
         this.RaisePropertyChanged(nameof(RunGraph));
         RunGraph = runGraph;
         Clear();
-        foreach (var vertex in msg.Value.Graph)
+        foreach (var vertex in activeGraph.Graph)
         {
             var runVertex = runGraph.Get(vertex.Position);
             vertex.WhenAnyValue(x => x.IsObstacle)
