@@ -5,8 +5,8 @@ using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
-using Pathfinding.Domain.Interface;
 using Pathfinding.Infrastructure.Data.Extensions;
+using Pathfinding.Infrastructure.Data.Pathfinding;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive;
@@ -69,7 +69,7 @@ internal sealed partial class GraphFieldView : FrameView
         mainLoop.Invoke(() => Visible = true);
     }
 
-    private void RenderGraph(IGraph<GraphVertexModel> graph)
+    private void RenderGraph(Graph<GraphVertexModel> graph)
     {
         mainLoop.Invoke(container.RemoveAll);
         vertexDisposables.Clear();

@@ -27,7 +27,11 @@ internal sealed partial class RunProgressView : FrameView
     private float Fraction
     {
         get => bar.Fraction;
-        set => bar.Fraction = FractionRange.ReturnInRange(value);
+        set
+        {
+            bar.Fraction = FractionRange.ReturnInRange(value);
+            viewModel.SelectedRun.Fraction = bar.Fraction;
+        }
     }
 
     public RunProgressView(
@@ -37,6 +41,7 @@ internal sealed partial class RunProgressView : FrameView
         Initialize();
         messenger.RegisterHandler<CloseRunFieldMessage>(this, OnRunFieldClosed).DisposeWith(disposables);
         messenger.RegisterHandler<OpenRunFieldMessage>(this, OnRunFieldOpen).DisposeWith(disposables);
+        messenger.RegisterHandler<KeyPressedMessage>(this, Clicked).DisposeWith(disposables);
         this.viewModel = viewModel;
 
         BindTo(leftLabel, _ => Fraction - GetFractionPerClick(), Button1Pressed, WheeledDown);
@@ -51,6 +56,51 @@ internal sealed partial class RunProgressView : FrameView
         viewModel.WhenAnyValue(x => x.SelectedRun.Fraction)
             .BindTo(this, x => x.Fraction)
             .DisposeWith(disposables);
+    }
+
+    private void Clicked(KeyPressedMessage msg)
+    {
+        var key = msg.Args.KeyEvent.Key;
+        switch (key)
+        {
+            case Key.CursorLeft | Key.CtrlMask:
+            case Key.D1:
+                Fraction = FractionRange.LowerValueOfRange;
+                msg.Args.Handled = true;
+                break;
+            case Key.CursorRight | Key.CtrlMask:
+            case Key.D0:
+                Fraction = FractionRange.UpperValueOfRange;
+                msg.Args.Handled = true;
+                break;
+            case Key.CursorLeft | Key.ShiftMask:
+                Fraction -= GetExtraFractionPerClick();
+                msg.Args.Handled = true;
+                break;
+            case Key.CursorRight | Key.ShiftMask:
+                Fraction += GetExtraFractionPerClick();
+                msg.Args.Handled = true;
+                break;
+            case Key.CursorLeft:
+                Fraction -= GetFractionPerClick();
+                msg.Args.Handled = true;
+                break;
+            case Key.CursorRight:
+                Fraction += GetFractionPerClick();
+                msg.Args.Handled = true;
+                break;
+            case Key.D2:
+            case Key.D3:
+            case Key.D4:
+            case Key.D5:
+            case Key.D6:
+            case Key.D7:
+            case Key.D8:
+            case Key.D9:
+                Fraction = (float)Math.Round((float)((int)key - (int)Key.D1) / 9, 3);
+                msg.Args.Handled = true;
+                break;
+        }
     }
 
     private static float GetFractionPerClick()
@@ -70,7 +120,7 @@ internal sealed partial class RunProgressView : FrameView
             .Where(x => viewModel.SelectedRun != RunModel.Empty
                 && flags.Any(z => x.MouseEvent.Flags.HasFlag(z)))
             .Select(function)
-            .BindTo(viewModel, x => x.SelectedRun.Fraction)
+            .BindTo(this, x => x.Fraction)
             .DisposeWith(disposables);
     }
 
