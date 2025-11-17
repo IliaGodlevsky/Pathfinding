@@ -26,6 +26,7 @@ internal sealed partial class RunsTableView : TableView
     {
         viewModel.Runs.CollectionChanged += OnCollectionChanged;
         this.Events().KeyPress
+            .Do(args => messenger.Send(new KeyPressedMessage(args)))
             .Where(x => x.KeyEvent.Key.HasFlag(Key.A)
                 && x.KeyEvent.Key.HasFlag(Key.CtrlMask)
                 && Table.Rows.Count > 0)

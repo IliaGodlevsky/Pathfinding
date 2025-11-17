@@ -1,6 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
+using Newtonsoft.Json.Linq;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages;
@@ -28,7 +29,7 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
 
     public ReactiveCommand<int[], Unit> SelectRunsCommand { get; }
 
-    private ActiveGraph ActivatedGraph { get; set; } = ActiveGraph.Empty;
+    private ActiveGraph ActivatedGraph { get; set; } = ActiveGraph.Empty; 
 
     public RunsTableViewModel(IStatisticsRequestService statisticsService,
         IGraphInfoRequestService graphInfoService,
@@ -56,16 +57,18 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
 
     private async Task OnGraphActivatedMessage(AwaitGraphActivatedMessage msg)
     {
-        await ExecuteSafe(async token =>
+        if (msg.Value.ActiveGraph.Id != ActivatedGraph.Id)
         {
-            ActivatedGraph = msg.Value.ActiveGraph;
-            var statistics = await statisticsService
-                .ReadStatisticsAsync(ActivatedGraph.Id, token)
-                .ConfigureAwait(false);
-            
-            Runs.Clear();
-            Runs.Add(statistics.ToRunInfo());
-        }).ConfigureAwait(false);
+            await ExecuteSafe(async token =>
+            {
+                ActivatedGraph = msg.Value.ActiveGraph;
+                var statistics = await statisticsService
+                    .ReadStatisticsAsync(ActivatedGraph.Id, token)
+                    .ConfigureAwait(false);
+                Runs.Clear();
+                Runs.Add(statistics.ToRunInfo());
+            }).ConfigureAwait(false);
+        }
     }
 
     private void OnGraphDeleted(GraphsDeletedMessage msg)
@@ -103,10 +106,7 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
             Runs.Remove(toDelete);
             if (Runs.Count == 0)
             {
-                messenger.Send(new GraphStateChangedMessage((ActivatedGraph.Id, GraphStatuses.Editable)));
-                var graphInfo = await graphInfoService.ReadGraphInfoAsync(ActivatedGraph.Id, token).ConfigureAwait(false);
-                graphInfo.Status = GraphStatuses.Editable;
-                await graphInfoService.UpdateGraphInfoAsync(graphInfo, token).ConfigureAwait(false);
+                await UpdateGraphInfo(GraphStatuses.Editable, token).ConfigureAwait(false);
             }
         }).ConfigureAwait(false);
     }
@@ -119,12 +119,17 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
             Runs.Add(msg.Value.ToRunInfo());
             if (previousCount == 0)
             {
-                messenger.Send(new GraphStateChangedMessage((ActivatedGraph.Id, GraphStatuses.Readonly)));
-                var graphInfo = await graphInfoService.ReadGraphInfoAsync(ActivatedGraph.Id, token).ConfigureAwait(false);
-                graphInfo.Status = GraphStatuses.Readonly;
-                await graphInfoService.UpdateGraphInfoAsync(graphInfo, token).ConfigureAwait(false);
+                await UpdateGraphInfo(GraphStatuses.Readonly, token).ConfigureAwait(false);
             }
         }).ConfigureAwait(false);
+    }
+
+    private async Task UpdateGraphInfo(GraphStatuses status, CancellationToken token)
+    {
+        messenger.Send(new GraphStateChangedMessage((ActivatedGraph.Id, status)));
+        var graphInfo = await graphInfoService.ReadGraphInfoAsync(ActivatedGraph.Id, token).ConfigureAwait(false);
+        graphInfo.Status = status;
+        await graphInfoService.UpdateGraphInfoAsync(graphInfo, token).ConfigureAwait(false);
     }
 
     public void Dispose()

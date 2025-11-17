@@ -50,7 +50,7 @@ internal static class ZipArchiveExtensions
     }
 
     public static async Task WriteHistoryAsync(this ZipArchive archive,
-        IEnumerable<PathfindingHistorySerializationModel> model,
+        IReadOnlyCollection<PathfindingHistorySerializationModel> model,
         CancellationToken token = default)
     {
         var records = model.ToHistory();
