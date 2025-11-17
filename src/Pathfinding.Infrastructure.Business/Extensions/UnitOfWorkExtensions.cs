@@ -56,7 +56,7 @@ internal static class UnitOfWorkExtensions
 
     internal static async Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeAsyncInternal<T>(
         this IUnitOfWork unit, int graphId, CancellationToken token = default)
-        where T : IVertex, IEntity<long>, new()
+        where T : IVertex, IEntity<long>
     {
         var range = await unit.RangeRepository
             .ReadByGraphIdAsync(graphId)
@@ -65,8 +65,7 @@ internal static class UnitOfWorkExtensions
         var rangeVerticesIds = range.Select(x => x.VertexId).ToHashSet();
         var vertices = await unit.VerticesRepository
             .ReadVerticesByIdsAsync(rangeVerticesIds)
-            .Select(x => new { x.Id, Coordinates = x.Coordinates.ToCoordinates() })
-            .ToDictionaryAsync(x => x.Id, x => x.Coordinates, token)
+            .ToDictionaryAsync(x => x.Id, x => x.Coordinates.ToCoordinates(), token)
             .ConfigureAwait(false);
         var result = new List<PathfindingRangeModel>(range.Count);
         foreach (var rangeVertex in range)
