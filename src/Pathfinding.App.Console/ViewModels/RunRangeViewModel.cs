@@ -10,7 +10,6 @@ using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface;
-using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Extensions;
@@ -198,7 +197,8 @@ internal sealed class RunRangeViewModel : ViewModel,
             Transit.CollectionChanged -= OnCollectionChanged;
             ClearRange();
             ActivatedGraph = msg.Value.ActiveGraph;
-            var range = await rangeService.ReadRangeAsync(ActivatedGraph.Id, token).ConfigureAwait(false);
+            var range = await rangeService
+                .ReadRangeAsync(ActivatedGraph.Id, token).ConfigureAwait(false);
             var src = range.FirstOrDefault(x => x.IsSource);
             Source = src != null ? ActivatedGraph.Graph.Get(src.Position) : null;
             var tgt = range.FirstOrDefault(x => x.IsTarget);

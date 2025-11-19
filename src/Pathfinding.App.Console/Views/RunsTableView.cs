@@ -1,6 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Injection;
+using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
@@ -26,7 +27,7 @@ internal sealed partial class RunsTableView : TableView
     {
         viewModel.Runs.CollectionChanged += OnCollectionChanged;
         this.Events().KeyPress
-            .Do(args => messenger.Send(new KeyPressedMessage(args)))
+            .Do(args => messenger.Send(new KeyPressedMessage(args), Tokens.ProgressBar))
             .Where(x => x.KeyEvent.Key.HasFlag(Key.A)
                 && x.KeyEvent.Key.HasFlag(Key.CtrlMask)
                 && Table.Rows.Count > 0)
