@@ -6,14 +6,11 @@ using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
-using Pathfinding.Shared.Extensions;
-using Pathfinding.Shared.Primitives;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Terminal.Gui;
-
 using static Terminal.Gui.Key;
 using static Terminal.Gui.MouseFlags;
 
@@ -21,20 +18,13 @@ namespace Pathfinding.App.Console.Views;
 
 internal sealed partial class RunProgressView : FrameView
 {
-    private static readonly InclusiveValueRange<float> FractionRange = (1, 0);
-
     private readonly IRunFieldViewModel viewModel;
     private readonly CompositeDisposable disposables = [];
 
     private float Fraction
     {
         get => bar.Fraction;
-        set => bar.Fraction = FractionRange.ReturnInRange(value);
-    }
-
-    private void SetFraction(float fraction)
-    {
-        viewModel.SelectedRun.Fraction = fraction;
+        set => bar.Fraction = value;
     }
 
     public RunProgressView(
@@ -48,11 +38,11 @@ internal sealed partial class RunProgressView : FrameView
             msg => bar.OnKeyDown(msg.Args.KeyEvent)).DisposeWith(disposables);
         this.viewModel = viewModel;
 
-        BindTo(leftLabel, _ => FractionRange.LowerValueOfRange, Button2Clicked);
+        BindTo(leftLabel, _ => RunModel.FractionRange.LowerValueOfRange, Button2Clicked);
         BindTo(leftLabel, _ => Fraction - GetFractionPerClick(), Button1Pressed, WheeledDown);
         BindTo(leftLabel, _ => Fraction - GetExtraFractionPerClick(), Button1Pressed | ButtonCtrl);
         BindTo(leftLabel, _ => Fraction + GetFractionPerClick(), WheeledUp);
-        BindTo(rightLabel, _ => FractionRange.UpperValueOfRange, Button2Clicked);
+        BindTo(rightLabel, _ => RunModel.FractionRange.UpperValueOfRange, Button2Clicked);
         BindTo(rightLabel, _ => Fraction + GetFractionPerClick(), Button1Pressed, WheeledUp);
         BindTo(rightLabel, _ => Fraction + GetExtraFractionPerClick(), Button1Pressed | ButtonCtrl);
         BindTo(rightLabel, _ => Fraction - GetFractionPerClick(), WheeledDown);
@@ -62,9 +52,11 @@ internal sealed partial class RunProgressView : FrameView
         BindTo(bar, _ => Fraction + GetFractionPerClick(), CursorRight);
         BindTo(bar, _ => Fraction - GetExtraFractionPerClick(), CursorLeft | ShiftMask);
         BindTo(bar, _ => Fraction + GetExtraFractionPerClick(), CursorRight | ShiftMask);
-        BindTo(bar, _ => FractionRange.LowerValueOfRange, CursorLeft | CtrlMask, D1);
-        BindTo(bar, _ => FractionRange.UpperValueOfRange, CursorRight | CtrlMask, D0);
-        viewModel.WhenAnyValue(x => x.SelectedRun.Fraction).BindTo(this, x => x.Fraction).DisposeWith(disposables);
+        BindTo(bar, _ => RunModel.FractionRange.LowerValueOfRange, CursorLeft | CtrlMask, D1);
+        BindTo(bar, _ => RunModel.FractionRange.UpperValueOfRange, CursorRight | CtrlMask, D0);
+        viewModel.WhenAnyValue(x => x.SelectedRun.Fraction)
+            .BindTo(this, x => x.Fraction)
+            .DisposeWith(disposables);
     }
 
     private static float GetFractionPerClick()
@@ -77,25 +69,24 @@ internal sealed partial class RunProgressView : FrameView
         return GetFractionPerClick() * 3;
     }
 
-    private void BindTo(View view, Func<MouseEventArgs, float> function,
-        params MouseFlags[] flags)
+    private void BindTo(View view, Func<MouseEventArgs, float> function, params MouseFlags[] flags)
     {
-        view.Events().MouseClick
-            .Where(x => viewModel.SelectedRun != RunModel.Empty
-                && flags.Any(z => x.MouseEvent.Flags.HasFlag(z)))
-            .Select(function)
-            .Subscribe(SetFraction)
-            .DisposeWith(disposables);
+        BindTo(() => view.Events().MouseClick, function, (x, y) => y.MouseEvent.Flags.HasFlag(x), flags);
     }
 
-    private void BindTo(View view, Func<KeyEventEventArgs, float> function,
-        params Key[] flags)
+    private void BindTo(View view, Func<KeyEventEventArgs, float> function, params Key[] flags)
     {
-        view.Events().KeyDown
+        BindTo(() => view.Events().KeyDown, function, (x, y) => y.KeyEvent.Key == x, flags);
+    }
+
+    private void BindTo<TArgs, TEnum>(Func<IObservable<TArgs>> trackedEvent,
+        Func<TArgs, float> function, Func<TEnum, TArgs, bool> predicate, params TEnum[] flags)
+    {
+        trackedEvent()
             .Where(x => viewModel.SelectedRun != RunModel.Empty
-                && flags.Any(z => x.KeyEvent.Key == z))
+                && flags.Any(z => predicate(z, x)))
             .Select(function)
-            .Subscribe(SetFraction)
+            .BindTo(viewModel, x => x.SelectedRun.Fraction)
             .DisposeWith(disposables);
     }
 

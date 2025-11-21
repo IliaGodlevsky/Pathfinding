@@ -69,7 +69,7 @@ internal class RunModel : ReactiveObject, IDisposable
     }
 
     public static readonly RunModel Empty = new(Graph<RunVertexModel>.Empty, [], []);
-    private static readonly InclusiveValueRange<float> FractionRange = new(1);
+    public static readonly InclusiveValueRange<float> FractionRange = new(1);
 
     private readonly CompositeDisposable disposables = [];
     private readonly ReadOnlyCollection<RunVertexStateModel> verticesStates;
