@@ -20,7 +20,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
     where T : IVertex, IEntity<long>, new()
 {
     public async Task<IReadOnlyCollection<PathfindingHistoryModel<T>>> CreatePathfindingHistoriesAsync(
-        IEnumerable<PathfindingHistorySerializationModel> request,
+        IReadOnlyCollection<PathfindingHistorySerializationModel> request,
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unitOfWork, t) =>
@@ -58,7 +58,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
                     Order = x.Order,
                     IsSource = x.Order == 0,
                     IsTarget = x.Order == rangeVertices.Count - 1 && rangeVertices.Count > 1
-                }).ToReadOnly();
+                }).ToArray();
                 await unitOfWork.RangeRepository.CreateAsync(entities, t).ConfigureAwait(false);
                 models.Add(new PathfindingHistoryModel<T>
                 {
@@ -110,7 +110,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadSerializationHistoriesAsync(
-        IEnumerable<int> graphIds,
+        IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unitOfWork, t) =>
@@ -140,7 +140,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadSerializationGraphsAsync(
-        IEnumerable<int> graphIds,
+        IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unitOfWork, t) =>
@@ -165,7 +165,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadSerializationGraphsWithRangeAsync(
-        IEnumerable<int> graphIds,
+        IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unitOfWork, t) =>

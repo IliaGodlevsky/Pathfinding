@@ -19,7 +19,7 @@ internal sealed class DeleteRunViewModelTests
         var serviceMock = new Mock<IStatisticsRequestService>();
         serviceMock
             .Setup(x => x.DeleteRunsAsync(
-                It.IsAny<IEnumerable<int>>(),
+                It.IsAny<IReadOnlyCollection<int>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
@@ -46,7 +46,7 @@ internal sealed class DeleteRunViewModelTests
             Assert.That(canExecute, Is.True);
             serviceMock
                 .Verify(x => x.DeleteRunsAsync(
-                    It.IsAny<IEnumerable<int>>(),
+                    It.IsAny<IReadOnlyCollection<int>>(),
                     It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(deletedMessage, Is.Not.Null);
             Assert.That(deletedMessage!.Value, Is.EqualTo(runModels.Select(x => x.Id).ToArray()));
@@ -60,7 +60,7 @@ internal sealed class DeleteRunViewModelTests
         var serviceMock = new Mock<IStatisticsRequestService>();
         serviceMock
             .Setup(x => x.DeleteRunsAsync(
-                It.IsAny<IEnumerable<int>>(),
+                It.IsAny<IReadOnlyCollection<int>>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception());
 
@@ -93,7 +93,7 @@ internal sealed class DeleteRunViewModelTests
             Assert.That(canExecute, Is.False);
             serviceMock
                 .Verify(x => x.DeleteRunsAsync(
-                    It.IsAny<IEnumerable<int>>(),
+                    It.IsAny<IReadOnlyCollection<int>>(),
                     It.IsAny<CancellationToken>()), Times.Never);
         });
     }

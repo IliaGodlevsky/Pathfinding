@@ -73,7 +73,7 @@ internal sealed class RunCreateViewModelTests
 
         statisticsServiceMock
             .Setup(x => x.CreateStatisticsAsync(
-                It.IsAny<IEnumerable<CreateStatisticsRequest>>(),
+                It.IsAny<IReadOnlyCollection<CreateStatisticsRequest>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdRuns);
 
@@ -105,7 +105,7 @@ internal sealed class RunCreateViewModelTests
         Assert.Multiple(() =>
         {
             statisticsServiceMock.Verify(x => x.CreateStatisticsAsync(
-                It.Is<IEnumerable<CreateStatisticsRequest>>(requests => requests.Any()),
+                It.Is<IReadOnlyCollection<CreateStatisticsRequest>>(requests => requests.Any()),
                 It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(createdMessage, Is.Not.Null);
         });
@@ -147,7 +147,7 @@ internal sealed class RunCreateViewModelTests
         await viewModel.CreateRunCommand.Execute();
 
         statisticsServiceMock.Verify(x => x.CreateStatisticsAsync(
-            It.IsAny<IEnumerable<CreateStatisticsRequest>>(),
+            It.IsAny<IReadOnlyCollection<CreateStatisticsRequest>>(),
             It.IsAny<CancellationToken>()), Times.Never);
         logMock.Verify(x => x.Info(It.IsAny<string>()), Times.Once);
     }

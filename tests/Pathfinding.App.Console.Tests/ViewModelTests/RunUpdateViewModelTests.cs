@@ -74,7 +74,7 @@ internal sealed class RunUpdateViewModelTests
 
         statisticsServiceMock
             .Setup(x => x.ReadStatisticsAsync(
-                It.IsAny<IEnumerable<int>>(),
+                It.IsAny<IReadOnlyCollection<int>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(
             [
@@ -83,7 +83,7 @@ internal sealed class RunUpdateViewModelTests
 
         statisticsServiceMock
             .Setup(x => x.UpdateStatisticsAsync(
-                It.IsAny<IEnumerable<RunStatisticsModel>>(),
+                It.IsAny<IReadOnlyCollection<RunStatisticsModel>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
@@ -111,10 +111,10 @@ internal sealed class RunUpdateViewModelTests
         Assert.Multiple(() =>
         {
             statisticsServiceMock.Verify(x => x.ReadStatisticsAsync(
-                It.IsAny<IEnumerable<int>>(),
+                It.IsAny<IReadOnlyCollection<int>>(),
                 It.IsAny<CancellationToken>()), Times.AtLeastOnce);
             statisticsServiceMock.Verify(x => x.UpdateStatisticsAsync(
-                It.IsAny<IEnumerable<RunStatisticsModel>>(),
+                It.IsAny<IReadOnlyCollection<RunStatisticsModel>>(),
                 It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(updatedMessage, Is.Not.Null);
         });

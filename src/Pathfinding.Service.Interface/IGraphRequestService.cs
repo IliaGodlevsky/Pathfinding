@@ -11,21 +11,21 @@ public interface IGraphRequestService<T>
     where T : IVertex, IEntity<long>
 {
     Task<PathfindingHistoriesSerializationModel> ReadSerializationHistoriesAsync(
-        IEnumerable<int> graphIds,
+        IReadOnlyCollection<int> graphIds,
         CancellationToken token = default);
 
     Task<PathfindingHistoriesSerializationModel> ReadSerializationGraphsAsync(
-        IEnumerable<int> graphIds,
+        IReadOnlyCollection<int> graphIds,
         CancellationToken token = default);
 
     Task<PathfindingHistoriesSerializationModel> ReadSerializationGraphsWithRangeAsync(
-        IEnumerable<int> graphIds,
+        IReadOnlyCollection<int> graphIds,
         CancellationToken token = default);
 
     Task<GraphModel<T>> ReadGraphAsync(int graphId, CancellationToken token = default);
 
     Task<IReadOnlyCollection<PathfindingHistoryModel<T>>> CreatePathfindingHistoriesAsync(
-        IEnumerable<PathfindingHistorySerializationModel> request,
+        IReadOnlyCollection<PathfindingHistorySerializationModel> request,
         CancellationToken token = default);
 
     Task<GraphModel<T>> CreateGraphAsync(CreateGraphRequest<T> graph,

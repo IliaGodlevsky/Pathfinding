@@ -10,5 +10,5 @@ public interface IGraphInfoRequestService
 
     Task<IReadOnlyCollection<GraphInformationModel>> ReadAllGraphInfoAsync(CancellationToken token = default);
 
-    Task<bool> DeleteGraphsAsync(IEnumerable<int> ids, CancellationToken token = default);
+    Task<bool> DeleteGraphsAsync(IReadOnlyCollection<int> ids, CancellationToken token = default);
 }

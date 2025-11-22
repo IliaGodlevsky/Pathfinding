@@ -34,8 +34,8 @@ internal sealed class RunRangeViewModel : ViewModel,
     private readonly CompositeDisposable disposables = [];
     private readonly CompositeDisposable shortLifeDisposables = [];
     private readonly IRangeRequestService<GraphVertexModel> rangeService;
-    private readonly IEnumerable<Command> includeCommands;
-    private readonly IEnumerable<Command> excludeCommands;
+    private readonly ReadOnlyCollection<Command> includeCommands;
+    private readonly ReadOnlyCollection<Command> excludeCommands;
     private readonly IPathfindingRange<GraphVertexModel> pathfindingRange;
 
     private ActiveGraph activeGraph;
@@ -107,11 +107,11 @@ internal sealed class RunRangeViewModel : ViewModel,
         this.includeCommands = includeCommands
             .OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => x.Value)
-            .ToReadOnly();
+            .ToList().AsReadOnly();
         this.excludeCommands = excludeCommands
             .OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => x.Value)
-            .ToReadOnly();
+            .ToList().AsReadOnly();
         messenger.RegisterHandler<IsVertexInRangeRequestMessage>(this, OnVertexIsInRangeReceived).DisposeWith(disposables);
         messenger.RegisterHandler<PathfindingRangeRequestMessage>(this, OnGetPathfindingRangeReceived).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);

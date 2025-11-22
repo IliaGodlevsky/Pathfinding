@@ -1,18 +1,7 @@
-﻿using System.Collections.ObjectModel;
-
-namespace Pathfinding.Shared.Extensions;
+﻿namespace Pathfinding.Shared.Extensions;
 
 public static class EnumerableExtension
 {
-    public static IReadOnlyList<T> ToReadOnly<T>(this IEnumerable<T> collection)
-    {
-        return collection switch
-        {
-            ReadOnlyCollection<T> readOnly => readOnly,
-            _ => Array.AsReadOnly([.. collection]),
-        };
-    }
-
     public static void AddRange<T>(this ICollection<T> collection, IEnumerable<T> items)
     {
         items.ForEach(collection.Add);
@@ -44,10 +33,5 @@ public static class EnumerableExtension
         return collection
             .Concat(Enumerable.Repeat(defaultValue, number))
             .Take(number);
-    }
-
-    public static U To<T, U>(this IEnumerable<T> items, Func<IEnumerable<T>, U> selector)
-    {
-        return selector(items);
     }
 }

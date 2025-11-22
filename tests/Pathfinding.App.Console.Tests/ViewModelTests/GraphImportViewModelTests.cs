@@ -67,7 +67,7 @@ internal sealed class GraphImportViewModelTests
 
         serviceMock
             .Setup(x => x.CreatePathfindingHistoriesAsync(
-                It.IsAny<IEnumerable<PathfindingHistorySerializationModel>>(),
+                It.IsAny<IReadOnlyCollection<PathfindingHistorySerializationModel>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(created);
 
@@ -100,7 +100,7 @@ internal sealed class GraphImportViewModelTests
                 It.IsAny<Stream>(),
                 It.IsAny<CancellationToken>()), Times.Once);
             serviceMock.Verify(x => x.CreatePathfindingHistoriesAsync(
-                It.IsAny<IEnumerable<PathfindingHistorySerializationModel>>(),
+                It.IsAny<IReadOnlyCollection<PathfindingHistorySerializationModel>>(),
                 It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(createdMessage, Is.Not.Null);
             logMock.Verify(x => x.Info(It.IsAny<string>()), Times.Once);
@@ -134,7 +134,7 @@ internal sealed class GraphImportViewModelTests
         await viewModel.ImportGraphCommand.Execute(() => StreamModel.Empty);
 
         serviceMock.Verify(x => x.CreatePathfindingHistoriesAsync(
-            It.IsAny<IEnumerable<PathfindingHistorySerializationModel>>(),
+            It.IsAny<IReadOnlyCollection<PathfindingHistorySerializationModel>>(),
             It.IsAny<CancellationToken>()), Times.Never);
     }
 }

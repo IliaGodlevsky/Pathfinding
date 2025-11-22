@@ -18,7 +18,7 @@ internal sealed class DeleteGraphViewModelTests
         var serviceMock = new Mock<IGraphInfoRequestService>();
         serviceMock
             .Setup(x => x.DeleteGraphsAsync(
-                It.IsAny<IEnumerable<int>>(),
+                It.IsAny<IReadOnlyCollection<int>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
@@ -39,7 +39,7 @@ internal sealed class DeleteGraphViewModelTests
             Assert.That(canExecute, Is.True);
             serviceMock
                 .Verify(x => x.DeleteGraphsAsync(
-                    It.IsAny<IEnumerable<int>>(),
+                    It.IsAny<IReadOnlyCollection<int>>(),
                     It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(deletedMessage, Is.Not.Null);
             Assert.That(deletedMessage!.Value, Is.EqualTo(models.Select(x => x.Id).ToArray()));
@@ -53,7 +53,7 @@ internal sealed class DeleteGraphViewModelTests
         var serviceMock = new Mock<IGraphInfoRequestService>();
         serviceMock
             .Setup(x => x.DeleteGraphsAsync(
-                It.IsAny<IEnumerable<int>>(),
+                It.IsAny<IReadOnlyCollection<int>>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception());
 
@@ -86,7 +86,7 @@ internal sealed class DeleteGraphViewModelTests
             Assert.That(canExecute, Is.False);
             serviceMock
                 .Verify(x => x.DeleteGraphsAsync(
-                    It.IsAny<IEnumerable<int>>(),
+                    It.IsAny<IReadOnlyCollection<int>>(),
                     It.IsAny<CancellationToken>()), Times.Never);
         });
     }

@@ -46,7 +46,7 @@ public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory) : IGraph
         }, token).ConfigureAwait(false);
     }
 
-    public async Task<bool> DeleteGraphsAsync(IEnumerable<int> ids,
+    public async Task<bool> DeleteGraphsAsync(IReadOnlyCollection<int> ids,
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unitOfWork, t)

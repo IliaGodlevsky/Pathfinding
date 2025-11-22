@@ -9,7 +9,7 @@ namespace Pathfinding.Infrastructure.Business.Services;
 
 public sealed class StatisticsRequestService(IUnitOfWorkFactory factory) : IStatisticsRequestService
 {
-    public async Task<bool> DeleteRunsAsync(IEnumerable<int> runIds, CancellationToken token = default)
+    public async Task<bool> DeleteRunsAsync(IReadOnlyCollection<int> runIds, CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unit, t) => await unit.StatisticsRepository
                 .DeleteByIdsAsync([.. runIds], t)
@@ -26,7 +26,8 @@ public sealed class StatisticsRequestService(IUnitOfWorkFactory factory) : IStat
         }, token).ConfigureAwait(false);
     }
 
-    public async Task<IReadOnlyCollection<RunStatisticsModel>> ReadStatisticsAsync(IEnumerable<int> runIds,
+    public async Task<IReadOnlyCollection<RunStatisticsModel>> ReadStatisticsAsync(
+        IReadOnlyCollection<int> runIds,
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unit, t) =>
@@ -53,7 +54,7 @@ public sealed class StatisticsRequestService(IUnitOfWorkFactory factory) : IStat
     }
 
     public async Task<IReadOnlyCollection<RunStatisticsModel>> CreateStatisticsAsync(
-        IEnumerable<CreateStatisticsRequest> request, CancellationToken token = default)
+        IReadOnlyCollection<CreateStatisticsRequest> request, CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unit, t) =>
         {
@@ -63,7 +64,7 @@ public sealed class StatisticsRequestService(IUnitOfWorkFactory factory) : IStat
         }, token).ConfigureAwait(false);
     }
 
-    public async Task<bool> UpdateStatisticsAsync(IEnumerable<RunStatisticsModel> models,
+    public async Task<bool> UpdateStatisticsAsync(IReadOnlyCollection<RunStatisticsModel> models,
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unit, t) =>

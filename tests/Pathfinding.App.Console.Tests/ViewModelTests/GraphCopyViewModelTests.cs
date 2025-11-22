@@ -7,7 +7,6 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Serialization;
-using Pathfinding.Shared.Extensions;
 using System.Reactive.Linq;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
@@ -23,10 +22,10 @@ internal sealed class GraphCopyViewModelTests
 
         var models = Generators.GenerateGraphInfos(3).ToArray();
 
-        var histories = Enumerable.Range(1, 5)
+        var historiesModels = Enumerable.Range(1, 5)
             .Select(_ => new PathfindingHistorySerializationModel())
-            .ToArray()
-            .To(x => new PathfindingHistoriesSerializationModel { Histories = [.. x] });
+            .ToArray();
+        var histories = new PathfindingHistoriesSerializationModel { Histories = historiesModels };
         var createdHistories = Enumerable.Range(1, 5)
             .Select(index => new PathfindingHistoryModel<GraphVertexModel>
             {
@@ -42,13 +41,13 @@ internal sealed class GraphCopyViewModelTests
 
         serviceMock
             .Setup(x => x.ReadSerializationHistoriesAsync(
-                It.IsAny<IEnumerable<int>>(),
+                It.IsAny<IReadOnlyCollection<int>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(histories);
 
         serviceMock
             .Setup(x => x.CreatePathfindingHistoriesAsync(
-                It.IsAny<IEnumerable<PathfindingHistorySerializationModel>>(),
+                It.IsAny<IReadOnlyCollection<PathfindingHistorySerializationModel>>(),
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(createdHistories);
 
@@ -68,12 +67,12 @@ internal sealed class GraphCopyViewModelTests
         {
             serviceMock
                 .Verify(x => x.ReadSerializationHistoriesAsync(
-                    It.IsAny<IEnumerable<int>>(),
+                    It.IsAny<IReadOnlyCollection<int>>(),
                     It.IsAny<CancellationToken>()), Times.Once);
 
             serviceMock
                 .Verify(x => x.CreatePathfindingHistoriesAsync(
-                    It.IsAny<IEnumerable<PathfindingHistorySerializationModel>>(),
+                    It.IsAny<IReadOnlyCollection<PathfindingHistorySerializationModel>>(),
                     It.IsAny<CancellationToken>()), Times.Once);
 
             Assert.That(createdMessage, Is.Not.Null);
@@ -88,7 +87,7 @@ internal sealed class GraphCopyViewModelTests
 
         serviceMock
             .Setup(x => x.ReadSerializationHistoriesAsync(
-                It.IsAny<IEnumerable<int>>(),
+                It.IsAny<IReadOnlyCollection<int>>(),
                 It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception());
 
@@ -96,7 +95,7 @@ internal sealed class GraphCopyViewModelTests
 
         using var viewModel = CreateViewModel(messenger, serviceMock, logMock.Object);
 
-        messenger.Send(new GraphsSelectedMessage(Generators.GenerateGraphInfos(1).ToArray()));
+        messenger.Send(new GraphsSelectedMessage([.. Generators.GenerateGraphInfos(1)]));
 
         await viewModel.CopyGraphCommand.Execute();
 
