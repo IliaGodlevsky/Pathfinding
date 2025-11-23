@@ -62,8 +62,8 @@ internal sealed class RunUpdateViewModelTests
         var graph = CreateGraph();
         var range = new[]
         {
-            new PathfindingRangeModel { Position = new Coordinate(0), IsSource = true },
-            new PathfindingRangeModel { Position = new Coordinate(1), IsTarget = true }
+            new PathfindingRangeModel { VertexId = 1, IsSource = true },
+            new PathfindingRangeModel { VertexId = 2, IsTarget = true }
         };
 
         rangeServiceMock
@@ -185,8 +185,8 @@ internal sealed class RunUpdateViewModelTests
 
     private static Graph<GraphVertexModel> CreateGraph()
     {
-        var first = new GraphVertexModel { Position = new Coordinate(0) };
-        var second = new GraphVertexModel { Position = new Coordinate(1) };
+        var first = new GraphVertexModel { Id = 1, Position = new Coordinate(0) };
+        var second = new GraphVertexModel { Id = 2, Position = new Coordinate(1) };
         first.Neighbors.Add(second);
         second.Neighbors.Add(first);
         return new Graph<GraphVertexModel>([first, second], [2]);

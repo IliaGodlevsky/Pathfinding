@@ -158,7 +158,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         int graphId)
     {
         var rangeModels = await rangeService.ReadRangeAsync(graphId).ConfigureAwait(false);
-        var range = rangeModels.Select(x => graphToUpdate.Get(x.Position)).ToList();
+        var range = rangeModels.Select(x => graphToUpdate.First(y => y.Id == x.VertexId)).ToList();
         var updatedRuns = new List<RunStatisticsModel>();
         if (range.Count > 1)
         {

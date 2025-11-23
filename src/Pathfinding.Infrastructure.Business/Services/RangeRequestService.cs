@@ -15,9 +15,14 @@ public sealed class RangeRequestService<T>(IUnitOfWorkFactory factory) : IRangeR
     public async Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeAsync(int graphId,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unit, t)
-                => await unit.ReadRangeAsyncInternal<T>(graphId, t).ConfigureAwait(false), token)
-            .ConfigureAwait(false);
+        return await factory.TransactionAsync(async (unit, t) =>
+        {
+            return await unit.RangeRepository
+                .ReadByGraphIdAsync(graphId)
+                .Select(x => x.ToRangeModel())
+                .ToListAsync(token)
+                .ConfigureAwait(false);
+        }, token).ConfigureAwait(false);
     }
 
     public async Task<bool> CreatePathfindingVertexAsync(int graphId,

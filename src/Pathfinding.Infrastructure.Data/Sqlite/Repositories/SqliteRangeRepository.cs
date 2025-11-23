@@ -2,6 +2,7 @@
 using Microsoft.Data.Sqlite;
 using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Interface.Repositories;
+using Pathfinding.Infrastructure.Data.Pathfinding;
 
 namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories;
 
@@ -70,6 +71,15 @@ internal sealed class SqliteRangeRepository(SqliteConnection connection,
         var parameters = new { GraphId = graphId };
         return Connection.QueryUnbufferedAsync<PathfindingRange>(query,
             param: parameters, transaction: Transaction);
+    }
+
+    public IAsyncEnumerable<PathfindingRange> ReadByGraphIdsAsync(IReadOnlyCollection<int> ids)
+    {
+        const string query = $"SELECT * FROM {DbTables.Ranges} WHERE GraphId IN @GraphIds";
+        var parameters = new { GraphIds = ids };
+        return Connection.QueryUnbufferedAsync<PathfindingRange>(query,
+            param: parameters, transaction: Transaction);
+
     }
 
     public async Task<IReadOnlyCollection<PathfindingRange>> UpsertAsync(

@@ -1,6 +1,4 @@
-﻿using Pathfinding.Shared.Primitives;
-
-namespace Pathfinding.Service.Interface.Models.Read;
+﻿namespace Pathfinding.Service.Interface.Models.Read;
 
 public class PathfindingRangeModel
 {
@@ -15,6 +13,4 @@ public class PathfindingRangeModel
     public int GraphId { get; set; }
 
     public int Order { get; set; }
-
-    public Coordinate Position { get; set; }
 }

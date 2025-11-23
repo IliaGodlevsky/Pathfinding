@@ -44,6 +44,14 @@ internal sealed class LiteDbVerticesRepository : IVerticesRepository
             .ToAsyncEnumerable();
     }
 
+    public IAsyncEnumerable<Vertex> ReadVerticesByGraphIdsAsync(IReadOnlyCollection<int> graphIds)
+    {
+        return collection.Query()
+            .Where(x => graphIds.Contains(x.GraphId))
+            .ToEnumerable()
+            .ToAsyncEnumerable();
+    }
+
     public IAsyncEnumerable<Vertex> ReadVerticesByIdsAsync(IReadOnlyCollection<long> vertexIds)
     {
         return collection.Query()

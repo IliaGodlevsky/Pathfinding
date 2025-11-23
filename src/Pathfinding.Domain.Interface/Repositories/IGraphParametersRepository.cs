@@ -18,4 +18,6 @@ public interface IGraphParametersRepository
     Task<bool> UpdateAsync(Graph graph, CancellationToken token = default);
 
     IAsyncEnumerable<Graph> GetAll();
+
+    IAsyncEnumerable<Graph> ReadAsync(IReadOnlyCollection<int> ids);
 }

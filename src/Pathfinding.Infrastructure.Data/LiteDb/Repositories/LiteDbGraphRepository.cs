@@ -65,6 +65,14 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
         return Task.FromResult(collection.FindById(graphId));
     }
 
+    public IAsyncEnumerable<Graph> ReadAsync(IReadOnlyCollection<int> ids)
+    {
+        return collection.Query()
+            .Where(x => ids.Contains(x.Id))
+            .ToEnumerable()
+            .ToAsyncEnumerable();
+    }
+
     public Task<IReadOnlyDictionary<int, int>> ReadObstaclesCountAsync(
         IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)

@@ -60,11 +60,6 @@ internal static class MappingExtensions
         return models.Select(x => x.ToSerializationModel()).ToList().AsReadOnly();
     }
 
-    public static IReadOnlyCollection<CoordinateModel> ToCoordinates(this IEnumerable<PathfindingRangeModel> models)
-    {
-        return [.. models.Select(x => new CoordinateModel { Coordinate = x.Position })];
-    }
-
     public static Statistics ToStatistics(this RunStatisticsModel model)
     {
         return new()

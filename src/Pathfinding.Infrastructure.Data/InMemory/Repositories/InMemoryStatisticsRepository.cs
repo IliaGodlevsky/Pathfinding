@@ -76,4 +76,9 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
     {
         return set.Where(x => runIds.Contains(x.Id)).ToAsyncEnumerable();
     }
+
+    public IAsyncEnumerable<Statistics> ReadByGraphIdsAsync(IReadOnlyCollection<int> graphIds)
+    {
+        return set.Where(x => graphIds.Contains(x.GraphId)).ToAsyncEnumerable();
+    }
 }

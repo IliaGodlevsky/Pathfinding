@@ -8,27 +8,33 @@ namespace Pathfinding.Infrastructure.Business.Extensions;
 
 internal static class UnitOfWorkExtensions
 {
-    internal static async Task<GraphModel<T>> ReadGraphInternalAsync<T>(
-        this IUnitOfWork unit, int graphId, CancellationToken token = default)
+    internal static async Task<IReadOnlyCollection<GraphModel<T>>> ReadGraphsInternalAsync<T>(
+        this IUnitOfWork unit, IReadOnlyCollection<int> graphIds, CancellationToken token = default)
         where T : IVertex, IEntity<long>, new()
     {
-        var graphEntity = await unit.GraphRepository
-            .ReadAsync(graphId, token).ConfigureAwait(false);
-        var vertices = await unit.VerticesRepository
-            .ReadVerticesByGraphIdAsync(graphId)
-            .Select(x => x.ToVertex<T>())
-            .ToListAsync(token)
+        var graphs = await unit.GraphRepository.ReadAsync(graphIds)
+            .ToArrayAsync(token)
             .ConfigureAwait(false);
-        return new GraphModel<T>
+        var vertices = (await unit.VerticesRepository.ReadVerticesByGraphIdsAsync(graphIds)
+            .ToArrayAsync(token)
+            .ConfigureAwait(false))
+            .GroupBy(x => x.GraphId, x => x.ToVertex<T>())
+            .ToDictionary(x => x.Key, x => x.ToArray());
+        var models = new List<GraphModel<T>>();
+        foreach (var graph in graphs)
         {
-            Vertices = vertices,
-            DimensionSizes = graphEntity.Dimensions.ToDimensionSizes(),
-            Id = graphEntity.Id,
-            Name = graphEntity.Name,
-            Neighborhood = graphEntity.Neighborhood,
-            SmoothLevel = graphEntity.SmoothLevel,
-            Status = graphEntity.Status
-        };
+            models.Add(new GraphModel<T>()
+            {
+                DimensionSizes = graph.Dimensions.ToDimensionSizes(),
+                Id = graph.Id,
+                Name = graph.Name,
+                Neighborhood = graph.Neighborhood,
+                SmoothLevel = graph.SmoothLevel,
+                Status = graph.Status,
+                Vertices = vertices[graph.Id]
+            });
+        }
+        return models;
     }
 
     internal static async Task<GraphModel<T>> CreateGraphAsyncInternal<T>(
@@ -54,26 +60,19 @@ internal static class UnitOfWorkExtensions
         };
     }
 
-    internal static async Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeAsyncInternal<T>(
-        this IUnitOfWork unit, int graphId, CancellationToken token = default)
-        where T : IVertex, IEntity<long>
+    internal static async Task<IReadOnlyDictionary<int, IReadOnlyCollection<PathfindingRangeModel>>> ReadRangesAsyncInternal(
+        this IUnitOfWork unit, IReadOnlyCollection<int> graphIds, CancellationToken token = default)
     {
-        var range = await unit.RangeRepository
-            .ReadByGraphIdAsync(graphId)
-            .ToListAsync(token)
-            .ConfigureAwait(false);
-        var rangeVerticesIds = range.Select(x => x.VertexId).ToHashSet();
-        var vertices = await unit.VerticesRepository
-            .ReadVerticesByIdsAsync(rangeVerticesIds)
-            .ToDictionaryAsync(x => x.Id, x => x.Coordinates.ToCoordinates(), token)
-            .ConfigureAwait(false);
-        var result = new List<PathfindingRangeModel>(range.Count);
-        foreach (var rangeVertex in range)
+        var ranges = (await unit.RangeRepository
+            .ReadByGraphIdsAsync(graphIds)
+            .ToArrayAsync(token))
+            .GroupBy(x => x.GraphId)
+            .ToDictionary(x => x.Key, x => x.OrderBy(y => y.Order).ToArray());
+        var result = new Dictionary<int, IReadOnlyCollection<PathfindingRangeModel>>();
+        foreach (var range in ranges)
         {
-            var model = rangeVertex.ToRangeModel();
-            model.Position = vertices[rangeVertex.VertexId];
-            result.Add(model);
+            result.Add(range.Key, [.. range.Value.Select(x => x.ToRangeModel())]);
         }
-        return result.AsReadOnly();
+        return result;
     }
 }

@@ -44,6 +44,14 @@ internal sealed class LiteDbStatisticsRepository : IStatisticsRepository
         return collection.Find(x => x.GraphId == graphId).ToAsyncEnumerable();
     }
 
+    public IAsyncEnumerable<Statistics> ReadByGraphIdsAsync(IReadOnlyCollection<int> graphIds)
+    {
+        return collection.Query()
+            .Where(x => graphIds.Contains(x.GraphId))
+            .ToEnumerable()
+            .ToAsyncEnumerable();
+    }
+
     public Task<Statistics> ReadByIdAsync(int id, CancellationToken token = default)
     {
         var result = collection.FindById(id);

@@ -65,4 +65,9 @@ internal sealed class InMemoryRangeRepository : IRangeRepository
         }
         return Task.FromResult(entities);
     }
+
+    public IAsyncEnumerable<PathfindingRange> ReadByGraphIdsAsync(IReadOnlyCollection<int> ids)
+    {
+        return set.Where(x => ids.Contains(x.GraphId)).ToAsyncEnumerable();
+    }
 }

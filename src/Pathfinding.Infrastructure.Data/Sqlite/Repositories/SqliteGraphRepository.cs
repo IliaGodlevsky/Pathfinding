@@ -110,4 +110,11 @@ internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParameters
 
         return result.ToDictionary(x => x.GraphId, x => x.ObstacleCount);
     }
+
+    public IAsyncEnumerable<Graph> ReadAsync(IReadOnlyCollection<int> ids)
+    {
+        const string query = $"SELECT * FROM {DbTables.Graphs} WHERE  {IdProperty} IN @Ids";
+
+        return Connection.QueryUnbufferedAsync<Graph>(query, new { Ids = ids }, transaction: Transaction);
+    }
 }

@@ -105,6 +105,13 @@ internal sealed class SqliteStatisticsRepository(SqliteConnection connection,
         const string query = $"SELECT * FROM {DbTables.Statistics} WHERE Id IN @Ids";
 
         return Connection.QueryUnbufferedAsync<Statistics>(query,
-            new { Ids = runIds.ToArray() }, Transaction);
+            new { Ids = runIds }, Transaction);
+    }
+
+    public IAsyncEnumerable<Statistics> ReadByGraphIdsAsync(IReadOnlyCollection<int> graphIds)
+    {
+        const string query = $"SELECT * FROM {DbTables.Statistics} WHERE GraphId IN @GraphIds";
+        return Connection.QueryUnbufferedAsync<Statistics>(query,
+            new { GraphIds = graphIds }, Transaction);
     }
 }

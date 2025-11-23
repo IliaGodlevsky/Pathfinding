@@ -9,6 +9,7 @@ using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Serialization;
+using Pathfinding.Service.Interface.Models.Undefined;
 using Pathfinding.Service.Interface.Requests.Create;
 using Pathfinding.Service.Interface.Requests.Update;
 using Pathfinding.Shared.Extensions;
@@ -96,9 +97,26 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
 
     public async Task<GraphModel<T>> ReadGraphAsync(int graphId, CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unitOfWork, t)
-                => await unitOfWork.ReadGraphInternalAsync<T>(graphId, t).ConfigureAwait(false), token)
-            .ConfigureAwait(false);
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
+        {
+            var graphEntity = await unitOfWork.GraphRepository
+                .ReadAsync(graphId, token).ConfigureAwait(false);
+            var vertices = await unitOfWork.VerticesRepository
+                .ReadVerticesByGraphIdAsync(graphId)
+                .Select(x => x.ToVertex<T>())
+                .ToListAsync(token)
+                .ConfigureAwait(false);
+            return new GraphModel<T>
+            {
+                Vertices = vertices,
+                DimensionSizes = graphEntity.Dimensions.ToDimensionSizes(),
+                Id = graphEntity.Id,
+                Name = graphEntity.Name,
+                Neighborhood = graphEntity.Neighborhood,
+                SmoothLevel = graphEntity.SmoothLevel,
+                Status = graphEntity.Status
+            };
+        }, token).ConfigureAwait(false);
     }
 
     public async Task<GraphModel<T>> CreateGraphAsync(CreateGraphRequest<T> graph,
@@ -116,22 +134,28 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
         return await factory.TransactionAsync(async (unitOfWork, t) =>
         {
             var result = new List<PathfindingHistorySerializationModel>();
-            foreach (var graphId in graphIds)
+            var graphs = await unitOfWork.ReadGraphsInternalAsync<T>(graphIds, t)
+                .ConfigureAwait(false);
+            var ranges = await unitOfWork.ReadRangesAsyncInternal(graphIds, t)
+                .ConfigureAwait(false);
+            var statisitics = (await unitOfWork.StatisticsRepository
+                .ReadByGraphIdsAsync(graphIds)
+                .ToArrayAsync(t))
+                .GroupBy(x => x.GraphId, x => x.ToSerializationModel())
+                .ToDictionary(x => x.Key, x => x.ToArray());
+            foreach (var graph in graphs)
             {
-                var graph = await unitOfWork.ReadGraphInternalAsync<T>(graphId, t)
-                    .ConfigureAwait(false);
-                var range = await unitOfWork.ReadRangeAsyncInternal<T>(graphId, t)
-                    .ConfigureAwait(false);
-                var statistics = await unitOfWork.StatisticsRepository
-                    .ReadByGraphIdAsync(graphId)
-                    .ToListAsync(t)
-                    .ConfigureAwait(false);
+                var graphDict = graph.Vertices.ToDictionary(x => x.Id, x => x.Position.ToArray());
+                var range = ranges[graph.Id].Select(x => graphDict[x.VertexId])
+                    .Select(x => new CoordinateModel() { Coordinate = x })
+                    .ToList();
+                var runs = statisitics[graph.Id];
                 result.Add(new PathfindingHistorySerializationModel
                 {
                     Graph = graph.ToSerializationModel(),
                     Vertices = graph.Vertices.ToSerializationModels(),
-                    Statistics = statistics.ToSerializationModels(),
-                    Range = range.ToCoordinates()
+                    Statistics = runs,
+                    Range = range
                 });
             }
 
@@ -145,13 +169,12 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
     {
         return await factory.TransactionAsync(async (unitOfWork, t) =>
         {
+            var graphs = await unitOfWork.ReadGraphsInternalAsync<T>(graphIds, t).ConfigureAwait(false);
             var result = new List<PathfindingHistorySerializationModel>();
-            foreach (var graphId in graphIds)
+            foreach (var graph in graphs)
             {
-                var graph = await unitOfWork.ReadGraphInternalAsync<T>(graphId, t)
-                    .ConfigureAwait(false);
                 graph.Status = GraphStatuses.Editable;
-                result.Add(new PathfindingHistorySerializationModel
+                result.Add(new PathfindingHistorySerializationModel()
                 {
                     Graph = graph.ToSerializationModel(),
                     Vertices = graph.Vertices.ToSerializationModels(),
@@ -171,19 +194,24 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
         return await factory.TransactionAsync(async (unitOfWork, t) =>
         {
             var result = new List<PathfindingHistorySerializationModel>();
-            foreach (var graphId in graphIds)
+            var graphs = await unitOfWork.ReadGraphsInternalAsync<T>(graphIds, t)
+                .ConfigureAwait(false);
+            var ranges = await unitOfWork.ReadRangesAsyncInternal(graphIds, t)
+                .ConfigureAwait(false);
+            foreach (var graph in graphs)
             {
-                var graph = await unitOfWork.ReadGraphInternalAsync<T>(graphId, t)
-                    .ConfigureAwait(false);
+                var graphDictionary = graph.Vertices
+                    .ToDictionary(x => x.Id, x => x.Position.ToArray());
                 graph.Status = GraphStatuses.Editable;
-                var range = await unitOfWork.ReadRangeAsyncInternal<T>(graphId, t)
-                    .ConfigureAwait(false);
+                var coordinates = ranges[graph.Id]
+                    .Select(x => new CoordinateModel { Coordinate = graphDictionary[x.VertexId] })
+                    .ToList();
                 result.Add(new PathfindingHistorySerializationModel
                 {
                     Graph = graph.ToSerializationModel(),
                     Vertices = graph.Vertices.ToSerializationModels(),
                     Statistics = [],
-                    Range = range.ToCoordinates()
+                    Range = coordinates
                 });
             }
 

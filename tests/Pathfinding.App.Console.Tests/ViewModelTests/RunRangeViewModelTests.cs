@@ -101,8 +101,8 @@ internal sealed class RunRangeViewModelTests
                 It.IsAny<CancellationToken>()))
             .ReturnsAsync(
             [
-                new() { Position = new Coordinate(0), IsSource = true },
-                new() { Position = new Coordinate(1), IsTarget = true }
+                new() { VertexId = 1, IsSource = true },
+                new() { VertexId = 2, IsTarget = true }
             ]);
 
         rangeServiceMock
@@ -149,7 +149,7 @@ internal sealed class RunRangeViewModelTests
     }
 
     private static async Task ActivateGraph(
-        IMessenger messenger,
+        StrongReferenceMessenger messenger,
         Graph<GraphVertexModel> graph,
         int graphId = 12,
         GraphStatuses status = GraphStatuses.Editable)
@@ -180,11 +180,13 @@ internal sealed class RunRangeViewModelTests
     {
         var first = new GraphVertexModel
         {
+            Id = 1,
             Position = new Coordinate(0),
             Cost = new StubVertexCost()
         };
         var second = new GraphVertexModel
         {
+            Id = 2,
             Position = new Coordinate(1),
             Cost = new StubVertexCost()
         };

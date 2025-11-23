@@ -50,6 +50,14 @@ internal sealed class LiteDbRangeRepository : IRangeRepository
             .ToAsyncEnumerable();
     }
 
+    public IAsyncEnumerable<PathfindingRange> ReadByGraphIdsAsync(IReadOnlyCollection<int> ids)
+    {
+        return collection.Query()
+            .Where(x => ids.Contains(x.GraphId))
+            .ToEnumerable()
+            .ToAsyncEnumerable();
+    }
+
     public Task<IReadOnlyCollection<PathfindingRange>> UpsertAsync(
         IReadOnlyCollection<PathfindingRange> entities,
         CancellationToken token = default)

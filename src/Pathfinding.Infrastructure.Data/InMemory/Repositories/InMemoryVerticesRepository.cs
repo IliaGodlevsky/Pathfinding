@@ -62,4 +62,9 @@ internal sealed class InMemoryVerticesRepository : IVerticesRepository
     {
         return set.Where(x => vertexIds.Contains(x.Id)).ToAsyncEnumerable();
     }
+
+    public IAsyncEnumerable<Vertex> ReadVerticesByGraphIdsAsync(IReadOnlyCollection<int> graphIds)
+    {
+        return set.Where(x => graphIds.Contains(x.GraphId)).ToAsyncEnumerable();
+    }
 }

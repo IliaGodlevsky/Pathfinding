@@ -6,6 +6,8 @@ public interface IStatisticsRepository
 {
     IAsyncEnumerable<Statistics> ReadByGraphIdAsync(int graphId);
 
+    IAsyncEnumerable<Statistics> ReadByGraphIdsAsync(IReadOnlyCollection<int> graphIds);
+
     IAsyncEnumerable<Statistics> ReadByIdsAsync(IReadOnlyCollection<int> runIds);
 
     Task<Statistics> ReadByIdAsync(int runId, CancellationToken token = default);

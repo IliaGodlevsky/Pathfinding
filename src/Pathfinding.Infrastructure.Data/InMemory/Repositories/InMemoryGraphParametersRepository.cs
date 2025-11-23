@@ -92,4 +92,9 @@ internal sealed class InMemoryGraphParametersRepository(
         }
         return result;
     }
+
+    public IAsyncEnumerable<Graph> ReadAsync(IReadOnlyCollection<int> ids)
+    {
+        return set.Where(x => ids.Contains(x.Id)).ToAsyncEnumerable();
+    }
 }

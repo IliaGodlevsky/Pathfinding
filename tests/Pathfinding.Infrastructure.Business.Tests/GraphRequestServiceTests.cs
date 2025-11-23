@@ -11,6 +11,7 @@ using Pathfinding.Service.Interface.Models.Serialization;
 using Pathfinding.Service.Interface.Models.Undefined;
 using Pathfinding.Service.Interface.Requests.Create;
 using Pathfinding.Service.Interface.Requests.Update;
+using Pathfinding.Shared.Extensions;
 using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Infrastructure.Business.Tests;
@@ -296,13 +297,13 @@ internal class GraphRequestServiceTests
         });
 
         mock.Mock<IGraphParametersRepository>()
-            .Setup(x => x.ReadAsync(graphId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(graphEntity);
+            .Setup(x => x.ReadAsync(graphId.Enumerate().ToArray()))
+            .Returns(graphEntity.Enumerate().ToAsyncEnumerable());
         mock.Mock<IVerticesRepository>()
-            .Setup(x => x.ReadVerticesByGraphIdAsync(graphId))
+            .Setup(x => x.ReadVerticesByGraphIdsAsync(graphId.Enumerate().ToArray()))
             .Returns(vertices.ToAsyncEnumerable());
         mock.Mock<IRangeRepository>()
-            .Setup(x => x.ReadByGraphIdAsync(graphId))
+            .Setup(x => x.ReadByGraphIdsAsync(graphId.Enumerate().ToArray()))
             .Returns(range.ToAsyncEnumerable());
 
         var service = mock.Create<GraphRequestService<FakeVertex>>();
