@@ -71,6 +71,7 @@ internal sealed class InMemoryGraphParametersRepository(
             result.Name = graph.Name;
             result.Neighborhood = graph.Neighborhood;
             result.SmoothLevel = graph.SmoothLevel;
+            result.Status = graph.Status;
             return Task.FromResult(true);
         }
         return Task.FromResult(false);

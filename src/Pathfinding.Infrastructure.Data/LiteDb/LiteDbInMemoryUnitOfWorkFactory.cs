@@ -5,7 +5,7 @@ namespace Pathfinding.Infrastructure.Data.LiteDb;
 
 public sealed class LiteDbInMemoryUnitOfWorkFactory : IUnitOfWorkFactory
 {
-    private static readonly MemoryStream Memory = new();
+    private readonly MemoryStream Memory = new();
 
     public Task<IUnitOfWork> CreateAsync(CancellationToken token = default)
     {

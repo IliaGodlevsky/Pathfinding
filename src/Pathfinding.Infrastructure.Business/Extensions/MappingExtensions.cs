@@ -55,11 +55,6 @@ internal static class MappingExtensions
         };
     }
 
-    public static IReadOnlyCollection<RunStatisticsSerializationModel> ToSerializationModels(this IEnumerable<Statistics> models)
-    {
-        return models.Select(x => x.ToSerializationModel()).ToList().AsReadOnly();
-    }
-
     public static Statistics ToStatistics(this RunStatisticsModel model)
     {
         return new()

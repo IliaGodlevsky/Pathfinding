@@ -4,6 +4,11 @@ using Pathfinding.Infrastructure.Data.InMemory.Repositories;
 
 namespace Pathfinding.Infrastructure.Data.InMemory;
 
+/// <summary>
+/// In memory unit of work. Uses hash sets as data storage.
+/// Does not support transactions! For transaction support
+/// consider using in memory lite db implementation
+/// </summary>
 public sealed class InMemoryUnitOfWork : IUnitOfWork
 {
     public IGraphParametersRepository GraphRepository { get; }

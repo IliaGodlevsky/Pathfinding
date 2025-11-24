@@ -23,10 +23,9 @@ public record CoordinateModel : IBinarySerializable, IXmlSerializable
 
     public void ReadXml(XmlReader reader)
     {
-        Coordinate = reader.ReadElement<string>(nameof(Coordinate))
+        Coordinate = [.. reader.ReadElement<string>(nameof(Coordinate))
             .Split(',')
-            .Select(int.Parse)
-            .ToList();
+            .Select(int.Parse)];
     }
 
     public void WriteXml(XmlWriter writer)

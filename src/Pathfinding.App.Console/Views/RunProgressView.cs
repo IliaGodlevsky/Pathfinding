@@ -71,7 +71,7 @@ internal sealed partial class RunProgressView : FrameView
 
     private void BindTo(View view, Func<MouseEventArgs, float> function, params MouseFlags[] flags)
     {
-        BindTo(() => view.Events().MouseClick, function, (x, y) => y.MouseEvent.Flags.HasFlag(x), flags);
+        BindTo(() => view.Events().MouseClick, function, (x, y) => y.MouseEvent.Flags == x, flags);
     }
 
     private void BindTo(View view, Func<KeyEventEventArgs, float> function, params Key[] flags)

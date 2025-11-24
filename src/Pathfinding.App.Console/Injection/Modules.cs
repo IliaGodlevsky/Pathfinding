@@ -17,9 +17,8 @@ using Pathfinding.Infrastructure.Business.Layers;
 using Pathfinding.Infrastructure.Business.Serializers;
 using Pathfinding.Infrastructure.Business.Serializers.Decorators;
 using Pathfinding.Infrastructure.Business.Services;
-using Pathfinding.Infrastructure.Data.InMemory;
+using Pathfinding.Infrastructure.Data.LiteDb;
 using Pathfinding.Infrastructure.Data.Pathfinding;
-using Pathfinding.Infrastructure.Data.Sqlite;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Logging.Loggers;
 using Pathfinding.Service.Interface;
@@ -38,7 +37,7 @@ internal static class Modules
         builder.RegisterType<GraphAssemble<GraphVertexModel>>().As<IGraphAssemble<GraphVertexModel>>().SingleInstance();
         builder.RegisterType<GraphAssemble<RunVertexModel>>().As<IGraphAssemble<RunVertexModel>>().SingleInstance();
 
-        builder.RegisterInstance(new SqliteUnitOfWorkFactory(Settings.Default.ConnectionString)).As<IUnitOfWorkFactory>().SingleInstance();
+        builder.RegisterInstance(new LiteDbInFileUnitOfWorkFactory(Settings.Default.ConnectionString)).As<IUnitOfWorkFactory>().SingleInstance();
 
         builder.RegisterType<GraphRequestService<GraphVertexModel>>().As<IGraphRequestService<GraphVertexModel>>().SingleInstance();
         builder.RegisterType<RangeRequestService<GraphVertexModel>>().As<IRangeRequestService<GraphVertexModel>>().SingleInstance();
@@ -226,7 +225,7 @@ internal static class Modules
         builder.RegisterType<RunHeuristicsView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
         builder.RegisterType<RunsPopulateView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
 
-        builder.RegisterType<InMemoryUnitOfWorkFactory>().As<IUnitOfWorkFactory>().SingleInstance().IfNotRegistered(typeof(IUnitOfWorkFactory));
+        builder.RegisterType<LiteDbInMemoryUnitOfWorkFactory>().As<IUnitOfWorkFactory>().SingleInstance().IfNotRegistered(typeof(IUnitOfWorkFactory));
 
         return builder.Build();
     }

@@ -23,7 +23,7 @@ internal static class UnitOfWorkExtensions
         var models = new List<GraphModel<T>>();
         foreach (var graph in graphs)
         {
-            models.Add(new GraphModel<T>()
+            models.Add(new()
             {
                 DimensionSizes = graph.Dimensions.ToDimensionSizes(),
                 Id = graph.Id,
@@ -48,7 +48,7 @@ internal static class UnitOfWorkExtensions
         await unit.VerticesRepository.CreateAsync(vertices, token).ConfigureAwait(false);
         vertices.Zip(request.Graph, (x, y) => (Entity: x, Vertex: y))
             .ForEach(x => x.Vertex.Id = x.Entity.Id);
-        return new GraphModel<T>
+        return new()
         {
             DimensionSizes = request.Graph.DimensionsSizes,
             Vertices = request.Graph,

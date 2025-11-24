@@ -149,12 +149,11 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
                 var range = ranges[graph.Id].Select(x => graphDict[x.VertexId])
                     .Select(x => new CoordinateModel() { Coordinate = x })
                     .ToList();
-                var runs = statisitics[graph.Id];
                 result.Add(new PathfindingHistorySerializationModel
                 {
                     Graph = graph.ToSerializationModel(),
                     Vertices = graph.Vertices.ToSerializationModels(),
-                    Statistics = runs,
+                    Statistics = statisitics[graph.Id],
                     Range = range
                 });
             }
