@@ -36,7 +36,6 @@ internal sealed partial class RunStepRulesView : FrameView
         stepRules.SelectedItem = 0;
         messenger.RegisterHandler<OpenStepRuleViewMessage>(this, OnOpen).DisposeWith(disposables);
         messenger.RegisterHandler<CloseStepRulesViewMessage>(this, OnStepRulesViewClose).DisposeWith(disposables);
-        messenger.RegisterHandler<CloseRunCreateViewMessage>(this, OnRunCreationViewClosed).DisposeWith(disposables);
         this.viewModel = viewModel;
     }
 
@@ -47,11 +46,6 @@ internal sealed partial class RunStepRulesView : FrameView
     }
 
     private void OnStepRulesViewClose(CloseStepRulesViewMessage msg)
-    {
-        Close();
-    }
-
-    private void OnRunCreationViewClosed(CloseRunCreateViewMessage msg)
     {
         Close();
     }

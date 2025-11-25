@@ -11,12 +11,9 @@ internal enum KeyFilters
     ViewModels,
     SmoothLevels,
     Neighborhoods,
-    RunCreateView,
     IncludeCommands,
     ExcludeCommands,
     RunButtonsFrame,
     GraphUpdateView,
-    GraphAssembleView,
-    GraphTableButtons,
-    RunParametersView
+    GraphTableButtons
 }

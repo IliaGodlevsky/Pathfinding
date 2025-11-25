@@ -29,12 +29,17 @@ internal sealed partial class RunsPopulateView : FrameView
         this.populateViewModel = populateViewModel;
 
         BindTo(weightTextField, x => x.FromWeight);
+        weightLabel.DisposeWith(disposables);
+        weightTextField.DisposeWith(disposables);
+        toWeightTextField.DisposeWith(disposables);
+        toWeightLabel.DisposeWith(disposables);
+        stepLabel.DisposeWith(disposables);
+        stepTextField.DisposeWith(disposables);
         BindTo(toWeightTextField, x => x.ToWeight);
         BindTo(stepTextField, x => x.Step);
 
         messenger.RegisterHandler<OpenRunsPopulateViewMessage>(this, OnRunPopulateOpen).DisposeWith(disposables);
         messenger.RegisterHandler<CloseRunPopulateViewMessage>(this, OnRunPopulateViewClosed).DisposeWith(disposables);
-        messenger.RegisterHandler<CloseRunCreateViewMessage>(this, OnRunCreateViewClosed).DisposeWith(disposables);
     }
 
     protected override void Dispose(bool disposing)
@@ -78,8 +83,6 @@ internal sealed partial class RunsPopulateView : FrameView
     }
 
     private void OnRunPopulateViewClosed(CloseRunPopulateViewMessage msg) => Close();
-
-    private void OnRunCreateViewClosed(CloseRunCreateViewMessage msg) => Close();
 
     private void SetDefaults()
     {

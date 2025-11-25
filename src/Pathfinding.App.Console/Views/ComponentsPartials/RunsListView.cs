@@ -7,10 +7,9 @@ internal partial class RunsListView
 {
     private void Initialize()
     {
-        X = 0;
         Y = 1;
-        Width = Dim.Percent(25);
-        Height = Dim.Percent(62);
+        Width = Dim.Percent(50);
+        Height = Dim.Fill(1);
         Border = new Border()
         {
             BorderStyle = BorderStyle.Rounded,

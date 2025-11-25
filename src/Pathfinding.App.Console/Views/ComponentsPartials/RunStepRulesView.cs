@@ -11,7 +11,7 @@ internal partial class RunStepRulesView
         stepRules.X = 1;
         stepRules.Y = 0;
         Height = Dim.Percent(20);
-        Width = Dim.Percent(30);
+        Width = Dim.Fill();
         Border = new Border()
         {
             BorderStyle = BorderStyle.Rounded,

@@ -59,6 +59,9 @@ internal sealed partial class GraphParametresView : FrameView
 
     protected override void Dispose(bool disposing)
     {
+        graphWidthInput.KeyPress -= KeyRestriction;
+        graphLengthInput.KeyPress -= KeyRestriction;
+        obstaclesInput.KeyPress -= KeyRestriction;
         disposables.Dispose();
         base.Dispose(disposing);
     }

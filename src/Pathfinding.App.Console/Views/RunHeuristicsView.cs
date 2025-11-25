@@ -19,10 +19,12 @@ internal sealed partial class RunHeuristicsView
 
     private readonly CompositeDisposable disposables = [];
 
-    public RunHeuristicsView([KeyFilter(KeyFilters.Views)] IMessenger messenger,
-        IRequireHeuristicsViewModel viewModel)
+    public RunHeuristicsView(IMessenger messenger, IRequireHeuristicsViewModel viewModel)
     {
         Initialize();
+        this.viewModel = viewModel;
+        messenger.Register<OpenHeuristicsViewMessage>(this, OnHeuristicsViewOpen);
+        messenger.Register<CloseHeuristicsViewMessage>(this, OnHeuristicsViewClosed);
         var heuristics = viewModel.AppliedHeuristics;
         foreach (var heuristic in viewModel.AllowedHeuristics)
         {
@@ -32,16 +34,11 @@ internal sealed partial class RunHeuristicsView
                 .Select(x => x
                     ? (Action<Heuristics?>)(z => heuristics.Remove(z))
                     : heuristics.Add)
-                .Do(x => x(heuristic))
-                .Subscribe()
+                .Subscribe(x => x(heuristic))
                 .DisposeWith(disposables);
             checkBoxes.Add(checkBox);
         }
         Add([.. checkBoxes]);
-        messenger.Register<OpenHeuristicsViewMessage>(this, OnHeuristicsViewOpen);
-        messenger.Register<CloseHeuristicsViewMessage>(this, OnHeuristicsViewClosed);
-        messenger.Register<CloseRunCreateViewMessage>(this, OnRunCreationViewClosed);
-        this.viewModel = viewModel;
     }
 
     protected override void Dispose(bool disposing)
@@ -62,17 +59,11 @@ internal sealed partial class RunHeuristicsView
         Close();
     }
 
-    private void OnRunCreationViewClosed(object recipient, CloseRunCreateViewMessage msg)
-    {
-        Close();
-    }
-
     private void Close()
     {
         foreach (var checkBox in checkBoxes.Where(x => x.Checked))
         {
             checkBox.Checked = false;
-            checkBox.OnToggled(true);
         }
         viewModel.AppliedHeuristics.Clear();
         Visible = false;

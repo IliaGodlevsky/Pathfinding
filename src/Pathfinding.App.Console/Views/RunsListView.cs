@@ -28,6 +28,7 @@ internal sealed partial class RunsListView : FrameView
     {
         Initialize();
         this.messenger = messenger;
+        viewModel.SelectedAlgorithms.Clear();
         requirementGroups = CreateRequirementsGroup();
         selectedAlgorithms = viewModel.SelectedAlgorithms;
         foreach (var algorithm in viewModel.AllowedAlgorithms)
@@ -71,24 +72,7 @@ internal sealed partial class RunsListView : FrameView
                 .DisposeWith(disposables);
             algorithms.Add(checkBox);
         }
-        VisibleChanged += RunsListView_VisibleChanged;
         Add([.. algorithms]);
-    }
-
-    private void RunsListView_VisibleChanged()
-    {
-        if (!Visible)
-        {
-            foreach (var checkBox in algorithms.Where(x => x.Checked))
-            {
-                checkBox.Checked = false;
-            }
-        }
-        else
-        {
-            selectedAlgorithms.Clear();
-            RequirementGroup = [];
-        }
     }
 
     private Dictionary<Algorithms, (HashSet<Algorithms>, Action)> CreateRequirementsGroup()

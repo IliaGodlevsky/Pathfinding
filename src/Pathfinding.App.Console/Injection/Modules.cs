@@ -186,7 +186,6 @@ internal static class Modules
 
         builder.RegisterType<GraphsTableView>().Keyed<View>(KeyFilters.GraphPanel).WithAttributeFiltering();
         builder.RegisterType<GraphTableButtonsFrame>().Keyed<View>(KeyFilters.GraphPanel).WithAttributeFiltering();
-        builder.RegisterType<GraphAssembleView>().Keyed<View>(KeyFilters.GraphPanel).AsSelf().WithAttributeFiltering().SingleInstance();
         builder.RegisterType<GraphUpdateView>().Keyed<View>(KeyFilters.GraphPanel).AsSelf().WithAttributeFiltering().SingleInstance();
 
         builder.RegisterType<GraphAssembleButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
@@ -202,28 +201,15 @@ internal static class Modules
         builder.RegisterType<GraphDeleteButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
             .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 6);
 
-        builder.RegisterType<GraphNameView>().Keyed<View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
-        builder.RegisterType<GraphParametresView>().Keyed<View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
-        builder.RegisterType<GraphNeighborhoodView>().Keyed<View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
-        builder.RegisterType<GraphSmoothLevelView>().Keyed<View>(KeyFilters.GraphAssembleView).WithAttributeFiltering();
-
         builder.RegisterType<GraphNameUpdateView>().Keyed<View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
         builder.RegisterType<GraphNeighborhoodUpdateView>().Keyed<View>(KeyFilters.GraphUpdateView).WithAttributeFiltering();
 
         builder.RegisterType<RunsTableView>().Keyed<View>(KeyFilters.RunsPanel).WithAttributeFiltering();
         builder.RegisterType<RunsTableButtonsFrame>().Keyed<View>(KeyFilters.RunsPanel).WithAttributeFiltering();
-        builder.RegisterType<RunCreateView>().Keyed<View>(KeyFilters.RunsPanel).AsSelf().WithAttributeFiltering().SingleInstance();
 
         builder.RegisterType<RunCreateButton>().Keyed<View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
-        builder.RegisterType<RunUpdateView>().Keyed<View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
+        builder.RegisterType<RunUpdateButton>().Keyed<View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
         builder.RegisterType<RunDeleteButton>().Keyed<View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
-
-        builder.RegisterType<RunsListView>().Keyed<View>(KeyFilters.RunCreateView).WithAttributeFiltering();
-        builder.RegisterType<RunParametresView>().Keyed<View>(KeyFilters.RunCreateView).WithAttributeFiltering();
-
-        builder.RegisterType<RunStepRulesView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
-        builder.RegisterType<RunHeuristicsView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
-        builder.RegisterType<RunsPopulateView>().Keyed<View>(KeyFilters.RunParametersView).WithAttributeFiltering();
 
         builder.RegisterType<LiteDbInMemoryUnitOfWorkFactory>().As<IUnitOfWorkFactory>().SingleInstance().IfNotRegistered(typeof(IUnitOfWorkFactory));
 

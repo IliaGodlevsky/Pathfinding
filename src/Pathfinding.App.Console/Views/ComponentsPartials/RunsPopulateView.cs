@@ -15,8 +15,8 @@ internal sealed partial class RunsPopulateView
 
     private void Initialize()
     {
-        Height = Dim.Percent(30);
-        Width = Dim.Percent(30);
+        Height = Dim.Percent(40);
+        Width = Dim.Fill();
         Border = new Border()
         {
             BorderStyle = BorderStyle.Rounded,

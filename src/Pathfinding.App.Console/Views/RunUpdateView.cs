@@ -9,11 +9,11 @@ using Terminal.Gui;
 
 namespace Pathfinding.App.Console.Views;
 
-internal sealed class RunUpdateView : Button
+internal sealed class RunUpdateButton : Button
 {
     private readonly CompositeDisposable disposables = [];
 
-    public RunUpdateView(IRunUpdateViewModel viewModel)
+    public RunUpdateButton(IRunUpdateViewModel viewModel)
     {
         X = Pos.Percent(33);
         Y = 0;

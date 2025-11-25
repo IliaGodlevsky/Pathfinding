@@ -6,8 +6,8 @@ internal sealed partial class RunHeuristicsView : FrameView
 {
     private void Initialize()
     {
-        Height = Dim.Percent(25);
-        Width = Dim.Percent(30);
+        Height = Dim.Percent(33);
+        Width = Dim.Fill();
         Border = new Border()
         {
             BorderStyle = BorderStyle.Rounded,
