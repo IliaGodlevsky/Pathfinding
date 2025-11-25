@@ -1,6 +1,4 @@
-﻿using Autofac.Features.AttributeFilters;
-using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.ViewModels;
+﻿using Pathfinding.App.Console.ViewModels;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive;
@@ -10,41 +8,40 @@ using Terminal.Gui;
 
 namespace Pathfinding.App.Console.Views;
 
-internal sealed partial class GraphUpdateView : FrameView
+internal sealed class GraphUpdateDialog : Dialog
 {
     private readonly CompositeDisposable disposables = [];
 
-    public GraphUpdateView(
-        [KeyFilter(KeyFilters.GraphUpdateView)] View[] children,
-        GraphUpdateViewModel viewModel)
+    public GraphUpdateDialog(GraphUpdateViewModel viewModel)
     {
-        Initialize();
-        Add(children);
+        var nameField = new GraphNameUpdateView(viewModel).DisposeWith(disposables);
+        var neighborhood = new GraphNeighborhoodUpdateView(viewModel).DisposeWith(disposables);
+        var updateButton = new Button("Update").DisposeWith(disposables);
+        var cancelButton = new Button("Cancel").DisposeWith(disposables);
+        Width = Dim.Percent(18);
+        Height = Dim.Percent(30);
         viewModel.UpdateGraphCommand.CanExecute
             .BindTo(updateButton, x => x.Enabled)
             .DisposeWith(disposables);
         updateButton.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-            .Select(x => Unit.Default)
-            .Do(x => Hide())
+            .Do(_ => Application.RequestStop())
+            .Select(_ => Unit.Default)
             .InvokeCommand(viewModel, x => x.UpdateGraphCommand)
             .DisposeWith(disposables);
         cancelButton.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-            .Do(x => Hide())
-            .Subscribe()
+            .Subscribe(_ => Application.RequestStop())
             .DisposeWith(disposables);
+        Add(nameField, neighborhood);
+        AddButton(cancelButton);
+        AddButton(updateButton);
+        Title = "Update graph";
     }
 
     protected override void Dispose(bool disposing)
     {
         disposables.Dispose();
         base.Dispose(disposing);
-    }
-
-    private void Hide()
-    {
-        Visible = false;
-        Application.Driver.SetCursorVisibility(CursorVisibility.Invisible);
     }
 }

@@ -22,11 +22,6 @@ internal sealed partial class RunParametresView : FrameView
         for (int i = 0; i < children.Length; i++)
         {
             children[i].Y = i == 0 ? 1 : Pos.Bottom(children[i - 1]);
-            //this.Events().VisibleChanged
-            //    .Where(x => !Visible)
-            //    .Select(x => Visible)
-            //    .BindTo(children[i], x => x.Visible)
-            //    .DisposeWith(disposables);
         }
     }
 

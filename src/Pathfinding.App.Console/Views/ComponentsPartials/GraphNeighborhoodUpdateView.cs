@@ -8,9 +8,9 @@ internal sealed partial class GraphNeighborhoodUpdateView
 
     private void Initialize()
     {
-        X = Pos.Percent(33);
-        Y = Pos.Percent(33);
-        Width = Dim.Percent(25);
+        X = Pos.Percent(25);
+        Y = Pos.Percent(24);
+        Width = Dim.Percent(47);
         Height = Dim.Percent(55);
         Border = new Border()
         {

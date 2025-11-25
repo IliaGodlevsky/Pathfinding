@@ -9,10 +9,10 @@ internal sealed partial class GraphNameUpdateView
 
     private void Initialize()
     {
-        X = 1;
-        Y = 1;
-        Height = Dim.Percent(15, true);
-        Width = Dim.Fill(3);
+        X = 0; 
+        Y = 0;
+        Height = Dim.Percent(20);
+        Width = Dim.Fill();
         Border = new Border()
         {
             BorderStyle = BorderStyle.None,
@@ -23,9 +23,9 @@ internal sealed partial class GraphNameUpdateView
         nameLabel.Y = 1;
         nameLabel.Width = Dim.Percent(15);
 
-        nameField.X = Pos.Percent(15) + 1;
+        nameField.X = Pos.Percent(15) + 2;
         nameField.Y = 1;
-        nameField.Width = Dim.Fill();
+        nameField.Width = Dim.Fill(1);
 
         Add(nameField, nameLabel);
     }

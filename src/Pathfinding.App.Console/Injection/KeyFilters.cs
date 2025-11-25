@@ -14,6 +14,5 @@ internal enum KeyFilters
     IncludeCommands,
     ExcludeCommands,
     RunButtonsFrame,
-    GraphUpdateView,
     GraphTableButtons
 }

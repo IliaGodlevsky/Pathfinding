@@ -23,8 +23,8 @@ internal sealed partial class RunHeuristicsView
     {
         Initialize();
         this.viewModel = viewModel;
-        messenger.Register<OpenHeuristicsViewMessage>(this, OnHeuristicsViewOpen);
-        messenger.Register<CloseHeuristicsViewMessage>(this, OnHeuristicsViewClosed);
+        messenger.RegisterHandler<OpenHeuristicsViewMessage>(this, OnHeuristicsViewOpen).DisposeWith(disposables);
+        messenger.RegisterHandler<CloseHeuristicsViewMessage>(this, OnHeuristicsViewClosed).DisposeWith(disposables);
         var heuristics = viewModel.AppliedHeuristics;
         foreach (var heuristic in viewModel.AllowedHeuristics)
         {
@@ -47,14 +47,14 @@ internal sealed partial class RunHeuristicsView
         base.Dispose(disposing);
     }
 
-    private void OnHeuristicsViewOpen(object recipient, OpenHeuristicsViewMessage msg)
+    private void OnHeuristicsViewOpen(OpenHeuristicsViewMessage msg)
     {
         Close();
         viewModel.AppliedHeuristics.Add(null);
         Visible = true;
     }
 
-    private void OnHeuristicsViewClosed(object recipient, CloseHeuristicsViewMessage msg)
+    private void OnHeuristicsViewClosed(CloseHeuristicsViewMessage msg)
     {
         Close();
     }

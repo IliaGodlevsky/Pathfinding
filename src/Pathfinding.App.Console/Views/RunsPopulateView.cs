@@ -27,14 +27,14 @@ internal sealed partial class RunsPopulateView : FrameView
     {
         Initialize();
         this.populateViewModel = populateViewModel;
-
-        BindTo(weightTextField, x => x.FromWeight);
         weightLabel.DisposeWith(disposables);
         weightTextField.DisposeWith(disposables);
         toWeightTextField.DisposeWith(disposables);
         toWeightLabel.DisposeWith(disposables);
         stepLabel.DisposeWith(disposables);
         stepTextField.DisposeWith(disposables);
+
+        BindTo(weightTextField, x => x.FromWeight);
         BindTo(toWeightTextField, x => x.ToWeight);
         BindTo(stepTextField, x => x.Step);
 

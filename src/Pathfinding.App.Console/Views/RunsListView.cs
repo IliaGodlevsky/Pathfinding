@@ -23,7 +23,7 @@ internal sealed partial class RunsListView : FrameView
 
     private HashSet<Algorithms> RequirementGroup { get; set; } = [];
 
-    public RunsListView([KeyFilter(KeyFilters.Views)] IMessenger messenger,
+    public RunsListView(IMessenger messenger,
         IRunCreateViewModel viewModel)
     {
         Initialize();

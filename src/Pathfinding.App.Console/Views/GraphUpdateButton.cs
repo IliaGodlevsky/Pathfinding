@@ -11,7 +11,7 @@ internal sealed class GraphUpdateButton : Button
 {
     private readonly CompositeDisposable disposables = [];
 
-    public GraphUpdateButton(GraphUpdateView view, GraphUpdateViewModel viewModel)
+    public GraphUpdateButton(GraphUpdateViewModel viewModel)
     {
         Text = "Update";
         viewModel.WhenAnyValue(x => x.SelectedGraphs)
@@ -20,9 +20,14 @@ internal sealed class GraphUpdateButton : Button
             .DisposeWith(disposables);
         this.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
-            .Do(x => view.Visible = true)
-            .Subscribe()
+            .Subscribe(_ => ShowDialog(viewModel))
             .DisposeWith(disposables);
+    }
+
+    private static void ShowDialog(GraphUpdateViewModel viewModel)
+    {
+        var dialog = new GraphUpdateDialog(viewModel);
+        Application.Run(dialog);
     }
 
     protected override void Dispose(bool disposing)
