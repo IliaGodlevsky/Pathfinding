@@ -56,11 +56,13 @@ internal sealed class RunCreateViewModel : ViewModel,
 
     public IReadOnlyCollection<Heuristics> AllowedHeuristics { get; }
 
-    public IReadOnlyCollection<Algorithms> AllowedAlgorithms { get; }
+    public IReadOnlyList<Algorithms> AllowedAlgorithms { get; }
 
     public IReadOnlyCollection<StepRules> AllowedStepRules { get; }
 
-    public ObservableCollection<Heuristics?> AppliedHeuristics { get; } = [];
+    IList<Heuristics> IRequireHeuristicsViewModel.AppliedHeuristics => AppliedHeuristics;
+
+    public ObservableCollection<Heuristics> AppliedHeuristics { get; } = [];
 
     private double? fromWeight;
     public double? FromWeight
@@ -98,6 +100,8 @@ internal sealed class RunCreateViewModel : ViewModel,
         set => this.RaiseAndSetIfChanged(ref activatedGraph, value);
     }
 
+    public IReadOnlyDictionary<Algorithms, AlgorithmRequirements> Requirements { get; }
+
     public RunCreateViewModel(
         IStatisticsRequestService statisticsService,
         IAlgorithmsFactory algorithmsFactory,
@@ -112,7 +116,10 @@ internal sealed class RunCreateViewModel : ViewModel,
         AllowedHeuristics = heuristicsFactory.Allowed;
         AllowedAlgorithms = algorithmsFactory.Allowed;
         AllowedStepRules = stepRuleFactory.Allowed;
+        Requirements = algorithmsFactory.Requirements;
+
         CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm, CanCreateAlgorithm());
+        
         messenger.RegisterHandler<GraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
     }
@@ -123,13 +130,16 @@ internal sealed class RunCreateViewModel : ViewModel,
             x => x.ActivatedGraph, x => x.AppliedHeuristics.Count,
             x => x.FromWeight, x => x.ToWeight,
             x => x.Step, x => x.SelectedAlgorithms.Count,
-            (g, count, weight, to, s, algo) =>
+            (graph, heuristicsCount, weight, to, s, algorithmsCount) =>
             {
-                var canExecute = g != ActiveGraph.Empty && algo > 0;
-                if (count > 0)
+                var canExecute = graph != ActiveGraph.Empty && algorithmsCount > 0;
+                var requiresHeuristics = SelectedAlgorithms.All(x =>
+                    Requirements[x] == AlgorithmRequirements.RequiredAll
+                    || Requirements[x] == AlgorithmRequirements.RequiredHeuristics);
+                if (canExecute && requiresHeuristics)
                 {
-                    canExecute = canExecute && count > 1;
-                    if (s != null && weight != null && to != null)
+                    canExecute = canExecute && heuristicsCount > 0;
+                    if (canExecute && s != null && weight != null && to != null)
                     {
                         canExecute = canExecute
                             && weight > 0
@@ -213,9 +223,9 @@ internal sealed class RunCreateViewModel : ViewModel,
         {
             return [.. SelectedAlgorithms.Select(algo => new AlgorithmBuildInfo(algo, StepRule))];
         }
-        return [.. AppliedHeuristics.Where(x => x is not null)
+        return [.. AppliedHeuristics
             .SelectMany(heuristic => SelectedAlgorithms
-                .Select(algo => new AlgorithmBuildInfo(algo,StepRule, heuristic, weight)))];
+                .Select(algo => new AlgorithmBuildInfo(algo, StepRule, heuristic, weight)))];
     }
 
     private async Task CreateAlgorithm()

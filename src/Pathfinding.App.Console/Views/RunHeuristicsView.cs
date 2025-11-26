@@ -26,13 +26,14 @@ internal sealed partial class RunHeuristicsView
         messenger.RegisterHandler<OpenHeuristicsViewMessage>(this, OnHeuristicsViewOpen).DisposeWith(disposables);
         messenger.RegisterHandler<CloseHeuristicsViewMessage>(this, OnHeuristicsViewClosed).DisposeWith(disposables);
         var heuristics = viewModel.AppliedHeuristics;
+        heuristics.Clear();
         foreach (var heuristic in viewModel.AllowedHeuristics)
         {
             var text = heuristic.ToStringRepresentation();
             var checkBox = new CheckBox(text) { Y = checkBoxes.Count };
             checkBox.Events().Toggled
                 .Select(x => x
-                    ? (Action<Heuristics?>)(z => heuristics.Remove(z))
+                    ? (Action<Heuristics>)(z => heuristics.Remove(z))
                     : heuristics.Add)
                 .Subscribe(x => x(heuristic))
                 .DisposeWith(disposables);
@@ -50,13 +51,13 @@ internal sealed partial class RunHeuristicsView
     private void OnHeuristicsViewOpen(OpenHeuristicsViewMessage msg)
     {
         Close();
-        viewModel.AppliedHeuristics.Add(null);
         Visible = true;
     }
 
     private void OnHeuristicsViewClosed(CloseHeuristicsViewMessage msg)
     {
         Close();
+        Visible = false;
     }
 
     private void Close()
@@ -66,6 +67,5 @@ internal sealed partial class RunHeuristicsView
             checkBox.Checked = false;
         }
         viewModel.AppliedHeuristics.Clear();
-        Visible = false;
     }
 }

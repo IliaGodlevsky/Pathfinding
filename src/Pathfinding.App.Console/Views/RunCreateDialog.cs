@@ -37,7 +37,7 @@ internal sealed class RunCreateDialog : Dialog
             .Subscribe(_ => Application.RequestStop())
             .DisposeWith(disposables);
         Width = Dim.Percent(17);
-        Height = Dim.Percent(45);
+        Height = Dim.Percent(43);
         Add(runListView, runParametresView);
         AddButton(cancelButton);
         AddButton(createButton);
