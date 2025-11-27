@@ -3,7 +3,6 @@ using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Models;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Business.Algorithms;
-using System.Collections.Generic;
 
 namespace Pathfinding.App.Console.Factories;
 

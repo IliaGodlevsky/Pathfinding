@@ -134,8 +134,8 @@ internal sealed class RunCreateViewModel : ViewModel,
             {
                 var canExecute = graph != ActiveGraph.Empty && algorithmsCount > 0;
                 var requiresHeuristics = SelectedAlgorithms.All(x =>
-                    Requirements[x] == AlgorithmRequirements.RequiredAll
-                    || Requirements[x] == AlgorithmRequirements.RequiredHeuristics);
+                    Requirements[x] == AlgorithmRequirements.RequiresAll
+                    || Requirements[x] == AlgorithmRequirements.RequiresHeuristics);
                 if (canExecute && requiresHeuristics)
                 {
                     canExecute = canExecute && heuristicsCount > 0;

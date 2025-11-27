@@ -71,12 +71,12 @@ internal sealed partial class RunsListView : FrameView
                 messenger.Send(new CloseRunPopulateViewMessage());
                 messenger.Send(new CloseHeuristicsViewMessage());
                 break;
-            case AlgorithmRequirements.RequiredHeuristics:
+            case AlgorithmRequirements.RequiresHeuristics:
                 messenger.Send(new CloseStepRulesViewMessage());
                 messenger.Send(new CloseRunPopulateViewMessage());
                 messenger.Send(new OpenHeuristicsViewMessage());
                 break;
-            case AlgorithmRequirements.RequiredAll:
+            case AlgorithmRequirements.RequiresAll:
                 messenger.Send(new OpenStepRuleViewMessage());
                 messenger.Send(new OpenRunsPopulateViewMessage());
                 messenger.Send(new OpenHeuristicsViewMessage());
