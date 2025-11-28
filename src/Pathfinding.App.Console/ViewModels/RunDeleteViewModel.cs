@@ -76,6 +76,7 @@ internal sealed class RunDeleteViewModel : ViewModel, IRunDeleteViewModel, IDisp
     private void OnGraphActivated(GraphActivatedMessage msg)
     {
         ActivatedGraph = msg.Value.ActiveGraph;
+        SelectedRunsIds = [];
     }
 
     private void OnGraphsDeleted(GraphsDeletedMessage msg)

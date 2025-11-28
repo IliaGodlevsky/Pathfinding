@@ -8,8 +8,6 @@ internal sealed class RunInfoModel : ReactiveObject, IAlgorithmBuildInfo
 {
     public int Id { get; init; }
 
-    public int GraphId { get; init; }
-
     public Algorithms Algorithm { get; init; }
 
     private int visited;

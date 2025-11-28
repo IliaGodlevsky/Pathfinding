@@ -52,7 +52,6 @@ internal static class MappingExtensions
         return new()
         {
             Id = model.Id,
-            GraphId = model.GraphId,
             Algorithm = model.Algorithm,
             Cost = model.Cost,
             Steps = model.Steps,

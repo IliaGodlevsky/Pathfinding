@@ -8,9 +8,9 @@ internal sealed partial class RunsPopulateView
 {
     private readonly Label weightLabel = new("Weight");
     private readonly TextField weightTextField = new();
-    private readonly Label toWeightLabel = new("To     ");
+    private readonly Label toWeightLabel = new("To wieght");
     private readonly TextField toWeightTextField = new();
-    private readonly Label stepLabel = new("Step   ");
+    private readonly Label stepLabel = new("Step");
     private readonly TextField stepTextField = new();
 
     private void Initialize()
@@ -26,21 +26,21 @@ internal sealed partial class RunsPopulateView
 
         weightLabel.Y = 1;
         weightLabel.X = 1;
-        weightTextField.X = Pos.Right(weightLabel) + 2;
+        weightTextField.X = Pos.Right(weightLabel) + 4;
         weightTextField.Y = 1;
-        weightTextField.Width = Dim.Percent(35);
+        weightTextField.Width = Dim.Percent(37);
 
         toWeightLabel.Y = Pos.Bottom(weightLabel) + 1;
         toWeightLabel.X = 1;
         toWeightTextField.X = Pos.Right(toWeightLabel) + 1;
         toWeightTextField.Y = Pos.Bottom(weightTextField) + 1;
-        toWeightTextField.Width = Dim.Percent(35);
+        toWeightTextField.Width = Dim.Percent(37);
 
         stepLabel.Y = Pos.Bottom(toWeightLabel) + 1;
         stepLabel.X = 1;
-        stepTextField.X = Pos.Right(stepLabel) + 1;
+        stepTextField.X = Pos.Right(stepLabel) + 6;
         stepTextField.Y = Pos.Bottom(toWeightLabel) + 1;
-        stepTextField.Width = Dim.Percent(35);
+        stepTextField.Width = Dim.Percent(37);
 
         weightTextField.KeyPress += (args) => KeyRestriction(args, weightTextField);
         toWeightTextField.KeyPress += (args) => KeyRestriction(args, toWeightTextField);

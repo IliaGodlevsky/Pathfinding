@@ -5,5 +5,5 @@ public enum AlgorithmRequirements
     NoRequirements,
     RequiresStepRule,
     RequiresHeuristics,
-    RequiresAll,
+    RequiresAll
 }

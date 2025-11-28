@@ -65,6 +65,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         messenger.RegisterHandler<RunsSelectedMessage>(this, OnRunsSelected).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
         messenger.RegisterHandler<GraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
+        messenger.RegisterHandler<RunsDeletedMessage>(this, OnRunsDeleted).DisposeWith(disposables);
         messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage, int>(this,
             Tokens.AlgorithmUpdate, OnGraphUpdated).DisposeWith(disposables);
     }
@@ -77,6 +78,12 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
     private void OnGraphActivated(GraphActivatedMessage msg)
     {
         ActivatedGraph = msg.Value.ActiveGraph;
+        Selected = [];
+    }
+
+    private void OnRunsDeleted(RunsDeletedMessage msg)
+    {
+        Selected = [.. Selected.Where(x => !msg.Value.Contains(x.Id))];
     }
 
     private void OnGraphDeleted(GraphsDeletedMessage msg)
@@ -163,9 +170,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         if (range.Count > 1)
         {
             using var cts = new CancellationTokenSource(GetTimeout());
-            var ids = selectedStatistics.Select(x => x.Id).ToArray();
-            var infos = await statisticsService.ReadStatisticsAsync(ids, cts.Token).ConfigureAwait(false);
-            foreach (var info in infos)
+            foreach (var info in selectedStatistics)
             {
                 var visitedCount = 0;
                 void OnVertexProcessed(EventArgs e) => visitedCount++;

@@ -219,12 +219,9 @@ internal sealed class RunCreateViewModel : ViewModel,
 
     private AlgorithmBuildInfo[] GetBuildInfo(double? weight)
     {
-        if (AppliedHeuristics.Count == 0)
-        {
-            return [.. SelectedAlgorithms.Select(algo => new AlgorithmBuildInfo(algo, StepRule))];
-        }
-        return [.. AppliedHeuristics
-            .SelectMany(heuristic => SelectedAlgorithms
+        return AppliedHeuristics.Count == 0
+            ? [.. SelectedAlgorithms.Select(algo => new AlgorithmBuildInfo(algo, StepRule))]
+            : [.. AppliedHeuristics.SelectMany(heuristic => SelectedAlgorithms
                 .Select(algo => new AlgorithmBuildInfo(algo, StepRule, heuristic, weight)))];
     }
 

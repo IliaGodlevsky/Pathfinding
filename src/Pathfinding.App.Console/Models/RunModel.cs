@@ -152,8 +152,8 @@ internal class RunModel : ReactiveObject, IDisposable
 
         foreach (var subAlgorithm in pathfindingResult)
         {
-            var visitedIgnore = range.Concat(paths).ToArray();
             var exceptRangePath = subAlgorithm.Path.Except(range).ToArray();
+            var visitedIgnore = paths.Union(range).ToArray();
 
             subAlgorithm.Visited.SelectMany(v =>
                  v.Enqueued.Intersect(visited).Except(visitedIgnore)
