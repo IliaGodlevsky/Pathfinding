@@ -195,14 +195,17 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
             var result = new List<PathfindingHistorySerializationModel>();
             var graphs = await unitOfWork.ReadGraphsInternalAsync<T>(graphIds, t)
                 .ConfigureAwait(false);
-            var ranges = await unitOfWork.ReadRangesAsyncInternal(graphIds, t)
-                .ConfigureAwait(false);
             foreach (var graph in graphs)
             {
+                var ranges = await unitOfWork.RangeRepository
+                    .ReadByGraphIdAsync(graph.Id)
+                    .Select(x => x.ToRangeModel())
+                    .ToArrayAsync(t)
+                    .ConfigureAwait(false);
                 var graphDictionary = graph.Vertices
                     .ToDictionary(x => x.Id, x => x.Position.ToArray());
                 graph.Status = GraphStatuses.Editable;
-                var coordinates = ranges[graph.Id]
+                var coordinates = ranges
                     .Select(x => new CoordinateModel { Coordinate = graphDictionary[x.VertexId] })
                     .ToList();
                 result.Add(new PathfindingHistorySerializationModel

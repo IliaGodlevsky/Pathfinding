@@ -175,6 +175,12 @@ internal sealed class RunCreateViewModelTests
         var algorithmsFactoryMock = new Mock<IAlgorithmsFactory>();
         algorithmsFactoryMock.SetupGet(x => x.Allowed).Returns([Algorithms.AStar]);
         algorithmsFactoryMock
+            .SetupGet(x => x.Requirements)
+            .Returns(new Dictionary<Algorithms, AlgorithmRequirements>
+            {
+                { Algorithms.AStar, AlgorithmRequirements.NoRequirements }
+            });
+        algorithmsFactoryMock
             .Setup(x => x.GetAlgorithmFactory(It.IsAny<Algorithms>()))
             .Returns(factory);
         return algorithmsFactoryMock;

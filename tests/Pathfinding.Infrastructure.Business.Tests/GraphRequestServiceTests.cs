@@ -352,8 +352,14 @@ internal class GraphRequestServiceTests
         mock.Mock<IGraphParametersRepository>()
             .Setup(x => x.ReadAsync(graphId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(graphEntity);
+        mock.Mock<IGraphParametersRepository>()
+            .Setup(x => x.ReadAsync(It.Is<IReadOnlyCollection<int>>(ids => ids.Single() == graphId)))
+            .Returns(graphEntity.Enumerate().ToAsyncEnumerable());
         mock.Mock<IVerticesRepository>()
             .Setup(x => x.ReadVerticesByGraphIdAsync(graphId))
+            .Returns(vertices.ToAsyncEnumerable());
+        mock.Mock<IVerticesRepository>()
+            .Setup(x => x.ReadVerticesByGraphIdsAsync(It.Is<IReadOnlyCollection<int>>(ids => ids.Single() == graphId)))
             .Returns(vertices.ToAsyncEnumerable());
         mock.Mock<IRangeRepository>()
             .Setup(x => x.ReadByGraphIdAsync(graphId))

@@ -116,7 +116,7 @@ internal sealed class RunCreateViewModel : ViewModel,
         AllowedHeuristics = heuristicsFactory.Allowed;
         AllowedAlgorithms = algorithmsFactory.Allowed;
         AllowedStepRules = stepRuleFactory.Allowed;
-        Requirements = algorithmsFactory.Requirements;
+        Requirements = algorithmsFactory.Requirements ?? new Dictionary<Algorithms, AlgorithmRequirements>();
 
         CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm, CanCreateAlgorithm());
         
@@ -134,8 +134,14 @@ internal sealed class RunCreateViewModel : ViewModel,
             {
                 var canExecute = graph != ActiveGraph.Empty && algorithmsCount > 0;
                 var requiresHeuristics = SelectedAlgorithms.All(x =>
-                    Requirements[x] == AlgorithmRequirements.RequiresAll
-                    || Requirements[x] == AlgorithmRequirements.RequiresHeuristics);
+                {
+                    if (!Requirements.TryGetValue(x, out var requirement))
+                    {
+                        requirement = AlgorithmRequirements.NoRequirements;
+                    }
+                    return requirement is AlgorithmRequirements.RequiresAll
+                        or AlgorithmRequirements.RequiresHeuristics;
+                });
                 if (canExecute && requiresHeuristics)
                 {
                     canExecute = canExecute && heuristicsCount > 0;
