@@ -362,7 +362,7 @@ internal class GraphRequestServiceTests
             .Setup(x => x.ReadVerticesByGraphIdsAsync(It.Is<IReadOnlyCollection<int>>(ids => ids.Single() == graphId)))
             .Returns(vertices.ToAsyncEnumerable());
         mock.Mock<IRangeRepository>()
-            .Setup(x => x.ReadByGraphIdAsync(graphId))
+            .Setup(x => x.ReadByGraphIdsAsync(graphId.Enumerate().ToArray()))
             .Returns(range.ToAsyncEnumerable());
         mock.Mock<IVerticesRepository>()
             .Setup(x => x.ReadVerticesByIdsAsync(It.Is<IReadOnlyCollection<long>>(ids => ids.SequenceEqual(range.Select(r => r.VertexId)))))
