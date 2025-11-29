@@ -13,6 +13,8 @@ internal static class NeighborhoodsExtensions
             Neighborhoods.VonNeumann => Resource.VonNeumann,
             Neighborhoods.Diagonal => Resource.DiagonalNeighborhood,
             Neighborhoods.Knight => Resource.Knight,
+            Neighborhoods.Hexagonal => Resource.Hexagonal,
+            Neighborhoods.ExtendedMoore => Resource.ExtendedMoore,
             _ => string.Empty
         };
     }

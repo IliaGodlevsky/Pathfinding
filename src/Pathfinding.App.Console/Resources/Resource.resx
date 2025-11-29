@@ -159,6 +159,9 @@
   <data name="Cosine" xml:space="preserve">
     <value>Cosine</value>
   </data>
+  <data name="Canberra" xml:space="preserve">
+    <value>Canberra</value>
+  </data>
   <data name="CostGreedy" xml:space="preserve">
     <value>DFS cost</value>
   </data>
@@ -201,6 +204,9 @@
   <data name="Failure" xml:space="preserve">
     <value>Failure</value>
   </data>
+  <data name="Hamming" xml:space="preserve">
+    <value>Hamming</value>
+  </data>
   <data name="GraphField" xml:space="preserve">
     <value>Graph field</value>
   </data>
@@ -209,6 +215,9 @@
   </data>
   <data name="High" xml:space="preserve">
     <value>High</value>
+  </data>
+  <data name="Hexagonal" xml:space="preserve">
+    <value>Hexagonal</value>
   </data>
   <data name="Import" xml:space="preserve">
     <value>Import</value>
@@ -239,6 +248,9 @@
   </data>
   <data name="Moore" xml:space="preserve">
     <value>Moore</value>
+  </data>
+  <data name="ExtendedMoore" xml:space="preserve">
+    <value>Extended Moore</value>
   </data>
   <data name="No" xml:space="preserve">
     <value>No</value>

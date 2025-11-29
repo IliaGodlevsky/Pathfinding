@@ -7,5 +7,7 @@ public enum Neighborhoods
     Moore,
     VonNeumann,
     Diagonal,
-    Knight
+    Knight,
+    Hexagonal,
+    ExtendedMoore
 }
