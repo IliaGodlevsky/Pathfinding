@@ -40,7 +40,7 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
         this.graphInfoService = graphInfoService;
 
         messenger.RegisterAsyncHandler<RunsCreatedMessaged>(this, OnRunCreated).DisposeWith(disposables);
-        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage, int>(this, Tokens.RunsTable, OnGraphActivatedMessage).DisposeWith(disposables);
+        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage>(this, OnGraphActivatedMessage).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
         messenger.RegisterHandler<RunsUpdatedMessage>(this, OnRunsUpdated).DisposeWith(disposables);
         messenger.RegisterAsyncHandler<RunsDeletedMessage>(this, OnRunsDeleteMessage).DisposeWith(disposables);

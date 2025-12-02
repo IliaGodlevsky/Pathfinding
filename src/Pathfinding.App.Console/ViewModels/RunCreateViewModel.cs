@@ -120,7 +120,7 @@ internal sealed class RunCreateViewModel : ViewModel,
 
         CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm, CanCreateAlgorithm());
         
-        messenger.RegisterHandler<GraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
+        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
     }
 
@@ -156,9 +156,10 @@ internal sealed class RunCreateViewModel : ViewModel,
         );
     }
 
-    private void OnGraphActivated(GraphActivatedMessage msg)
+    private Task OnGraphActivated(AwaitGraphActivatedMessage msg)
     {
         ActivatedGraph = msg.Value.ActiveGraph;
+        return Task.CompletedTask;
     }
 
     private void OnGraphDeleted(GraphsDeletedMessage msg)

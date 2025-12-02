@@ -38,7 +38,7 @@ internal sealed class RunDeleteViewModel : ViewModel, IRunDeleteViewModel, IDisp
         this.statisticsService = statisticsService;
         messenger.RegisterHandler<RunsSelectedMessage>(this, OnRunsSelected).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphsDeleted).DisposeWith(disposables);
-        messenger.RegisterHandler<GraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
+        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
         DeleteRunsCommand = ReactiveCommand.CreateFromTask(DeleteRuns, CanDelete());
     }
 
@@ -73,10 +73,11 @@ internal sealed class RunDeleteViewModel : ViewModel, IRunDeleteViewModel, IDisp
         SelectedRunsIds = [.. msg.Value.Select(x => x.Id)];
     }
 
-    private void OnGraphActivated(GraphActivatedMessage msg)
+    private Task OnGraphActivated(AwaitGraphActivatedMessage msg)
     {
         ActivatedGraph = msg.Value.ActiveGraph;
         SelectedRunsIds = [];
+        return Task.CompletedTask;
     }
 
     private void OnGraphsDeleted(GraphsDeletedMessage msg)

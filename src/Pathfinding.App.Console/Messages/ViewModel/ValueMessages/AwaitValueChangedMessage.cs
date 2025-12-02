@@ -6,15 +6,17 @@ namespace Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 internal abstract class AwaitValueChangedMessage<T>(T payload)
     : ValueChangedMessage<T>(payload), IAwaitableMessage
 {
-    private readonly TaskCompletionSource source = new();
+    private readonly List<Task> tasks = [];
 
-    public TaskAwaiter GetAwaiter()
+    public virtual TaskCompletionSource CreateCompletionSource()
     {
-        return source.Task.GetAwaiter();
+        var tcs = new TaskCompletionSource();
+        tasks.Add(tcs.Task);
+        return tcs;
     }
 
-    public void SetCompleted()
+    public virtual TaskAwaiter GetAwaiter()
     {
-        source.TrySetResult();
+        return Task.WhenAll(tasks).GetAwaiter();
     }
 }

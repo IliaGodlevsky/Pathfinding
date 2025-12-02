@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
@@ -64,10 +63,9 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         UpdateRunsCommand = ReactiveCommand.CreateFromTask(ExecuteUpdate, CanUpdate()).DisposeWith(disposables);
         messenger.RegisterHandler<RunsSelectedMessage>(this, OnRunsSelected).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
-        messenger.RegisterHandler<GraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
         messenger.RegisterHandler<RunsDeletedMessage>(this, OnRunsDeleted).DisposeWith(disposables);
-        messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage, int>(this,
-            Tokens.AlgorithmUpdate, OnGraphUpdated).DisposeWith(disposables);
+        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
+        messenger.RegisterAwaitHandler<AwaitGraphStructureUpdatedMessage>(this, OnGraphUpdated).DisposeWith(disposables);
     }
 
     private void OnRunsSelected(RunsSelectedMessage msg)
@@ -75,10 +73,11 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         Selected = msg.Value;
     }
 
-    private void OnGraphActivated(GraphActivatedMessage msg)
+    private Task OnGraphActivated(AwaitGraphActivatedMessage msg)
     {
         ActivatedGraph = msg.Value.ActiveGraph;
         Selected = [];
+        return Task.CompletedTask;
     }
 
     private void OnRunsDeleted(RunsDeletedMessage msg)
@@ -114,7 +113,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         }).ConfigureAwait(false);
     }
 
-    private async Task OnGraphUpdated(AwaitGraphUpdatedMessage msg)
+    private async Task OnGraphUpdated(AwaitGraphStructureUpdatedMessage msg)
     {
         var (graphToUpdate, graphId) = await EnsureGraphLoadedAsync(msg).ConfigureAwait(false);
         if (graphToUpdate == Graph<GraphVertexModel>.Empty)
@@ -125,7 +124,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         await NotifyRunsUpdatedAsync(graphId, graphToUpdate).ConfigureAwait(false);
     }
 
-    private async Task<(Graph<GraphVertexModel> Graph, int GraphId)> EnsureGraphLoadedAsync(AwaitGraphUpdatedMessage msg)
+    private async Task<(Graph<GraphVertexModel> Graph, int GraphId)> EnsureGraphLoadedAsync(AwaitGraphStructureUpdatedMessage msg)
     {
         var localGraph = ActivatedGraph.Graph;
         var graphId = ActivatedGraph.Id;
@@ -165,11 +164,12 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         int graphId)
     {
         var rangeModels = await rangeService.ReadRangeAsync(graphId).ConfigureAwait(false);
-        var range = rangeModels.Select(x => graphToUpdate.First(y => y.Id == x.VertexId)).ToList();
+        var range = rangeModels
+            .Select(x => graphToUpdate.First(y => y.Id == x.VertexId))
+            .ToList();
         var updatedRuns = new List<RunStatisticsModel>();
         if (range.Count > 1)
         {
-            using var cts = new CancellationTokenSource(GetTimeout());
             foreach (var info in selectedStatistics)
             {
                 var visitedCount = 0;

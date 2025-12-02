@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.Requests;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
@@ -49,7 +48,7 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
     {
         this.messenger = messenger;
         this.service = service;
-        messenger.RegisterHandler<GraphActivatedMessage, int>(this, Tokens.GraphField, OnGraphActivated).DisposeWith(disposables);
+        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
         messenger.RegisterHandler<GraphStateChangedMessage>(this, OnGraphBecameReadonly).DisposeWith(disposables);
         ChangeVertexPolarityCommand = ReactiveCommand.CreateFromTask<GraphVertexModel>(ChangePolarity, CanExecute()).DisposeWith(disposables);
@@ -125,9 +124,10 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
         }).ConfigureAwait(false);
     }
 
-    private void OnGraphActivated(GraphActivatedMessage msg)
+    private Task OnGraphActivated(AwaitGraphActivatedMessage msg)
     {
         ActivatedGraph = msg.Value.ActiveGraph;
+        return Task.CompletedTask;
     }
 
     private void OnGraphBecameReadonly(GraphStateChangedMessage msg)

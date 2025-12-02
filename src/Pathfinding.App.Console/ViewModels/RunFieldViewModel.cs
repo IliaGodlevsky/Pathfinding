@@ -62,10 +62,10 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
         this.graphAssemble = graphAssemble;
         this.algorithmsFactory = algorithmsFactory;
         Runs.ActOnEveryObject(_ => { }, OnRemoved).DisposeWith(disposables);
-        messenger.RegisterHandler<GraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
+        messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage>(this, OnGraphUpdated).DisposeWith(disposables);
+        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
         messenger.RegisterHandler<RunsDeletedMessage>(this, OnRunsDeleted).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
-        messenger.RegisterHandler<GraphUpdatedMessage>(this, OnGraphUpdated).DisposeWith(disposables);
         messenger.RegisterHandler<RunsSelectedMessage>(this, OnRunActivated).DisposeWith(disposables);
         shortTermDisposables.DisposeWith(disposables);
     }
@@ -88,9 +88,11 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
         Runs.Remove(runs);
     }
 
-    private void OnGraphUpdated(GraphUpdatedMessage msg)
+    private Task OnGraphUpdated(AwaitGraphUpdatedMessage msg)
     {
         this.RaisePropertyChanged(nameof(RunGraph));
+        Clear();
+        return Task.CompletedTask;
     }
 
     private void Clear()
@@ -112,7 +114,7 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
         }
     }
 
-    private void OnGraphActivated(GraphActivatedMessage msg)
+    private Task OnGraphActivated(AwaitGraphActivatedMessage msg)
     {
         activeGraph = msg.Value.ActiveGraph;
         var runGraph = graphAssemble.AssembleGraph(activeGraph.Graph,
@@ -132,6 +134,7 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
                 .Subscribe()
                 .DisposeWith(shortTermDisposables);
         }
+        return Task.CompletedTask;
     }
 
     private static void OnRemoved(RunModel model) => model.Dispose();

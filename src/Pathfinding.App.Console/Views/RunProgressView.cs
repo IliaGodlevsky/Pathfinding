@@ -34,8 +34,7 @@ internal sealed partial class RunProgressView : FrameView
         Initialize();
         messenger.RegisterHandler<CloseRunFieldMessage>(this, OnRunFieldClosed).DisposeWith(disposables);
         messenger.RegisterHandler<OpenRunFieldMessage>(this, OnRunFieldOpen).DisposeWith(disposables);
-        messenger.RegisterHandler<KeyPressedMessage, int>(this, Tokens.ProgressBar,
-            msg => bar.OnKeyDown(msg.Args.KeyEvent)).DisposeWith(disposables);
+        messenger.RegisterHandler<KeyPressedMessage>(this, msg => bar.OnKeyDown(msg.Args.KeyEvent)).DisposeWith(disposables);
         this.viewModel = viewModel;
 
         BindTo(leftLabel, _ => RunModel.FractionRange.LowerValueOfRange, Button2Clicked);

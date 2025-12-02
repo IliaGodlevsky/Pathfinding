@@ -4,7 +4,6 @@ using DynamicData;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
@@ -48,8 +47,7 @@ internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDi
         this.graphInfoService = graphInfoService;
         this.messenger = messenger;
         this.neighborFactory = neighborFactory;
-        messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage, int>(this,
-            Tokens.GraphTable, OnGraphUpdated).DisposeWith(disposables);
+        messenger.RegisterAwaitHandler<AwaitGraphUpdatedMessage>(this, OnGraphUpdated).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsCreatedMessage>(this, OnGraphCreated).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
         messenger.RegisterHandler<ObstaclesCountChangedMessage>(this, OnObstaclesCountChanged).DisposeWith(disposables);
@@ -77,10 +75,7 @@ internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDi
                 graphModel.SmoothLevel);
             var layer = neighborFactory.CreateNeighborhoodLayer(graphModel.Neighborhood);
             await layer.OverlayAsync(graph, token).ConfigureAwait(false);
-            messenger.Send(new GraphActivatedMessage(activated), Tokens.GraphField);
-            await messenger.Send(new AwaitGraphActivatedMessage(activated), Tokens.RunsTable);
-            await messenger.Send(new AwaitGraphActivatedMessage(activated), Tokens.PathfindingRange);
-            messenger.Send(new GraphActivatedMessage(activated));
+            await messenger.Send(new AwaitGraphActivatedMessage(activated));
             ActivatedGraphId = graphModel.Id;
         }).ConfigureAwait(false);
     }
@@ -119,11 +114,15 @@ internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDi
         if (model != null)
         {
             model.Name = msg.Value.Name;
-            model.Neighborhood = msg.Value.Neighborhood;
-            model.SmoothLevel = msg.Value.SmoothLevel;
-            if (ActivatedGraphId == model.Id)
+            var neighborhood = model.Neighborhood;
+            if (model.Neighborhood != msg.Value.Neighborhood)
             {
-                await ActivatedGraph(ActivatedGraphId).ConfigureAwait(false);
+                model.Neighborhood = msg.Value.Neighborhood;
+                if (ActivatedGraphId == model.Id)
+                {
+                    await ActivatedGraph(ActivatedGraphId).ConfigureAwait(false);
+                }
+                await messenger.Send(new AwaitGraphStructureUpdatedMessage(msg.Value));
             }
         }
     }

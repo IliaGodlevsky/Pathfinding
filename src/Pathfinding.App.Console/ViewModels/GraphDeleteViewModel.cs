@@ -32,9 +32,9 @@ internal sealed class GraphDeleteViewModel : ViewModel, IGraphDeleteViewModel, I
         IGraphInfoRequestService service,
         ILog logger) : base(logger)
     {
-        DeleteGraphCommand = ReactiveCommand.CreateFromTask(DeleteGraph, CanDelete()).DisposeWith(disposables);
-        this.messenger = messenger;
         this.service = service;
+        this.messenger = messenger;
+        DeleteGraphCommand = ReactiveCommand.CreateFromTask(DeleteGraph, CanDelete()).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsSelectedMessage>(this, OnGraphSelected).DisposeWith(disposables);
     }
 

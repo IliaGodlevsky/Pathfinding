@@ -116,7 +116,7 @@ internal sealed class RunRangeViewModel : ViewModel,
         messenger.RegisterHandler<PathfindingRangeRequestMessage>(this, OnGetPathfindingRangeReceived).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
         messenger.RegisterHandler<GraphStateChangedMessage>(this, OnGraphBecameReadonly).DisposeWith(disposables);
-        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage, int>(this, Tokens.PathfindingRange, OnGraphActivated).DisposeWith(disposables);
+        messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage>(this, OnGraphFieldActivated).DisposeWith(disposables);
         AddToRangeCommand = ReactiveCommand.Create<GraphVertexModel>(AddVertexToRange, CanExecute()).DisposeWith(disposables);
         RemoveFromRangeCommand = ReactiveCommand.Create<GraphVertexModel>(RemoveVertexFromRange, CanExecute()).DisposeWith(disposables);
         DeletePathfindingRange = ReactiveCommand.CreateFromTask(DeleteRange, CanExecute()).DisposeWith(disposables);
@@ -189,7 +189,7 @@ internal sealed class RunRangeViewModel : ViewModel,
         }
     }
 
-    private async Task OnGraphActivated(AwaitGraphActivatedMessage msg)
+    private async Task OnGraphFieldActivated(AwaitGraphActivatedMessage msg)
     {
         await ExecuteSafe(async token =>
         {

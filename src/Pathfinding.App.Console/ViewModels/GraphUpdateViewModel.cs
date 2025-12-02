@@ -87,9 +87,7 @@ internal sealed class GraphUpdateViewModel : ViewModel, IDisposable
             info.Name = Name;
             info.Neighborhood = Neighborhood;
             await service.UpdateGraphInfoAsync(info, token).ConfigureAwait(false);
-            await messenger.Send(new AwaitGraphUpdatedMessage(info), Tokens.GraphTable);
-            messenger.Send(new GraphUpdatedMessage(info));
-            await messenger.Send(new AwaitGraphUpdatedMessage(info), Tokens.AlgorithmUpdate);
+            await messenger.Send(new AwaitGraphUpdatedMessage(info));
         }).ConfigureAwait(false);
     }
 

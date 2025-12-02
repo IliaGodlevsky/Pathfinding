@@ -37,7 +37,7 @@ internal sealed partial class GraphsTableView
         this.Events().KeyPress
             .Where(x => x.KeyEvent.Key.HasFlag(Key.A)
                 && x.KeyEvent.Key.HasFlag(Key.CtrlMask))
-            .Throttle(TimeSpan.FromMilliseconds(150))
+            .Throttle(TimeSpan.FromMilliseconds(50))
             .Select(_ => MultiSelectedRegions
                     .SelectMany(x => (x.Rect.Top, x.Rect.Bottom - 1).Iterate())
                     .Select(GetGraphId)

@@ -4,7 +4,7 @@ namespace Pathfinding.App.Console.Messages;
 
 internal interface IAwaitableMessage
 {
-    TaskAwaiter GetAwaiter();
+    TaskCompletionSource CreateCompletionSource();
 
-    void SetCompleted();
+    TaskAwaiter GetAwaiter();
 }
