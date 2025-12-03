@@ -38,7 +38,7 @@ internal sealed class RunUpdateViewModelTests
 
         var graph = CreateGraph();
 
-        messenger.Send(new GraphActivatedMessage(new ActivatedGraphModel(
+        await messenger.Send(new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(10, graph, false),
             Neighborhoods.Moore,
             SmoothLevels.No)));
@@ -95,7 +95,7 @@ internal sealed class RunUpdateViewModelTests
             algorithmsFactoryMock,
             neighborhoodFactoryMock);
 
-        messenger.Send(new GraphActivatedMessage(new ActivatedGraphModel(
+        await messenger.Send(new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(10, graph, false),
             default,
             default)));
@@ -139,7 +139,7 @@ internal sealed class RunUpdateViewModelTests
             neighborhoodFactoryMock);
 
         var graph = CreateGraph();
-        messenger.Send(new GraphActivatedMessage(new ActivatedGraphModel(
+        await messenger.Send(new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(5, graph, false),
             default,
             default)));

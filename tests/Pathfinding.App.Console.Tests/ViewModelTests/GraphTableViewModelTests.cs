@@ -103,22 +103,8 @@ internal sealed class GraphTableViewModelTests
             .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))
             .Returns(new MooreNeighborhoodLayer());
 
-        var runsTableMessages = new List<AwaitGraphActivatedMessage>();
-        messenger.Register<AwaitGraphActivatedMessage, int>(this, Tokens.RunsTable, (_, msg) =>
-        {
-            runsTableMessages.Add(msg);
-            msg.SetCompleted();
-        });
-        var pathfindingMessages = new List<AwaitGraphActivatedMessage>();
-        messenger.Register<AwaitGraphActivatedMessage, int>(this, Tokens.PathfindingRange, (_, msg) =>
-        {
-            pathfindingMessages.Add(msg);
-            msg.SetCompleted();
-        });
-        var fieldMessages = new List<GraphActivatedMessage>();
-        messenger.Register<GraphActivatedMessage, int>(this, Tokens.GraphField, (_, msg) => fieldMessages.Add(msg));
-        var broadcastMessages = new List<GraphActivatedMessage>();
-        messenger.Register<GraphActivatedMessage>(this, (_, msg) => broadcastMessages.Add(msg));
+        var activatedMessages = new List<AwaitGraphActivatedMessage>();
+        messenger.Register<AwaitGraphActivatedMessage>(this, (_, msg) => activatedMessages.Add(msg));
 
         using var viewModel = CreateViewModel(
             messenger,
@@ -134,10 +120,7 @@ internal sealed class GraphTableViewModelTests
                 .Verify(x => x.ReadGraphAsync(
                     It.Is<int>(z => z == 1),
                     It.IsAny<CancellationToken>()), Times.Once);
-            Assert.That(fieldMessages, Has.Count.EqualTo(1));
-            Assert.That(runsTableMessages, Has.Count.EqualTo(1));
-            Assert.That(pathfindingMessages, Has.Count.EqualTo(1));
-            Assert.That(broadcastMessages, Has.Count.EqualTo(1));
+            Assert.That(activatedMessages, Has.Count.EqualTo(1));
         });
     }
 

@@ -158,7 +158,7 @@ internal sealed class RunRangeViewModelTests
             new(graphId, graph, status == GraphStatuses.Readonly),
             default,
             default));
-        await messenger.Send(message, Tokens.PathfindingRange);
+        await messenger.Send(message);
     }
 
     private static RunRangeViewModel CreateViewModel(

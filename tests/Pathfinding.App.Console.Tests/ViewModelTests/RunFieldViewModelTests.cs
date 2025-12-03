@@ -15,7 +15,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests;
 internal sealed class RunFieldViewModelTests
 {
     [Test]
-    public void GraphActivatedMessage_ShouldAssembleRunGraph()
+    public async Task AwaitGraphActivatedMessage_ShouldAssembleRunGraph()
     {
         var messenger = new StrongReferenceMessenger();
         var graphAssemble = new GraphAssemble<RunVertexModel>();
@@ -27,17 +27,17 @@ internal sealed class RunFieldViewModelTests
             messenger);
 
         var graph = CreateGraph();
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(1, graph, false),
             default,
             default));
-        messenger.Send(message);
+        await messenger.Send(message);
 
         Assert.That(viewModel.RunGraph, Is.Not.EqualTo(Graph<RunVertexModel>.Empty));
     }
 
     [Test]
-    public void RunsSelectedMessage_ShouldActivateRun()
+    public async Task RunsSelectedMessage_ShouldActivateRun()
     {
         var messenger = new StrongReferenceMessenger();
         var graphAssemble = new GraphAssemble<RunVertexModel>();
@@ -49,11 +49,11 @@ internal sealed class RunFieldViewModelTests
             messenger);
 
         var graph = CreateGraph();
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(42, graph, false),
             default,
             default));
-        messenger.Send(message);
+        await messenger.Send(message);
 
         messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
             => msg.Reply([.. graph]));
@@ -65,7 +65,7 @@ internal sealed class RunFieldViewModelTests
     }
 
     [Test]
-    public void RunsDeletedMessage_ShouldClearSelectedRun()
+    public async Task RunsDeletedMessage_ShouldClearSelectedRun()
     {
         var messenger = new StrongReferenceMessenger();
         var graphAssemble = new GraphAssemble<RunVertexModel>();
@@ -77,11 +77,11 @@ internal sealed class RunFieldViewModelTests
             messenger);
 
         var graph = CreateGraph();
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(42, graph, false),
             default,
             default));
-        messenger.Send(message);
+        await messenger.Send(message);
 
         messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
             => msg.Reply([.. graph]));
