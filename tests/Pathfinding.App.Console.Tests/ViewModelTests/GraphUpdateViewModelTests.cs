@@ -93,22 +93,8 @@ internal sealed class GraphUpdateViewModelTests
                 It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult(true));
 
-        var graphTableMessages = new List<AwaitGraphUpdatedMessage>();
-        messenger.Register<AwaitGraphUpdatedMessage, int>(this, Tokens.GraphTable, (_, msg) =>
-        {
-            graphTableMessages.Add(msg);
-            msg.SetCompleted();
-        });
-
-        var algorithmUpdateMessages = new List<AwaitGraphUpdatedMessage>();
-        messenger.Register<AwaitGraphUpdatedMessage, int>(this, Tokens.AlgorithmUpdate, (_, msg) =>
-        {
-            algorithmUpdateMessages.Add(msg);
-            msg.SetCompleted();
-        });
-
-        GraphUpdatedMessage broadcastMessage = null;
-        messenger.Register<GraphUpdatedMessage>(this, (_, msg) => broadcastMessage = msg);
+        var updatedMessages = new List<AwaitGraphUpdatedMessage>();
+        messenger.Register<AwaitGraphUpdatedMessage>(this, (_, msg) => updatedMessages.Add(msg));
 
         using var viewModel = CreateViewModel(messenger, serviceMock, neighborhoodFactoryMock);
 
@@ -129,9 +115,7 @@ internal sealed class GraphUpdateViewModelTests
                        && model.Name == newName
                        && model.Neighborhood == Neighborhoods.Moore),
                 It.IsAny<CancellationToken>()), Times.Once);
-            Assert.That(graphTableMessages, Has.Count.EqualTo(1));
-            Assert.That(algorithmUpdateMessages, Has.Count.EqualTo(1));
-            Assert.That(broadcastMessage, Is.Not.Null);
+            Assert.That(updatedMessages, Has.Count.EqualTo(1));
         });
     }
 

@@ -67,7 +67,7 @@ internal sealed class RunTableViewModelTests
 
         using var viewModel = CreateViewModel(messenger, statisticsMock, graphInfoMock);
 
-        await messenger.Send(CreateActivatedMessage(1), Tokens.RunsTable);
+        await messenger.Send(CreateActivatedMessage(1));
 
         Assert.Multiple(() =>
         {
@@ -111,7 +111,7 @@ internal sealed class RunTableViewModelTests
 
         using var viewModel = CreateViewModel(messenger, statisticsMock, graphInfoMock);
 
-        await messenger.Send(CreateActivatedMessage(1), Tokens.RunsTable);
+        await messenger.Send(CreateActivatedMessage(1));
 
         messenger.Send(new GraphsDeletedMessage([1]));
 
@@ -154,7 +154,7 @@ internal sealed class RunTableViewModelTests
 
         using var viewModel = CreateViewModel(messenger, statisticsMock, graphInfoMock);
 
-        await messenger.Send(CreateActivatedMessage(1), Tokens.RunsTable);
+        await messenger.Send(CreateActivatedMessage(1));
 
         var stateChanged = new TaskCompletionSource();
         messenger.Register<GraphStateChangedMessage>(this, (_, msg) =>
@@ -195,7 +195,7 @@ internal sealed class RunTableViewModelTests
 
         using var viewModel = CreateViewModel(messenger, statisticsMock, graphInfoMock, logMock.Object);
 
-        await messenger.Send(CreateActivatedMessage(1), Tokens.RunsTable);
+        await messenger.Send(CreateActivatedMessage(1));
 
         logMock
             .Verify(x => x.Error(

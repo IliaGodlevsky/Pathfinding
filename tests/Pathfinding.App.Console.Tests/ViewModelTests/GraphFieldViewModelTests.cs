@@ -19,7 +19,7 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests;
 internal sealed class GraphFieldViewModelTests
 {
     [Test]
-    public async Task GraphActivatedMessage_EditableGraph_ShouldEnableCommands()
+    public async Task AwaitGraphActivatedMessage_EditableGraph_ShouldEnableCommands()
     {
         var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
@@ -27,12 +27,12 @@ internal sealed class GraphFieldViewModelTests
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(1, graph, false),
             default,
             default));
 
-        messenger.Send(message, Tokens.GraphField);
+        await messenger.Send(message);
 
         var canExecute = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => value);
 
@@ -44,7 +44,7 @@ internal sealed class GraphFieldViewModelTests
     }
 
     [Test]
-    public async Task GraphActivatedMessage_ReadonlyGraph_ShouldDisableCommands()
+    public async Task AwaitGraphActivatedMessage_ReadonlyGraph_ShouldDisableCommands()
     {
         var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IRequestService<GraphVertexModel>>();
@@ -52,12 +52,12 @@ internal sealed class GraphFieldViewModelTests
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(1, graph, true),
             default,
             default));
 
-        messenger.Send(message, Tokens.GraphField);
+        await messenger.Send(message);
 
         var canExecute = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => !value);
 
@@ -83,7 +83,7 @@ internal sealed class GraphFieldViewModelTests
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(2, graph, false),
             default,
             default));
@@ -92,7 +92,7 @@ internal sealed class GraphFieldViewModelTests
         messenger.Register<ObstaclesCountChangedMessage>(this, (_, msg) => obstaclesMessage = msg);
         messenger.Register<IsVertexInRangeRequestMessage>(this, (_, request) => request.Reply(false));
 
-        messenger.Send(message, Tokens.GraphField);
+        await messenger.Send(message);
 
         await viewModel.ChangeVertexPolarityCommand.Execute(vertex);
 
@@ -120,7 +120,7 @@ internal sealed class GraphFieldViewModelTests
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(3, graph, false),
             default,
             default));
@@ -129,7 +129,7 @@ internal sealed class GraphFieldViewModelTests
         messenger.Register<ObstaclesCountChangedMessage>(this, (_, _) => obstaclesSent = true);
         messenger.Register<IsVertexInRangeRequestMessage>(this, (_, request) => request.Reply(true));
 
-        messenger.Send(message, Tokens.GraphField);
+        await messenger.Send(message);
 
         await viewModel.ChangeVertexPolarityCommand.Execute(vertex);
 
@@ -160,12 +160,12 @@ internal sealed class GraphFieldViewModelTests
         var vertex = CreateVertex();
         vertex.Cost = new VertexCost(9, new InclusiveValueRange<int>(10, 0));
         var graph = new Graph<GraphVertexModel>([vertex], 1);
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(4, graph, false),
             default,
             default));
 
-        messenger.Send(message, Tokens.GraphField);
+        await messenger.Send(message);
 
         await viewModel.IncreaseVertexCostCommand.Execute(vertex);
 
@@ -197,7 +197,7 @@ internal sealed class GraphFieldViewModelTests
         var vertex = CreateVertex();
         vertex.IsObstacle = true;
         var graph = new Graph<GraphVertexModel>([vertex], 1);
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(5, graph, false),
             default,
             default));
@@ -206,7 +206,7 @@ internal sealed class GraphFieldViewModelTests
         messenger.Register<ObstaclesCountChangedMessage>(this, (_, msg) => obstaclesMessage = msg);
         messenger.Register<IsVertexInRangeRequestMessage>(this, (_, request) => request.Reply(false));
 
-        messenger.Send(message, Tokens.GraphField);
+        await messenger.Send(message);
 
         await viewModel.InverseVertexCommand.Execute(vertex);
 
@@ -228,12 +228,12 @@ internal sealed class GraphFieldViewModelTests
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(6, graph, false),
             default,
             default));
 
-        messenger.Send(message, Tokens.GraphField);
+        await messenger.Send(message);
 
         var enabled = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => value);
 
@@ -257,12 +257,12 @@ internal sealed class GraphFieldViewModelTests
 
         var vertex = CreateVertex();
         var graph = new Graph<GraphVertexModel>([vertex], 1);
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(7, graph, false),
             default,
             default));
 
-        messenger.Send(message, Tokens.GraphField);
+        await messenger.Send(message);
 
         var enabled = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => value);
         Assert.That(enabled, Is.True);

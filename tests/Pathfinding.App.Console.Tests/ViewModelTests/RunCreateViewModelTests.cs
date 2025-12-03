@@ -39,11 +39,11 @@ internal sealed class RunCreateViewModelTests
             stepRuleFactoryMock);
 
         var graph = CreateGraph();
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(42, graph, false),
             default,
             default));
-        messenger.Send(message);
+        await messenger.Send(message);
 
         viewModel.SelectedAlgorithms.Add(Algorithms.AStar);
 
@@ -86,11 +86,11 @@ internal sealed class RunCreateViewModelTests
             logMock.Object);
 
         var graph = CreateGraph();
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(42, graph, false),
             default,
             default));
-        messenger.Send(message);
+        await messenger.Send(message);
 
         messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
             => msg.Reply([.. graph.Select(v => v)]));
@@ -133,7 +133,7 @@ internal sealed class RunCreateViewModelTests
 
         var graph = CreateGraph();
 
-        var message = new GraphActivatedMessage(new ActivatedGraphModel(
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(42, graph, false),
             default,
             default));
