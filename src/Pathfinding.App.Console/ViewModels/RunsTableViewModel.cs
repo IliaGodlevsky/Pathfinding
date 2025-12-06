@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;

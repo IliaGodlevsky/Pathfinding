@@ -53,9 +53,6 @@ internal sealed partial class RunProgressView : FrameView
         BindTo(bar, _ => Fraction + GetExtraFractionPerClick(), CursorRight | ShiftMask);
         BindTo(bar, _ => RunModel.FractionRange.LowerValueOfRange, CursorLeft | CtrlMask, D1);
         BindTo(bar, _ => RunModel.FractionRange.UpperValueOfRange, CursorRight | CtrlMask, D0);
-        BindTo(bar, _ => Fraction > RunModel.FractionRange.LowerValueOfRange
-                ? RunModel.FractionRange.LowerValueOfRange 
-                : RunModel.FractionRange.UpperValueOfRange, Space);
         viewModel.WhenAnyValue(x => x.SelectedRun.Fraction)
             .BindTo(this, x => x.Fraction)
             .DisposeWith(disposables);

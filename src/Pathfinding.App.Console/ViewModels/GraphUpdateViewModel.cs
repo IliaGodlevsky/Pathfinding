@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.Domain.Core.Enums;
@@ -46,13 +45,6 @@ internal sealed class GraphUpdateViewModel : ViewModel, IDisposable
         set => this.RaiseAndSetIfChanged(ref name, value);
     }
 
-    private GraphStatuses status;
-    public GraphStatuses Status
-    {
-        get => status;
-        set => this.RaiseAndSetIfChanged(ref status, value);
-    }
-
     public ReactiveCommand<Unit, Unit> UpdateGraphCommand { get; }
 
     public GraphUpdateViewModel(IGraphInfoRequestService service,
@@ -64,7 +56,6 @@ internal sealed class GraphUpdateViewModel : ViewModel, IDisposable
         this.service = service;
         this.neighborFactory = neighborFactory;
         messenger.RegisterHandler<GraphsSelectedMessage>(this, OnGraphSelected).DisposeWith(disposables);
-        messenger.RegisterHandler<GraphStateChangedMessage>(this, OnStatusChanged).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
         UpdateGraphCommand = ReactiveCommand.CreateFromTask(ExecuteUpdate, CanExecute()).DisposeWith(disposables);
     }
@@ -91,11 +82,6 @@ internal sealed class GraphUpdateViewModel : ViewModel, IDisposable
         }).ConfigureAwait(false);
     }
 
-    private void OnStatusChanged(GraphStateChangedMessage msg)
-    {
-        Status = msg.Value.Status;
-    }
-
     private void OnGraphSelected(GraphsSelectedMessage msg)
     {
         if (msg.Value.Length == 1)
@@ -104,7 +90,6 @@ internal sealed class GraphUpdateViewModel : ViewModel, IDisposable
             var graph = SelectedGraphs[0];
             Name = graph.Name;
             Neighborhood = graph.Neighborhood;
-            Status = graph.Status;
         }
     }
 

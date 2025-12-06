@@ -54,15 +54,15 @@ internal sealed class RunCreateViewModel : ViewModel,
 
     IList<Algorithms> IRunCreateViewModel.SelectedAlgorithms => SelectedAlgorithms;
 
+    IList<Heuristics> IRequireHeuristicsViewModel.AppliedHeuristics => AppliedHeuristics;
+
+    public ObservableCollection<Heuristics> AppliedHeuristics { get; } = [];
+
     public IReadOnlyCollection<Heuristics> AllowedHeuristics { get; }
 
     public IReadOnlyList<Algorithms> AllowedAlgorithms { get; }
 
     public IReadOnlyCollection<StepRules> AllowedStepRules { get; }
-
-    IList<Heuristics> IRequireHeuristicsViewModel.AppliedHeuristics => AppliedHeuristics;
-
-    public ObservableCollection<Heuristics> AppliedHeuristics { get; } = [];
 
     private double? fromWeight;
     public double? FromWeight

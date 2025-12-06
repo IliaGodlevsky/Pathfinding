@@ -12,6 +12,8 @@ internal abstract class ViewModel(ILog log) : ReactiveObject
     public readonly record struct ActiveGraph(int Id, Graph<GraphVertexModel> Graph, bool IsReadonly)
     {
         public static readonly ActiveGraph Empty = new(0, Graph<GraphVertexModel>.Empty, false);
+
+        public IReadOnlyDictionary<long, GraphVertexModel> VertexMap { get; } = Graph.ToDictionary(x => x.Id);
     }
 
     protected readonly ILog log = log;

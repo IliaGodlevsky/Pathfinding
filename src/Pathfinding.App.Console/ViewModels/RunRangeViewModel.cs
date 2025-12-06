@@ -199,11 +199,11 @@ internal sealed class RunRangeViewModel : ViewModel,
             ActivatedGraph = msg.Value.ActiveGraph;
             var range = await rangeService.ReadRangeAsync(ActivatedGraph.Id, token).ConfigureAwait(false);
             var src = range.FirstOrDefault(x => x.IsSource);
-            Source = src != null ? ActivatedGraph.Graph.First(x => x.Id == src.VertexId) : null;
+            Source = src != null ? ActivatedGraph.VertexMap[src.VertexId]: null;
             var tgt = range.FirstOrDefault(x => x.IsTarget);
-            Target = tgt != null ? ActivatedGraph.Graph.First(x => x.Id == tgt.VertexId) : null;
+            Target = tgt != null ? ActivatedGraph.VertexMap[tgt.VertexId] : null;
             var transit = range.Where(x => !x.IsSource && !x.IsTarget)
-                .Select(x => ActivatedGraph.Graph.First(y => y.Id == x.VertexId))
+                .Select(x => ActivatedGraph.VertexMap[x.VertexId])
                 .ToList();
             Transit.CollectionChanged += OnCollectionChanged;
             Transit.AddRange(transit);

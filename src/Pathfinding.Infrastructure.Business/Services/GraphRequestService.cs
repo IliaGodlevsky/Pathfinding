@@ -133,7 +133,6 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
     {
         return await factory.TransactionAsync(async (unitOfWork, t) =>
         {
-            var result = new List<PathfindingHistorySerializationModel>();
             var graphs = await unitOfWork.ReadGraphsInternalAsync<T>(graphIds, t)
                 .ConfigureAwait(false);
             var ranges = await unitOfWork.ReadRangesAsyncInternal(graphIds, t)
@@ -143,6 +142,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
                 .ToArrayAsync(t))
                 .GroupBy(x => x.GraphId, x => x.ToSerializationModel())
                 .ToDictionary(x => x.Key, x => x.ToArray());
+            var result = new List<PathfindingHistorySerializationModel>();
             foreach (var graph in graphs)
             {
                 var graphDict = graph.Vertices.ToDictionary(x => x.Id, x => x.Position.ToArray());
