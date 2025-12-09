@@ -9,7 +9,6 @@ internal enum KeyFilters
     MainWindow,
     GraphPanel,
     ViewModels,
-    SmoothLevels,
     Neighborhoods,
     IncludeCommands,
     ExcludeCommands,

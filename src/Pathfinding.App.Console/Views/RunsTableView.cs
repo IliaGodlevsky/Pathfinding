@@ -138,7 +138,7 @@ internal sealed partial class RunsTableView : TableView
             model.Steps,
             model.Cost, model.Elapsed,
             ToTableValue(model.StepRule),
-            ToTableValue(model.Heuristics),
+            ToTableValue(model.Heuristics), 
             ToTableValue(model.Weight),
             model.ResultStatus);
         var sub = new CompositeDisposable();

@@ -63,16 +63,14 @@ internal static class UnitOfWorkExtensions
     internal static async Task<IReadOnlyDictionary<int, IReadOnlyCollection<PathfindingRangeModel>>> ReadRangesAsyncInternal(
         this IUnitOfWork unit, IReadOnlyCollection<int> graphIds, CancellationToken token = default)
     {
-        var ranges = (await unit.RangeRepository
+        return (await unit.RangeRepository
             .ReadByGraphIdsAsync(graphIds)
             .ToArrayAsync(token))
             .GroupBy(x => x.GraphId)
-            .ToDictionary(x => x.Key, x => x.OrderBy(y => y.Order).ToArray());
-        var result = new Dictionary<int, IReadOnlyCollection<PathfindingRangeModel>>();
-        foreach (var range in ranges)
-        {
-            result.Add(range.Key, [.. range.Value.Select(x => x.ToRangeModel())]);
-        }
-        return result;
+            .ToDictionary(
+                x => x.Key,
+                x => (IReadOnlyCollection<PathfindingRangeModel>)[.. x
+                    .OrderBy(y => y.Order)
+                    .Select(y => y.ToRangeModel())]);
     }
 }

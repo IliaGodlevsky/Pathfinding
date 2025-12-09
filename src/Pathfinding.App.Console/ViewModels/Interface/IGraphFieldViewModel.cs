@@ -1,5 +1,4 @@
 ﻿using Pathfinding.App.Console.Models;
-using Pathfinding.Domain.Interface;
 using ReactiveUI;
 using System.Reactive;
 using static Pathfinding.App.Console.ViewModels.ViewModel;

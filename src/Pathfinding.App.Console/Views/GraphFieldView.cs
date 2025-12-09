@@ -41,6 +41,7 @@ internal sealed partial class GraphFieldView : FrameView
         this.runRangeViewModel = runRangeViewModel;
         Initialize();
         this.graphFieldViewModel.WhenAnyValue(x => x.ActivatedGraph)
+            .DistinctUntilChanged(x => x.Id)
             .Subscribe(x => RenderGraph(x.Graph))
             .DisposeWith(disposables);
         messenger.RegisterHandler<OpenRunFieldMessage>(this, OnOpenAlgorithmRunView).DisposeWith(disposables);

@@ -3,7 +3,6 @@ using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Extensions;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.ViewModel.Requests;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
@@ -36,7 +35,6 @@ internal sealed class RunRangeViewModel : ViewModel,
     private readonly IRangeRequestService<GraphVertexModel> rangeService;
     private readonly ReadOnlyCollection<Command> includeCommands;
     private readonly ReadOnlyCollection<Command> excludeCommands;
-    private readonly IPathfindingRange<GraphVertexModel> pathfindingRange;
 
     private ActiveGraph activeGraph;
     private ActiveGraph ActivatedGraph
@@ -102,7 +100,6 @@ internal sealed class RunRangeViewModel : ViewModel,
         IRangeRequestService<GraphVertexModel> rangeService,
         ILog logger) : base(logger)
     {
-        pathfindingRange = this;
         this.rangeService = rangeService;
         this.includeCommands = includeCommands
             .OrderBy(x => x.Metadata[MetadataKeys.Order])
@@ -135,7 +132,7 @@ internal sealed class RunRangeViewModel : ViewModel,
 
     private void AddVertexToRange(GraphVertexModel vertex)
     {
-        includeCommands.ExecuteFirst(pathfindingRange, vertex);
+        includeCommands.ExecuteFirst(this, vertex);
     }
 
     private void BindTo(Expression<Func<GraphVertexModel, bool>> expression,
@@ -153,7 +150,7 @@ internal sealed class RunRangeViewModel : ViewModel,
     {
         await ExecuteSafe(async token =>
         {
-            var vertices = pathfindingRange.ToList();
+            var vertices = this.ToList();
             var index = vertices.IndexOf(vertex);
             await rangeService.CreatePathfindingVertexAsync(ActivatedGraph.Id,
                 vertex.Id, index, token).ConfigureAwait(false);
@@ -162,7 +159,7 @@ internal sealed class RunRangeViewModel : ViewModel,
 
     private void RemoveVertexFromRange(GraphVertexModel vertex)
     {
-        excludeCommands.ExecuteFirst(pathfindingRange, vertex);
+        excludeCommands.ExecuteFirst(this, vertex);
     }
 
     private async Task RemoveVertexFromStorage(GraphVertexModel vertex)
@@ -199,7 +196,7 @@ internal sealed class RunRangeViewModel : ViewModel,
             ActivatedGraph = msg.Value.ActiveGraph;
             var range = await rangeService.ReadRangeAsync(ActivatedGraph.Id, token).ConfigureAwait(false);
             var src = range.FirstOrDefault(x => x.IsSource);
-            Source = src != null ? ActivatedGraph.VertexMap[src.VertexId]: null;
+            Source = src != null ? ActivatedGraph.VertexMap[src.VertexId] : null;
             var tgt = range.FirstOrDefault(x => x.IsTarget);
             Target = tgt != null ? ActivatedGraph.VertexMap[tgt.VertexId] : null;
             var transit = range.Where(x => !x.IsSource && !x.IsTarget)
@@ -249,13 +246,13 @@ internal sealed class RunRangeViewModel : ViewModel,
 
     private void OnVertexIsInRangeReceived(IsVertexInRangeRequestMessage request)
     {
-        var contains = pathfindingRange.Contains(request.Vertex);
+        var contains = this.Contains(request.Vertex);
         request.Reply(contains);
     }
 
     private void OnGetPathfindingRangeReceived(PathfindingRangeRequestMessage msg)
     {
-        var range = pathfindingRange
+        var range = this
             .Where(x => x is not null)
             .ToArray();
         msg.Reply(range);
