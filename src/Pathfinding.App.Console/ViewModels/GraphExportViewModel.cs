@@ -68,17 +68,15 @@ internal sealed class GraphExportViewModel
         await ExecuteSafe(async token =>
         {
             await using var stream = streamFactory();
-            if (!stream.IsEmpty)
-            {
-                var histories = await options.ReadHistoryAsync(Option,
-                    SelectedGraphIds, token).ConfigureAwait(false);
-                var serializer = serializers[stream.Format.Value];
-                await serializer.SerializeToAsync(histories,
-                    stream.Stream, token).ConfigureAwait(false);
-                log.Info(histories.Histories.Count == 1
-                    ? Resource.WasDeletedMsg
-                    : Resource.WereDeletedMsg);
-            }
+            if (stream.IsEmpty) return;
+            var histories = await options.ReadHistoryAsync(Option,
+                SelectedGraphIds, token).ConfigureAwait(false);
+            var serializer = serializers[stream.Format.Value];
+            await serializer.SerializeToAsync(histories,
+                stream.Stream, token).ConfigureAwait(false);
+            log.Info(histories.Histories.Count == 1
+                ? Resource.WasDeletedMsg
+                : Resource.WereDeletedMsg);
         }).ConfigureAwait(false);
     }
 

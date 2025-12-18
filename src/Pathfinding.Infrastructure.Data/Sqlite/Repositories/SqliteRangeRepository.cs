@@ -2,7 +2,6 @@
 using Microsoft.Data.Sqlite;
 using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Interface.Repositories;
-using Pathfinding.Infrastructure.Data.Pathfinding;
 
 namespace Pathfinding.Infrastructure.Data.Sqlite.Repositories;
 

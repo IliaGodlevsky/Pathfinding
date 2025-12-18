@@ -27,7 +27,7 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
 
     public ReactiveCommand<int[], Unit> SelectRunsCommand { get; }
 
-    private ActiveGraph ActivatedGraph { get; set; } = ActiveGraph.Empty; 
+    private ActiveGraph ActivatedGraph { get; set; } = ActiveGraph.Empty;
 
     public RunsTableViewModel(IStatisticsRequestService statisticsService,
         IGraphInfoRequestService graphInfoService,

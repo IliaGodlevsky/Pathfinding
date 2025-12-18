@@ -9,7 +9,7 @@ internal sealed partial class GraphNameUpdateView
 
     private void Initialize()
     {
-        X = 0; 
+        X = 0;
         Y = 0;
         Height = Dim.Percent(20);
         Width = Dim.Fill();

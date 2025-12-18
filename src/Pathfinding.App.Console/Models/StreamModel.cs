@@ -1,30 +1,38 @@
 ﻿namespace Pathfinding.App.Console.Models;
 
-internal sealed class StreamModel(Stream stream = null, StreamFormat? format = null,
-    params IDisposable[] disposables) : IDisposable, IAsyncDisposable
+internal sealed class StreamModel : IDisposable, IAsyncDisposable
 {
     public static readonly StreamModel Empty = new();
 
-    private readonly IDisposable[] disposables = disposables;
+    private readonly List<IDisposable> disposables;
 
-    public Stream Stream { get; } = stream ?? Stream.Null;
+    public Stream Stream { get; }
 
-    public StreamFormat? Format { get; } = format;
+    public StreamFormat? Format { get; }
 
-    public bool IsEmpty => Stream == Stream.Null || !Format.HasValue;
+    public bool IsEmpty { get; }
+
+    public StreamModel(Stream stream = null,
+        StreamFormat? format = null,
+        params IDisposable[] additionalDisposables)
+    {
+        Stream = stream ?? Stream.Null;
+        Format = format;
+        IsEmpty = Stream == Stream.Null || !Format.HasValue;
+        disposables = [.. additionalDisposables, Stream];
+    }
 
     public void Dispose()
     {
-        Stream.Dispose();
         foreach (var disposable in disposables)
         {
             disposable.Dispose();
         }
+        disposables.Clear();
     }
 
     public async ValueTask DisposeAsync()
     {
-        await Stream.DisposeAsync().ConfigureAwait(false);
         foreach (var disposable in disposables)
         {
             if (disposable is IAsyncDisposable async)
@@ -36,5 +44,6 @@ internal sealed class StreamModel(Stream stream = null, StreamFormat? format = n
                 disposable.Dispose();
             }
         }
+        disposables.Clear();
     }
 }

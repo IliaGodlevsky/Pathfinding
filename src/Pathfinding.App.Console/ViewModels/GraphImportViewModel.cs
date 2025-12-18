@@ -42,17 +42,16 @@ internal sealed class GraphImportViewModel : ViewModel, IGraphImportViewModel
 
     private async Task ImportGraphs(Func<StreamModel> streamFactory)
     {
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
             await using var stream = streamFactory();
             if (stream.IsEmpty) return;
             var serializer = serializers[stream.Format.Value];
-            var histories = await serializer.DeserializeFromAsync(stream.Stream)
+            var histories = await serializer
+                .DeserializeFromAsync(stream.Stream, token)
                 .ConfigureAwait(false);
-            var timeout = GetTimeout(histories.Histories.Count);
-            using var cts = new CancellationTokenSource(timeout);
             var result = await service.CreatePathfindingHistoriesAsync(
-                histories.Histories, cts.Token).ConfigureAwait(false);
+                histories.Histories, token).ConfigureAwait(false);
             var graphs = result.Select(x => x.Graph).ToGraphInfo();
             messenger.Send(new GraphsCreatedMessage(graphs));
             log.Info(graphs.Length > 0

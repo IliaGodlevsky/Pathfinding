@@ -25,7 +25,7 @@ namespace Pathfinding.App.Console {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Filename=pathfinding.litedb")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Data source=pathfinding.sqlite")]
         public string ConnectionString {
             get {
                 return ((string)(this["ConnectionString"]));

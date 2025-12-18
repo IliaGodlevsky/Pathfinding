@@ -10,9 +10,9 @@ internal sealed class GraphVertexView : VertexView<GraphVertexModel>
         : base(model)
     {
         model.WhenAnyValue(
-            x => x.IsObstacle, 
-            x => x.IsTransit, 
-            x => x.IsTarget, 
+            x => x.IsObstacle,
+            x => x.IsTransit,
+            x => x.IsTarget,
             x => x.IsSource,
             (isObstacle, isTransit, isTarget, isSource) =>
             {

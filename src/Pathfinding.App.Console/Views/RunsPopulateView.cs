@@ -51,13 +51,13 @@ internal sealed partial class RunsPopulateView : FrameView
     private void BindTo(TextField field,
         Expression<Func<IRequirePopulationViewModel, double?>> expression)
     {
-        var compiled = expression.Compile();
         var propertyName = ((MemberExpression)expression.Body).Member.Name;
         field.Events().TextChanging
             .DistinctUntilChanged()
             .Select(x => double.TryParse(x.NewText.ToString(), out var value) ? value : default(double?))
             .BindTo(populateViewModel, expression)
             .DisposeWith(disposables);
+        var compiled = expression.Compile();
         populateViewModel.Events().PropertyChanged
             .Where(x => x.PropertyName == propertyName)
             .Do(_ =>

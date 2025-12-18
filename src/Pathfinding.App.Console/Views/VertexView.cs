@@ -1,5 +1,4 @@
 ﻿using Pathfinding.Domain.Interface;
-using Pathfinding.Infrastructure.Data.Extensions;
 using ReactiveUI;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -9,19 +8,19 @@ using static Pathfinding.App.Console.Settings;
 
 namespace Pathfinding.App.Console.Views;
 
-internal abstract class VertexView<T> : Label
+internal class VertexView<T> : Label
     where T : IVertex
 {
-    protected static readonly Color Background = Enum.Parse<Color>(Default.BackgroundColor);
-    protected static readonly ColorScheme ObstacleColor = Create(Default.BackgroundColor);
-    protected static readonly ColorScheme RegularColor = Create(Default.RegularVertexColor);
-    protected static readonly ColorScheme VisitedColor = Create(Default.VisitedVertexColor);
-    protected static readonly ColorScheme EnqueuedColor = Create(Default.EnqueuedVertexColor);
-    protected static readonly ColorScheme SourceColor = Create(Default.SourceVertexColor);
-    protected static readonly ColorScheme TargetColor = Create(Default.TargetVertexColor);
-    protected static readonly ColorScheme TransitColor = Create(Default.TranstiVertexColor);
-    protected static readonly ColorScheme PathColor = Create(Default.PathVertexColor);
-    protected static readonly ColorScheme CrossedPathColor = Create(Default.CrossedPathColor);
+    public static readonly Color Background = Enum.Parse<Color>(Default.BackgroundColor);
+    public static readonly ColorScheme ObstacleColor = Create(Default.BackgroundColor);
+    public static readonly ColorScheme RegularColor = Create(Default.RegularVertexColor);
+    public static readonly ColorScheme VisitedColor = Create(Default.VisitedVertexColor);
+    public static readonly ColorScheme EnqueuedColor = Create(Default.EnqueuedVertexColor);
+    public static readonly ColorScheme SourceColor = Create(Default.SourceVertexColor);
+    public static readonly ColorScheme TargetColor = Create(Default.TargetVertexColor);
+    public static readonly ColorScheme TransitColor = Create(Default.TranstiVertexColor);
+    public static readonly ColorScheme PathColor = Create(Default.PathVertexColor);
+    public static readonly ColorScheme CrossedPathColor = Create(Default.CrossedPathColor);
 
     protected readonly T model;
     protected readonly CompositeDisposable disposables = [];
@@ -36,8 +35,8 @@ internal abstract class VertexView<T> : Label
 
         this.model = model;
         var labelWidth = GraphFieldView.DistanceBetweenVertices;
-        X = model.Position.GetX() * labelWidth;
-        Y = model.Position.GetY();
+        X = model.Position.ElementAtOrDefault(0) * labelWidth;
+        Y = model.Position.ElementAtOrDefault(1);
         Width = labelWidth;
     }
 

@@ -1,7 +1,6 @@
 ﻿using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Injection;
-using Pathfinding.App.Console.Messages;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
@@ -138,7 +137,7 @@ internal sealed partial class RunsTableView : TableView
             model.Steps,
             model.Cost, model.Elapsed,
             ToTableValue(model.StepRule),
-            ToTableValue(model.Heuristics), 
+            ToTableValue(model.Heuristics),
             ToTableValue(model.Weight),
             model.ResultStatus);
         var sub = new CompositeDisposable();

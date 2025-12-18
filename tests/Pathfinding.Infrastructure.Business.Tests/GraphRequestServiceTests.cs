@@ -3,7 +3,6 @@ using Autofac.Extras.Moq;
 using Moq;
 using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Core.Enums;
-using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Repositories;
 using Pathfinding.Infrastructure.Business.Services;
 using Pathfinding.Infrastructure.Data.Pathfinding;

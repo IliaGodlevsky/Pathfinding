@@ -4,16 +4,6 @@ namespace Pathfinding.Infrastructure.Data.Extensions;
 
 public static class CoordinateExtensions
 {
-    public static int GetX(this Coordinate coordinate)
-    {
-        return coordinate.ElementAtOrDefault(0);
-    }
-
-    public static int GetY(this Coordinate coordinate)
-    {
-        return coordinate.ElementAtOrDefault(1);
-    }
-
     public static bool IsCardinal(this Coordinate self, Coordinate coordinate)
     {
         // Cardinal coordinate differs from the

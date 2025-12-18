@@ -32,7 +32,7 @@ internal sealed partial class RunCreateButton : Button
             .DisposeWith(disposables);
     }
 
-    private static void ShowDialog(IMessenger messenger, 
+    private static void ShowDialog(IMessenger messenger,
         RunCreateViewModel viewModel)
     {
         var dialog = new RunCreateDialog(messenger, viewModel);

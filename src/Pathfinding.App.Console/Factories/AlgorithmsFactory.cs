@@ -19,7 +19,7 @@ internal sealed class AlgorithmsFactory(Meta<IAlgorithmFactory<PathfindingProces
 
     public IReadOnlyDictionary<Algorithms, AlgorithmRequirements> Requirements { get; }
         = algorithms.ToDictionary(
-            x => (Algorithms)x.Metadata[MetadataKeys.Algorithm], 
+            x => (Algorithms)x.Metadata[MetadataKeys.Algorithm],
             x => (AlgorithmRequirements)x.Metadata[MetadataKeys.Requirements]);
 
     public IAlgorithmFactory<PathfindingProcess> GetAlgorithmFactory(Algorithms algorithm)

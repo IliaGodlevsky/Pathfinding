@@ -38,7 +38,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
     }
 
     private ActiveGraph activatedGraph;
-    private ActiveGraph ActivatedGraph 
+    private ActiveGraph ActivatedGraph
     {
         get => activatedGraph;
         set => this.RaiseAndSetIfChanged(ref activatedGraph, value);
