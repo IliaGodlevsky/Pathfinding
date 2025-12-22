@@ -9,7 +9,7 @@ public sealed class ReplaceTransitIsolatedVertex<TVertex> : IPathfindingRangeCom
 {
     public void Execute(IPathfindingRange<TVertex> range, TVertex vertex)
     {
-        var isolated = range.Transit.First(IsIsolated);
+        var isolated = range.Transit.First(x => x.IsIsolated());
         int isolatedIndex = range.Transit.IndexOf(isolated);
         range.Transit.RemoveAt(isolatedIndex);
         range.Transit.Insert(isolatedIndex, vertex);
@@ -19,12 +19,7 @@ public sealed class ReplaceTransitIsolatedVertex<TVertex> : IPathfindingRangeCom
     {
         return range.Transit.Count > 0
             && range.HasSourceAndTargetSet()
-            && range.Transit.Any(IsIsolated)
+            && range.Transit.Any(x => x.IsIsolated())
             && range.CanBeInRange(vertex);
-    }
-
-    private static bool IsIsolated(TVertex vertex)
-    {
-        return vertex.IsIsolated();
     }
 }

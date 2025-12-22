@@ -6,6 +6,7 @@ using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Business.Extensions;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
+using Pathfinding.Service.Interface.Requests.Create;
 
 namespace Pathfinding.Infrastructure.Business.Services;
 
@@ -25,22 +26,18 @@ public sealed class RangeRequestService<T>(IUnitOfWorkFactory factory) : IRangeR
         }, token).ConfigureAwait(false);
     }
 
-    public async Task<bool> CreatePathfindingVertexAsync(int graphId,
-        long vertexId, int index, CancellationToken token = default)
+    public async Task<bool> CreatePathfindingVertexAsync(CreatePathfindingVertexRequest request,
+        CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unit, t) =>
         {
             var range = await unit.RangeRepository
-                .ReadByGraphIdAsync(graphId)
+                .ReadByGraphIdAsync(request.GraphId)
                 .ToListAsync(t)
                 .ConfigureAwait(false);
-            var pathfindingRange = new PathfindingRange
-            {
-                GraphId = graphId,
-                Order = index,
-                VertexId = vertexId
-            };
-            range.Insert(index, pathfindingRange);
+
+            range.Insert(request.Index, request.ToPathfindingRange());
+
             for (int i = 0; i < range.Count; i++)
             {
                 range[i].IsSource = i == 0;
@@ -59,7 +56,8 @@ public sealed class RangeRequestService<T>(IUnitOfWorkFactory factory) : IRangeR
         return await factory.TransactionAsync(async (unitOfWork, t) =>
         {
             var verticesIds = request.Select(x => x.Id).ToList();
-            return await unitOfWork.RangeRepository.DeleteByVerticesIdsAsync(verticesIds, t)
+            return await unitOfWork.RangeRepository
+                .DeleteByVerticesIdsAsync(verticesIds, t)
                 .ConfigureAwait(false);
         }, token).ConfigureAwait(false);
     }

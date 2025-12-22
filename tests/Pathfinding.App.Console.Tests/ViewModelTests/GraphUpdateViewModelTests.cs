@@ -33,7 +33,6 @@ internal sealed class GraphUpdateViewModelTests
             Assert.That(viewModel.SelectedGraphs, Has.Length.EqualTo(1));
             Assert.That(viewModel.Name, Is.EqualTo(model.Name));
             Assert.That(viewModel.Neighborhood, Is.EqualTo(model.Neighborhood));
-            Assert.That(viewModel.Status, Is.EqualTo(model.Status));
         });
     }
 

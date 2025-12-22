@@ -12,6 +12,7 @@ using Pathfinding.Domain.Interface;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Extensions;
+using Pathfinding.Service.Interface.Requests.Create;
 using Pathfinding.Shared.Extensions;
 using ReactiveUI;
 using System.Collections;
@@ -152,8 +153,11 @@ internal sealed class RunRangeViewModel : ViewModel,
         {
             var vertices = this.ToList();
             var index = vertices.IndexOf(vertex);
-            await rangeService.CreatePathfindingVertexAsync(ActivatedGraph.Id,
-                vertex.Id, index, token).ConfigureAwait(false);
+            var request = new CreatePathfindingVertexRequest(
+                ActivatedGraph.Id, 
+                vertex.Id, 
+                index);
+            await rangeService.CreatePathfindingVertexAsync(request, token).ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
 

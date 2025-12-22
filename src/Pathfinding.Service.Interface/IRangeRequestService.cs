@@ -1,6 +1,7 @@
 using Pathfinding.Domain.Core;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Service.Interface.Models.Read;
+using Pathfinding.Service.Interface.Requests.Create;
 
 namespace Pathfinding.Service.Interface;
 
@@ -10,10 +11,12 @@ public interface IRangeRequestService<T>
     Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeAsync(int graphId,
         CancellationToken token = default);
 
-    Task<bool> CreatePathfindingVertexAsync(int graphId,
-        long vertexId, int index, CancellationToken token = default);
+    Task<bool> CreatePathfindingVertexAsync(CreatePathfindingVertexRequest request,
+        CancellationToken token = default);
 
-    Task<bool> DeleteRangeAsync(IEnumerable<T> request, CancellationToken token = default);
+    Task<bool> DeleteRangeAsync(IEnumerable<T> request,
+        CancellationToken token = default);
 
-    Task<bool> DeleteRangeAsync(int graphId, CancellationToken token = default);
+    Task<bool> DeleteRangeAsync(int graphId,
+        CancellationToken token = default);
 }

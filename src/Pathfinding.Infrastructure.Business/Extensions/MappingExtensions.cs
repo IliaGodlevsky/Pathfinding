@@ -73,6 +73,16 @@ internal static class MappingExtensions
         };
     }
 
+    public static PathfindingRange ToPathfindingRange(this CreatePathfindingVertexRequest request)
+    {
+        return new()
+        {
+            GraphId = request.GraphId,
+            VertexId = request.VertexId,
+            Order = request.Index
+        };
+    }
+
     public static Statistics ToStatistics(this CreateStatisticsRequest request)
     {
         return new()

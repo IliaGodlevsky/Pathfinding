@@ -136,7 +136,7 @@ internal sealed class RunCreateViewModelTests
             new(42, graph, false),
             default,
             default));
-        messenger.Send(message);
+        await messenger.Send(message);
 
         messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
             => msg.Reply([graph.First()]));
@@ -187,8 +187,8 @@ internal sealed class RunCreateViewModelTests
 
     private static Graph<GraphVertexModel> CreateGraph()
     {
-        var first = new GraphVertexModel { Position = new Coordinate(0) };
-        var second = new GraphVertexModel { Position = new Coordinate(1) };
+        var first = new GraphVertexModel { Id = 1, Position = new Coordinate(0) };
+        var second = new GraphVertexModel { Id = 2, Position = new Coordinate(1) };
         first.Neighbors.Add(second);
         second.Neighbors.Add(first);
         return new Graph<GraphVertexModel>([first, second], [2]);

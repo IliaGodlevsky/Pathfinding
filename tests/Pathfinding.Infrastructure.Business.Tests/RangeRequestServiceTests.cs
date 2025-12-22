@@ -78,7 +78,7 @@ internal class RangeRequestServiceTests
 
         var service = mock.Create<RangeRequestService<FakeVertex>>();
 
-        var result = await service.CreatePathfindingVertexAsync(graphId, 99, 1);
+        var result = await service.CreatePathfindingVertexAsync(new(graphId, 99, 1));
 
         Assert.Multiple(() =>
         {

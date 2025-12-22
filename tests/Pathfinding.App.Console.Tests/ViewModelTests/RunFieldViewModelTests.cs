@@ -96,8 +96,8 @@ internal sealed class RunFieldViewModelTests
 
     private static Graph<GraphVertexModel> CreateGraph()
     {
-        var first = new GraphVertexModel { Position = new Coordinate(0), Cost = new VertexCost(1, (1, 2)) };
-        var second = new GraphVertexModel { Position = new Coordinate(1), Cost = new VertexCost(3, (2, 4)) };
+        var first = new GraphVertexModel { Id = 1, Position = new Coordinate(0), Cost = new VertexCost(1, (1, 2)) };
+        var second = new GraphVertexModel { Id = 2, Position = new Coordinate(1), Cost = new VertexCost(3, (2, 4)) };
         first.Neighbors.Add(second);
         second.Neighbors.Add(first);
         return new Graph<GraphVertexModel>([first, second], [2]);
