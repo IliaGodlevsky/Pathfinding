@@ -90,11 +90,6 @@ internal sealed class GraphExportViewModel
         SelectedGraphIds = [.. SelectedGraphIds.Except(msg.Value)];
     }
 
-    protected override TimeSpan GetTimeout()
-    {
-        return base.GetTimeout() * SelectedGraphIds.Length;
-    }
-
     public void Dispose()
     {
         disposables.Dispose();

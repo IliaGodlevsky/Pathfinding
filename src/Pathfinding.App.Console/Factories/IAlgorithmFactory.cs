@@ -5,7 +5,7 @@ using Pathfinding.Shared.Primitives;
 namespace Pathfinding.App.Console.Factories;
 
 public interface IAlgorithmFactory<out T>
-    where T : IAlgorithm<IEnumerable<Coordinate>>
+    where T : IPathfindingAlgorithm<IEnumerable<Coordinate>>
 {
     T CreateAlgorithm(
         IReadOnlyCollection<IPathfindingVertex> range,

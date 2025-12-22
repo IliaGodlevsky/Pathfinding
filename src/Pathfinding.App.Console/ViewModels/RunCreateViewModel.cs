@@ -240,10 +240,9 @@ internal sealed class RunCreateViewModel : ViewModel,
             .Select(buildInfo => CreateStatistics(range, buildInfo))
             .ToArray();
 
-        await ExecuteSafe(async () =>
+        await ExecuteSafe(async token =>
         {
-            using var cts = new CancellationTokenSource(GetTimeout(statistics.Length));
-            var result = await statisticsService.CreateStatisticsAsync(statistics, cts.Token)
+            var result = await statisticsService.CreateStatisticsAsync(statistics, token)
                 .ConfigureAwait(false);
             messenger.Send(new RunsCreatedMessaged([.. result]));
         }).ConfigureAwait(false);

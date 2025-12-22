@@ -144,31 +144,29 @@ internal class RunModel : ReactiveObject, IDisposable
         var enqueued = new HashSet<Coordinate>();
         var states = new List<RunVertexStateModel>();
 
-        range.Skip(1).Take(range.Count - 2)
+        states.AddRange(range.Skip(1).Take(range.Count - 2)
             .Select(x => ToRunVertexModel(x, RunVertexState.Transit))
             .Prepend(ToRunVertexModel(range.First(), RunVertexState.Source))
-            .Append(ToRunVertexModel(range.Last(), RunVertexState.Target))
-            .ForWhole(states.AddRange);
+            .Append(ToRunVertexModel(range.Last(), RunVertexState.Target)));
 
         foreach (var subAlgorithm in pathfindingResult)
         {
             var exceptRangePath = subAlgorithm.Path.Except(range).ToArray();
             var visitedIgnore = paths.Union(range).ToArray();
 
-            subAlgorithm.Visited.SelectMany(v =>
+            states.AddRange(subAlgorithm.Visited.SelectMany(v =>
                  v.Enqueued.Intersect(visited).Except(visitedIgnore)
                     .Select(x => ToRunVertexModel(x, RunVertexState.Visited, false))
                     .Concat(v.Visited.Enumerate().Except(visitedIgnore)
                     .Select(x => ToRunVertexModel(x, RunVertexState.Visited))
                     .Concat(v.Enqueued.Except(visitedIgnore).Except(enqueued)
                     .Select(x => ToRunVertexModel(x, RunVertexState.Enqueued)))))
-                    .Distinct().ForWhole(states.AddRange);
+                    .Distinct());
 
-            exceptRangePath.Intersect(paths)
+            states.AddRange(exceptRangePath.Intersect(paths)
                 .Select(x => ToRunVertexModel(x, RunVertexState.CrossPath))
                 .Concat(exceptRangePath.Except(paths)
-                .Select(x => ToRunVertexModel(x, RunVertexState.Path)))
-                .ForWhole(states.AddRange);
+                .Select(x => ToRunVertexModel(x, RunVertexState.Path))));
 
             visited.AddRange(subAlgorithm.Visited.Select(x => x.Visited));
             enqueued.AddRange(subAlgorithm.Visited.SelectMany(x => x.Enqueued));

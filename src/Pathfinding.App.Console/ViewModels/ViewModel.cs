@@ -3,6 +3,7 @@ using Pathfinding.App.Console.Models;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using ReactiveUI;
+using System.Collections.Frozen;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -13,7 +14,7 @@ internal abstract class ViewModel(ILog log) : ReactiveObject
     {
         public static readonly ActiveGraph Empty = new(0, Graph<GraphVertexModel>.Empty, false);
 
-        public IReadOnlyDictionary<long, GraphVertexModel> VertexMap { get; } = Graph.ToDictionary(x => x.Id);
+        public IReadOnlyDictionary<long, GraphVertexModel> VertexMap { get; } = Graph.ToFrozenDictionary(x => x.Id);
     }
 
     protected readonly ILog log = log;
@@ -24,7 +25,9 @@ internal abstract class ViewModel(ILog log) : ReactiveObject
     {
         try
         {
-            using var cts = new CancellationTokenSource(GetTimeout());
+            double seconds = Settings.Default.BaseTimeoutSeconds;
+            TimeSpan timeout = TimeSpan.FromSeconds(seconds);
+            using var cts = new CancellationTokenSource(timeout);
             await action(cts.Token).ConfigureAwait(false);
         }
         catch (OperationCanceledException ex)
@@ -37,36 +40,5 @@ internal abstract class ViewModel(ILog log) : ReactiveObject
             log.Error(ex, ex.Message);
             onError?.Invoke();
         }
-    }
-
-    protected async Task ExecuteSafe(
-        Func<Task> action,
-        Action onError = null)
-    {
-        try
-        {
-            await action().ConfigureAwait(false);
-        }
-        catch (OperationCanceledException ex)
-        {
-            log.Warn(ex, ex.Message);
-            onError?.Invoke();
-        }
-        catch (Exception ex)
-        {
-            log.Error(ex, ex.Message);
-            onError?.Invoke();
-        }
-    }
-
-    protected virtual TimeSpan GetTimeout()
-    {
-        return TimeSpan.FromSeconds(Settings.Default.BaseTimeoutSeconds);
-    }
-
-    protected static TimeSpan GetTimeout(int multiplicator)
-    {
-        double timeout = Settings.Default.BaseTimeoutSeconds * multiplicator;
-        return TimeSpan.FromSeconds(timeout);
     }
 }

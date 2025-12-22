@@ -201,7 +201,7 @@ internal sealed class RunRangeViewModel : ViewModel,
             Target = tgt != null ? ActivatedGraph.VertexMap[tgt.VertexId] : null;
             var transit = range.Where(x => !x.IsSource && !x.IsTarget)
                 .Select(x => ActivatedGraph.VertexMap[x.VertexId])
-                .ToList();
+                .ToArray();
             Transit.CollectionChanged += OnCollectionChanged;
             Transit.AddRange(transit);
             foreach (var vertex in ActivatedGraph.Graph)

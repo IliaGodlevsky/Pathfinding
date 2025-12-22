@@ -6,7 +6,7 @@ using Pathfinding.Service.Interface;
 namespace Pathfinding.Infrastructure.Business.Algorithms;
 
 public abstract class PathfindingProcess(IReadOnlyCollection<IPathfindingVertex> range)
-    : IAlgorithm<IGraphPath>
+    : IPathfindingAlgorithm<IGraphPath>
 {
     protected readonly record struct SubRange(
         IPathfindingVertex Source,
@@ -36,7 +36,7 @@ public abstract class PathfindingProcess(IReadOnlyCollection<IPathfindingVertex>
             }
             var subPath = GetSubPath();
             subPaths.Add(subPath);
-            RaiseSubPathFound(subPath);
+            SubPathFound?.Invoke(new(subPath));
             DropState();
         }
         return CreatePath(subPaths);
@@ -60,11 +60,6 @@ public abstract class PathfindingProcess(IReadOnlyCollection<IPathfindingVertex>
         IEnumerable<IPathfindingVertex> vertices)
     {
         VertexProcessed?.Invoke(new(vertex, vertices));
-    }
-
-    protected void RaiseSubPathFound(IGraphPath subPath)
-    {
-        SubPathFound?.Invoke(new(subPath));
     }
 
     private static SubRange[] GetSubRanges(IReadOnlyCollection<IPathfindingVertex> range)

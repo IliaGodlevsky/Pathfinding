@@ -4,6 +4,6 @@
 // used to identify the statuses in the database
 public enum GraphStatuses
 {
-    Editable = 0,
-    Readonly = 1
+    Editable,
+    Readonly
 }

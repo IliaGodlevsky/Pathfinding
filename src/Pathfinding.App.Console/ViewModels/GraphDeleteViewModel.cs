@@ -64,11 +64,6 @@ internal sealed class GraphDeleteViewModel : ViewModel, IGraphDeleteViewModel, I
         SelectedGraphIds = [.. msg.Value.Select(x => x.Id)];
     }
 
-    protected override TimeSpan GetTimeout()
-    {
-        return base.GetTimeout() * SelectedGraphIds.Length;
-    }
-
     public void Dispose()
     {
         disposables.Dispose();

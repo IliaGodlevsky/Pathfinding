@@ -69,11 +69,6 @@ internal sealed class GraphCopyViewModel : ViewModel, IGraphCopyViewModel, IDisp
             ids => ids.Length > 0);
     }
 
-    protected override TimeSpan GetTimeout()
-    {
-        return base.GetTimeout() * SelectedGraphIds.Length;
-    }
-
     public void Dispose()
     {
         disposables.Dispose();

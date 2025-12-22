@@ -52,7 +52,7 @@ internal sealed class RunDeleteViewModel : ViewModel, IRunDeleteViewModel, IDisp
     {
         await ExecuteSafe(async token =>
         {
-            var isDeleted = await statisticsService.DeleteRunsAsync(
+            bool isDeleted = await statisticsService.DeleteRunsAsync(
                 SelectedRunsIds, token).ConfigureAwait(false);
             if (isDeleted)
             {
@@ -61,11 +61,6 @@ internal sealed class RunDeleteViewModel : ViewModel, IRunDeleteViewModel, IDisp
                 messenger.Send(new RunsDeletedMessage(runs));
             }
         }).ConfigureAwait(false);
-    }
-
-    protected override TimeSpan GetTimeout()
-    {
-        return base.GetTimeout() * SelectedRunsIds.Length;
     }
 
     private void OnRunsSelected(RunsSelectedMessage msg)

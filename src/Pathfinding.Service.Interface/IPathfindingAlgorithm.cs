@@ -2,7 +2,7 @@
 
 namespace Pathfinding.Service.Interface;
 
-public interface IAlgorithm<out TPath>
+public interface IPathfindingAlgorithm<out TPath>
     where TPath : IEnumerable<Coordinate>
 {
     TPath FindPath();
