@@ -1,5 +1,4 @@
 using Pathfinding.Domain.Core;
-using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Extensions;
 using Pathfinding.Domain.Interface.Factories;
@@ -45,7 +44,9 @@ public sealed class RangeRequestService<T>(IUnitOfWorkFactory factory) : IRangeR
                 range[i].Order = i;
             }
 
-            await unit.RangeRepository.UpsertAsync(range, t).ConfigureAwait(false);
+            await unit.RangeRepository
+                .UpsertAsync(range, t)
+                .ConfigureAwait(false);
             return true;
         }, token).ConfigureAwait(false);
     }
@@ -65,8 +66,11 @@ public sealed class RangeRequestService<T>(IUnitOfWorkFactory factory) : IRangeR
     public async Task<bool> DeleteRangeAsync(int graphId,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unitOfWork, t)
-                => await unitOfWork.RangeRepository.DeleteByGraphIdAsync(graphId, t).ConfigureAwait(false), token)
-            .ConfigureAwait(false);
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
+        {
+            return await unitOfWork.RangeRepository
+                .DeleteByGraphIdAsync(graphId, t)
+                .ConfigureAwait(false);
+        }, token).ConfigureAwait(false);
     }
 }

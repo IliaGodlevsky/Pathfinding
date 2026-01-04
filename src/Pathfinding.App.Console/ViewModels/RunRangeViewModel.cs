@@ -21,6 +21,7 @@ using System.Collections.Specialized;
 using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 
 // ReSharper disable AsyncVoidLambda
@@ -157,7 +158,9 @@ internal sealed class RunRangeViewModel : ViewModel,
                 ActivatedGraph.Id, 
                 vertex.Id, 
                 index);
-            await rangeService.CreatePathfindingVertexAsync(request, token).ConfigureAwait(false);
+            await rangeService
+                .CreatePathfindingVertexAsync(request, token)
+                .ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
 
@@ -170,7 +173,9 @@ internal sealed class RunRangeViewModel : ViewModel,
     {
         await ExecuteSafe(async token =>
         {
-            await rangeService.DeleteRangeAsync(vertex.Enumerate(), token).ConfigureAwait(false);
+            await rangeService
+                .DeleteRangeAsync(vertex.Enumerate(), token)
+                .ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
 
@@ -178,13 +183,15 @@ internal sealed class RunRangeViewModel : ViewModel,
     {
         Source = null;
         Target = null;
-        while (Transit.Count > 0) Transit.RemoveAt(0);
+        Transit.Clear();
     }
 
     private async Task DeleteRange()
     {
-        var result = await rangeService.DeleteRangeAsync(ActivatedGraph.Id).ConfigureAwait(false);
-        if (result)
+        bool deleted = await rangeService
+            .DeleteRangeAsync(ActivatedGraph.Id)
+            .ConfigureAwait(false);
+        if (deleted)
         {
             ClearRange();
         }
@@ -198,7 +205,9 @@ internal sealed class RunRangeViewModel : ViewModel,
             Transit.CollectionChanged -= OnCollectionChanged;
             ClearRange();
             ActivatedGraph = msg.Value.ActiveGraph;
-            var range = await rangeService.ReadRangeAsync(ActivatedGraph.Id, token).ConfigureAwait(false);
+            var range = await rangeService
+                .ReadRangeAsync(ActivatedGraph.Id, token)
+                .ConfigureAwait(false);
             var src = range.FirstOrDefault(x => x.IsSource);
             Source = src != null ? ActivatedGraph.VertexMap[src.VertexId] : null;
             var tgt = range.FirstOrDefault(x => x.IsTarget);

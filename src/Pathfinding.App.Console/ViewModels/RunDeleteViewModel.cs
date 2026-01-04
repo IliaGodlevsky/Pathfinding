@@ -9,6 +9,7 @@ using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -52,8 +53,9 @@ internal sealed class RunDeleteViewModel : ViewModel, IRunDeleteViewModel, IDisp
     {
         await ExecuteSafe(async token =>
         {
-            bool isDeleted = await statisticsService.DeleteRunsAsync(
-                SelectedRunsIds, token).ConfigureAwait(false);
+            bool isDeleted = await statisticsService
+                .DeleteRunsAsync(SelectedRunsIds, token)
+                .ConfigureAwait(false);
             if (isDeleted)
             {
                 var runs = SelectedRunsIds.ToArray();

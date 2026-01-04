@@ -10,6 +10,7 @@ using ReactiveUI;
 using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -19,6 +20,9 @@ internal sealed partial class GraphsTableView
 {
     private readonly Dictionary<int, IDisposable> modelChangingSubs = [];
     private readonly CompositeDisposable disposables = [];
+
+    private readonly MainLoop mainLoop = Application.MainLoop;
+    private readonly ConsoleDriver driver = Application.Driver;
 
     public GraphsTableView(IGraphTableViewModel viewModel,
         [KeyFilter(KeyFilters.Views)] IMessenger messenger) : this()
@@ -32,6 +36,7 @@ internal sealed partial class GraphsTableView
         this.Events().CellActivated
             .Where(x => x.Row < table.Rows.Count)
             .Select(x => GetGraphId(x.Row))
+            .Do(_ => SetCursorInvisible())
             .InvokeCommand(viewModel, x => x.ActivateGraphCommand)
             .DisposeWith(disposables);
         this.Events().KeyPress
@@ -42,12 +47,14 @@ internal sealed partial class GraphsTableView
                     .SelectMany(x => (x.Rect.Top, x.Rect.Bottom - 1).Iterate())
                     .Select(GetGraphId)
                     .ToArray())
+            .Do(_ => SetCursorInvisible())
             .InvokeCommand(viewModel, x => x.SelectGraphsCommand)
             .DisposeWith(disposables);
         this.Events().SelectedCellChanged
             .Where(x => x.NewRow > -1 && x.NewRow < table.Rows.Count)
             .Select(_ => GetAllSelectedCells().Select(x => x.Y)
                 .Distinct().Select(GetGraphId).ToArray())
+            .Do(_ => SetCursorInvisible())
             .InvokeCommand(viewModel, x => x.SelectGraphsCommand)
             .DisposeWith(disposables);
         this.Events().MouseClick
@@ -56,6 +63,7 @@ internal sealed partial class GraphsTableView
             .Select(x => x.MouseEvent.Y + RowOffset - headerLinesConsumed)
             .Where(x => x >= 0 && x < Table.Rows.Count && x == SelectedRow)
             .Select(x => GetGraphId(x).Enumerate().ToArray())
+            .Do(_ => SetCursorInvisible())
             .InvokeCommand(viewModel, x => x.SelectGraphsCommand)
             .DisposeWith(disposables);
     }
@@ -67,7 +75,7 @@ internal sealed partial class GraphsTableView
 
     private void AddToTable(GraphInfoModel model)
     {
-        Application.MainLoop.Invoke(() =>
+        mainLoop.Invoke(() =>
         {
             table.Rows.Add(model.GetProperties());
             table.AcceptChanges();
@@ -100,7 +108,7 @@ internal sealed partial class GraphsTableView
 
     private void Update<T>(int id, string column, T value)
     {
-        Application.MainLoop.Invoke(() =>
+        mainLoop.Invoke(() =>
         {
             var row = table.Rows.Find(id);
             if (row is not null)
@@ -115,7 +123,7 @@ internal sealed partial class GraphsTableView
 
     private void RemoveFromTable(GraphInfoModel model)
     {
-        Application.MainLoop.Invoke(() =>
+        mainLoop.Invoke(() =>
         {
             var row = table.Rows.Find(model.Id);
             if (row is not null)
@@ -141,8 +149,12 @@ internal sealed partial class GraphsTableView
         });
     }
 
-    private static void SetCursorInvisible()
+    private void SetCursorInvisible()
     {
-        Application.Driver.SetCursorVisibility(CursorVisibility.Invisible);
+        mainLoop.Invoke(() =>
+        {
+            driver.UpdateCursor();
+            driver.SetCursorVisibility(CursorVisibility.Invisible);
+        });
     }
 }

@@ -4,6 +4,7 @@ using Pathfinding.App.Console.ViewModels.Interface;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Terminal.Gui;
 
@@ -20,13 +21,13 @@ internal sealed partial class GraphNeighborhoodView : FrameView
         Initialize();
         var labels = map.Keys.Select(ustring.Make).ToArray();
         var values = labels.Select(x => map[x.ToString()]).ToList();
-        this.neighborhoods.RadioLabels = labels;
-        this.neighborhoods.Events().SelectedItemChanged
+        neighborhoods.RadioLabels = labels;
+        neighborhoods.Events().SelectedItemChanged
             .Where(x => x.SelectedItem > -1)
             .Select(x => values[x.SelectedItem])
             .BindTo(viewModel, x => x.Neighborhood)
             .DisposeWith(disposables);
-        this.neighborhoods.SelectedItem = 0;
+        neighborhoods.SelectedItem = 0;
         this.Events().VisibleChanged
             .Where(_ => Visible)
             .Do(_ => neighborhoods.SelectedItem = 0)

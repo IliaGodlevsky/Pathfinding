@@ -3,5 +3,5 @@ using Pathfinding.Service.Interface.Models.Undefined;
 
 namespace Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 
-internal sealed class RunsCreatedMessaged(RunStatisticsModel[] models)
-    : ValueChangedMessage<RunStatisticsModel[]>(models);
+internal sealed class RunsCreatedMessaged(IReadOnlyCollection<RunStatisticsModel> models)
+    : ValueChangedMessage<IReadOnlyCollection<RunStatisticsModel>>(models);

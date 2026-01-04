@@ -2,6 +2,7 @@
 using ReactiveUI;
 using System.Linq.Expressions;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Terminal.Gui;
 

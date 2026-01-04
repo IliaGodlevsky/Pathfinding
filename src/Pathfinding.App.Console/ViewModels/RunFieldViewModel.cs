@@ -17,6 +17,7 @@ using Pathfinding.Shared.Primitives;
 using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using static Pathfinding.App.Console.Models.RunModel;
 using static Pathfinding.App.Console.ViewModels.ViewModel;

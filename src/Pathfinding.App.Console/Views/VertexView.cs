@@ -1,6 +1,7 @@
 ﻿using Pathfinding.Domain.Interface;
 using ReactiveUI;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Terminal.Gui;
 using static Pathfinding.App.Console.Settings;

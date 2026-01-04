@@ -5,6 +5,7 @@ using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
 using ReactiveMarbles.ObservableEvents;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 using System.Reactive.Linq;
 using Terminal.Gui;
 

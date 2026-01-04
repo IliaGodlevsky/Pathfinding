@@ -9,6 +9,7 @@ using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -48,8 +49,9 @@ internal sealed class GraphDeleteViewModel : ViewModel, IGraphDeleteViewModel, I
     {
         await ExecuteSafe(async token =>
         {
-            var isDeleted = await service.DeleteGraphsAsync(
-                SelectedGraphIds, token).ConfigureAwait(false);
+            var isDeleted = await service
+                .DeleteGraphsAsync(SelectedGraphIds, token)
+                .ConfigureAwait(false);
             if (isDeleted)
             {
                 var graphs = SelectedGraphIds.ToArray();

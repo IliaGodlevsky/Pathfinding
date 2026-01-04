@@ -13,6 +13,7 @@ using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -125,9 +126,13 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
     private async Task UpdateGraphInfo(GraphStatuses status, CancellationToken token)
     {
         messenger.Send(new GraphStateChangedMessage((ActivatedGraph.Id, status)));
-        var graphInfo = await graphInfoService.ReadGraphInfoAsync(ActivatedGraph.Id, token).ConfigureAwait(false);
+        var graphInfo = await graphInfoService
+            .ReadGraphInfoAsync(ActivatedGraph.Id, token)
+            .ConfigureAwait(false);
         graphInfo.Status = status;
-        await graphInfoService.UpdateGraphInfoAsync(graphInfo, token).ConfigureAwait(false);
+        await graphInfoService
+            .UpdateGraphInfoAsync(graphInfo, token)
+            .ConfigureAwait(false);
     }
 
     public void Dispose()

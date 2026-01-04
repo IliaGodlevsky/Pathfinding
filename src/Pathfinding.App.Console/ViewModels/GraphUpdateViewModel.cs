@@ -11,6 +11,7 @@ using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -74,10 +75,14 @@ internal sealed class GraphUpdateViewModel : ViewModel, IDisposable
         await ExecuteSafe(async token =>
         {
             var graph = SelectedGraphs[0];
-            var info = await service.ReadGraphInfoAsync(graph.Id, token).ConfigureAwait(false);
+            var info = await service
+                .ReadGraphInfoAsync(graph.Id, token)
+                .ConfigureAwait(false);
             info.Name = Name;
             info.Neighborhood = Neighborhood;
-            await service.UpdateGraphInfoAsync(info, token).ConfigureAwait(false);
+            await service
+                .UpdateGraphInfoAsync(info, token)
+                .ConfigureAwait(false);
             await messenger.Send(new AwaitGraphUpdatedMessage(info));
         }).ConfigureAwait(false);
     }

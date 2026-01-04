@@ -10,6 +10,7 @@ using Pathfinding.Service.Interface;
 using ReactiveUI;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -54,10 +55,12 @@ internal sealed class GraphCopyViewModel : ViewModel, IGraphCopyViewModel, IDisp
     {
         await ExecuteSafe(async token =>
         {
-            var copies = await service.ReadSerializationHistoriesAsync(
-                SelectedGraphIds, token).ConfigureAwait(false);
-            var histories = await service.CreatePathfindingHistoriesAsync(
-                copies.Histories, token).ConfigureAwait(false);
+            var copies = await service
+                .ReadSerializationHistoriesAsync(SelectedGraphIds, token)
+                .ConfigureAwait(false);
+            var histories = await service
+                .CreatePathfindingHistoriesAsync(copies.Histories, token)
+                .ConfigureAwait(false);
             var graphs = histories.Select(x => x.Graph).ToGraphInfo();
             messenger.Send(new GraphsCreatedMessage(graphs));
         }).ConfigureAwait(false);

@@ -15,6 +15,7 @@ using ReactiveUI;
 using System.Collections.ObjectModel;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -67,14 +68,21 @@ internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDi
     {
         await ExecuteSafe(async token =>
         {
-            var graphModel = await graphService.ReadGraphAsync(model, token).ConfigureAwait(false);
+            var graphModel = await graphService
+                .ReadGraphAsync(model, token)
+                .ConfigureAwait(false);
             var graph = graphModel.CreateGraph();
-            var activatedGraph = new ActiveGraph(graphModel.Id, graph, graphModel.Status == GraphStatuses.Readonly);
+            var activatedGraph = new ActiveGraph(
+                graphModel.Id, 
+                graph, 
+                graphModel.Status == GraphStatuses.Readonly);
             var activated = new ActivatedGraphModel(activatedGraph,
                 graphModel.Neighborhood,
                 graphModel.SmoothLevel);
             var layer = neighborFactory.CreateNeighborhoodLayer(graphModel.Neighborhood);
-            await layer.OverlayAsync(graph, token).ConfigureAwait(false);
+            await layer
+                .OverlayAsync(graph, token)
+                .ConfigureAwait(false);
             await messenger.Send(new AwaitGraphActivatedMessage(activated));
             ActivatedGraphId = graphModel.Id;
         }).ConfigureAwait(false);
@@ -85,7 +93,9 @@ internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDi
         await ExecuteSafe(async token =>
         {
             Graphs.Clear();
-            var infos = await graphInfoService.ReadAllGraphInfoAsync(token).ConfigureAwait(false);
+            var infos = await graphInfoService
+                .ReadAllGraphInfoAsync(token)
+                .ConfigureAwait(false);
             Graphs.Add(infos.ToGraphInfo());
         }).ConfigureAwait(false);
     }

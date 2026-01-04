@@ -126,7 +126,9 @@ internal sealed class GraphAssembleViewModel : ViewModel,
         {
             var graph = graphAssemble.AssembleGraph([Width, Length]);
             var layers = GetLayers();
-            await layers.OverlayAsync(graph, token).ConfigureAwait(false);
+            await layers
+                .OverlayAsync(graph, token)
+                .ConfigureAwait(false);
             var request = new CreateGraphRequest<GraphVertexModel>
             {
                 Graph = graph,
@@ -135,7 +137,9 @@ internal sealed class GraphAssembleViewModel : ViewModel,
                 SmoothLevel = SmoothLevel,
                 Status = GraphStatuses.Editable
             };
-            var graphModel = await service.CreateGraphAsync(request, token).ConfigureAwait(false);
+            var graphModel = await service
+                .CreateGraphAsync(request, token)
+                .ConfigureAwait(false);
             var info = graphModel.ToGraphInformationModel().ToGraphInfo();
             messenger.Send(new GraphsCreatedMessage(info));
         }).ConfigureAwait(false);

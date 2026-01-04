@@ -7,7 +7,7 @@ public class SmoothLayer(int level) : ILayer
 {
     public void Overlay(IGraph<IVertex> graph)
     {
-        var lvl = level;
+        int lvl = level;
         while (lvl-- > 0)
         {
             var costs = graph.Select(GetAverageCost);

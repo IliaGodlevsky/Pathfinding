@@ -17,6 +17,7 @@ using ReactiveUI;
 using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -106,9 +107,10 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
     {
         await ExecuteSafe(async token =>
         {
-            var models = await statisticsService.ReadStatisticsAsync(
-                [.. Selected.Select(x => x.Id)], token).ConfigureAwait(false);
-            var updated = await UpdateRunsAsync(models, ActivatedGraph.Graph, ActivatedGraph.Id).ConfigureAwait(false);
+            var models = await statisticsService
+                .ReadStatisticsAsync([.. Selected.Select(x => x.Id)], token)
+                .ConfigureAwait(false);
+            var updated = await UpdateRunsAsync(models, ActivatedGraph).ConfigureAwait(false);
             messenger.Send(new RunsUpdatedMessage(updated));
         }).ConfigureAwait(false);
     }
@@ -138,11 +140,15 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
 
         await ExecuteSafe(async token =>
         {
-            var model = await graphService.ReadGraphAsync(msg.Value.Id, token).ConfigureAwait(false);
+            var model = await graphService
+                .ReadGraphAsync(msg.Value.Id, token)
+                .ConfigureAwait(false);
             localGraph = model.CreateGraph();
             graphId = model.Id;
             var layer = neighborFactory.CreateNeighborhoodLayer(model.Neighborhood);
-            await layer.OverlayAsync(localGraph, token).ConfigureAwait(false);
+            await layer
+                .OverlayAsync(localGraph, token)
+                .ConfigureAwait(false);
         }).ConfigureAwait(false);
 
         return (localGraph, graphId);
@@ -152,20 +158,24 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
     {
         await ExecuteSafe(async token =>
         {
-            var models = await statisticsService.ReadStatisticsAsync(graphId, token).ConfigureAwait(false);
-            var updated = await UpdateRunsAsync(models, graphToUpdate, graphId).ConfigureAwait(false);
+            var models = await statisticsService
+                .ReadStatisticsAsync(graphId, token)
+                .ConfigureAwait(false);
+            var updated = await UpdateRunsAsync(models, 
+                new(graphId, graphToUpdate)).ConfigureAwait(false);
             messenger.Send(new RunsUpdatedMessage(updated));
         }).ConfigureAwait(false);
     }
 
     private async Task<RunStatisticsModel[]> UpdateRunsAsync(
         IReadOnlyCollection<RunStatisticsModel> selectedStatistics,
-        Graph<GraphVertexModel> graphToUpdate,
-        int graphId)
+        ActiveGraph graphToUpdate)
     {
-        var rangeModels = await rangeService.ReadRangeAsync(graphId).ConfigureAwait(false);
+        var rangeModels = await rangeService
+            .ReadRangeAsync(graphToUpdate.Id)
+            .ConfigureAwait(false);
         var range = rangeModels
-            .Select(x => graphToUpdate.First(y => y.Id == x.VertexId))
+            .Select(x => graphToUpdate.VertexMap[x.VertexId])
             .ToList();
         var updatedRuns = new List<RunStatisticsModel>();
         if (range.Count > 1)
@@ -202,7 +212,9 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
             }
             await ExecuteSafe(async token =>
             {
-                await statisticsService.UpdateStatisticsAsync(updatedRuns, token).ConfigureAwait(false);
+                await statisticsService
+                    .UpdateStatisticsAsync(updatedRuns, token)
+                    .ConfigureAwait(false);
             }, updatedRuns.Clear).ConfigureAwait(false);
         }
         return [.. updatedRuns];

@@ -28,30 +28,41 @@ public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory) : IGraph
         }, token).ConfigureAwait(false);
     }
 
-    public async Task<GraphInformationModel> ReadGraphInfoAsync(int graphId, CancellationToken token = default)
+    public async Task<GraphInformationModel> ReadGraphInfoAsync(
+        int graphId, 
+        CancellationToken token = default)
     {
-        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
-        var result = await unitOfWork.GraphRepository.ReadAsync(graphId, token)
+        await using var unitOfWork = await factory
+            .CreateAsync(token)
+            .ConfigureAwait(false);
+        var result = await unitOfWork.GraphRepository
+            .ReadAsync(graphId, token)
             .ConfigureAwait(false);
         return result.ToGraphInformationModel();
     }
 
-    public async Task<bool> UpdateGraphInfoAsync(GraphInformationModel graph, CancellationToken token = default)
+    public async Task<bool> UpdateGraphInfoAsync(
+        GraphInformationModel graph, 
+        CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unit, t) =>
         {
             var graphInfo = graph.ToGraphEntity();
-            return await unit.GraphRepository.UpdateAsync(graphInfo, t)
+            return await unit.GraphRepository
+                .UpdateAsync(graphInfo, t)
                 .ConfigureAwait(false);
         }, token).ConfigureAwait(false);
     }
 
-    public async Task<bool> DeleteGraphsAsync(IReadOnlyCollection<int> ids,
+    public async Task<bool> DeleteGraphsAsync(
+        IReadOnlyCollection<int> ids,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unitOfWork, t)
-                => await unitOfWork.GraphRepository.DeleteAsync([.. ids], t)
-                    .ConfigureAwait(false), token)
-            .ConfigureAwait(false);
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
+        {
+            return await unitOfWork.GraphRepository
+                .DeleteAsync(ids, t)
+                .ConfigureAwait(false);
+        }, token).ConfigureAwait(false);
     }
 }

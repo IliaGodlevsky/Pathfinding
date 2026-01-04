@@ -50,12 +50,14 @@ internal sealed class GraphImportViewModel : ViewModel, IGraphImportViewModel
             var histories = await serializer
                 .DeserializeFromAsync(stream.Stream, token)
                 .ConfigureAwait(false);
-            var result = await service.CreatePathfindingHistoriesAsync(
-                histories.Histories, token).ConfigureAwait(false);
+            var result = await service
+                .CreatePathfindingHistoriesAsync(histories.Histories, token)
+                .ConfigureAwait(false);
             var graphs = result.Select(x => x.Graph).ToGraphInfo();
             messenger.Send(new GraphsCreatedMessage(graphs));
             log.Info(graphs.Length > 0
-                ? Resource.WasLoadedMsg : Resource.WereLoadedMsg);
+                ? Resource.WasLoadedMsg 
+                : Resource.WereLoadedMsg);
         }).ConfigureAwait(false);
     }
 }

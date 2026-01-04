@@ -22,6 +22,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 
 // ReSharper disable PossibleInvalidOperationException
 // ReSharper disable RedundantAssignment
@@ -86,7 +87,6 @@ internal sealed class RunCreateViewModel : ViewModel,
     }
 
     private StepRules? stepRule;
-
     public StepRules? StepRule
     {
         get => stepRule;
@@ -242,9 +242,10 @@ internal sealed class RunCreateViewModel : ViewModel,
 
         await ExecuteSafe(async token =>
         {
-            var result = await statisticsService.CreateStatisticsAsync(statistics, token)
+            var result = await statisticsService
+                .CreateStatisticsAsync(statistics, token)
                 .ConfigureAwait(false);
-            messenger.Send(new RunsCreatedMessaged([.. result]));
+            messenger.Send(new RunsCreatedMessaged(result));
         }).ConfigureAwait(false);
     }
 

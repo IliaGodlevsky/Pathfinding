@@ -12,13 +12,13 @@ using Pathfinding.Logging.Interface;
 using ReactiveUI;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 
 // ReSharper disable PossibleInvalidOperationException
 
 namespace Pathfinding.App.Console.ViewModels;
 
-internal sealed class GraphExportViewModel
-    : ViewModel, IGraphExportViewModel, IDisposable
+internal sealed class GraphExportViewModel : ViewModel, IGraphExportViewModel, IDisposable
 {
     private readonly IReadHistoryOptions options;
     private readonly Dictionary<StreamFormat, Serializer> serializers;
@@ -69,11 +69,13 @@ internal sealed class GraphExportViewModel
         {
             await using var stream = streamFactory();
             if (stream.IsEmpty) return;
-            var histories = await options.ReadHistoryAsync(Option,
-                SelectedGraphIds, token).ConfigureAwait(false);
+            var histories = await options
+                .ReadHistoryAsync(Option,SelectedGraphIds, token)
+                .ConfigureAwait(false);
             var serializer = serializers[stream.Format.Value];
-            await serializer.SerializeToAsync(histories,
-                stream.Stream, token).ConfigureAwait(false);
+            await serializer
+                .SerializeToAsync(histories, stream.Stream, token)
+                .ConfigureAwait(false);
             log.Info(histories.Histories.Count == 1
                 ? Resource.WasDeletedMsg
                 : Resource.WereDeletedMsg);

@@ -15,6 +15,7 @@ using Pathfinding.Shared.Extensions;
 using ReactiveUI;
 using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
 
 namespace Pathfinding.App.Console.ViewModels;
 
@@ -91,11 +92,12 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
                 vertex.IsObstacle = polarity;
                 int graphId = activatedGraph.Id;
                 messenger.Send(new ObstaclesCountChangedMessage((graphId, vertex.IsObstacle ? 1 : -1)));
-                var request = new UpdateVerticesRequest<GraphVertexModel>(graphId,
-                    [.. vertex.Enumerate()]);
+                var request = new UpdateVerticesRequest<GraphVertexModel>(graphId, [.. vertex.Enumerate()]);
                 await ExecuteSafe(async token =>
                 {
-                    await service.UpdateVerticesAsync(request, token).ConfigureAwait(false);
+                    await service
+                        .UpdateVerticesAsync(request, token)
+                        .ConfigureAwait(false);
                 }).ConfigureAwait(false);
             }
         }
@@ -120,7 +122,9 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
             cost = vertex.Cost.CostRange.ReturnInRange(cost);
             vertex.Cost = new VertexCost(cost, vertex.Cost.CostRange);
             var request = new UpdateVerticesRequest<GraphVertexModel>(ActivatedGraph.Id, [.. vertex.Enumerate()]);
-            await service.UpdateVerticesAsync(request, token).ConfigureAwait(false);
+            await service
+                .UpdateVerticesAsync(request, token)
+                .ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
 

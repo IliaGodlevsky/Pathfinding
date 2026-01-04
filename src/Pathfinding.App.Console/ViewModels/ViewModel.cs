@@ -10,7 +10,7 @@ namespace Pathfinding.App.Console.ViewModels;
 [ViewModel]
 internal abstract class ViewModel(ILog log) : ReactiveObject
 {
-    public readonly record struct ActiveGraph(int Id, Graph<GraphVertexModel> Graph, bool IsReadonly)
+    public readonly record struct ActiveGraph(int Id, Graph<GraphVertexModel> Graph, bool IsReadonly = false)
     {
         public static readonly ActiveGraph Empty = new(0, Graph<GraphVertexModel>.Empty, false);
 
