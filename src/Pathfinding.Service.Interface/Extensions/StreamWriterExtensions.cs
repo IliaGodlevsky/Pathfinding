@@ -4,8 +4,8 @@ namespace Pathfinding.Service.Interface.Extensions;
 
 public static class StreamWriterExtensions
 {
-    public static async Task WriteAsync(this Stream stream, 
-        IReadOnlyCollection<IBinarySerializable> collection, 
+    public static async Task WriteAsync(this Stream stream,
+        IReadOnlyCollection<IBinarySerializable> collection,
         CancellationToken token = default)
     {
         await stream
@@ -19,7 +19,7 @@ public static class StreamWriterExtensions
         }
     }
 
-    public static async Task WriteAsync(this Stream stream, 
+    public static async Task WriteAsync(this Stream stream,
         IBinarySerializable serializable,
         CancellationToken token = default)
     {
@@ -28,8 +28,8 @@ public static class StreamWriterExtensions
             .ConfigureAwait(false);
     }
 
-    public static async Task WriteNullableInt32Async(this Stream stream, 
-        int? value, 
+    public static async Task WriteNullableInt32Async(this Stream stream,
+        int? value,
         CancellationToken token = default)
     {
         await stream
@@ -43,8 +43,8 @@ public static class StreamWriterExtensions
         }
     }
 
-    public static async Task WriteNullableDoubleAsync(this Stream stream, 
-        double? value, 
+    public static async Task WriteNullableDoubleAsync(this Stream stream,
+        double? value,
         CancellationToken token = default)
     {
         await stream
@@ -58,7 +58,7 @@ public static class StreamWriterExtensions
         }
     }
 
-    public static async Task WriteInt32ArrayAsync(this Stream stream, 
+    public static async Task WriteInt32ArrayAsync(this Stream stream,
         IReadOnlyCollection<int> array,
         CancellationToken token = default)
     {
@@ -87,7 +87,7 @@ public static class StreamWriterExtensions
         await stream.WriteAsync(buffer, token).ConfigureAwait(false);
     }
 
-    public static async Task WriteStringAsync(this Stream stream, string value, 
+    public static async Task WriteStringAsync(this Stream stream, string value,
         CancellationToken token = default)
     {
         ArgumentNullException.ThrowIfNull(value, nameof(value));
@@ -97,7 +97,7 @@ public static class StreamWriterExtensions
         await stream.WriteAsync(buffer, token).ConfigureAwait(false);
     }
 
-    public static async Task WriteBoolAsync(this Stream stream, bool value, 
+    public static async Task WriteBoolAsync(this Stream stream, bool value,
         CancellationToken token)
     {
         var buffer = new[] { (byte)(value ? 1 : 0) };

@@ -88,7 +88,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
     }
 
     public async Task<bool> UpdateVerticesAsync(
-        UpdateVerticesRequest<T> request, 
+        UpdateVerticesRequest<T> request,
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unitOfWork, t) =>
@@ -103,7 +103,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
     }
 
     public async Task<GraphModel<T>> ReadGraphAsync(
-        int graphId, 
+        int graphId,
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unitOfWork, t) =>

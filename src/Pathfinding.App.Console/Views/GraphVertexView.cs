@@ -1,6 +1,5 @@
 ﻿using Pathfinding.App.Console.Models;
 using ReactiveUI;
-using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
 
 namespace Pathfinding.App.Console.Views;

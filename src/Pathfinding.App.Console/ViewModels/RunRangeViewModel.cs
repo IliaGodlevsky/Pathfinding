@@ -155,8 +155,8 @@ internal sealed class RunRangeViewModel : ViewModel,
             var vertices = this.ToList();
             var index = vertices.IndexOf(vertex);
             var request = new CreatePathfindingVertexRequest(
-                ActivatedGraph.Id, 
-                vertex.Id, 
+                ActivatedGraph.Id,
+                vertex.Id,
                 index);
             await rangeService
                 .CreatePathfindingVertexAsync(request, token)

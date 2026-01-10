@@ -70,7 +70,7 @@ internal sealed class GraphExportViewModel : ViewModel, IGraphExportViewModel, I
             await using var stream = streamFactory();
             if (stream.IsEmpty) return;
             var histories = await options
-                .ReadHistoryAsync(Option,SelectedGraphIds, token)
+                .ReadHistoryAsync(Option, SelectedGraphIds, token)
                 .ConfigureAwait(false);
             var serializer = serializers[stream.Format.Value];
             await serializer

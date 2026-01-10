@@ -73,8 +73,8 @@ internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDi
                 .ConfigureAwait(false);
             var graph = graphModel.CreateGraph();
             var activatedGraph = new ActiveGraph(
-                graphModel.Id, 
-                graph, 
+                graphModel.Id,
+                graph,
                 graphModel.Status == GraphStatuses.Readonly);
             var activated = new ActivatedGraphModel(activatedGraph,
                 graphModel.Neighborhood,

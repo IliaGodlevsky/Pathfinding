@@ -29,7 +29,7 @@ public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory) : IGraph
     }
 
     public async Task<GraphInformationModel> ReadGraphInfoAsync(
-        int graphId, 
+        int graphId,
         CancellationToken token = default)
     {
         await using var unitOfWork = await factory
@@ -42,7 +42,7 @@ public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory) : IGraph
     }
 
     public async Task<bool> UpdateGraphInfoAsync(
-        GraphInformationModel graph, 
+        GraphInformationModel graph,
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unit, t) =>
