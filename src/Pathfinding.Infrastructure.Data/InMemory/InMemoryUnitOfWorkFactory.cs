@@ -9,6 +9,8 @@ public sealed class InMemoryUnitOfWorkFactory : IUnitOfWorkFactory
 
     public Task<IUnitOfWork> CreateAsync(CancellationToken token = default)
     {
-        return Task.FromResult(unitOfWork);
+        return token.IsCancellationRequested
+            ? Task.FromCanceled<IUnitOfWork>(token)
+            : Task.FromResult(unitOfWork);
     }
 }

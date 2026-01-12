@@ -9,6 +9,10 @@ public sealed class LiteDbInMemoryUnitOfWorkFactory : IUnitOfWorkFactory
 
     public Task<IUnitOfWork> CreateAsync(CancellationToken token = default)
     {
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<IUnitOfWork>(token);
+        }
         IUnitOfWork uow = new LiteDbUnitOfWork(Memory);
         return Task.FromResult(uow);
     }

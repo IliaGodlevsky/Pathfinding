@@ -5,6 +5,7 @@ using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Extensions;
 using Pathfinding.Domain.Interface.Factories;
 using Pathfinding.Infrastructure.Business.Extensions;
+using Pathfinding.Infrastructure.Data.InMemory;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
@@ -20,6 +21,11 @@ namespace Pathfinding.Infrastructure.Business.Services;
 public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphRequestService<T>
     where T : IVertex, IEntity<long>, new()
 {
+    public GraphRequestService() : this(new InMemoryUnitOfWorkFactory())
+    {
+
+    }
+
     public async Task<IReadOnlyCollection<PathfindingHistoryModel<T>>> CreatePathfindingHistoriesAsync(
         IReadOnlyCollection<PathfindingHistorySerializationModel> request,
         CancellationToken token = default)

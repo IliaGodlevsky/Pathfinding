@@ -19,7 +19,10 @@ internal sealed class LiteDbRangeRepository : IRangeRepository
         IReadOnlyCollection<PathfindingRange> entities,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<IReadOnlyCollection<PathfindingRange>>(token);
+        }
         collection.Insert(entities);
         return Task.FromResult(entities);
     }
@@ -27,7 +30,10 @@ internal sealed class LiteDbRangeRepository : IRangeRepository
     public Task<bool> DeleteByGraphIdAsync(int graphId,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<bool>(token);
+        }
         int deleted = collection.DeleteMany(x => x.GraphId == graphId);
         return Task.FromResult(deleted > 0);
     }
@@ -35,7 +41,10 @@ internal sealed class LiteDbRangeRepository : IRangeRepository
     public Task<bool> DeleteByVerticesIdsAsync(IReadOnlyCollection<long> verticesIds,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<bool>(token);
+        }
         var ids = verticesIds.Select(x => new BsonValue(x)).ToArray();
         var query = Query.In(nameof(PathfindingRange.VertexId), ids);
         return Task.FromResult(collection.DeleteMany(query) > 0);
@@ -62,7 +71,10 @@ internal sealed class LiteDbRangeRepository : IRangeRepository
         IReadOnlyCollection<PathfindingRange> entities,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<IReadOnlyCollection<PathfindingRange>>(token);
+        }
         collection.Upsert(entities);
         return Task.FromResult(entities);
     }

@@ -37,7 +37,7 @@ public sealed class InMemoryUnitOfWork : IUnitOfWork
 
     public Task CommitTransactionAsync(CancellationToken token = default)
     {
-        return Task.CompletedTask;
+        return token.IsCancellationRequested ? Task.FromCanceled(token) : Task.CompletedTask;
     }
 
     public void Dispose()
@@ -47,7 +47,7 @@ public sealed class InMemoryUnitOfWork : IUnitOfWork
 
     public Task RollbackTransactionAsync(CancellationToken token = default)
     {
-        return Task.CompletedTask;
+        return token.IsCancellationRequested ? Task.FromCanceled(token) : Task.CompletedTask;
     }
 
     public ValueTask DisposeAsync()

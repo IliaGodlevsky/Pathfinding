@@ -14,7 +14,10 @@ internal sealed class InMemoryVerticesRepository : IVerticesRepository
         IReadOnlyCollection<Vertex> vertices,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<IReadOnlyCollection<Vertex>>(token);
+        }
         var result = vertices
             .ForEach(x => x.Id = ++id)
             .ForWhole(set.AddRange)
@@ -31,7 +34,10 @@ internal sealed class InMemoryVerticesRepository : IVerticesRepository
     public Task<Vertex> ReadAsync(long vertexId,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<Vertex>(token);
+        }
         var vertex = new Vertex { Id = vertexId };
         set.TryGetValue(vertex, out var result);
         return Task.FromResult(result);
@@ -46,7 +52,10 @@ internal sealed class InMemoryVerticesRepository : IVerticesRepository
         IReadOnlyCollection<Vertex> vertices,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<bool>(token);
+        }
         foreach (var vertex in vertices)
         {
             if (set.TryGetValue(vertex, out var result))

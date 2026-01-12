@@ -22,9 +22,13 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
         collection.EnsureIndex(x => x.Id);
     }
 
-    public Task<Graph> CreateAsync(
-        Graph graph, CancellationToken token = default)
+    public Task<Graph> CreateAsync(Graph graph,
+        CancellationToken token = default)
     {
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<Graph>(token);
+        }
         collection.Insert(graph);
         return Task.FromResult(graph);
     }
@@ -58,10 +62,13 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
         return collection.FindAll().ToAsyncEnumerable();
     }
 
-    public Task<Graph> ReadAsync(
-        int graphId, CancellationToken token = default)
+    public Task<Graph> ReadAsync(int graphId,
+        CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<Graph>(token);
+        }
         return Task.FromResult(collection.FindById(graphId));
     }
 
@@ -77,7 +84,10 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
         IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<IReadOnlyDictionary<int, int>>(token);
+        }
         var result = vertexCollection
             .Find(x => graphIds.Contains(x.GraphId) && x.IsObstacle)
             .GroupBy(x => x.GraphId)
@@ -87,7 +97,10 @@ internal sealed class LiteDbGraphRepository : IGraphParametersRepository
 
     public Task<bool> UpdateAsync(Graph graph, CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<bool>(token);
+        }
         return Task.FromResult(collection.Update(graph));
     }
 }

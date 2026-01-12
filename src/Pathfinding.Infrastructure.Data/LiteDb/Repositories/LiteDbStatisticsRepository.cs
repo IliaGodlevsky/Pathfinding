@@ -19,7 +19,10 @@ internal sealed class LiteDbStatisticsRepository : IStatisticsRepository
         IReadOnlyCollection<Statistics> statistics,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<IReadOnlyCollection<Statistics>>(token);
+        }
         collection.InsertBulk(statistics);
         return Task.FromResult(statistics);
     }
@@ -34,7 +37,10 @@ internal sealed class LiteDbStatisticsRepository : IStatisticsRepository
         IReadOnlyCollection<int> ids,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<bool>(token);
+        }
         var deletedCount = collection.DeleteMany(x => ids.Contains(x.Id));
         return Task.FromResult(deletedCount > 0);
     }
@@ -54,6 +60,10 @@ internal sealed class LiteDbStatisticsRepository : IStatisticsRepository
 
     public Task<Statistics> ReadByIdAsync(int id, CancellationToken token = default)
     {
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<Statistics>(token);
+        }
         var result = collection.FindById(id);
         return Task.FromResult(result);
     }
@@ -70,6 +80,10 @@ internal sealed class LiteDbStatisticsRepository : IStatisticsRepository
         IReadOnlyCollection<Statistics> entities,
         CancellationToken token = default)
     {
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<bool>(token);
+        }
         var updated = collection.Update(entities);
         return Task.FromResult(updated > 0);
     }

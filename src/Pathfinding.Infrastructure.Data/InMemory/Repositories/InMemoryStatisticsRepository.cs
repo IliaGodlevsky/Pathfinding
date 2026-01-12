@@ -12,7 +12,10 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
         IReadOnlyCollection<Statistics> statistics,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<IReadOnlyCollection<Statistics>>(token);
+        }
         foreach (var entity in statistics)
         {
             entity.Id = ++id;
@@ -35,14 +38,20 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
     public Task<bool> DeleteByIdsAsync(IReadOnlyCollection<int> ids,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<bool>(token);
+        }
         var removed = set.RemoveWhere(s => ids.Contains(s.Id)) > 0;
         return Task.FromResult(removed);
     }
 
     public Task<Statistics> ReadByIdAsync(int statId, CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<Statistics>(token);
+        }
         var tracking = new Statistics { Id = statId };
         set.TryGetValue(tracking, out var statistics);
         return Task.FromResult(statistics);
@@ -52,7 +61,10 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
         IReadOnlyCollection<Statistics> entities,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<bool>(token);
+        }
         foreach (var entity in entities)
         {
             if (set.TryGetValue(entity, out var statistics))

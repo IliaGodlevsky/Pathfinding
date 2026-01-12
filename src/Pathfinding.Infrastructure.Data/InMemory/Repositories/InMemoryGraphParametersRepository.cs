@@ -15,7 +15,10 @@ internal sealed class InMemoryGraphParametersRepository(
     public Task<Graph> CreateAsync(Graph graph,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<Graph>(token);
+        }
         graph.Id = ++id;
         set.Add(graph);
         return Task.FromResult(graph);
@@ -54,7 +57,10 @@ internal sealed class InMemoryGraphParametersRepository(
     public Task<Graph> ReadAsync(int graphId,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<Graph>(token);
+        }
         var equal = new Graph { Id = graphId };
         set.TryGetValue(equal, out var result);
         return Task.FromResult(result);
@@ -63,7 +69,10 @@ internal sealed class InMemoryGraphParametersRepository(
     public Task<bool> UpdateAsync(Graph graph,
         CancellationToken token = default)
     {
-        token.ThrowIfCancellationRequested();
+        if (token.IsCancellationRequested)
+        {
+            return Task.FromCanceled<bool>(token);
+        }
         var equal = new Graph { Id = graph.Id };
         if (set.TryGetValue(equal, out var result))
         {
@@ -85,7 +94,7 @@ internal sealed class InMemoryGraphParametersRepository(
         var result = new Dictionary<int, int>();
         foreach (var graphId in graphIds)
         {
-            var obstacles = await verticesRepository
+            int obstacles = await verticesRepository
                 .ReadVerticesByGraphIdAsync(graphId)
                 .CountAsync(x => x.IsObstacle, token)
                 .ConfigureAwait(false);
