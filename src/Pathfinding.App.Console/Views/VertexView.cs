@@ -30,8 +30,7 @@ internal class VertexView<T> : Label
     {
         model.WhenAnyValue(x => x.Cost)
             .Select(x => x.CurrentCost.ToString())
-            .Do(x => Text = x)
-            .Subscribe()
+            .Subscribe(x => Text = x)
             .DisposeWith(disposables);
 
         this.model = model;

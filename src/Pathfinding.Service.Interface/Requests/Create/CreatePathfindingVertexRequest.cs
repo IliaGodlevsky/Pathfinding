@@ -2,5 +2,5 @@
 
 public record CreatePathfindingVertexRequest(
     int GraphId,
-    long VertexId, 
+    long VertexId,
     int Index);

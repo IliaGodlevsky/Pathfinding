@@ -161,7 +161,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
             var models = await statisticsService
                 .ReadStatisticsAsync(graphId, token)
                 .ConfigureAwait(false);
-            var updated = await UpdateRunsAsync(models, 
+            var updated = await UpdateRunsAsync(models,
                 new(graphId, graphToUpdate)).ConfigureAwait(false);
             messenger.Send(new RunsUpdatedMessage(updated));
         }).ConfigureAwait(false);

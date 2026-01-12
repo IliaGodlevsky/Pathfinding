@@ -27,7 +27,7 @@ public sealed class StatisticsRequestService(IUnitOfWorkFactory factory) : IStat
     }
 
     public async Task<RunStatisticsModel> ReadStatisticAsync(
-        int runId, 
+        int runId,
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(async (unit, t) =>
