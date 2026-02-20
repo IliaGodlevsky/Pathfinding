@@ -25,7 +25,11 @@ internal abstract class ViewModel(ILog log) : ReactiveObject
     {
         try
         {
-            double seconds = Settings.Default.BaseTimeoutSeconds;
+            int multiplier = 1;
+#if DEBUG
+            multiplier = 600;
+#endif
+            double seconds = Settings.Default.BaseTimeoutSeconds * multiplier;
             TimeSpan timeout = TimeSpan.FromSeconds(seconds);
             using var cts = new CancellationTokenSource(timeout);
             await action(cts.Token).ConfigureAwait(false);

@@ -21,12 +21,6 @@ public static class EnumerableExtension
         return collection;
     }
 
-    public static IEnumerable<T> ForWhole<T>(this IEnumerable<T> collection, Action<IEnumerable<T>> action)
-    {
-        action(collection);
-        return collection;
-    }
-
     public static IEnumerable<T> TakeOrDefault<T>(this IEnumerable<T> collection,
         int number, T defaultValue = default)
     {

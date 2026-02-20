@@ -126,9 +126,7 @@ internal sealed class GraphAssembleViewModel : ViewModel,
         {
             var graph = graphAssemble.AssembleGraph([Width, Length]);
             var layers = GetLayers();
-            await layers
-                .OverlayAsync(graph, token)
-                .ConfigureAwait(false);
+            await layers.OverlayAsync(graph, token).ConfigureAwait(false);
             var request = new CreateGraphRequest<GraphVertexModel>
             {
                 Graph = graph,

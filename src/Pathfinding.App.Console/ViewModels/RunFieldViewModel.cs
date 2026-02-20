@@ -75,7 +75,55 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
     {
         if (msg.Value.Length > 0)
         {
-            ActivateRun(msg.Value[0]);
+            var model = msg.Value[0];
+            var run = Runs.FirstOrDefault(x => x.Id == model.Id);
+            if (run == null)
+            {
+                this.RaisePropertyChanged(nameof(RunGraph));
+
+                var rangeMsg = new PathfindingRangeRequestMessage();
+                messenger.Send(rangeMsg);
+
+                var subRevisions = new List<SubRunModel>();
+                var visitedVertices = new List<VisitedModel>();
+
+                void AddSubAlgorithm(IReadOnlyCollection<Coordinate> path = null)
+                {
+                    subRevisions.Add(new(visitedVertices, path ?? []));
+                    visitedVertices = [];
+                }
+                void OnVertexProcessed(VerticesProcessedEventArgs e)
+                {
+                    visitedVertices.Add(new(e.Current, e.Enqueued));
+                }
+                void OnSubPathFound(SubPathFoundEventArgs args)
+                {
+                    AddSubAlgorithm(args.SubPath);
+                }
+
+                var factory = algorithmsFactory.GetAlgorithmFactory(model.Algorithm);
+                var algorithm = factory.CreateAlgorithm(rangeMsg.Response, model);
+                algorithm.SubPathFound += OnSubPathFound;
+                algorithm.VertexProcessed += OnVertexProcessed;
+                try
+                {
+                    algorithm.FindPath();
+                }
+                catch
+                {
+                    AddSubAlgorithm();
+                }
+                finally
+                {
+                    algorithm.SubPathFound -= OnSubPathFound;
+                    algorithm.VertexProcessed -= OnVertexProcessed;
+                }
+
+                var rangeCoordinates = rangeMsg.Response.Select(x => x.Position).ToArray();
+                run = new(RunGraph, subRevisions, rangeCoordinates) { Id = model.Id };
+                Runs.Add(run);
+            }
+            SelectedRun = run;
         }
     }
 
@@ -139,58 +187,6 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
     }
 
     private static void OnRemoved(RunModel model) => model.Dispose();
-
-    private void ActivateRun(RunInfoModel model)
-    {
-        var run = Runs.FirstOrDefault(x => x.Id == model.Id);
-        if (run == null)
-        {
-            this.RaisePropertyChanged(nameof(RunGraph));
-
-            var rangeMsg = new PathfindingRangeRequestMessage();
-            messenger.Send(rangeMsg);
-
-            var subRevisions = new List<SubRunModel>();
-            var visitedVertices = new List<VisitedModel>();
-
-            void AddSubAlgorithm(IReadOnlyCollection<Coordinate> path = null)
-            {
-                subRevisions.Add(new(visitedVertices, path ?? []));
-                visitedVertices = [];
-            }
-            void OnVertexProcessed(VerticesProcessedEventArgs e)
-            {
-                visitedVertices.Add(new(e.Current, e.Enqueued));
-            }
-            void OnSubPathFound(SubPathFoundEventArgs args)
-            {
-                AddSubAlgorithm(args.SubPath);
-            }
-
-            var factory = algorithmsFactory.GetAlgorithmFactory(model.Algorithm);
-            var algorithm = factory.CreateAlgorithm(rangeMsg.Response, model);
-            algorithm.SubPathFound += OnSubPathFound;
-            algorithm.VertexProcessed += OnVertexProcessed;
-            try
-            {
-                algorithm.FindPath();
-            }
-            catch
-            {
-                AddSubAlgorithm();
-            }
-            finally
-            {
-                algorithm.SubPathFound -= OnSubPathFound;
-                algorithm.VertexProcessed -= OnVertexProcessed;
-            }
-
-            var rangeCoordinates = rangeMsg.Response.Select(x => x.Position).ToArray();
-            run = new(RunGraph, subRevisions, rangeCoordinates) { Id = model.Id };
-            Runs.Add(run);
-        }
-        SelectedRun = run;
-    }
 
     public void Dispose()
     {

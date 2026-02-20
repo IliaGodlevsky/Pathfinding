@@ -72,7 +72,7 @@ internal sealed partial class RunFieldView : FrameView
         mainLoop.Invoke(container.RemoveAll);
         vertexDisposables.Clear();
         var children = graph
-            .Select(x => new RunVertexView(x).DisposeWith(disposables))
+            .Select(x => new RunVertexView(x).DisposeWith(vertexDisposables))
             .ToArray();
         mainLoop.Invoke(() =>
         {

@@ -9,7 +9,6 @@ using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.Resources;
 using Pathfinding.App.Console.ViewModels.Interface;
 using Pathfinding.Domain.Core.Enums;
-using Pathfinding.Infrastructure.Business.Algorithms.Exceptions;
 using Pathfinding.Infrastructure.Business.Algorithms.GraphPaths;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
@@ -288,15 +287,9 @@ internal sealed class RunCreateViewModel : ViewModel,
         {
             path = algo.FindPath();
         }
-        catch (PathfindingException ex)
+        catch
         {
             status = RunStatuses.Failure;
-            log.Warn(ex);
-        }
-        catch (Exception ex)
-        {
-            status = RunStatuses.Failure;
-            log.Error(ex);
         }
         finally
         {

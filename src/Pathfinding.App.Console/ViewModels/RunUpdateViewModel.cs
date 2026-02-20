@@ -167,49 +167,21 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         }).ConfigureAwait(false);
     }
 
-    private async Task<RunStatisticsModel[]> UpdateRunsAsync(
+    private async Task<List<RunStatisticsModel>> UpdateRunsAsync(
         IReadOnlyCollection<RunStatisticsModel> selectedStatistics,
         ActiveGraph graphToUpdate)
     {
-        var rangeModels = await rangeService
+        var range = (await rangeService
             .ReadRangeAsync(graphToUpdate.Id)
-            .ConfigureAwait(false);
-        var range = rangeModels
+            .ConfigureAwait(false))
             .Select(x => graphToUpdate.VertexMap[x.VertexId])
-            .ToList();
-        var updatedRuns = new List<RunStatisticsModel>();
-        if (range.Count > 1)
+            .ToArray();
+        List<RunStatisticsModel> updatedRuns = [];
+        if (range.Length > 1)
         {
-            foreach (var info in selectedStatistics)
-            {
-                var visitedCount = 0;
-                void OnVertexProcessed(EventArgs e) => visitedCount++;
-                var factory = algorithmsFactory.GetAlgorithmFactory(info.Algorithm);
-                var algorithm = factory.CreateAlgorithm(range, info);
-                algorithm.VertexProcessed += OnVertexProcessed;
-
-                var status = RunStatuses.Success;
-                var path = NullGraphPath.Interface;
-                var stopwatch = Stopwatch.StartNew();
-                try
-                {
-                    path = algorithm.FindPath();
-                }
-                catch
-                {
-                    status = RunStatuses.Failure;
-                }
-
-                stopwatch.Stop();
-                algorithm.VertexProcessed -= OnVertexProcessed;
-
-                info.Elapsed = stopwatch.Elapsed;
-                info.Visited = visitedCount;
-                info.Cost = path.Cost;
-                info.Steps = path.Count;
-                info.ResultStatus = status;
-                updatedRuns.Add(info);
-            }
+            updatedRuns = [.. selectedStatistics
+                .Select(x => UpdateStatistics(x, range))];
+            
             await ExecuteSafe(async token =>
             {
                 await statisticsService
@@ -217,7 +189,38 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
                     .ConfigureAwait(false);
             }, updatedRuns.Clear).ConfigureAwait(false);
         }
-        return [.. updatedRuns];
+        return updatedRuns;
+    }
+
+    private RunStatisticsModel UpdateStatistics(RunStatisticsModel info, GraphVertexModel[] range)
+    {
+        var visitedCount = 0;
+        void OnVertexProcessed(EventArgs e) => visitedCount++;
+        var factory = algorithmsFactory.GetAlgorithmFactory(info.Algorithm);
+        var algorithm = factory.CreateAlgorithm(range, info);
+        algorithm.VertexProcessed += OnVertexProcessed;
+
+        var status = RunStatuses.Success;
+        var path = NullGraphPath.Interface;
+        var stopwatch = Stopwatch.StartNew();
+        try
+        {
+            path = algorithm.FindPath();
+        }
+        catch
+        {
+            status = RunStatuses.Failure;
+        }
+
+        stopwatch.Stop();
+        algorithm.VertexProcessed -= OnVertexProcessed;
+
+        info.Elapsed = stopwatch.Elapsed;
+        info.Visited = visitedCount;
+        info.Cost = path.Cost;
+        info.Steps = path.Count;
+        info.ResultStatus = status;
+        return info;
     }
 
     public void Dispose()

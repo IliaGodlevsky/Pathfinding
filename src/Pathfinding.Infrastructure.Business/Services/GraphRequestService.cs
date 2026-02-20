@@ -165,11 +165,11 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
             var result = new List<PathfindingHistorySerializationModel>();
             foreach (var graph in graphs)
             {
-                var graphDict = graph.Vertices.ToDictionary(x => x.Id, x => x.Position.ToArray());
+                var graphDict = graph.Vertices.ToDictionary(x => x.Id, x => x.Position);
                 var range = ranges[graph.Id].Select(x => graphDict[x.VertexId])
                     .Select(x => new CoordinateModel() { Coordinate = x })
                     .ToList();
-                result.Add(new PathfindingHistorySerializationModel
+                result.Add(new()
                 {
                     Graph = graph.ToSerializationModel(),
                     Vertices = graph.Vertices.ToSerializationModels(),
@@ -195,7 +195,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
             foreach (var graph in graphs)
             {
                 graph.Status = GraphStatuses.Editable;
-                result.Add(new PathfindingHistorySerializationModel()
+                result.Add(new()
                 {
                     Graph = graph.ToSerializationModel(),
                     Vertices = graph.Vertices.ToSerializationModels(),
@@ -224,12 +224,12 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
             foreach (var graph in graphs)
             {
                 var graphDictionary = graph.Vertices
-                    .ToDictionary(x => x.Id, x => x.Position.ToArray());
+                    .ToDictionary(x => x.Id, x => x.Position);
                 graph.Status = GraphStatuses.Editable;
                 var coordinates = ranges[graph.Id]
                     .Select(x => new CoordinateModel { Coordinate = graphDictionary[x.VertexId] })
                     .ToList();
-                result.Add(new PathfindingHistorySerializationModel
+                result.Add(new()
                 {
                     Graph = graph.ToSerializationModel(),
                     Vertices = graph.Vertices.ToSerializationModels(),

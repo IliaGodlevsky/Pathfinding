@@ -5,6 +5,7 @@ using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.View;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels.Interface;
+using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Infrastructure.Data.Extensions;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using ReactiveMarbles.ObservableEvents;
@@ -73,25 +74,22 @@ internal sealed partial class GraphFieldView : FrameView
     {
         mainLoop.Invoke(container.RemoveAll);
         vertexDisposables.Clear();
-        var views = new GraphVertexView[graph.Count];
-        int i = 0;
-        foreach (var vertex in graph)
+        var views = graph.Select(x =>
         {
-            var view = new GraphVertexView(vertex).DisposeWith(vertexDisposables);
+            var view = new GraphVertexView(x).DisposeWith(vertexDisposables);
 
-            BindTo(view, vertex, runRangeViewModel.AddToRangeCommand, Button1Pressed);
-            BindTo(view, vertex, runRangeViewModel.RemoveFromRangeCommand, Button1Pressed | ButtonCtrl);
+            BindTo(view, x, runRangeViewModel.AddToRangeCommand, Button1Pressed);
+            BindTo(view, x, runRangeViewModel.RemoveFromRangeCommand, Button1Pressed | ButtonCtrl);
             BindTo(view, runRangeViewModel.DeletePathfindingRange, Button1DoubleClicked | ButtonCtrl | ButtonAlt);
 
-            BindTo(view, vertex, graphFieldViewModel.ReverseVertexCommand, Button3Pressed | ButtonCtrl);
-            BindTo(view, vertex, graphFieldViewModel.InverseVertexCommand, Button3Pressed | ButtonAlt);
-            BindTo(view, vertex, graphFieldViewModel.ChangeVertexPolarityCommand, Button3Clicked);
+            BindTo(view, x, graphFieldViewModel.ReverseVertexCommand, Button3Pressed | ButtonCtrl);
+            BindTo(view, x, graphFieldViewModel.InverseVertexCommand, Button3Pressed | ButtonAlt);
+            BindTo(view, x, graphFieldViewModel.ChangeVertexPolarityCommand, Button3Clicked);
 
-            BindTo(view, vertex, graphFieldViewModel.DecreaseVertexCostCommand, WheeledDown);
-            BindTo(view, vertex, graphFieldViewModel.IncreaseVertexCostCommand, WheeledUp);
-
-            views[i++] = view;
-        }
+            BindTo(view, x, graphFieldViewModel.DecreaseVertexCostCommand, WheeledDown);
+            BindTo(view, x, graphFieldViewModel.IncreaseVertexCostCommand, WheeledUp);
+            return view;
+        }).ToArray();
 
         mainLoop.Invoke(() =>
         {

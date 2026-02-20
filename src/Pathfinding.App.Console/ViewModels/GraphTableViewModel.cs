@@ -80,9 +80,7 @@ internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDi
                 graphModel.Neighborhood,
                 graphModel.SmoothLevel);
             var layer = neighborFactory.CreateNeighborhoodLayer(graphModel.Neighborhood);
-            await layer
-                .OverlayAsync(graph, token)
-                .ConfigureAwait(false);
+            await layer.OverlayAsync(graph, token).ConfigureAwait(false);
             await messenger.Send(new AwaitGraphActivatedMessage(activated));
             ActivatedGraphId = graphModel.Id;
         }).ConfigureAwait(false);

@@ -1,6 +1,5 @@
 ﻿using Pathfinding.Domain.Core.Entities;
 using Pathfinding.Domain.Interface.Repositories;
-using Pathfinding.Shared.Extensions;
 
 namespace Pathfinding.Infrastructure.Data.InMemory.Repositories;
 
@@ -18,11 +17,12 @@ internal sealed class InMemoryVerticesRepository : IVerticesRepository
         {
             return Task.FromCanceled<IReadOnlyCollection<Vertex>>(token);
         }
-        var result = vertices
-            .ForEach(x => x.Id = ++id)
-            .ForWhole(set.AddRange)
-            .ToList();
-        return Task.FromResult((IReadOnlyCollection<Vertex>)result);
+        foreach (var vertex in vertices)
+        {
+            vertex.Id = ++id;
+            set.Add(vertex);
+        }
+        return Task.FromResult(vertices);
     }
 
     public Task<bool> DeleteVerticesByGraphIdAsync(int graphId)

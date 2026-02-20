@@ -27,17 +27,22 @@ public sealed class InMemoryUnitOfWork : IUnitOfWork
         VerticesRepository = vertices;
         RangeRepository = range;
         StatisticsRepository = statistics;
-        GraphRepository = new InMemoryGraphParametersRepository(range, vertices, statistics);
+        GraphRepository = new InMemoryGraphParametersRepository(range, 
+            vertices, statistics);
     }
 
     public ValueTask BeginTransactionAsync(CancellationToken token = default)
     {
-        return token.IsCancellationRequested ? ValueTask.FromCanceled(token) : ValueTask.CompletedTask;
+        return token.IsCancellationRequested 
+            ? ValueTask.FromCanceled(token) 
+            : ValueTask.CompletedTask;
     }
 
     public Task CommitTransactionAsync(CancellationToken token = default)
     {
-        return token.IsCancellationRequested ? Task.FromCanceled(token) : Task.CompletedTask;
+        return token.IsCancellationRequested 
+            ? Task.FromCanceled(token) 
+            : Task.CompletedTask;
     }
 
     public void Dispose()
@@ -47,7 +52,9 @@ public sealed class InMemoryUnitOfWork : IUnitOfWork
 
     public Task RollbackTransactionAsync(CancellationToken token = default)
     {
-        return token.IsCancellationRequested ? Task.FromCanceled(token) : Task.CompletedTask;
+        return token.IsCancellationRequested 
+            ? Task.FromCanceled(token) 
+            : Task.CompletedTask;
     }
 
     public ValueTask DisposeAsync()
