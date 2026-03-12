@@ -73,7 +73,7 @@ public sealed class GraphPath : IGraphPath
 
     public IEnumerator<Coordinate> GetEnumerator()
     {
-        for (int i = 0; i < Path.Count - 1; i++)
+        for (int i = 0; i < Count; i++)
         {
             yield return Path[i].Position;
         }

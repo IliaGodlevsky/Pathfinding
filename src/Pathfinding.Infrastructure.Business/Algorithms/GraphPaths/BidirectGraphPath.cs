@@ -49,30 +49,32 @@ public sealed class BidirectGraphPath : IGraphPath
 
     }
 
-    private ReadOnlyCollection<IPathfindingVertex> GetPath()
+    private List<IPathfindingVertex> UnrollPath(
+        IReadOnlyDictionary<Coordinate, IPathfindingVertex> traces,
+        bool isBackward = false)
     {
-        var vertices = new HashSet<IPathfindingVertex>();
+        IPathfindingVertex[] initial = isBackward ? [] : [intersection];
+        var vertices = new List<IPathfindingVertex>(initial);
         var vertex = intersection;
-        vertices.Add(vertex);
-        var parent = forwardTraces.GetOrNullVertex(vertex.Position);
+        var parent = traces.GetOrNullVertex(vertex.Position);
         while (parent.IsNeighbor(vertex))
         {
             vertices.Add(parent);
             vertex = parent;
-            parent = forwardTraces.GetOrNullVertex(vertex.Position);
+            parent = traces.GetOrNullVertex(vertex.Position);
         }
-        vertex = intersection;
-        parent = backwardTraces.GetOrNullVertex(vertex.Position);
-        var backward = new HashSet<IPathfindingVertex>();
-        while (parent.IsNeighbor(vertex))
+        if (isBackward)
         {
-            backward.Add(parent);
-            vertex = parent;
-            parent = backwardTraces.GetOrNullVertex(vertex.Position);
+            vertices.Reverse();
         }
-        backward.Add(vertex);
-        return backward.Reverse()
-            .Concat(vertices).ToList().AsReadOnly();
+        return vertices;
+    }
+
+    private ReadOnlyCollection<IPathfindingVertex> GetPath()
+    {
+        var forward = UnrollPath(forwardTraces);
+        var backward = UnrollPath(backwardTraces, true);
+        return backward.Concat(forward).ToList().AsReadOnly();
     }
 
     private double GetCost()
@@ -92,7 +94,7 @@ public sealed class BidirectGraphPath : IGraphPath
 
     public IEnumerator<Coordinate> GetEnumerator()
     {
-        for (int i = 0; i < Path.Count - 1; i++)
+        for (int i = 0; i < Count; i++)
         {
             yield return Path[i].Position;
         }

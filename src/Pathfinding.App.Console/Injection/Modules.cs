@@ -35,10 +35,34 @@ internal static class Modules
     {
         var builder = new ContainerBuilder();
 
+        builder.RegisterInstance(new SqliteUnitOfWorkFactory(Settings.Default.ConnectionString)).As<IUnitOfWorkFactory>().SingleInstance();
+        builder.RegisterType<LiteDbInMemoryUnitOfWorkFactory>().As<IUnitOfWorkFactory>().SingleInstance().IfNotRegistered(typeof(IUnitOfWorkFactory));
+
         builder.RegisterType<GraphAssemble<GraphVertexModel>>().As<IGraphAssemble<GraphVertexModel>>().SingleInstance();
         builder.RegisterType<GraphAssemble<RunVertexModel>>().As<IGraphAssemble<RunVertexModel>>().SingleInstance();
 
-        builder.RegisterInstance(new SqliteUnitOfWorkFactory(Settings.Default.ConnectionString)).As<IUnitOfWorkFactory>().SingleInstance();
+        builder.RegisterType<MooreNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Moore);
+        builder.RegisterType<VonNeumannNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.VonNeumann);
+        builder.RegisterType<DiagonalNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Diagonal);
+        builder.RegisterType<KnightsNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Knight);
+        builder.RegisterType<NeighborhoodLayerFactory>().As<INeighborhoodLayerFactory>()
+            .WithAttributeFiltering().SingleInstance();
+
+        builder.RegisterInstance(new SmoothLayer(0)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.No);
+        builder.RegisterInstance(new SmoothLayer(1)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Low);
+        builder.RegisterInstance(new SmoothLayer(2)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Medium);
+        builder.RegisterInstance(new SmoothLayer(4)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.High);
+        builder.RegisterInstance(new SmoothLayer(8)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Extreme);
+        builder.RegisterType<SmoothLevelFactory>().As<ISmoothLevelFactory>().SingleInstance();
 
         builder.RegisterType<GraphRequestService<GraphVertexModel>>().As<IGraphRequestService<GraphVertexModel>>().SingleInstance();
         builder.RegisterType<RangeRequestService<GraphVertexModel>>().As<IRangeRequestService<GraphVertexModel>>().SingleInstance();
@@ -98,29 +122,6 @@ internal static class Modules
         builder.RegisterType<ManhattanDistance>().As<IHeuristic>().SingleInstance()
             .WithMetadata(MetadataKeys.Heuristics, Heuristics.Manhattan);
         builder.RegisterType<HeuristicsFactory>().As<IHeuristicsFactory>().SingleInstance();
-
-        builder.RegisterType<MooreNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
-            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Moore);
-        builder.RegisterType<VonNeumannNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
-            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.VonNeumann);
-        builder.RegisterType<DiagonalNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
-            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Diagonal);
-        builder.RegisterType<KnightsNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
-            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Knight);
-        builder.RegisterType<NeighborhoodLayerFactory>().As<INeighborhoodLayerFactory>()
-            .WithAttributeFiltering().SingleInstance();
-
-        builder.RegisterInstance(new SmoothLayer(0)).AsSelf().SingleInstance()
-            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.No);
-        builder.RegisterInstance(new SmoothLayer(1)).AsSelf().SingleInstance()
-            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Low);
-        builder.RegisterInstance(new SmoothLayer(2)).AsSelf().SingleInstance()
-            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Medium);
-        builder.RegisterInstance(new SmoothLayer(4)).AsSelf().SingleInstance()
-            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.High);
-        builder.RegisterInstance(new SmoothLayer(8)).AsSelf().SingleInstance()
-            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Extreme);
-        builder.RegisterType<SmoothLevelFactory>().As<ISmoothLevelFactory>().SingleInstance();
 
         builder.RegisterType<RandomAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Random)
             .WithMetadata(MetadataKeys.Order, 15).WithMetadata(MetadataKeys.Requirements, AlgorithmRequirements.NoRequirements)
@@ -222,8 +223,6 @@ internal static class Modules
         builder.RegisterType<RunCreateButton>().Keyed<View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
         builder.RegisterType<RunUpdateButton>().Keyed<View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
         builder.RegisterType<RunDeleteButton>().Keyed<View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
-
-        builder.RegisterType<LiteDbInMemoryUnitOfWorkFactory>().As<IUnitOfWorkFactory>().SingleInstance().IfNotRegistered(typeof(IUnitOfWorkFactory));
 
         return builder.Build();
     }

@@ -117,7 +117,7 @@ internal sealed class RunCreateViewModel : ViewModel,
         AllowedStepRules = stepRuleFactory.Allowed;
         Requirements = algorithmsFactory.Requirements;
 
-        CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm, CanCreateAlgorithm());
+        CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm, CanCreateAlgorithm()).DisposeWith(disposables);
 
         messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
