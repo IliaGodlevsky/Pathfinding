@@ -6,9 +6,18 @@ namespace Pathfinding.App.Console.Views;
 
 internal sealed class GraphVertexView : VertexView<GraphVertexModel>
 {
+    private const string ObstacleWall = "███";
+
     public GraphVertexView(GraphVertexModel model)
         : base(model)
     {
+        model.WhenAnyValue(
+                x => x.IsObstacle,
+                x => x.Cost,
+                (isObstacle, cost) => isObstacle ? ObstacleWall : cost.CurrentCost.ToString())
+            .BindTo(this, x => x.Text)
+            .DisposeWith(disposables);
+
         model.WhenAnyValue(
             x => x.IsObstacle,
             x => x.IsTransit,

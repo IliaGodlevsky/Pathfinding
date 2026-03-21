@@ -19,11 +19,23 @@ internal sealed class GraphAssembleDialog : Dialog
         var parametres = new GraphParametresView(viewModel).DisposeWith(disposables);
         var neighborhood = new GraphNeighborhoodView(viewModel).DisposeWith(disposables);
         var smoothLevels = new GraphSmoothLevelView(viewModel).DisposeWith(disposables);
+        var mazeMode = new CheckBox("Maze mode")
+        {
+            X = 2,
+            Y = Pos.Bottom(name) + 1
+        }.DisposeWith(disposables);
         var createButton = new Button("Create").DisposeWith(disposables);
         var cancelButton = new Button("Cancel").DisposeWith(disposables);
         viewModel.AssembleGraphCommand.CanExecute
            .BindTo(createButton, x => x.Enabled)
            .DisposeWith(disposables);
+        mazeMode.Events().Toggled
+            .Select(x => x.CurrentValue)
+            .BindTo(viewModel, x => x.IsMaze)
+            .DisposeWith(disposables);
+        viewModel.WhenAnyValue(x => x.IsMaze)
+            .BindTo(mazeMode, x => x.Checked)
+            .DisposeWith(disposables);
         createButton.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
             .Select(_ => Unit.Default)
@@ -34,7 +46,7 @@ internal sealed class GraphAssembleDialog : Dialog
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
             .Subscribe(_ => Application.RequestStop())
             .DisposeWith(disposables);
-        Add(name, parametres, neighborhood, smoothLevels);
+        Add(name, parametres, neighborhood, smoothLevels, mazeMode);
         Width = Dim.Percent(27);
         Height = Dim.Percent(37);
         AddButton(cancelButton);

@@ -85,6 +85,13 @@ internal sealed class GraphAssembleViewModel : ViewModel,
         set => this.RaiseAndSetIfChanged(ref neighborhood, value);
     }
 
+    private bool isMaze;
+    public bool IsMaze
+    {
+        get => isMaze;
+        set => this.RaiseAndSetIfChanged(ref isMaze, value);
+    }
+
     private InclusiveValueRange<int> range;
     public InclusiveValueRange<int> Range
     {
@@ -151,7 +158,7 @@ internal sealed class GraphAssembleViewModel : ViewModel,
             {
                 Graph = graph,
                 Name = Name,
-                Neighborhood = Neighborhood,
+                Neighborhood = IsMaze ? Neighborhoods.VonNeumann : Neighborhood,
                 SmoothLevel = SmoothLevel
             }; 
             var graphModel = await service
@@ -168,9 +175,10 @@ internal sealed class GraphAssembleViewModel : ViewModel,
             => new VertexCost(Random.Shared.Next(
                 range.LowerValueOfRange,
                 range.UpperValueOfRange + 1)));
-        var obstacleLayer = new ObstacleLayer(Obstacles);
+        ILayer obstacleLayer = IsMaze ? new MazeLayer() : new ObstacleLayer(Obstacles);
         var smoothLayer = smoothLevelFactory.CreateLayer(SmoothLevel);
-        var neighborhoodLayer = neighborFactory.CreateNeighborhoodLayer(Neighborhood);
+        var neighborhood = IsMaze ? Neighborhoods.VonNeumann : Neighborhood;
+        var neighborhoodLayer = neighborFactory.CreateNeighborhoodLayer(neighborhood);
         return new(neighborhoodLayer, costLayer, obstacleLayer, smoothLayer);
     }
 
