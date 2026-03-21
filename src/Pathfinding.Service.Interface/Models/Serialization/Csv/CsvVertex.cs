@@ -8,9 +8,5 @@ internal class CsvVertex
 
     public int Cost { get; set; }
 
-    public int UpperValueOfRange { get; set; }
-
-    public int LowerValueOfRange { get; set; }
-
     public bool IsObstacle { get; set; }
 }

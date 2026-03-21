@@ -18,12 +18,12 @@ public class StepRulesBenchmarks
         first = new BenchmarkVertex()
         {
             Position = new Coordinate(2, 3),
-            Cost = new VertexCost(3, range)
+            Cost = new VertexCost(3)
         };
         second = new BenchmarkVertex()
         {
             Position = new Coordinate(12, 45),
-            Cost = new VertexCost(6, range)
+            Cost = new VertexCost(6)
         };
     }
 

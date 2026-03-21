@@ -10,8 +10,6 @@ internal static class CsvMappings
         return new()
         {
             GraphId = graphId,
-            LowerValueOfRange = model.Cost.LowerValueOfRange,
-            UpperValueOfRange = model.Cost.UpperValueOfRange,
             Cost = model.Cost.Cost,
             IsObstacle = model.IsObstacle,
             Coordinate = JsonConvert.SerializeObject(model.Position.Coordinate)
@@ -32,7 +30,9 @@ internal static class CsvMappings
             SmoothLevel = model.SmoothLevel,
             Status = model.Status,
             Neighborhood = model.Neighborhood,
-            DimensionSizes = JsonConvert.SerializeObject(model.DimensionSizes)
+            DimensionSizes = JsonConvert.SerializeObject(model.DimensionSizes),
+            UpperValueOfRange = model.CostRange.UpperValueOfRange,
+            LowerValueOfRange = model.CostRange.LowerValueOfRange
         };
     }
 
@@ -76,7 +76,8 @@ internal static class CsvMappings
             SmoothLevel = model.SmoothLevel,
             Status = model.Status,
             Neighborhood = model.Neighborhood,
-            DimensionSizes = JsonConvert.DeserializeObject<int[]>(model.DimensionSizes)
+            DimensionSizes = JsonConvert.DeserializeObject<int[]>(model.DimensionSizes),
+            CostRange = new(model.LowerValueOfRange, model.UpperValueOfRange)
         };
     }
 
@@ -84,12 +85,7 @@ internal static class CsvMappings
     {
         return new()
         {
-            Cost = new()
-            {
-                Cost = model.Cost,
-                UpperValueOfRange = model.UpperValueOfRange,
-                LowerValueOfRange = model.LowerValueOfRange
-            },
+            Cost = new() { Cost = model.Cost },
             IsObstacle = model.IsObstacle,
             Position = new()
             {

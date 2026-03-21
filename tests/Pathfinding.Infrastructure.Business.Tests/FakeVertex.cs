@@ -12,7 +12,7 @@ internal class FakeVertex : IVertex, IEntity<long>
 
     public bool IsObstacle { get; set; }
 
-    public IVertexCost Cost { get; set; } = new VertexCost(1, (1, 9));
+    public IVertexCost Cost { get; set; } = new VertexCost(1);
 
     public Coordinate Position { get; set; }
 

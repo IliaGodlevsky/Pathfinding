@@ -86,6 +86,7 @@ internal sealed partial class GraphsTableView
             BindTo(model, StatusCol, x => x.Status).DisposeWith(composite);
             BindTo(model, SmoothCol, x => x.SmoothLevel).DisposeWith(composite);
             BindTo(model, NeighborsCol, x => x.Neighborhood).DisposeWith(composite);
+            BindTo(model, CostRangeCol, x => x.CostRange).DisposeWith(composite);
             modelChangingSubs.Add(model.Id, composite);
             composite.DisposeWith(disposables);
             SetCursorInvisible();

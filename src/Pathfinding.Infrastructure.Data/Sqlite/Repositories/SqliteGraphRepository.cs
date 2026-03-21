@@ -13,11 +13,15 @@ internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParameters
     private const string StatusProperty = nameof(Graph.Status);
     private const string DimensionsProperty = nameof(Graph.Dimensions);
     private const string IdProperty = nameof(Graph.Id);
+    private const string UpperValueOfRange = nameof(Graph.UpperValueRange);
+    private const string LowerValueOfRange = nameof(Graph.LowerValueRange);
 
     protected override string CreateTableScript =>
         @$"
             CREATE TABLE IF NOT EXISTS {DbTables.Graphs} (
                 {IdProperty} INTEGER PRIMARY KEY AUTOINCREMENT,
+                {UpperValueOfRange} INTEGER NOT NULL,
+                {LowerValueOfRange} INTEGER NOT NULL,
                 {NameProperty} TEXT NOT NULL,
                 {NeighborhoodProperty} INTEGER NOT NULL,
                 {SmoothLevelProperty} INTEGER NOT NULL,
@@ -35,8 +39,8 @@ internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParameters
     public async Task<Graph> CreateAsync(Graph graph, CancellationToken token = default)
     {
         const string query = @$"
-                INSERT INTO {DbTables.Graphs} ({NameProperty}, {NeighborhoodProperty}, {SmoothLevelProperty}, {StatusProperty}, {DimensionsProperty})
-                VALUES (@{NameProperty}, @{NeighborhoodProperty}, @{SmoothLevelProperty}, @{StatusProperty}, @{DimensionsProperty});
+                INSERT INTO {DbTables.Graphs} ({UpperValueOfRange}, {LowerValueOfRange}, {NameProperty}, {NeighborhoodProperty}, {SmoothLevelProperty}, {StatusProperty}, {DimensionsProperty})
+                VALUES (@{UpperValueOfRange}, @{LowerValueOfRange}, @{NameProperty}, @{NeighborhoodProperty}, @{SmoothLevelProperty}, @{StatusProperty}, @{DimensionsProperty});
                 SELECT last_insert_rowid();";
 
         var id = await Connection.ExecuteScalarAsync<int>(
@@ -82,7 +86,9 @@ internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParameters
                     {NeighborhoodProperty} = @{NeighborhoodProperty},
                     {SmoothLevelProperty} = @{SmoothLevelProperty},
                     {StatusProperty} = @{StatusProperty},
-                    {DimensionsProperty} = @{DimensionsProperty}
+                    {DimensionsProperty} = @{DimensionsProperty},
+                    {UpperValueOfRange} = @{UpperValueOfRange},
+                    {LowerValueOfRange} = @{LowerValueOfRange}
                 WHERE {IdProperty} = @{IdProperty}";
 
         var affectedRows = await Connection.ExecuteAsync(

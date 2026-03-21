@@ -11,7 +11,7 @@ public class CreateGraphRequest<T> where T : IVertex
 
     public SmoothLevels SmoothLevel { get; set; }
 
-    public GraphStatuses Status { get; set; }
+    public GraphStatuses Status { get; set; } = GraphStatuses.Editable;
 
     public IGraph<T> Graph { get; set; }
 }

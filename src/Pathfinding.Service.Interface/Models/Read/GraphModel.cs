@@ -1,5 +1,6 @@
 ﻿using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Domain.Interface;
+using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Service.Interface.Models.Read;
 
@@ -9,6 +10,8 @@ public record GraphModel<T>
     public int Id { get; set; }
 
     public string Name { get; set; }
+
+    public InclusiveValueRange<int> CostRange { get; set; }
 
     public SmoothLevels SmoothLevel { get; set; }
 

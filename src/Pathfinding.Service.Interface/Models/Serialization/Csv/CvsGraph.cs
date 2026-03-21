@@ -15,4 +15,8 @@ internal class CsvGraph
     public GraphStatuses Status { get; set; }
 
     public string DimensionSizes { get; set; }
+
+    public int UpperValueOfRange { get; set; }
+
+    public int LowerValueOfRange { get; set; }
 }

@@ -3,10 +3,8 @@ using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Infrastructure.Data.Pathfinding;
 
-public sealed class VertexCost(int cost, InclusiveValueRange<int> costRange) : IVertexCost
+public sealed class VertexCost(int cost) : IVertexCost
 {
-    public InclusiveValueRange<int> CostRange { get; set; } = costRange;
-
     public int CurrentCost { get; set; } = cost;
 
     public override int GetHashCode()
@@ -16,6 +14,6 @@ public sealed class VertexCost(int cost, InclusiveValueRange<int> costRange) : I
 
     public IVertexCost DeepClone()
     {
-        return new VertexCost(CurrentCost, CostRange);
+        return new VertexCost(CurrentCost);
     }
 }

@@ -31,6 +31,7 @@ internal static class UnitOfWorkExtensions
                 Neighborhood = graph.Neighborhood,
                 SmoothLevel = graph.SmoothLevel,
                 Status = graph.Status,
+                CostRange = (graph.LowerValueRange, graph.UpperValueRange),
                 Vertices = vertices[graph.Id]
             });
         }
@@ -56,7 +57,8 @@ internal static class UnitOfWorkExtensions
             Name = graph.Name,
             Neighborhood = graph.Neighborhood,
             SmoothLevel = graph.SmoothLevel,
-            Status = graph.Status
+            Status = graph.Status,
+            CostRange = request.Graph.CostRange
         };
     }
 

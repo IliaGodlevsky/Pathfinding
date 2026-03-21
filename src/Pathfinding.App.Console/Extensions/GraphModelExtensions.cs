@@ -9,6 +9,9 @@ internal static class GraphModelExtensions
     public static Graph<T> CreateGraph<T>(this GraphModel<T> model)
         where T : IVertex
     {
-        return new(model.Vertices, model.DimensionSizes);
+        return new(model.Vertices, model.DimensionSizes)
+        {
+            CostRange = model.CostRange,
+        };
     }
 }

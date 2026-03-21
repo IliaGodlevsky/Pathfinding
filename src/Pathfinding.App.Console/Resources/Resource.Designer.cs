@@ -340,6 +340,15 @@ namespace Pathfinding.App.Console.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to IDA*.
+        /// </summary>
+        internal static string IDAStar {
+            get {
+                return ResourceManager.GetString("IDAStar", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Import.
         /// </summary>
         internal static string Import {

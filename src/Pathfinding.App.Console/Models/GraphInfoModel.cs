@@ -1,4 +1,5 @@
 ﻿using Pathfinding.Domain.Core.Enums;
+using Pathfinding.Shared.Primitives;
 using ReactiveUI;
 
 namespace Pathfinding.App.Console.Models;
@@ -56,9 +57,16 @@ internal sealed class GraphInfoModel : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref status, value);
     }
 
+    private InclusiveValueRange<int> costRange;
+    public InclusiveValueRange<int> CostRange
+    {
+        get => costRange;
+        set => this.RaiseAndSetIfChanged(ref costRange, value);
+    }
+
     public object[] GetProperties()
     {
-        return [ Id, Name, Width, Length, Neighborhood,
+        return [ Id, Name, Width, Length, CostRange, Neighborhood,
             SmoothLevel, ObstaclesCount, Status ];
     }
 }

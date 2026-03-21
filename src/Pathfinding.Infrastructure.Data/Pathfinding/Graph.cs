@@ -17,6 +17,8 @@ public class Graph<TVertex> : IGraph<TVertex>
 
     public int Count { get; }
 
+    public InclusiveValueRange<int> CostRange { get; set; }
+
     public Graph(int requiredNumberOfDimensions,
         IReadOnlyCollection<TVertex> vertices,
         IReadOnlyList<int> dimensionSizes)

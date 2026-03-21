@@ -14,8 +14,6 @@ internal sealed class SqliteVerticesRepository(SqliteConnection connection,
                 GraphId INTEGER NOT NULL,
                 Coordinates TEXT NOT NULL,
                 Cost INTEGER NOT NULL,
-                UpperValueRange INTEGER NOT NULL,
-                LowerValueRange INTEGER NOT NULL,
                 IsObstacle BOOLEAN NOT NULL,
                 FOREIGN KEY (GraphId) REFERENCES {DbTables.Graphs}(Id) ON DELETE CASCADE
             );
@@ -27,8 +25,8 @@ internal sealed class SqliteVerticesRepository(SqliteConnection connection,
         CancellationToken token = default)
     {
         const string query = @$"
-                INSERT INTO {DbTables.Vertices} (GraphId, Coordinates, Cost, UpperValueRange, LowerValueRange, IsObstacle)
-                VALUES (@GraphId, @Coordinates, @Cost, @UpperValueRange, @LowerValueRange, @IsObstacle);
+                INSERT INTO {DbTables.Vertices} (GraphId, Coordinates, Cost, IsObstacle)
+                VALUES (@GraphId, @Coordinates, @Cost, @IsObstacle);
                 SELECT last_insert_rowid();";
 
         foreach (var vertex in vertices)
@@ -79,8 +77,6 @@ internal sealed class SqliteVerticesRepository(SqliteConnection connection,
                 UPDATE {DbTables.Vertices}
                 SET Coordinates = @Coordinates,
                     Cost = @Cost,
-                    UpperValueRange = @UpperValueRange,
-                    LowerValueRange = @LowerValueRange,
                     IsObstacle = @IsObstacle
                 WHERE Id = @Id";
 

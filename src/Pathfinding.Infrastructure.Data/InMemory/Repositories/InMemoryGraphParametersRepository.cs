@@ -81,6 +81,8 @@ internal sealed class InMemoryGraphParametersRepository(
             result.Neighborhood = graph.Neighborhood;
             result.SmoothLevel = graph.SmoothLevel;
             result.Status = graph.Status;
+            result.UpperValueRange = graph.UpperValueRange;
+            result.LowerValueRange = graph.LowerValueRange;
             return Task.FromResult(true);
         }
         return Task.FromResult(false);

@@ -135,6 +135,9 @@ internal static class Modules
         builder.RegisterType<CostGreedyAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.CostGreedy)
             .WithMetadata(MetadataKeys.Order, 6).WithMetadata(MetadataKeys.Requirements, AlgorithmRequirements.RequiresStepRule)
             .SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
+        builder.RegisterType<IdaStarAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.IdaStar)
+            .WithMetadata(MetadataKeys.Order, 5).WithMetadata(MetadataKeys.Requirements, AlgorithmRequirements.RequiresAll)
+            .SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<BidirectLeeAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.BidirectLee)
             .WithMetadata(MetadataKeys.Order, 9).WithMetadata(MetadataKeys.Requirements, AlgorithmRequirements.NoRequirements)
             .SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();

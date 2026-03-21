@@ -18,7 +18,8 @@ internal static class MappingExtensions
             Width = model.Dimensions.ElementAtOrDefault(0),
             Length = model.Dimensions.ElementAtOrDefault(1),
             ObstaclesCount = model.ObstaclesCount,
-            Status = model.Status
+            Status = model.Status,
+            CostRange = model.CostRange
         };
     }
 
@@ -33,6 +34,7 @@ internal static class MappingExtensions
             Id = model.Id,
             SmoothLevel = model.SmoothLevel,
             Status = model.Status,
+            CostRange = model.CostRange,
             ObstaclesCount = model.Vertices.Count(x => x.IsObstacle)
         };
     }

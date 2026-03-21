@@ -108,8 +108,7 @@ internal static class MappingExtensions
             Id = vertexEntity.Id,
             IsObstacle = vertexEntity.IsObstacle,
             Position = vertexEntity.Coordinates.ToCoordinates(),
-            Cost = new VertexCost(vertexEntity.Cost,
-                new(vertexEntity.UpperValueRange, vertexEntity.LowerValueRange)),
+            Cost = new VertexCost(vertexEntity.Cost),
         };
     }
 
@@ -158,7 +157,9 @@ internal static class MappingExtensions
             Neighborhood = request.Neighborhood,
             SmoothLevel = request.SmoothLevel,
             Dimensions = JsonConvert.SerializeObject(request.Graph.DimensionsSizes),
-            Status = request.Status
+            Status = request.Status,
+            UpperValueRange = request.Graph.CostRange.UpperValueOfRange,
+            LowerValueRange = request.Graph.CostRange.LowerValueOfRange
         };
     }
 
@@ -169,8 +170,6 @@ internal static class MappingExtensions
         {
             Id = vertex.Id,
             Coordinates = vertex.Position.ToStringCoordinates(),
-            UpperValueRange = vertex.Cost.CostRange.UpperValueOfRange,
-            LowerValueRange = vertex.Cost.CostRange.LowerValueOfRange,
             Cost = vertex.Cost.CurrentCost,
             IsObstacle = vertex.IsObstacle
         };
@@ -183,12 +182,7 @@ internal static class MappingExtensions
         return new()
         {
             IsObstacle = vertex.IsObstacle,
-            Cost = new()
-            {
-                Cost = cost.CurrentCost,
-                UpperValueOfRange = cost.CostRange.UpperValueOfRange,
-                LowerValueOfRange = cost.CostRange.LowerValueOfRange
-            },
+            Cost = new() { Cost = cost.CurrentCost },
             Position = new() { Coordinate = vertex.Position }
         };
     }
@@ -202,7 +196,8 @@ internal static class MappingExtensions
             Neighborhood = model.Neighborhood,
             SmoothLevel = model.SmoothLevel,
             Status = model.Status,
-            Name = model.Name
+            Name = model.Name,
+            CostRange = model.CostRange
         };
     }
 
@@ -227,7 +222,8 @@ internal static class MappingExtensions
             Dimensions = JsonConvert.DeserializeObject<int[]>(graph.Dimensions),
             Id = graph.Id,
             SmoothLevel = graph.SmoothLevel,
-            Status = graph.Status
+            Status = graph.Status,
+            CostRange = (graph.LowerValueRange, graph.UpperValueRange)
         };
     }
 
@@ -246,6 +242,8 @@ internal static class MappingExtensions
             Status = model.Status,
             Dimensions = model.Dimensions.ToDimensionsString(),
             Id = model.Id,
+            LowerValueRange = model.CostRange.LowerValueOfRange,
+            UpperValueRange = model.CostRange.UpperValueOfRange
         };
     }
 
@@ -255,7 +253,7 @@ internal static class MappingExtensions
         var cost = model.Cost;
         return new()
         {
-            Cost = new VertexCost(cost.Cost, new(cost.UpperValueOfRange, cost.LowerValueOfRange)),
+            Cost = new VertexCost(cost.Cost),
             IsObstacle = model.IsObstacle,
             Position = new(model.Position.Coordinate)
         };

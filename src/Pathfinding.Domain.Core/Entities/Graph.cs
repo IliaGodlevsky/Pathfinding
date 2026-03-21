@@ -14,5 +14,9 @@ public class Graph : IEntity<int>
 
     public GraphStatuses Status { get; set; }
 
+    public int UpperValueRange { get; set; }
+
+    public int LowerValueRange { get; set; }
+
     public string Dimensions { get; set; }
 }

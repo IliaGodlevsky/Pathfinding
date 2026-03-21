@@ -74,7 +74,7 @@ public sealed class BidirectGraphPath : IGraphPath
     {
         var forward = UnrollPath(forwardTraces);
         var backward = UnrollPath(backwardTraces, true);
-        return backward.Concat(forward).ToList().AsReadOnly();
+        return Array.AsReadOnly([.. backward, .. forward]);
     }
 
     private double GetCost()

@@ -11,8 +11,6 @@ internal static class TestGraphFactory
 {
     private const int GridSize = 10;
 
-    private static readonly InclusiveValueRange<int> CostRange = new(1, 9);
-
     private static readonly int[,] CostMatrix = new int[GridSize, GridSize]
     {
         { 4, 7, 2, 8, 3, 6, 5, 9, 1, 2 },
@@ -64,7 +62,7 @@ internal static class TestGraphFactory
                 var y = vertex.Position[1];
 
                 vertex.IsObstacle = obstacles[x, y];
-                vertex.Cost = new VertexCost(costs[x, y], CostRange);
+                vertex.Cost = new VertexCost(costs[x, y]);
             }
         }
     }
@@ -75,7 +73,7 @@ internal static class TestGraphFactory
 
         public bool IsObstacle { get; set; }
 
-        public IVertexCost Cost { get; set; } = new VertexCost(1, CostRange);
+        public IVertexCost Cost { get; set; } = new VertexCost(1);
 
         public Coordinate Position { get; set; } = new Coordinate(0, 0);
 

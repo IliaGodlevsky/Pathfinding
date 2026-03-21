@@ -67,17 +67,15 @@ internal sealed class SqliteRangeRepository(SqliteConnection connection,
     public IAsyncEnumerable<PathfindingRange> ReadByGraphIdAsync(int graphId)
     {
         const string query = $"SELECT * FROM {DbTables.Ranges} WHERE GraphId = @GraphId ORDER BY \"Order\"";
-        var parameters = new { GraphId = graphId };
         return Connection.QueryUnbufferedAsync<PathfindingRange>(query,
-            param: parameters, transaction: Transaction);
+            param: new { GraphId = graphId }, transaction: Transaction);
     }
 
     public IAsyncEnumerable<PathfindingRange> ReadByGraphIdsAsync(IReadOnlyCollection<int> ids)
     {
         const string query = $"SELECT * FROM {DbTables.Ranges} WHERE GraphId IN @GraphIds";
-        var parameters = new { GraphIds = ids };
         return Connection.QueryUnbufferedAsync<PathfindingRange>(query,
-            param: parameters, transaction: Transaction);
+            param: new { GraphIds = ids }, transaction: Transaction);
 
     }
 

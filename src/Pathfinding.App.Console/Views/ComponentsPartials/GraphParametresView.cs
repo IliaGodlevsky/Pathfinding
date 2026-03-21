@@ -10,13 +10,16 @@ internal sealed partial class GraphParametresView
     private readonly TextField graphLengthInput = new();
     private readonly Label obstaclesLabel = new("Obstacles");
     private readonly TextField obstaclesInput = new();
+    private readonly Label costRangeLabel = new("Range");
+    private readonly TextField upperCostInput = new();
+    private readonly TextField lowerCostInput = new();
 
     private void Initialize()
     {
         X = 1;
         Y = Pos.Percent(25) + 1;
         Width = Dim.Percent(35);
-        Height = Dim.Percent(55);
+        Height = Dim.Percent(60);
         Border = new Border()
         {
             BorderStyle = BorderStyle.Rounded,
@@ -48,13 +51,29 @@ internal sealed partial class GraphParametresView
         obstaclesInput.Y = Pos.Bottom(graphLengthInput) + 1;
         obstaclesInput.Width = Dim.Fill(1);
 
+        costRangeLabel.Y = Pos.Bottom(obstaclesLabel) + 1;
+        costRangeLabel.X = 1;
+        costRangeLabel.Width = Dim.Percent(50, true);
+
+        lowerCostInput.X = Pos.Right(costRangeLabel) + 1;
+        lowerCostInput.Y = Pos.Bottom(obstaclesInput) + 1;
+        lowerCostInput.Width = Dim.Percent(17);
+
+        upperCostInput.X = Pos.Right(lowerCostInput) + 1;
+        upperCostInput.Y = Pos.Bottom(obstaclesInput) + 1;
+        upperCostInput.Width = Dim.Percent(17);
+
         graphWidthInput.KeyPress += KeyRestriction;
         graphLengthInput.KeyPress += KeyRestriction;
         obstaclesInput.KeyPress += KeyRestriction;
+        upperCostInput.KeyPress += KeyRestriction;
+        lowerCostInput.KeyPress += KeyRestriction;
 
         Add(graphWidthLabel, graphWidthInput,
             graphLengthLabel, graphLengthInput,
-            obstaclesLabel, obstaclesInput);
+            obstaclesLabel, obstaclesInput,
+            costRangeLabel, lowerCostInput, 
+            upperCostInput);
     }
 
     private void KeyRestriction(KeyEventEventArgs args)

@@ -13,7 +13,7 @@ public class SmoothLayer(int level) : ILayer
             var costs = graph.Select(GetAverageCost);
             foreach (var (vertex, price) in graph.Zip(costs, (v, p) => (Vertex: v, Price: p)))
             {
-                var range = vertex.Cost.CostRange;
+                var range = graph.CostRange;
                 var cost = range.ReturnInRange(price);
                 vertex.Cost.CurrentCost = cost;
             }

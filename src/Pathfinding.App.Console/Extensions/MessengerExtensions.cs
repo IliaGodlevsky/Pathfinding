@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 using Pathfinding.App.Console.Messages;
 
 // ReSharper disable AsyncVoidLambda
@@ -49,5 +50,11 @@ internal static class MessengerExtensions
         messenger.Register<TMessage>(recipient, async (_, msg)
             => await handler(msg).ConfigureAwait(false));
         return UnregisterAdapter.New<TMessage>(messenger, recipient);
+    }
+
+    public static T SendAndGetResponse<T>(this IMessenger messenger, RequestMessage<T> message)
+    {
+        messenger.Send(message);
+        return message.Response;
     }
 }

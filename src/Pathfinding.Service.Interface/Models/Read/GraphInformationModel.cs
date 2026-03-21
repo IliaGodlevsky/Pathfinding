@@ -1,4 +1,5 @@
 ﻿using Pathfinding.Domain.Core.Enums;
+using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Service.Interface.Models.Read;
 
@@ -17,4 +18,6 @@ public record GraphInformationModel
     public IReadOnlyList<int> Dimensions { get; set; }
 
     public int ObstaclesCount { get; set; }
+
+    public InclusiveValueRange<int> CostRange { get; set; }
 }

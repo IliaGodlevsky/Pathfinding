@@ -98,8 +98,8 @@ internal class GraphRequestServiceTests
         };
         var vertexEntities = new List<Vertex>
         {
-            new() { Id = 10, GraphId = graphId, Coordinates = "[0,0]", Cost = 1, UpperValueRange = 9, LowerValueRange = 1 },
-            new() { Id = 11, GraphId = graphId, Coordinates = "[0,1]", Cost = 1, UpperValueRange = 9, LowerValueRange = 1 }
+            new() { Id = 10, GraphId = graphId, Coordinates = "[0,0]", Cost = 1 },
+            new() { Id = 11, GraphId = graphId, Coordinates = "[0,1]", Cost = 1 }
         };
 
         UnitOfWorkMockHelper.SetupUnitOfWork(mock, unit =>
@@ -119,13 +119,13 @@ internal class GraphRequestServiceTests
 
         var result = await service.ReadGraphAsync(graphId);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.Id, Is.EqualTo(graphId));
             Assert.That(result.Name, Is.EqualTo(graphEntity.Name));
             Assert.That(result.Vertices.Select(x => x.Id), Is.EqualTo(vertexEntities.Select(v => v.Id)));
             Assert.That(result.DimensionSizes, Is.EqualTo(expectedArray));
-        });
+        }
     }
 
     [Test]
@@ -179,13 +179,13 @@ internal class GraphRequestServiceTests
                 new()
                 {
                     Position = new CoordinateModel { Coordinate = [0, 0] },
-                    Cost = new VertexCostModel { Cost = 1, UpperValueOfRange = 9, LowerValueOfRange = 1 },
+                    Cost = new VertexCostModel { Cost = 1 },
                     IsObstacle = false
                 },
                 new()
                 {
                     Position = new CoordinateModel { Coordinate = [0, 1] },
-                    Cost = new VertexCostModel { Cost = 2, UpperValueOfRange = 9, LowerValueOfRange = 1 },
+                    Cost = new VertexCostModel { Cost = 2 },
                     IsObstacle = true
                 }
             ],
@@ -280,8 +280,8 @@ internal class GraphRequestServiceTests
         };
         var vertices = new List<Vertex>
         {
-            new() { Id = 1, GraphId = graphId, Coordinates = "[0,0]", Cost = 1, UpperValueRange = 9, LowerValueRange = 1 },
-            new() { Id = 2, GraphId = graphId, Coordinates = "[0,1]", Cost = 2, UpperValueRange = 9, LowerValueRange = 1 }
+            new() { Id = 1, GraphId = graphId, Coordinates = "[0,0]", Cost = 1 },
+            new() { Id = 2, GraphId = graphId, Coordinates = "[0,1]", Cost = 2 }
         };
         var range = new List<PathfindingRange>
         {
@@ -334,7 +334,7 @@ internal class GraphRequestServiceTests
         };
         var vertices = new List<Vertex>
         {
-            new() { Id = 1, GraphId = graphId, Coordinates = "[0,0]", Cost = 1, UpperValueRange = 9, LowerValueRange = 1 }
+            new() { Id = 1, GraphId = graphId, Coordinates = "[0,0]", Cost = 1 }
         };
         var range = new List<PathfindingRange>
         {

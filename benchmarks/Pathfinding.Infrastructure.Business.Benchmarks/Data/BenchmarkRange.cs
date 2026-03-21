@@ -23,11 +23,11 @@ internal sealed class BenchmarkRange :
         var assemble = new GraphAssemble<BenchmarkVertex>();
         var neighborhoodLayer = new VonNeumannNeighborhoodLayer();
         var costLayer = new VertexCostLayer(
-            new InclusiveValueRange<int>(9, 1),
             range => new VertexCost(Random.Shared.Next(range.LowerValueOfRange,
-                range.UpperValueOfRange + 1), range));
+                range.UpperValueOfRange + 1)));
         var layers = new Layers.Layers(neighborhoodLayer, costLayer);
         graph = assemble.AssembleGraph(layers, 200, 250);
+        graph.CostRange = new InclusiveValueRange<int>(1, 9);
     }
 
     public IEnumerator<BenchmarkVertex> GetEnumerator()

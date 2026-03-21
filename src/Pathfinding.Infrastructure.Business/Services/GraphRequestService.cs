@@ -38,7 +38,10 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
                 var graphModel = history.Graph;
                 var vertices = history.Vertices.ToVertices<T>();
                 var dimensions = graphModel.DimensionSizes;
-                var graph = new Graph<T>(vertices, dimensions);
+                var graph = new Graph<T>(vertices, dimensions)
+                {
+                    CostRange = graphModel.CostRange
+                };
                 var createGraphRequest = new CreateGraphRequest<T>
                 {
                     Graph = graph,
@@ -82,7 +85,8 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
                         Neighborhood = graphModel.Neighborhood,
                         SmoothLevel = graphModel.SmoothLevel,
                         Name = graphModel.Name,
-                        Status = graphModel.Status
+                        Status = graphModel.Status,
+                        CostRange = graphModel.CostRange
                     },
                     Statistics = statistics.ToRunStatisticsModels(),
                     Range = range
@@ -129,7 +133,8 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
                 Name = graphEntity.Name,
                 Neighborhood = graphEntity.Neighborhood,
                 SmoothLevel = graphEntity.SmoothLevel,
-                Status = graphEntity.Status
+                Status = graphEntity.Status,
+                CostRange = (graphEntity.UpperValueRange, graphEntity.LowerValueRange)
             };
         }, token).ConfigureAwait(false);
     }
@@ -166,14 +171,14 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
             foreach (var graph in graphs)
             {
                 var graphDict = graph.Vertices.ToDictionary(x => x.Id, x => x.Position);
-                var range = ranges[graph.Id].Select(x => graphDict[x.VertexId])
+                var range = ranges.GetValueOrDefault(graph.Id, []).Select(x => graphDict[x.VertexId])
                     .Select(x => new CoordinateModel() { Coordinate = x })
                     .ToList();
                 result.Add(new()
                 {
                     Graph = graph.ToSerializationModel(),
                     Vertices = graph.Vertices.ToSerializationModels(),
-                    Statistics = statisitics[graph.Id],
+                    Statistics = statisitics.GetValueOrDefault(graph.Id, []),
                     Range = range
                 });
             }

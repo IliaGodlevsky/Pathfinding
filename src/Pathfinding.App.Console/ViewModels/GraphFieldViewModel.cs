@@ -85,9 +85,8 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
     {
         if (vertex.IsObstacle != polarity)
         {
-            var inRangeRequest = new IsVertexInRangeRequestMessage(vertex);
-            messenger.Send(inRangeRequest);
-            if (!inRangeRequest.Response)
+            bool isInRange = messenger.SendAndGetResponse(new IsVertexInRangeRequestMessage(vertex));
+            if (!isInRange)
             {
                 vertex.IsObstacle = polarity;
                 int graphId = activatedGraph.Id;
@@ -119,8 +118,8 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
         {
             var cost = vertex.Cost.CurrentCost;
             cost += delta;
-            cost = vertex.Cost.CostRange.ReturnInRange(cost);
-            vertex.Cost = new VertexCost(cost, vertex.Cost.CostRange);
+            cost = activatedGraph.CostRange.ReturnInRange(cost);
+            vertex.Cost = new VertexCost(cost);
             var request = new UpdateVerticesRequest<GraphVertexModel>(ActivatedGraph.Id, [.. vertex.Enumerate()]);
             await service
                 .UpdateVerticesAsync(request, token)

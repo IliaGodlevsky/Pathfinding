@@ -157,7 +157,7 @@ internal sealed class GraphFieldViewModelTests
         using var viewModel = CreateViewModel(messenger, serviceMock);
 
         var vertex = CreateVertex();
-        vertex.Cost = new VertexCost(9, new InclusiveValueRange<int>(10, 0));
+        vertex.Cost = new VertexCost(9);
         var graph = new Graph<GraphVertexModel>([vertex], 1);
         var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(4, graph, false),
@@ -290,7 +290,7 @@ internal sealed class GraphFieldViewModelTests
             Id = 1,
             IsObstacle = false,
             Position = new Coordinate(0),
-            Cost = new VertexCost(1, new InclusiveValueRange<int>(10, 0))
+            Cost = new VertexCost(1)
         };
     }
 }

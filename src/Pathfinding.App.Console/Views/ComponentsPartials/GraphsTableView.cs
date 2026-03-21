@@ -1,5 +1,6 @@
 ﻿using Pathfinding.App.Console.Extensions;
 using Pathfinding.Domain.Core.Enums;
+using Pathfinding.Shared.Primitives;
 using System.Data;
 using Terminal.Gui;
 
@@ -14,6 +15,7 @@ internal sealed partial class GraphsTableView : TableView
     private const string NeighborsCol = "Neighbors";
     private const string SmoothCol = "Smooth";
     private const string ObstaclesCol = "Obstacles";
+    private const string CostRangeCol = "Range";
     private const string StatusCol = "Status";
 
     private readonly DataTable table = new();
@@ -27,6 +29,7 @@ internal sealed partial class GraphsTableView : TableView
             new(NameCol, typeof(string)),
             new(WidthCol, typeof(int)),
             new(LengthCol, typeof(int)),
+            new(CostRangeCol, typeof(string)),
             new(NeighborsCol, typeof(Neighborhoods)),
             new(SmoothCol, typeof(SmoothLevels)),
             new(ObstaclesCol, typeof(int)),
@@ -36,9 +39,10 @@ internal sealed partial class GraphsTableView : TableView
         var columnStyles = new Dictionary<DataColumn, ColumnStyle>()
         {
             { table.Columns[IdCol], new() { Visible = false } },
-            { table.Columns[NameCol], new() { MinWidth = 24, MaxWidth = 24, Alignment = TextAlignment.Left } },
+            { table.Columns[NameCol], new() { MinWidth = 17, MaxWidth = 17, Alignment = TextAlignment.Left } },
             { table.Columns[WidthCol], new() { Alignment = TextAlignment.Centered } },
             { table.Columns[LengthCol], new() { Alignment = TextAlignment.Centered } },
+            { table.Columns[CostRangeCol], new() { Alignment = TextAlignment.Centered } },
             { table.Columns[NeighborsCol], new() { Alignment = TextAlignment.Left,
                 RepresentationGetter = NeighborhoodToString } },
             { table.Columns[SmoothCol], new() { Alignment = TextAlignment.Left,

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Pathfinding.Shared.Primitives;
+using System.ComponentModel;
 
 namespace Pathfinding.App.Console.ViewModels.Interface;
 
@@ -11,4 +12,6 @@ internal interface IRequireGraphParametresViewModel
     public int Length { get; set; }
 
     public int Obstacles { get; set; }
+
+    public InclusiveValueRange<int> Range { get; set; }
 }

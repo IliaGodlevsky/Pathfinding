@@ -1,5 +1,6 @@
 ﻿using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Service.Interface.Extensions;
+using Pathfinding.Shared.Primitives;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
@@ -18,6 +19,8 @@ public record GraphSerializationModel : IBinarySerializable, IXmlSerializable
 
     public IReadOnlyList<int> DimensionSizes { get; set; }
 
+    public InclusiveValueRange<int> CostRange { get; set; }
+
     public async Task DeserializeAsync(Stream stream, CancellationToken token = default)
     {
         Name = await stream.ReadStringAsync(token).ConfigureAwait(false);
@@ -25,6 +28,9 @@ public record GraphSerializationModel : IBinarySerializable, IXmlSerializable
         Neighborhood = (Neighborhoods)await stream.ReadInt32Async(token).ConfigureAwait(false);
         Status = (GraphStatuses)await stream.ReadInt32Async(token).ConfigureAwait(false);
         DimensionSizes = await stream.ReadArrayAsync(token).ConfigureAwait(false);
+        int upperValueOfRange = await stream.ReadInt32Async(token).ConfigureAwait(false);
+        int lowerValueOfRange = await stream.ReadInt32Async(token).ConfigureAwait(false);
+        CostRange = (upperValueOfRange, lowerValueOfRange);
     }
 
     public async Task SerializeAsync(Stream stream, CancellationToken token = default)
@@ -34,6 +40,8 @@ public record GraphSerializationModel : IBinarySerializable, IXmlSerializable
         await stream.WriteInt32Async((int)Neighborhood, token).ConfigureAwait(false);
         await stream.WriteInt32Async((int)Status, token).ConfigureAwait(false);
         await stream.WriteInt32ArrayAsync(DimensionSizes, token).ConfigureAwait(false);
+        await stream.WriteInt32Async(CostRange.UpperValueOfRange, token).ConfigureAwait(false);
+        await stream.WriteInt32Async(CostRange.LowerValueOfRange, token).ConfigureAwait(false);
     }
 
     public XmlSchema GetSchema() => null;
@@ -45,6 +53,8 @@ public record GraphSerializationModel : IBinarySerializable, IXmlSerializable
         writer.WriteAttribute(nameof(Neighborhood), Neighborhood);
         writer.WriteAttribute(nameof(Status), Status);
         writer.WriteAttribute(nameof(DimensionSizes), string.Join(",", DimensionSizes));
+        writer.WriteAttribute(nameof(CostRange.UpperValueOfRange), CostRange.UpperValueOfRange);
+        writer.WriteAttribute(nameof(CostRange.LowerValueOfRange), CostRange.LowerValueOfRange);
     }
 
     public void ReadXml(XmlReader reader)
@@ -54,5 +64,8 @@ public record GraphSerializationModel : IBinarySerializable, IXmlSerializable
         Neighborhood = reader.ReadEnumAttribute<Neighborhoods>(nameof(Neighborhood));
         Status = reader.ReadEnumAttribute<GraphStatuses>(nameof(Status));
         DimensionSizes = Array.ConvertAll(reader.ReadAttribute<string>(nameof(DimensionSizes)).Split(','), int.Parse);
+        int upperValueOfRange = reader.ReadAttribute<int>(nameof(CostRange.UpperValueOfRange));
+        int lowerValueOfRange = reader.ReadAttribute<int>(nameof(CostRange.LowerValueOfRange));
+        CostRange = (upperValueOfRange, lowerValueOfRange);
     }
 }

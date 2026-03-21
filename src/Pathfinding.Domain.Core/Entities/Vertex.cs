@@ -10,9 +10,5 @@ public class Vertex : IEntity<long>
 
     public int Cost { get; set; }
 
-    public int UpperValueRange { get; set; }
-
-    public int LowerValueRange { get; set; }
-
     public bool IsObstacle { get; set; }
 }

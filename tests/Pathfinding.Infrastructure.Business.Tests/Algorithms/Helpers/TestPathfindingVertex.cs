@@ -13,7 +13,7 @@ internal sealed class TestPathfindingVertex(Coordinate position, int cost = 1, b
 
     public Coordinate Position { get; } = position;
 
-    public IVertexCost Cost { get; } = new VertexCost(cost, (1, 10));
+    public IVertexCost Cost { get; } = new VertexCost(cost);
 
     public IReadOnlyCollection<IPathfindingVertex> Neighbors => neighbors;
 
