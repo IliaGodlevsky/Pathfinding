@@ -72,6 +72,11 @@ internal sealed class GraphTableViewModel : ViewModel, IGraphTableViewModel, IDi
                 .ReadGraphAsync(model, token)
                 .ConfigureAwait(false);
             var graph = graphModel.CreateGraph();
+            bool isMaze = graphModel.Neighborhood == Neighborhoods.Maze;
+            foreach (var vertex in graph)
+            {
+                vertex.IsMaze = isMaze;
+            }
             var activatedGraph = new ActiveGraph(
                 graphModel.Id,
                 graph,

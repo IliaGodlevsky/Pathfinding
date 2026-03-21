@@ -24,33 +24,34 @@ public sealed class MazeLayer : ILayer
 
         foreach (var vertex in graph)
         {
-            vertex.IsObstacle = true;
+            vertex.IsObstacle = false;
+            vertex.Neighbors = [];
         }
 
         if (width < 3 || length < 3)
         {
-            foreach (var vertex in graph)
-            {
-                vertex.IsObstacle = false;
-            }
+            ConnectDense(graph, width, length);
             return;
         }
 
-        int startX = RandomOddWithin(width);
-        int startY = RandomOddWithin(length);
+        var seed = CreateSeed(graph, width, length);
+        var random = new Random(seed);
+        int startX = RandomOddWithin(width, random);
+        int startY = RandomOddWithin(length, random);
         var visited = new HashSet<Coordinate>();
+        var carved = new HashSet<Coordinate>();
         var stack = new Stack<Coordinate>();
         var start = new Coordinate([startX, startY]);
 
         stack.Push(start);
         visited.Add(start);
-        Carve(start);
+        carved.Add(start);
 
         while (stack.Count > 0)
         {
             var current = stack.Peek();
             var nextCandidates = Directions
-                .OrderBy(_ => Random.Shared.Next())
+                .OrderBy(_ => random.Next())
                 .Select(x => Next(current, x.Dx, x.Dy))
                 .Where(IsInside)
                 .Where(x => IsOdd(x.ElementAtOrDefault(0)) && IsOdd(x.ElementAtOrDefault(1)))
@@ -65,10 +66,33 @@ public sealed class MazeLayer : ILayer
 
             var next = nextCandidates[0];
             var wall = Between(current, next);
-            Carve(wall);
-            Carve(next);
+            carved.Add(wall);
+            carved.Add(next);
             visited.Add(next);
             stack.Push(next);
+        }
+
+        foreach (var coordinate in carved)
+        {
+            graph.Get(coordinate).Neighbors = [.. GetNeighbors(coordinate)];
+        }
+
+        IEnumerable<IVertex> GetNeighbors(Coordinate coordinate)
+        {
+            var candidates = new[]
+            {
+                new Coordinate([coordinate.ElementAtOrDefault(0), coordinate.ElementAtOrDefault(1) - 1]),
+                new Coordinate([coordinate.ElementAtOrDefault(0) + 1, coordinate.ElementAtOrDefault(1)]),
+                new Coordinate([coordinate.ElementAtOrDefault(0), coordinate.ElementAtOrDefault(1) + 1]),
+                new Coordinate([coordinate.ElementAtOrDefault(0) - 1, coordinate.ElementAtOrDefault(1)])
+            };
+            foreach (var candidate in candidates)
+            {
+                if (IsInside(candidate) && carved.Contains(candidate))
+                {
+                    yield return graph.Get(candidate);
+                }
+            }
         }
 
         Coordinate Next(Coordinate coordinate, int dx, int dy)
@@ -89,14 +113,45 @@ public sealed class MazeLayer : ILayer
             int y = coordinate.ElementAtOrDefault(1);
             return x >= 0 && y >= 0 && x < width && y < length;
         }
+    }
 
-        void Carve(Coordinate coordinate)
+    private static int CreateSeed(IGraph<IVertex> graph, int width, int length)
+    {
+        var hash = new HashCode();
+        hash.Add(width);
+        hash.Add(length);
+        foreach (var vertex in graph)
         {
-            graph.Get(coordinate).IsObstacle = false;
+            hash.Add(vertex.Cost.CurrentCost);
+            hash.Add(vertex.Position.ElementAtOrDefault(0));
+            hash.Add(vertex.Position.ElementAtOrDefault(1));
+        }
+        return hash.ToHashCode();
+    }
+
+    private static void ConnectDense(IGraph<IVertex> graph, int width, int length)
+    {
+        foreach (var vertex in graph)
+        {
+            int x = vertex.Position.ElementAtOrDefault(0);
+            int y = vertex.Position.ElementAtOrDefault(1);
+            var coords = new[]
+            {
+                new Coordinate([x, y - 1]),
+                new Coordinate([x + 1, y]),
+                new Coordinate([x, y + 1]),
+                new Coordinate([x - 1, y])
+            };
+            vertex.Neighbors = [.. coords
+                .Where(c => c.ElementAtOrDefault(0) >= 0
+                            && c.ElementAtOrDefault(1) >= 0
+                            && c.ElementAtOrDefault(0) < width
+                            && c.ElementAtOrDefault(1) < length)
+                .Select(graph.Get)];
         }
     }
 
-    private static int RandomOddWithin(int max)
+    private static int RandomOddWithin(int max, Random random)
     {
         int upper = max - 1;
         if (upper % 2 == 0)
@@ -110,7 +165,7 @@ public sealed class MazeLayer : ILayer
         }
 
         int count = (upper + 1) / 2;
-        return Random.Shared.Next(0, count) * 2 + 1;
+        return random.Next(0, count) * 2 + 1;
     }
 
     private static bool IsOdd(int number) => number % 2 != 0;

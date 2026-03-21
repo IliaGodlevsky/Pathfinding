@@ -41,14 +41,16 @@ internal static class Modules
         builder.RegisterType<GraphAssemble<GraphVertexModel>>().As<IGraphAssemble<GraphVertexModel>>().SingleInstance();
         builder.RegisterType<GraphAssemble<RunVertexModel>>().As<IGraphAssemble<RunVertexModel>>().SingleInstance();
 
-        builder.RegisterType<MooreNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
+        builder.RegisterType<MooreNeighborhoodLayer>().Keyed<ILayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Moore);
-        builder.RegisterType<VonNeumannNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
+        builder.RegisterType<VonNeumannNeighborhoodLayer>().Keyed<ILayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.VonNeumann);
-        builder.RegisterType<DiagonalNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
+        builder.RegisterType<DiagonalNeighborhoodLayer>().Keyed<ILayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Diagonal);
-        builder.RegisterType<KnightsNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
+        builder.RegisterType<KnightsNeighborhoodLayer>().Keyed<ILayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Knight);
+        builder.RegisterType<MazeLayer>().Keyed<ILayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Maze);
         builder.RegisterType<NeighborhoodLayerFactory>().As<INeighborhoodLayerFactory>()
             .WithAttributeFiltering().SingleInstance();
 

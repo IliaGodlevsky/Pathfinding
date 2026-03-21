@@ -22,6 +22,11 @@ public class SmoothLayer(int level) : ILayer
 
     private static int GetAverageCost(IVertex vertex)
     {
+        if (vertex.Neighbors.Count == 0)
+        {
+            return vertex.Cost.CurrentCost;
+        }
+
         return (int)vertex.Neighbors
             .Average(neighbour => CalculateMeanCost(neighbour, vertex));
     }

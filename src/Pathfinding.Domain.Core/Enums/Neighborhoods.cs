@@ -7,5 +7,6 @@ public enum Neighborhoods
     Moore,
     VonNeumann,
     Diagonal,
-    Knight
+    Knight,
+    Maze
 }
