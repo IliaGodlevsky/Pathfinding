@@ -34,7 +34,7 @@ internal sealed class DeleteGraphViewModelTests
 
         await viewModel.DeleteGraphCommand.Execute();
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(canExecute, Is.True);
             serviceMock
@@ -43,7 +43,7 @@ internal sealed class DeleteGraphViewModelTests
                     It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(deletedMessage, Is.Not.Null);
             Assert.That(deletedMessage!.Value, Is.EqualTo(models.Select(x => x.Id).ToArray()));
-        });
+        }
     }
 
     [Test]
@@ -81,14 +81,14 @@ internal sealed class DeleteGraphViewModelTests
 
         var canExecute = await viewModel.DeleteGraphCommand.CanExecute.FirstAsync(value => !value);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(canExecute, Is.False);
             serviceMock
                 .Verify(x => x.DeleteGraphsAsync(
                     It.IsAny<IReadOnlyCollection<int>>(),
                     It.IsAny<CancellationToken>()), Times.Never);
-        });
+        }
     }
 
     private static GraphDeleteViewModel CreateViewModel(StrongReferenceMessenger messenger,

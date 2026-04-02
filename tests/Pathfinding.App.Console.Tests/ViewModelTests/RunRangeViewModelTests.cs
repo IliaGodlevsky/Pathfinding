@@ -130,21 +130,21 @@ internal sealed class RunRangeViewModelTests
         var graph = CreateGraph();
         await ActivateGraph(messenger, graph, graphId: 12);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(viewModel.Source, Is.Not.Null);
             Assert.That(viewModel.Target, Is.Not.Null);
-        });
+        }
 
         await viewModel.DeletePathfindingRange.Execute();
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             rangeServiceMock.Verify(x => x.DeleteRangeAsync(12, It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(viewModel.Source, Is.Null);
             Assert.That(viewModel.Target, Is.Null);
             Assert.That(viewModel.Transit, Is.Empty);
-        });
+        }
     }
 
     private static async Task ActivateGraph(

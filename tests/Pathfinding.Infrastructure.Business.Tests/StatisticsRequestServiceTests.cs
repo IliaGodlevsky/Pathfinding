@@ -31,12 +31,12 @@ internal class StatisticsRequestServiceTests
 
         var result = await service.DeleteRunsAsync(ids);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result, Is.True);
             repository.Verify(x => x.DeleteByIdsAsync(It.Is<IReadOnlyCollection<int>>(collection =>
                 collection.OrderBy(v => v).SequenceEqual(ids.OrderBy(v => v))), It.IsAny<CancellationToken>()), Times.Once());
-        });
+        }
     }
 
     [Test]
@@ -68,11 +68,11 @@ internal class StatisticsRequestServiceTests
 
         var result = await service.ReadStatisticAsync(3);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(result.Id, Is.EqualTo(3));
             repository.Verify(x => x.ReadByIdAsync(3, It.IsAny<CancellationToken>()), Times.Once());
-        });
+        }
     }
 
     [Test]

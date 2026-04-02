@@ -52,7 +52,8 @@ internal static class MessengerExtensions
         return UnregisterAdapter.New<TMessage>(messenger, recipient);
     }
 
-    public static T SendAndGetResponse<T>(this IMessenger messenger, RequestMessage<T> message)
+    public static T SendAndGetResponse<TMessage, T>(this IMessenger messenger, TMessage message)
+        where TMessage : RequestMessage<T>
     {
         messenger.Send(message);
         return message.Response;

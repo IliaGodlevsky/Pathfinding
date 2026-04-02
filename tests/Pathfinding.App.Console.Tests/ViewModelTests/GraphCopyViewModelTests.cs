@@ -63,7 +63,7 @@ internal sealed class GraphCopyViewModelTests
             await viewModel.CopyGraphCommand.Execute();
         }
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             serviceMock
                 .Verify(x => x.ReadSerializationHistoriesAsync(
@@ -76,7 +76,7 @@ internal sealed class GraphCopyViewModelTests
                     It.IsAny<CancellationToken>()), Times.Once);
 
             Assert.That(createdMessage, Is.Not.Null);
-        });
+        }
     }
 
     [Test]

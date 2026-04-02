@@ -85,7 +85,7 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
     {
         if (vertex.IsObstacle != polarity)
         {
-            bool isInRange = messenger.SendAndGetResponse(new IsVertexInRangeRequestMessage(vertex));
+            bool isInRange = messenger.SendAndGetResponse<IsVertexInRangeRequestMessage, bool>(new(vertex));
             if (!isInRange)
             {
                 vertex.IsObstacle = polarity;

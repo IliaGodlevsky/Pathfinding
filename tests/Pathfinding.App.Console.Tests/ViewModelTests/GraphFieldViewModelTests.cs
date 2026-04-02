@@ -35,11 +35,11 @@ internal sealed class GraphFieldViewModelTests
 
         var canExecute = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => value);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(viewModel.ActivatedGraph.Graph, Is.EqualTo(graph));
             Assert.That(canExecute, Is.True);
-        });
+        }
     }
 
     [Test]
@@ -60,11 +60,11 @@ internal sealed class GraphFieldViewModelTests
 
         var canExecute = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => !value);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(viewModel.ActivatedGraph.Graph, Is.EqualTo(graph));
             Assert.That(canExecute, Is.False);
-        });
+        }
     }
 
     [Test]
@@ -95,7 +95,7 @@ internal sealed class GraphFieldViewModelTests
 
         await viewModel.ChangeVertexPolarityCommand.Execute(vertex);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(vertex.IsObstacle, Is.True);
             serviceMock
@@ -107,7 +107,7 @@ internal sealed class GraphFieldViewModelTests
             Assert.That(obstaclesMessage, Is.Not.Null);
             Assert.That(obstaclesMessage!.Value.GraphId, Is.EqualTo(2));
             Assert.That(obstaclesMessage!.Value.Delta, Is.EqualTo(1));
-        });
+        }
     }
 
     [Test]
@@ -132,7 +132,7 @@ internal sealed class GraphFieldViewModelTests
 
         await viewModel.ChangeVertexPolarityCommand.Execute(vertex);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(vertex.IsObstacle, Is.False);
             serviceMock
@@ -140,7 +140,7 @@ internal sealed class GraphFieldViewModelTests
                     It.IsAny<UpdateVerticesRequest<GraphVertexModel>>(),
                     It.IsAny<CancellationToken>()), Times.Never);
             Assert.That(obstaclesSent, Is.False);
-        });
+        }
     }
 
     [Test]
@@ -158,7 +158,10 @@ internal sealed class GraphFieldViewModelTests
 
         var vertex = CreateVertex();
         vertex.Cost = new VertexCost(9);
-        var graph = new Graph<GraphVertexModel>([vertex], 1);
+        var graph = new Graph<GraphVertexModel>([vertex], 1)
+        {
+            CostRange = (1, 10)
+        };
         var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
             new(4, graph, false),
             default,
@@ -168,7 +171,7 @@ internal sealed class GraphFieldViewModelTests
 
         await viewModel.IncreaseVertexCostCommand.Execute(vertex);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(vertex.Cost.CurrentCost, Is.EqualTo(10));
             serviceMock
@@ -177,7 +180,7 @@ internal sealed class GraphFieldViewModelTests
                         => request.GraphId == 4
                         && request.Vertices.Single() == vertex),
                     It.IsAny<CancellationToken>()), Times.Once);
-        });
+        }
     }
 
     [Test]
@@ -209,13 +212,13 @@ internal sealed class GraphFieldViewModelTests
 
         await viewModel.InverseVertexCommand.Execute(vertex);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(vertex.IsObstacle, Is.False);
             Assert.That(obstaclesMessage, Is.Not.Null);
             Assert.That(obstaclesMessage!.Value.GraphId, Is.EqualTo(5));
             Assert.That(obstaclesMessage!.Value.Delta, Is.EqualTo(-1));
-        });
+        }
     }
 
     [Test]
@@ -240,11 +243,11 @@ internal sealed class GraphFieldViewModelTests
 
         var disabled = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => !value);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(enabled, Is.True);
             Assert.That(disabled, Is.False);
-        });
+        }
     }
 
     [Test]
@@ -270,11 +273,11 @@ internal sealed class GraphFieldViewModelTests
 
         var disabled = await viewModel.ChangeVertexPolarityCommand.CanExecute.FirstAsync(value => !value);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(viewModel.ActivatedGraph.Graph, Is.SameAs(Graph<GraphVertexModel>.Empty));
             Assert.That(disabled, Is.False);
-        });
+        }
     }
 
     private static GraphFieldViewModel CreateViewModel(StrongReferenceMessenger messenger,

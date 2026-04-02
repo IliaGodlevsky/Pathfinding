@@ -68,7 +68,7 @@ internal sealed class GraphExportViewModelTests
             await viewModel.ExportGraphCommand.Execute(() => new StreamModel(new MemoryStream(), StreamFormat.Json));
         }
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             optionsMock
                 .Verify(x => x.ReadHistoryAsync(
@@ -85,7 +85,7 @@ internal sealed class GraphExportViewModelTests
             logMock
                 .Verify(x => x.Info(
                     It.Is<string>(message => message == Resource.WasDeletedMsg)), Times.Once);
-        });
+        }
     }
 
     [Test]

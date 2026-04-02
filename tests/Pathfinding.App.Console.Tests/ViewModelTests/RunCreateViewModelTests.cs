@@ -101,13 +101,13 @@ internal sealed class RunCreateViewModelTests
 
         await viewModel.CreateRunCommand.Execute();
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             statisticsServiceMock.Verify(x => x.CreateStatisticsAsync(
                 It.Is<IReadOnlyCollection<CreateStatisticsRequest>>(requests => requests.Any()),
                 It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(createdMessage, Is.Not.Null);
-        });
+        }
     }
 
     [Test]

@@ -67,11 +67,11 @@ internal sealed class RunTableViewModelTests
 
         await messenger.Send(CreateActivatedMessage(1));
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(viewModel.Runs, Has.Count.EqualTo(runs.Count));
             Assert.That(viewModel.Runs, Is.Not.Empty);
-        });
+        }
     }
 
     [Test]
@@ -113,14 +113,14 @@ internal sealed class RunTableViewModelTests
 
         messenger.Send(new GraphsDeletedMessage([1]));
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(viewModel.Runs, Is.Empty);
             statisticsMock
                 .Verify(x => x.ReadStatisticsAsync(
                     It.IsAny<int>(),
                     It.IsAny<CancellationToken>()), Times.Once);
-        });
+        }
     }
 
     [Test]
@@ -167,14 +167,14 @@ internal sealed class RunTableViewModelTests
 
         await stateChanged.Task.ConfigureAwait(false);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(viewModel.Runs, Is.Empty);
             graphInfoMock
                 .Verify(x => x.UpdateGraphInfoAsync(
                     It.IsAny<GraphInformationModel>(),
                     It.IsAny<CancellationToken>()), Times.Once);
-        });
+        }
     }
 
     [Test]

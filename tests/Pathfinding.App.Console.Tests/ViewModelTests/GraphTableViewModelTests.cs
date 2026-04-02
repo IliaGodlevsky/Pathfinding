@@ -39,13 +39,13 @@ internal sealed class GraphTableViewModelTests
 
         await viewModel.LoadGraphsCommand.Execute();
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             graphInfoServiceMock
                 .Verify(x => x.ReadAllGraphInfoAsync(
                     It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(viewModel.Graphs, Has.Count.EqualTo(graphs.Count));
-        });
+        }
     }
 
     [Test]
@@ -113,14 +113,14 @@ internal sealed class GraphTableViewModelTests
 
         await viewModel.ActivateGraphCommand.Execute(1);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             graphServiceMock
                 .Verify(x => x.ReadGraphAsync(
                     It.Is<int>(z => z == 1),
                     It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(activatedMessages, Has.Count.EqualTo(1));
-        });
+        }
     }
 
     [Test]

@@ -28,12 +28,12 @@ internal sealed class GraphUpdateViewModelTests
         var model = Generators.GenerateGraphInfos(1).Single();
         messenger.Send(new GraphsSelectedMessage([model]));
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(viewModel.SelectedGraphs, Has.Length.EqualTo(1));
             Assert.That(viewModel.Name, Is.EqualTo(model.Name));
             Assert.That(viewModel.Neighborhood, Is.EqualTo(model.Neighborhood));
-        });
+        }
     }
 
     [Test]
@@ -52,11 +52,11 @@ internal sealed class GraphUpdateViewModelTests
 
         messenger.Send(new GraphsDeletedMessage([model.Id]));
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(viewModel.SelectedGraphs, Is.Empty);
             Assert.That(viewModel.Name, Is.EqualTo(string.Empty));
-        });
+        }
     }
 
     [Test]
@@ -102,7 +102,7 @@ internal sealed class GraphUpdateViewModelTests
 
         await viewModel.UpdateGraphCommand.Execute();
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             serviceMock.Verify(x => x.ReadGraphInfoAsync(
                 graphInfoModel.Id,
@@ -114,7 +114,7 @@ internal sealed class GraphUpdateViewModelTests
                        && model.Neighborhood == Neighborhoods.Moore),
                 It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(updatedMessages, Has.Count.EqualTo(1));
-        });
+        }
     }
 
     private static GraphUpdateViewModel CreateViewModel(

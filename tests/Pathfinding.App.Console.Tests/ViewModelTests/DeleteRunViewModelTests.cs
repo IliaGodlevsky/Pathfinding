@@ -41,7 +41,7 @@ internal sealed class DeleteRunViewModelTests
 
         await viewModel.DeleteRunsCommand.Execute();
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(canExecute, Is.True);
             serviceMock
@@ -50,7 +50,7 @@ internal sealed class DeleteRunViewModelTests
                     It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(deletedMessage, Is.Not.Null);
             Assert.That(deletedMessage!.Value, Is.EqualTo(runModels.Select(x => x.Id).ToArray()));
-        });
+        }
     }
 
     [Test]
@@ -88,14 +88,14 @@ internal sealed class DeleteRunViewModelTests
 
         var canExecute = await viewModel.DeleteRunsCommand.CanExecute.FirstAsync(value => !value);
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(canExecute, Is.False);
             serviceMock
                 .Verify(x => x.DeleteRunsAsync(
                     It.IsAny<IReadOnlyCollection<int>>(),
                     It.IsAny<CancellationToken>()), Times.Never);
-        });
+        }
     }
 
     private static RunDeleteViewModel CreateViewModel(StrongReferenceMessenger messenger,

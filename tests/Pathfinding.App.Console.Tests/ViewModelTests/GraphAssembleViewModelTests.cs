@@ -39,6 +39,7 @@ internal sealed class GraphAssembleViewModelTests
             .ReturnsAsync(new GraphModel<GraphVertexModel>
             {
                 Id = 1,
+                CostRange = (1, 9),
                 Name = "Demo",
                 SmoothLevel = SmoothLevels.No,
                 Neighborhood = Neighborhoods.VonNeumann,
@@ -74,6 +75,7 @@ internal sealed class GraphAssembleViewModelTests
         viewModel.Neighborhood = Neighborhoods.VonNeumann;
         viewModel.Obstacles = 10;
         viewModel.Name = "Demo";
+        viewModel.Range = (1, 9);
 
         GraphsCreatedMessage createdMessage = null;
         messenger.Register<GraphsCreatedMessage>(this, (_, msg) => createdMessage = msg);
@@ -82,7 +84,7 @@ internal sealed class GraphAssembleViewModelTests
 
         await viewModel.AssembleGraphCommand.Execute();
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             Assert.That(canExecute, Is.True);
             graphServiceMock
@@ -93,7 +95,7 @@ internal sealed class GraphAssembleViewModelTests
                 .Verify(x => x.AssembleGraph(
                     It.IsAny<IReadOnlyList<int>>()), Times.Once);
             Assert.That(createdMessage, Is.Not.Null);
-        });
+        }
     }
 
     private static GraphAssembleViewModel CreateViewModel(StrongReferenceMessenger messenger,

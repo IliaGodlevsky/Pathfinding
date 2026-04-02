@@ -77,8 +77,8 @@ internal sealed class GraphImportViewModelTests
                 serializerMock.Object,
                 new Dictionary<string, object>
                 {
-                    [Pathfinding.App.Console.Injection.MetadataKeys.Order] = 1,
-                    [Pathfinding.App.Console.Injection.MetadataKeys.ExportFormat] = StreamFormat.Json
+                    [Injection.MetadataKeys.Order] = 1,
+                    [Injection.MetadataKeys.ExportFormat] = StreamFormat.Json
                 })
         };
 
@@ -94,7 +94,7 @@ internal sealed class GraphImportViewModelTests
         await viewModel.ImportGraphCommand.Execute(() =>
             new StreamModel(new MemoryStream([1, 2, 3]), StreamFormat.Json));
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             serializerMock.Verify(x => x.DeserializeFromAsync(
                 It.IsAny<Stream>(),
@@ -104,7 +104,7 @@ internal sealed class GraphImportViewModelTests
                 It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(createdMessage, Is.Not.Null);
             logMock.Verify(x => x.Info(It.IsAny<string>()), Times.Once);
-        });
+        }
     }
 
     [Test]
@@ -120,8 +120,8 @@ internal sealed class GraphImportViewModelTests
                 serializerMock.Object,
                 new Dictionary<string, object>
                 {
-                    [Pathfinding.App.Console.Injection.MetadataKeys.Order] = 1,
-                    [Pathfinding.App.Console.Injection.MetadataKeys.ExportFormat] = StreamFormat.Json
+                    [Injection.MetadataKeys.Order] = 1,
+                    [Injection.MetadataKeys.ExportFormat] = StreamFormat.Json
                 })
         };
 

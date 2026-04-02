@@ -108,7 +108,7 @@ internal sealed class RunUpdateViewModelTests
 
         await viewModel.UpdateRunsCommand.Execute();
 
-        Assert.Multiple(() =>
+        using (Assert.EnterMultipleScope())
         {
             statisticsServiceMock.Verify(x => x.ReadStatisticsAsync(
                 It.IsAny<IReadOnlyCollection<int>>(),
@@ -117,7 +117,7 @@ internal sealed class RunUpdateViewModelTests
                 It.IsAny<IReadOnlyCollection<RunStatisticsModel>>(),
                 It.IsAny<CancellationToken>()), Times.Once);
             Assert.That(updatedMessage, Is.Not.Null);
-        });
+        }
     }
 
     [Test]
