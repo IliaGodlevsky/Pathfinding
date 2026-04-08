@@ -50,7 +50,7 @@ internal sealed class ServiceIntegrationTests
             new()
             {
                 GraphId = graph.Id,
-                Algorithm = Algorithms.AStar,
+                Algorithm = Domain.Core.Enums.Algorithms.AStar,
                 Heuristics = Heuristics.Manhattan,
                 StepRule = StepRules.Landscape,
                 Weight = 2,
@@ -72,15 +72,15 @@ internal sealed class ServiceIntegrationTests
             Assert.That(history.Vertices.Single(v => v.Position.Coordinate.SequenceEqual([0, 1])).IsObstacle, Is.True);
             Assert.That(
                 history.Range.Select(v => v.Coordinate.ToArray()),
-                Is.EqualTo(new[]
-                {
-                    source.Position.ToArray(),
-                    transit.Position.ToArray(),
+                Is.EqualTo(
+                [
+                    [.. source.Position],
+                    [.. transit.Position],
                     target.Position.ToArray()
-                }));
+                ]));
             Assert.That(history.Statistics, Has.Count.EqualTo(1));
-            Assert.That(history.Statistics[0].Id, Is.EqualTo(stats.Single().Id));
-            Assert.That(history.Statistics[0].Heuristics, Is.EqualTo(Heuristics.Manhattan));
+            Assert.That(history.Statistics.First().Visited, Is.EqualTo(stats.Single().Visited));
+            Assert.That(history.Statistics.First().Heuristics, Is.EqualTo(Heuristics.Manhattan));
         }
     }
 
@@ -164,7 +164,7 @@ internal sealed class ServiceIntegrationTests
             new()
             {
                 GraphId = graph.Id,
-                Algorithm = Algorithms.Dijkstra,
+                Algorithm = Domain.Core.Enums.Algorithms.Dijkstra,
                 Visited = 2,
                 Steps = 1,
                 Cost = 1,
@@ -266,7 +266,7 @@ internal sealed class ServiceIntegrationTests
             new()
             {
                 GraphId = graph.Id,
-                Algorithm = Algorithms.AStar,
+                Algorithm = Domain.Core.Enums.Algorithms.AStar,
                 Visited = 2,
                 Steps = 1,
                 Cost = 1,
@@ -276,7 +276,7 @@ internal sealed class ServiceIntegrationTests
             new()
             {
                 GraphId = graph.Id,
-                Algorithm = Algorithms.Dijkstra,
+                Algorithm = Domain.Core.Enums.Algorithms.Dijkstra,
                 Visited = 4,
                 Steps = 2,
                 Cost = 2,
@@ -293,7 +293,7 @@ internal sealed class ServiceIntegrationTests
             Assert.That(deleted, Is.True);
             Assert.That(afterDelete, Has.Count.EqualTo(1));
             Assert.That(afterDelete.Single().Id, Is.EqualTo(runs.Last().Id));
-            Assert.That(afterDelete.Single().Algorithm, Is.EqualTo(Algorithms.Dijkstra));
+            Assert.That(afterDelete.Single().Algorithm, Is.EqualTo(Domain.Core.Enums.Algorithms.Dijkstra));
         }
     }
 
@@ -324,7 +324,7 @@ internal sealed class ServiceIntegrationTests
                 IsObstacle = x.Position == new Coordinate(0, 1),
                 Cost = new VertexCost(x.Position == new Coordinate(0, 1) ? 9 : 2)
             })
-            .ToArray();
+            .ToList();
 
         var updated = await graphService.UpdateVerticesAsync(new(graph.Id, updatedVertices));
         var readGraph = await graphService.ReadGraphAsync(graph.Id);
@@ -333,8 +333,8 @@ internal sealed class ServiceIntegrationTests
         {
             Assert.That(updated, Is.True);
             Assert.That(readGraph.Vertices.Single(x => x.Position == new Coordinate(0, 1)).IsObstacle, Is.True);
-            Assert.That(readGraph.Vertices.Single(x => x.Position == new Coordinate(0, 1)).Cost.Cost, Is.EqualTo(9));
-            Assert.That(readGraph.Vertices.Single(x => x.Position == new Coordinate(0, 0)).Cost.Cost, Is.EqualTo(2));
+            Assert.That(readGraph.Vertices.Single(x => x.Position == new Coordinate(0, 1)).Cost.CurrentCost, Is.EqualTo(9));
+            Assert.That(readGraph.Vertices.Single(x => x.Position == new Coordinate(0, 0)).Cost.CurrentCost, Is.EqualTo(2));
         }
     }
 }
