@@ -92,6 +92,83 @@ internal class RangeRequestServiceTests
     }
 
     [Test]
+    public async Task CreatePathfindingVertexAsync_WhenRangeIsEmpty_ShouldCreateSourceWithoutTarget()
+    {
+        using var mock = AutoMock.GetLoose();
+        var graphId = 8;
+        IReadOnlyCollection<PathfindingRange> resultRange = null!;
+
+        UnitOfWorkMockHelper.SetupUnitOfWork(mock, unit =>
+        {
+            unit.Setup(x => x.RangeRepository).Returns(mock.Container.Resolve<IRangeRepository>());
+        });
+
+        mock.Mock<IRangeRepository>()
+            .Setup(x => x.ReadByGraphIdAsync(graphId))
+            .Returns(Enumerable.Empty<PathfindingRange>().ToAsyncEnumerable());
+        mock.Mock<IRangeRepository>()
+            .Setup(x => x.UpsertAsync(It.IsAny<IReadOnlyCollection<PathfindingRange>>(), It.IsAny<CancellationToken>()))
+            .Callback((IReadOnlyCollection<PathfindingRange> ranges, CancellationToken _) => resultRange = ranges)
+            .ReturnsAsync((IReadOnlyCollection<PathfindingRange> ranges, CancellationToken _) => ranges);
+
+        var service = mock.Create<RangeRequestService<FakeVertex>>();
+
+        var result = await service.CreatePathfindingVertexAsync(new(graphId, 100, 0));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.True);
+            Assert.That(resultRange, Has.Count.EqualTo(1));
+            var created = resultRange.Single();
+            Assert.That(created.VertexId, Is.EqualTo(100));
+            Assert.That(created.Order, Is.EqualTo(0));
+            Assert.That(created.IsSource, Is.True);
+            Assert.That(created.IsTarget, Is.False);
+        });
+    }
+
+    [Test]
+    public async Task CreatePathfindingVertexAsync_WhenInsertedAtBeginning_ShouldReassignSourceAndTarget()
+    {
+        using var mock = AutoMock.GetLoose();
+        var graphId = 9;
+        var existingRange = new List<PathfindingRange>
+        {
+            new() { GraphId = graphId, VertexId = 11, Order = 0, IsSource = true, IsTarget = false },
+            new() { GraphId = graphId, VertexId = 12, Order = 1, IsSource = false, IsTarget = true }
+        };
+        IReadOnlyCollection<PathfindingRange> resultRange = null!;
+
+        UnitOfWorkMockHelper.SetupUnitOfWork(mock, unit =>
+        {
+            unit.Setup(x => x.RangeRepository).Returns(mock.Container.Resolve<IRangeRepository>());
+        });
+
+        mock.Mock<IRangeRepository>()
+            .Setup(x => x.ReadByGraphIdAsync(graphId))
+            .Returns(existingRange.ToAsyncEnumerable());
+        mock.Mock<IRangeRepository>()
+            .Setup(x => x.UpsertAsync(It.IsAny<IReadOnlyCollection<PathfindingRange>>(), It.IsAny<CancellationToken>()))
+            .Callback((IReadOnlyCollection<PathfindingRange> ranges, CancellationToken _) => resultRange = ranges)
+            .ReturnsAsync((IReadOnlyCollection<PathfindingRange> ranges, CancellationToken _) => ranges);
+
+        var service = mock.Create<RangeRequestService<FakeVertex>>();
+
+        var result = await service.CreatePathfindingVertexAsync(new(graphId, 10, 0));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.True);
+            var ordered = resultRange.OrderBy(x => x.Order).ToList();
+            Assert.That(ordered.Select(x => x.VertexId), Is.EqualTo(new[] { 10L, 11L, 12L }));
+            Assert.That(ordered[0].IsSource, Is.True);
+            Assert.That(ordered[0].IsTarget, Is.False);
+            Assert.That(ordered[2].IsTarget, Is.True);
+            Assert.That(ordered[2].IsSource, Is.False);
+        });
+    }
+
+    [Test]
     public async Task DeleteRangeByVerticesAsync_ShouldCallRepository()
     {
         using var mock = AutoMock.GetLoose();
