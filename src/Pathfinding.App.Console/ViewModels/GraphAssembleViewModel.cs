@@ -82,6 +82,13 @@ internal sealed class GraphAssembleViewModel : ViewModel,
         set => this.RaiseAndSetIfChanged(ref neighborhood, value);
     }
 
+    private bool isMaze;
+    public bool IsMaze
+    {
+        get => isMaze;
+        set => this.RaiseAndSetIfChanged(ref isMaze, value);
+    }
+
     private InclusiveValueRange<int> range;
     public InclusiveValueRange<int> Range
     {
@@ -113,7 +120,7 @@ internal sealed class GraphAssembleViewModel : ViewModel,
         this.graphAssemble = graphAssemble;
         this.neighborFactory = neighborFactory;
         this.smoothLevelFactory = smoothLevelFactory;
-        AllowedNeighborhoods = neighborFactory.Allowed;
+        AllowedNeighborhoods = [.. neighborFactory.Allowed.Where(x => x != Neighborhoods.Maze)];
         AllowedLevels = smoothLevelFactory.Allowed;
         AssembleGraphCommand = ReactiveCommand.CreateFromTask(CreateGraph, CanExecute());
     }
@@ -148,7 +155,7 @@ internal sealed class GraphAssembleViewModel : ViewModel,
             {
                 Graph = graph,
                 Name = Name,
-                Neighborhood = Neighborhood,
+                Neighborhood = IsMaze ? Neighborhoods.Maze : Neighborhood,
                 SmoothLevel = SmoothLevel
             }; 
             var graphModel = await service
@@ -167,6 +174,12 @@ internal sealed class GraphAssembleViewModel : ViewModel,
                 range.UpperValueOfRange + 1)));
         var obstacleLayer = new ObstacleLayer(Obstacles);
         var smoothLayer = smoothLevelFactory.CreateLayer(SmoothLevel);
+        if (IsMaze)
+        {
+            var mazeLayer = neighborFactory.CreateNeighborhoodLayer(Neighborhoods.Maze);
+            return new(costLayer, mazeLayer, smoothLayer);
+        }
+
         var neighborhoodLayer = neighborFactory.CreateNeighborhoodLayer(Neighborhood);
         return new(neighborhoodLayer, costLayer, obstacleLayer, smoothLayer);
     }

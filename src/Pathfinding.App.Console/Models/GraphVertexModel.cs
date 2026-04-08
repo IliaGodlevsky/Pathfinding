@@ -58,6 +58,13 @@ public class GraphVertexModel : ReactiveObject, IVertex, IPathfindingVertex, IEn
 
     public Coordinate Position { get; set; }
 
+    private bool isMaze;
+    public bool IsMaze
+    {
+        get => isMaze;
+        set => this.RaiseAndSetIfChanged(ref isMaze, value);
+    }
+
     public HashSet<GraphVertexModel> Neighbors { get; private set; } = [];
 
     IReadOnlyCollection<IVertex> IVertex.Neighbors
