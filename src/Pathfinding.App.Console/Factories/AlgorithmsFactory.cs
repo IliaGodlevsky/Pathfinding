@@ -13,7 +13,7 @@ internal sealed class AlgorithmsFactory(Meta<IAlgorithmFactory<PathfindingProces
             x => (Algorithms)x.Metadata[MetadataKeys.Algorithm],
             x => x.Value);
 
-    public IReadOnlyList<Algorithms> Allowed { get; }
+    public IReadOnlyList<Algorithms> AvailableAlgorithms { get; }
         = [.. algorithms.OrderBy(x => x.Metadata[MetadataKeys.Order])
             .Select(x => (Algorithms)x.Metadata[MetadataKeys.Algorithm])];
 
@@ -24,8 +24,7 @@ internal sealed class AlgorithmsFactory(Meta<IAlgorithmFactory<PathfindingProces
 
     public IAlgorithmFactory<PathfindingProcess> GetAlgorithmFactory(Algorithms algorithm)
     {
-        return algorithms.TryGetValue(algorithm, out var value)
-            ? value
-            : throw new KeyNotFoundException($"{algorithm} was not found");
+        return algorithms.GetValueOrDefault(algorithm)
+            ?? throw new KeyNotFoundException($"{algorithm} was not found");
     }
 }

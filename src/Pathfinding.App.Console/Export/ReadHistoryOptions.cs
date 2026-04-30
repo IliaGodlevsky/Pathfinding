@@ -9,14 +9,14 @@ internal sealed class ReadHistoryOptions : IReadHistoryOptions
 {
     private readonly Dictionary<ExportOptions, IReadHistoryOption> options;
 
-    public IReadOnlyList<ExportOptions> Allowed { get; }
+    public IReadOnlyList<ExportOptions> AvailableExportOptions { get; }
 
     public ReadHistoryOptions(Meta<IReadHistoryOption>[] options)
     {
         this.options = options.ToDictionary(
             x => (ExportOptions)x.Metadata[MetadataKeys.ExportOptions],
             x => x.Value);
-        Allowed = [.. this.options.Keys];
+        AvailableExportOptions = [.. this.options.Keys];
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(

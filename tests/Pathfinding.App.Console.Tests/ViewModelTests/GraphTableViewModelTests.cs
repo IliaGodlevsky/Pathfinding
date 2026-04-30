@@ -183,7 +183,7 @@ internal sealed class GraphTableViewModelTests
         ILog logger = null)
     {
         neighborFactoryMock
-            .SetupGet(x => x.Allowed)
+            .SetupGet(x => x.AvailableNeighborhoods)
             .Returns(Enum.GetValues<Neighborhoods>());
         neighborFactoryMock
             .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))

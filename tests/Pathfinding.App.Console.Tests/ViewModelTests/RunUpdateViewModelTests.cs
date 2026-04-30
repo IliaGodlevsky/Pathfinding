@@ -176,7 +176,7 @@ internal sealed class RunUpdateViewModelTests
     {
         var factory = new TestAlgorithmFactory();
         var algorithmsFactoryMock = new Mock<IAlgorithmsFactory>();
-        algorithmsFactoryMock.SetupGet(x => x.Allowed).Returns([Algorithms.AStar]);
+        algorithmsFactoryMock.SetupGet(x => x.AvailableAlgorithms).Returns([Algorithms.AStar]);
         algorithmsFactoryMock
             .Setup(x => x.GetAlgorithmFactory(It.IsAny<Algorithms>()))
             .Returns(factory);

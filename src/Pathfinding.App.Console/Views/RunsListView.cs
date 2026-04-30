@@ -26,7 +26,7 @@ internal sealed partial class RunsListView : FrameView
         var selectedAlgorithms = viewModel.SelectedAlgorithms;
         selectedAlgorithms.Clear();
         int i = 0;
-        foreach (var algorithm in viewModel.AllowedAlgorithms)
+        foreach (var algorithm in viewModel.AvailableAlgorithms)
         {
             var text = algorithm.ToStringRepresentation();
             var checkBox = new CheckBox(text) { Y = i++ };
@@ -67,17 +67,17 @@ internal sealed partial class RunsListView : FrameView
     {
         switch (requirements)
         {
-            case AlgorithmRequirements.RequiresStepRule:
+            case AlgorithmRequirements.StepRule:
                 messenger.Send(new OpenStepRuleViewMessage());
                 messenger.Send(new CloseRunPopulateViewMessage());
                 messenger.Send(new CloseHeuristicsViewMessage());
                 break;
-            case AlgorithmRequirements.RequiresHeuristics:
+            case AlgorithmRequirements.Heuristics:
                 messenger.Send(new CloseStepRulesViewMessage());
                 messenger.Send(new CloseRunPopulateViewMessage());
                 messenger.Send(new OpenHeuristicsViewMessage());
                 break;
-            case AlgorithmRequirements.RequiresAll:
+            case AlgorithmRequirements.All:
                 messenger.Send(new OpenStepRuleViewMessage());
                 messenger.Send(new OpenRunsPopulateViewMessage());
                 messenger.Send(new OpenHeuristicsViewMessage());

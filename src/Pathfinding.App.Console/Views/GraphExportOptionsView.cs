@@ -23,18 +23,18 @@ internal sealed class GraphExportOptionsView : FrameView
 
     public GraphExportOptionsView(IGraphExportViewModel viewModel)
     {
-        exportOptions.RadioLabels = [.. viewModel.AllowedOptions
+        exportOptions.RadioLabels = [.. viewModel.AvailableOptions
             .Select(x => ustring.Make(x.ToStringRepresentation()))];
         DisplayMode = DisplayModeLayout.Horizontal;
         Border = new();
         exportOptions.Events().SelectedItemChanged
             .Where(x => x.SelectedItem >= 0)
-            .Select(x => viewModel.AllowedOptions[x.SelectedItem])
+            .Select(x => viewModel.AvailableOptions[x.SelectedItem])
             .BindTo(viewModel, x => x.Option)
             .DisposeWith(disposables);
         exportOptions.X = 1;
         exportOptions.Y = 1;
-        exportOptions.SelectedItem = viewModel.AllowedOptions.Count - 1;
+        exportOptions.SelectedItem = viewModel.AvailableOptions.Count - 1;
         Add(exportOptions);
     }
 

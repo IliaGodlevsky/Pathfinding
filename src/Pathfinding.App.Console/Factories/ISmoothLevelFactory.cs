@@ -5,7 +5,7 @@ namespace Pathfinding.App.Console.Factories;
 
 public interface ISmoothLevelFactory
 {
-    IReadOnlyCollection<SmoothLevels> Allowed { get; }
+    IReadOnlyCollection<SmoothLevels> AvailableLevels { get; }
 
     SmoothLayer CreateLayer(SmoothLevels level);
 }

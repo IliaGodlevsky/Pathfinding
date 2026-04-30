@@ -12,12 +12,11 @@ public sealed class NeighborhoodLayerFactory(
     private readonly Dictionary<Neighborhoods, NeighborhoodLayer> layers
         = layers.ToDictionary(x => (Neighborhoods)x.Metadata[MetadataKeys.Neighborhoods], x => x.Value);
 
-    public IReadOnlyCollection<Neighborhoods> Allowed => layers.Keys;
+    public IReadOnlyCollection<Neighborhoods> AvailableNeighborhoods => layers.Keys;
 
     public NeighborhoodLayer CreateNeighborhoodLayer(Neighborhoods neighborhoods)
     {
-        return layers.TryGetValue(neighborhoods, out var value)
-            ? value
-            : throw new KeyNotFoundException($"{neighborhoods} was not found");
+        return layers.GetValueOrDefault(neighborhoods)
+            ?? throw new KeyNotFoundException($"{neighborhoods} was not found");
     }
 }

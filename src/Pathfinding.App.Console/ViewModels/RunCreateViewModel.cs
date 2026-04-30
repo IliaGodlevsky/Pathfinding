@@ -58,11 +58,11 @@ internal sealed class RunCreateViewModel : ViewModel,
 
     public ObservableCollection<Heuristics> AppliedHeuristics { get; } = [];
 
-    public IReadOnlyCollection<Heuristics> AllowedHeuristics { get; }
+    public IReadOnlyCollection<Heuristics> AvailableHeuristics { get; }
 
-    public IReadOnlyList<Algorithms> AllowedAlgorithms { get; }
+    public IReadOnlyList<Algorithms> AvailableAlgorithms { get; }
 
-    public IReadOnlyCollection<StepRules> AllowedStepRules { get; }
+    public IReadOnlyCollection<StepRules> AvailiableStepRules { get; }
 
     private double? fromWeight;
     public double? FromWeight
@@ -112,9 +112,9 @@ internal sealed class RunCreateViewModel : ViewModel,
         this.messenger = messenger;
         this.statisticsService = statisticsService;
         this.algorithmsFactory = algorithmsFactory;
-        AllowedHeuristics = heuristicsFactory.Allowed;
-        AllowedAlgorithms = algorithmsFactory.Allowed;
-        AllowedStepRules = stepRuleFactory.Allowed;
+        AvailableHeuristics = heuristicsFactory.AvailableHeuristics;
+        AvailableAlgorithms = algorithmsFactory.AvailableAlgorithms;
+        AvailiableStepRules = stepRuleFactory.AvailableStepRules;
         Requirements = algorithmsFactory.Requirements;
 
         CreateRunCommand = ReactiveCommand.CreateFromTask(CreateAlgorithm, CanCreateAlgorithm()).DisposeWith(disposables);
@@ -133,8 +133,8 @@ internal sealed class RunCreateViewModel : ViewModel,
             {
                 var canExecute = graph != ActiveGraph.Empty && algorithmsCount > 0;
                 var requiresHeuristics = SelectedAlgorithms.All(x =>
-                    Requirements[x] == AlgorithmRequirements.RequiresAll
-                    || Requirements[x] == AlgorithmRequirements.RequiresHeuristics);
+                    Requirements[x] == AlgorithmRequirements.All
+                    || Requirements[x] == AlgorithmRequirements.Heuristics);
                 if (canExecute && requiresHeuristics)
                 {
                     canExecute = canExecute && heuristicsCount > 0;

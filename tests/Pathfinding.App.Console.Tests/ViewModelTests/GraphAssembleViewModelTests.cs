@@ -49,14 +49,14 @@ internal sealed class GraphAssembleViewModelTests
             });
 
         smoothFactoryMock
-            .SetupGet(x => x.Allowed)
+            .SetupGet(x => x.AvailableLevels)
             .Returns(Enum.GetValues<SmoothLevels>());
         smoothFactoryMock
             .Setup(x => x.CreateLayer(It.IsAny<SmoothLevels>()))
             .Returns(new SmoothLayer(0));
 
         neighborFactoryMock
-            .SetupGet(x => x.Allowed)
+            .SetupGet(x => x.AvailableNeighborhoods)
             .Returns(Enum.GetValues<Neighborhoods>());
         neighborFactoryMock
             .Setup(x => x.CreateNeighborhoodLayer(It.IsAny<Neighborhoods>()))

@@ -24,7 +24,7 @@ internal sealed partial class RunStepRulesView : FrameView
         IRequireStepRuleViewModel viewModel)
     {
         Initialize();
-        var rules = viewModel.AllowedStepRules
+        var rules = viewModel.AvailiableStepRules
             .ToDictionary(x => x.ToStringRepresentation());
         var labels = rules.Select(x => ustring.Make(x.Key)).ToArray();
         var values = labels.Select(x => rules[x.ToString()!]).ToList();

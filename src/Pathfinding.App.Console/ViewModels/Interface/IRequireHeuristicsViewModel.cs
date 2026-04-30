@@ -4,7 +4,7 @@ namespace Pathfinding.App.Console.ViewModels.Interface;
 
 internal interface IRequireHeuristicsViewModel
 {
-    IReadOnlyCollection<Heuristics> AllowedHeuristics { get; }
+    IReadOnlyCollection<Heuristics> AvailableHeuristics { get; }
 
     IList<Heuristics> AppliedHeuristics { get; }
 }

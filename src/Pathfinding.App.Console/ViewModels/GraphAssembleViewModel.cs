@@ -113,8 +113,8 @@ internal sealed class GraphAssembleViewModel : ViewModel,
         this.graphAssemble = graphAssemble;
         this.neighborFactory = neighborFactory;
         this.smoothLevelFactory = smoothLevelFactory;
-        AllowedNeighborhoods = neighborFactory.Allowed;
-        AllowedLevels = smoothLevelFactory.Allowed;
+        AllowedNeighborhoods = neighborFactory.AvailableNeighborhoods;
+        AllowedLevels = smoothLevelFactory.AvailableLevels;
         AssembleGraphCommand = ReactiveCommand.CreateFromTask(CreateGraph, CanExecute());
     }
 

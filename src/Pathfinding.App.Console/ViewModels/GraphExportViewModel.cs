@@ -33,7 +33,7 @@ internal sealed class GraphExportViewModel : ViewModel, IGraphExportViewModel, I
 
     public ExportOptions Option { get; set; }
 
-    public IReadOnlyList<ExportOptions> AllowedOptions => options.Allowed;
+    public IReadOnlyList<ExportOptions> AvailableOptions => options.AvailableExportOptions;
 
     public IReadOnlyCollection<StreamFormat> StreamFormats { get; }
 
@@ -45,8 +45,7 @@ internal sealed class GraphExportViewModel : ViewModel, IGraphExportViewModel, I
         ILog logger) : base(logger)
     {
         this.options = options;
-        this.serializers = serializers
-            .ToDictionary(
+        this.serializers = serializers.ToDictionary(
                 x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat],
                 x => x.Value);
         StreamFormats = [.. serializers

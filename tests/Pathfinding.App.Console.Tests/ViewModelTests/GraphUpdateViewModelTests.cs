@@ -20,7 +20,7 @@ internal sealed class GraphUpdateViewModelTests
         var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IGraphInfoRequestService>();
         var neighborhoodFactoryMock = new Mock<INeighborhoodLayerFactory>();
-        neighborhoodFactoryMock.SetupGet(x => x.Allowed)
+        neighborhoodFactoryMock.SetupGet(x => x.AvailableNeighborhoods)
             .Returns([Neighborhoods.Moore, Neighborhoods.Diagonal]);
 
         using var viewModel = CreateViewModel(messenger, serviceMock, neighborhoodFactoryMock);
@@ -42,7 +42,7 @@ internal sealed class GraphUpdateViewModelTests
         var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IGraphInfoRequestService>();
         var neighborhoodFactoryMock = new Mock<INeighborhoodLayerFactory>();
-        neighborhoodFactoryMock.SetupGet(x => x.Allowed).Returns([]);
+        neighborhoodFactoryMock.SetupGet(x => x.AvailableNeighborhoods).Returns([]);
 
         using var viewModel = CreateViewModel(messenger, serviceMock, neighborhoodFactoryMock);
 
@@ -65,7 +65,7 @@ internal sealed class GraphUpdateViewModelTests
         var messenger = new StrongReferenceMessenger();
         var serviceMock = new Mock<IGraphInfoRequestService>();
         var neighborhoodFactoryMock = new Mock<INeighborhoodLayerFactory>();
-        neighborhoodFactoryMock.SetupGet(x => x.Allowed)
+        neighborhoodFactoryMock.SetupGet(x => x.AvailableNeighborhoods)
             .Returns([Neighborhoods.Moore]);
 
         var graphInfoModel = Generators.GenerateGraphInfos(1).Single();

@@ -19,7 +19,6 @@ public sealed class XmlSerializer<T> : ISerializer<T>
             var xmlSerializer = new XmlSerializer(typeof(T));
             using var stringReader = new StringReader(xml);
             return (T)xmlSerializer.Deserialize(stringReader);
-
         }
         catch (Exception ex)
         {

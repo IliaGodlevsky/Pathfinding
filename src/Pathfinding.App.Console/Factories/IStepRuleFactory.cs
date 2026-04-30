@@ -5,7 +5,7 @@ namespace Pathfinding.App.Console.Factories;
 
 public interface IStepRuleFactory
 {
-    IReadOnlyCollection<StepRules> Allowed { get; }
+    IReadOnlyCollection<StepRules> AvailableStepRules { get; }
 
     IStepRule CreateStepRule(StepRules stepRule);
 }

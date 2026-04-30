@@ -8,7 +8,7 @@ internal interface IGraphExportViewModel
 {
     ExportOptions Option { get; set; }
 
-    IReadOnlyList<ExportOptions> AllowedOptions { get; }
+    IReadOnlyList<ExportOptions> AvailableOptions { get; }
 
     IReadOnlyCollection<StreamFormat> StreamFormats { get; }
 

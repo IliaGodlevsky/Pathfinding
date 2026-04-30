@@ -9,7 +9,7 @@ internal interface IRunCreateViewModel
 {
     IList<Algorithms> SelectedAlgorithms { get; }
 
-    IReadOnlyList<Algorithms> AllowedAlgorithms { get; }
+    IReadOnlyList<Algorithms> AvailableAlgorithms { get; }
 
     IReadOnlyDictionary<Algorithms, AlgorithmRequirements> Requirements { get; }
 

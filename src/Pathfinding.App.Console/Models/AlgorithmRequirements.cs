@@ -1,9 +1,3 @@
 ﻿namespace Pathfinding.App.Console.Models;
 
-public enum AlgorithmRequirements
-{
-    NoRequirements,
-    RequiresStepRule,
-    RequiresHeuristics,
-    RequiresAll
-}
+public enum AlgorithmRequirements { No, StepRule, Heuristics, All }

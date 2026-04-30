@@ -26,7 +26,7 @@ internal sealed partial class RunHeuristicsView
         messenger.RegisterHandler<CloseHeuristicsViewMessage>(this, OnHeuristicsViewClosed).DisposeWith(disposables);
         var heuristics = viewModel.AppliedHeuristics;
         heuristics.Clear();
-        foreach (var heuristic in viewModel.AllowedHeuristics)
+        foreach (var heuristic in viewModel.AvailableHeuristics)
         {
             var text = heuristic.ToStringRepresentation();
             var checkBox = new CheckBox(text) { Y = checkBoxes.Count };

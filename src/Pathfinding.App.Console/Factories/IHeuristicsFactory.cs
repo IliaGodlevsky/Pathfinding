@@ -5,7 +5,7 @@ namespace Pathfinding.App.Console.Factories;
 
 public interface IHeuristicsFactory
 {
-    IReadOnlyCollection<Heuristics> Allowed { get; }
+    IReadOnlyCollection<Heuristics> AvailableHeuristics { get; }
 
     IHeuristic CreateHeuristic(Heuristics heuristics, double weight);
 }

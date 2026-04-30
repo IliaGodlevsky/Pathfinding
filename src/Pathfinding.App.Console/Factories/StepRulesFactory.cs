@@ -11,12 +11,11 @@ public sealed class StepRulesFactory(IEnumerable<Meta<IStepRule>> stepRules) : I
             x => (StepRules)x.Metadata[MetadataKeys.StepRule],
             x => x.Value);
 
-    public IReadOnlyCollection<StepRules> Allowed => stepRules.Keys;
+    public IReadOnlyCollection<StepRules> AvailableStepRules => stepRules.Keys;
 
     public IStepRule CreateStepRule(StepRules stepRule)
     {
-        return stepRules.TryGetValue(stepRule, out var value)
-            ? value
-            : throw new KeyNotFoundException($"{stepRule} was not found");
+        return stepRules.GetValueOrDefault(stepRule)
+            ?? throw new KeyNotFoundException($"{stepRule} was not found");
     }
 }

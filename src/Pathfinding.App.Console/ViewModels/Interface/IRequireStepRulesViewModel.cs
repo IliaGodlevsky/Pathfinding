@@ -4,7 +4,7 @@ namespace Pathfinding.App.Console.ViewModels.Interface;
 
 internal interface IRequireStepRuleViewModel
 {
-    IReadOnlyCollection<StepRules> AllowedStepRules { get; }
+    IReadOnlyCollection<StepRules> AvailiableStepRules { get; }
 
     StepRules? StepRule { get; set; }
 }

@@ -14,12 +14,12 @@ public sealed class HeuristicsFactory(IEnumerable<Meta<IHeuristic>> heuristics)
             x => (Heuristics)x.Metadata[MetadataKeys.Heuristics],
             x => x.Value);
 
-    public IReadOnlyCollection<Heuristics> Allowed => heuristics.Keys;
+    public IReadOnlyCollection<Heuristics> AvailableHeuristics => heuristics.Keys;
 
     public IHeuristic CreateHeuristic(Heuristics heuristic, double weight)
     {
-        return heuristics.TryGetValue(heuristic, out var value)
-            ? new WeightedHeuristic(value, weight)
-            : throw new KeyNotFoundException($"{heuristic} was not found");
+        var value = heuristics.GetValueOrDefault(heuristic)
+            ?? throw new KeyNotFoundException($"{heuristic} was not found");
+        return weight == 1 ? value : new WeightedHeuristic(value, weight);
     }
 }

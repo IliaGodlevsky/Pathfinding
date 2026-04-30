@@ -26,9 +26,9 @@ internal sealed class RunCreateViewModelTests
         var statisticsServiceMock = new Mock<IStatisticsRequestService>();
         var algorithmsFactoryMock = CreateAlgorithmsFactoryMock();
         var heuristicsFactoryMock = new Mock<IHeuristicsFactory>();
-        heuristicsFactoryMock.SetupGet(x => x.Allowed).Returns([]);
+        heuristicsFactoryMock.SetupGet(x => x.AvailableHeuristics).Returns([]);
         var stepRuleFactoryMock = new Mock<IStepRuleFactory>();
-        stepRuleFactoryMock.SetupGet(x => x.Allowed).Returns([]);
+        stepRuleFactoryMock.SetupGet(x => x.AvailableStepRules).Returns([]);
 
         using var viewModel = CreateViewModel(
             messenger,
@@ -60,9 +60,9 @@ internal sealed class RunCreateViewModelTests
         var statisticsServiceMock = new Mock<IStatisticsRequestService>();
         var algorithmsFactoryMock = CreateAlgorithmsFactoryMock();
         var heuristicsFactoryMock = new Mock<IHeuristicsFactory>();
-        heuristicsFactoryMock.SetupGet(x => x.Allowed).Returns([]);
+        heuristicsFactoryMock.SetupGet(x => x.AvailableHeuristics).Returns([]);
         var stepRuleFactoryMock = new Mock<IStepRuleFactory>();
-        stepRuleFactoryMock.SetupGet(x => x.Allowed).Returns([]);
+        stepRuleFactoryMock.SetupGet(x => x.AvailableStepRules).Returns([]);
         var logMock = new Mock<ILog>();
 
         var createdRuns = new[]
@@ -117,9 +117,9 @@ internal sealed class RunCreateViewModelTests
         var statisticsServiceMock = new Mock<IStatisticsRequestService>();
         var algorithmsFactoryMock = CreateAlgorithmsFactoryMock();
         var heuristicsFactoryMock = new Mock<IHeuristicsFactory>();
-        heuristicsFactoryMock.SetupGet(x => x.Allowed).Returns([]);
+        heuristicsFactoryMock.SetupGet(x => x.AvailableHeuristics).Returns([]);
         var stepRuleFactoryMock = new Mock<IStepRuleFactory>();
-        stepRuleFactoryMock.SetupGet(x => x.Allowed).Returns([]);
+        stepRuleFactoryMock.SetupGet(x => x.AvailableStepRules).Returns([]);
         var logMock = new Mock<ILog>();
 
         using var viewModel = CreateViewModel(
@@ -172,12 +172,12 @@ internal sealed class RunCreateViewModelTests
     {
         var factory = new TestAlgorithmFactory();
         var algorithmsFactoryMock = new Mock<IAlgorithmsFactory>();
-        algorithmsFactoryMock.SetupGet(x => x.Allowed).Returns([Algorithms.AStar]);
+        algorithmsFactoryMock.SetupGet(x => x.AvailableAlgorithms).Returns([Algorithms.AStar]);
         algorithmsFactoryMock
             .SetupGet(x => x.Requirements)
             .Returns(new Dictionary<Algorithms, AlgorithmRequirements>
             {
-                { Algorithms.AStar, AlgorithmRequirements.NoRequirements }
+                { Algorithms.AStar, AlgorithmRequirements.No }
             });
         algorithmsFactoryMock
             .Setup(x => x.GetAlgorithmFactory(It.IsAny<Algorithms>()))

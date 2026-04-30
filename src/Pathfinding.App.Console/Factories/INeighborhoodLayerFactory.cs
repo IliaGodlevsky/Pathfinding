@@ -5,7 +5,7 @@ namespace Pathfinding.App.Console.Factories;
 
 public interface INeighborhoodLayerFactory
 {
-    IReadOnlyCollection<Neighborhoods> Allowed { get; }
+    IReadOnlyCollection<Neighborhoods> AvailableNeighborhoods { get; }
 
     NeighborhoodLayer CreateNeighborhoodLayer(Neighborhoods neighborhoods);
 }

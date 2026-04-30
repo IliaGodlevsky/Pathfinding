@@ -37,7 +37,7 @@ internal sealed class GraphUpdateViewModel : ViewModel, IDisposable
     }
 
     public IReadOnlyCollection<Neighborhoods> Allowed
-        => neighborFactory.Allowed;
+        => neighborFactory.AvailableNeighborhoods;
 
     private string name;
     public string Name

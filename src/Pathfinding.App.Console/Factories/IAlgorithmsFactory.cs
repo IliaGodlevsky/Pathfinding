@@ -6,7 +6,7 @@ namespace Pathfinding.App.Console.Factories;
 
 public interface IAlgorithmsFactory
 {
-    IReadOnlyList<Algorithms> Allowed { get; }
+    IReadOnlyList<Algorithms> AvailableAlgorithms { get; }
 
     IReadOnlyDictionary<Algorithms, AlgorithmRequirements> Requirements { get; }
 

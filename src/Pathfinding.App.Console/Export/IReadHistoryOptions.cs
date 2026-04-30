@@ -5,7 +5,7 @@ namespace Pathfinding.App.Console.Export;
 
 internal interface IReadHistoryOptions
 {
-    IReadOnlyList<ExportOptions> Allowed { get; }
+    IReadOnlyList<ExportOptions> AvailableExportOptions { get; }
 
     Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(
         ExportOptions option,

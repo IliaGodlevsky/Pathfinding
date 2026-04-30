@@ -27,7 +27,7 @@ internal sealed class GraphExportViewModelTests
         var logMock = new Mock<ILog>();
 
         optionsMock
-            .SetupGet(x => x.Allowed)
+            .SetupGet(x => x.AvailableExportOptions)
             .Returns([ExportOptions.GraphOnly, ExportOptions.WithRuns]);
 
         var histories = new PathfindingHistoriesSerializationModel

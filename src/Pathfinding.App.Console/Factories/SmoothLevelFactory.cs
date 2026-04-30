@@ -11,12 +11,11 @@ internal sealed class SmoothLevelFactory(Meta<SmoothLayer>[] layers) : ISmoothLe
             x => (SmoothLevels)x.Metadata[MetadataKeys.SmoothLevels],
             x => x.Value);
 
-    public IReadOnlyCollection<SmoothLevels> Allowed => layers.Keys;
+    public IReadOnlyCollection<SmoothLevels> AvailableLevels => layers.Keys;
 
     public SmoothLayer CreateLayer(SmoothLevels level)
     {
-        return layers.TryGetValue(level, out var value)
-            ? value
-            : throw new KeyNotFoundException($"{level} was not found");
+        return layers.GetValueOrDefault(level)
+            ?? throw new KeyNotFoundException($"{level} was not found");
     }
 }
