@@ -1,8 +1,10 @@
 ﻿using Autofac;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Views;
+using ReactiveUI.Builder;
 using Terminal.Gui;
 
+RxAppBuilder.CreateReactiveUIBuilder().BuildApp();
 Application.Init();
 await using var container = Modules.Build();
 using var main = container.Resolve<MainView>();
