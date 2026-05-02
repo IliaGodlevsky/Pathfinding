@@ -8,12 +8,19 @@ using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Domain.Core.Enums;
 using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Shared.Primitives;
+using ReactiveUI.Builder;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
 
 [Category("Unit")]
 internal sealed class RunFieldViewModelTests
 {
+    [SetUp]
+    public void Setup()
+    {
+        RxAppBuilder.CreateReactiveUIBuilder().BuildApp();
+    }
+
     [Test]
     public async Task AwaitGraphActivatedMessage_ShouldAssembleRunGraph()
     {

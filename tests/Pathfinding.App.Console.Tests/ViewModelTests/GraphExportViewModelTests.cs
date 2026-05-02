@@ -9,6 +9,7 @@ using Pathfinding.App.Console.Resources;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface.Models.Serialization;
+using ReactiveUI.Builder;
 using System.Reactive.Linq;
 
 using Serializer = Pathfinding.Service.Interface.ISerializer<Pathfinding.Service.Interface.Models.Serialization.PathfindingHistoriesSerializationModel>;
@@ -18,6 +19,12 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests;
 [Category("Unit")]
 internal sealed class GraphExportViewModelTests
 {
+    [SetUp]
+    public void Setup()
+    {
+        RxAppBuilder.CreateReactiveUIBuilder().BuildApp();
+    }
+
     [Test]
     public async Task ExportGraphCommand_ShouldSerializeHistories()
     {

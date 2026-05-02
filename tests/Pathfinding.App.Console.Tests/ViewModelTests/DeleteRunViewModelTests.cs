@@ -5,6 +5,7 @@ using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
+using ReactiveUI.Builder;
 using System.Reactive.Linq;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
@@ -12,6 +13,12 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests;
 [Category("Unit")]
 internal sealed class DeleteRunViewModelTests
 {
+    [SetUp]
+    public void Setup()
+    {
+        RxAppBuilder.CreateReactiveUIBuilder().BuildApp();
+    }
+
     [Test]
     public async Task DeleteRunsCommand_SeveralRunIds_ShouldDelete()
     {

@@ -4,6 +4,7 @@ using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.ViewModels;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
+using ReactiveUI.Builder;
 using System.Reactive.Linq;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
@@ -11,6 +12,12 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests;
 [Category("Unit")]
 internal sealed class DeleteGraphViewModelTests
 {
+    [SetUp]
+    public void Setup()
+    {
+        RxAppBuilder.CreateReactiveUIBuilder().BuildApp();
+    }
+
     [Test]
     public async Task DeleteGraphCommand_MoreThanOneGraph_ShouldExecute()
     {

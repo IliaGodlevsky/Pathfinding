@@ -7,6 +7,7 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Serialization;
+using ReactiveUI.Builder;
 using System.Reactive.Linq;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
@@ -14,6 +15,12 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests;
 [Category("Unit")]
 internal sealed class GraphCopyViewModelTests
 {
+    [SetUp]
+    public void Setup()
+    {
+        RxAppBuilder.CreateReactiveUIBuilder().BuildApp();
+    }
+
     [Test]
     public async Task CopyCommand_CanExecute_ShouldCopy()
     {

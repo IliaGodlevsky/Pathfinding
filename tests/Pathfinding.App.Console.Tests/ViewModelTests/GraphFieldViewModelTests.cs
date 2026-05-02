@@ -10,6 +10,7 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Requests.Update;
 using Pathfinding.Shared.Primitives;
+using ReactiveUI.Builder;
 using System.Reactive.Linq;
 
 namespace Pathfinding.App.Console.Tests.ViewModelTests;
@@ -17,6 +18,12 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests;
 [Category("Unit")]
 internal sealed class GraphFieldViewModelTests
 {
+    [SetUp]
+    public void Setup()
+    {
+        RxAppBuilder.CreateReactiveUIBuilder().BuildApp();
+    }
+
     [Test]
     public async Task AwaitGraphActivatedMessage_EditableGraph_ShouldEnableCommands()
     {

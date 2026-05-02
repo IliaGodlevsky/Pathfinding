@@ -12,6 +12,7 @@ using Pathfinding.Infrastructure.Data.Pathfinding;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Shared.Primitives;
+using ReactiveUI.Builder;
 using System.Reactive.Linq;
 using Command = Pathfinding.Service.Interface.IPathfindingRangeCommand<Pathfinding.App.Console.Models.GraphVertexModel>;
 
@@ -20,6 +21,12 @@ namespace Pathfinding.App.Console.Tests.ViewModelTests;
 [Category("Unit")]
 internal sealed class RunRangeViewModelTests
 {
+    [SetUp]
+    public void Setup()
+    {
+        RxAppBuilder.CreateReactiveUIBuilder().BuildApp();
+    }
+
     [Test]
     public async Task AddToRangeCommand_ShouldExecuteFirstAvailableCommand()
     {
