@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
+using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
 using Pathfinding.App.Console.ViewModels;
@@ -85,7 +86,7 @@ internal sealed class GraphImportViewModelTests
         var viewModel = new GraphImportViewModel(
             serviceMock.Object,
             messenger,
-            serializerMeta,
+            new SerializerFactory(serializerMeta),
             logMock.Object);
 
         GraphsCreatedMessage createdMessage = null;
@@ -128,7 +129,7 @@ internal sealed class GraphImportViewModelTests
         var viewModel = new GraphImportViewModel(
             serviceMock.Object,
             messenger,
-            serializerMeta,
+            new SerializerFactory(serializerMeta),
             Mock.Of<ILog>());
 
         await viewModel.ImportGraphCommand.Execute(() => StreamModel.Empty);

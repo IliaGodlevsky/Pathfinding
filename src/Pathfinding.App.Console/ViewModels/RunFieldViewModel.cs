@@ -81,8 +81,7 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
             {
                 this.RaisePropertyChanged(nameof(RunGraph));
 
-                var rangeMsg = new PathfindingRangeRequestMessage();
-                messenger.Send(rangeMsg);
+                var range = messenger.SendAndGetResponse<PathfindingRangeRequestMessage, GraphVertexModel[]>(new());
 
                 var subRevisions = new List<SubRunModel>();
                 var visitedVertices = new List<VisitedModel>();
@@ -102,7 +101,7 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
                 }
 
                 var factory = algorithmsFactory.GetAlgorithmFactory(model.Algorithm);
-                var algorithm = factory.CreateAlgorithm(rangeMsg.Response, model);
+                var algorithm = factory.CreateAlgorithm(range, model);
                 algorithm.SubPathFound += OnSubPathFound;
                 algorithm.VertexProcessed += OnVertexProcessed;
                 try
@@ -119,7 +118,7 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
                     algorithm.VertexProcessed -= OnVertexProcessed;
                 }
 
-                var rangeCoordinates = rangeMsg.Response.Select(x => x.Position).ToArray();
+                var rangeCoordinates = range.Select(x => x.Position).ToArray();
                 run = new(RunGraph, subRevisions, rangeCoordinates) { Id = model.Id };
                 Runs.Add(run);
             }

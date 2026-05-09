@@ -106,6 +106,7 @@ internal static class Modules
         builder.RegisterDecorator<Serializer>(
             (_, _, inner) => new BufferedSerializer<PathfindingHistoriesSerializationModel>(inner),
             condition: ctx => ctx.CurrentInstance is not CompressSerializer<PathfindingHistoriesSerializationModel>);
+        builder.RegisterType<SerializerFactory>().As<ISerializerFactory>().SingleInstance();
 
         builder.RegisterType<DefaultStepRule>().As<IStepRule>().SingleInstance()
             .WithMetadata(MetadataKeys.StepRule, StepRules.Default);

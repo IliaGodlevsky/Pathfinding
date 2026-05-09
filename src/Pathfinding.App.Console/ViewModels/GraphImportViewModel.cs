@@ -1,7 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
-using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Extensions;
+using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
@@ -17,26 +17,22 @@ namespace Pathfinding.App.Console.ViewModels;
 
 internal sealed class GraphImportViewModel : ViewModel, IGraphImportViewModel
 {
-    private readonly Dictionary<StreamFormat, Serializer> serializers;
+    private readonly ISerializerFactory serializerFactory;
     private readonly IGraphRequestService<GraphVertexModel> service;
     private readonly IMessenger messenger;
 
     public ReactiveCommand<Func<StreamModel>, Unit> ImportGraphCommand { get; }
 
-    public IReadOnlyCollection<StreamFormat> StreamFormats { get; }
+    public IReadOnlyCollection<StreamFormat> StreamFormats => serializerFactory.AvailiableFormats;
 
     public GraphImportViewModel(IGraphRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        Meta<Serializer>[] serializers,
+        ISerializerFactory serializerFactory,
         ILog logger) : base(logger)
     {
         this.messenger = messenger;
         this.service = service;
-        this.serializers = serializers.ToDictionary(x =>
-            (StreamFormat)x.Metadata[MetadataKeys.ExportFormat], x => x.Value);
-        StreamFormats = [.. serializers
-            .OrderBy(x => x.Metadata[MetadataKeys.Order])
-            .Select(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat])];
+        this.serializerFactory = serializerFactory;
         ImportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(ImportGraphs);
     }
 
@@ -46,7 +42,7 @@ internal sealed class GraphImportViewModel : ViewModel, IGraphImportViewModel
         {
             await using var stream = streamFactory();
             if (stream.IsEmpty) return;
-            var serializer = serializers[stream.Format.Value];
+            var serializer = serializerFactory.CreateSerializer(stream.Format.Value);
             var histories = await serializer
                 .DeserializeFromAsync(stream.Stream, token)
                 .ConfigureAwait(false);

@@ -2,6 +2,7 @@ using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
 using Moq;
 using Pathfinding.App.Console.Export;
+using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
@@ -174,7 +175,7 @@ internal sealed class GraphExportViewModelTests
         return new GraphExportViewModel(
             optionsMock.Object,
             messenger,
-            serializers,
+            new SerializerFactory(serializers),
             log ?? Mock.Of<ILog>());
     }
 

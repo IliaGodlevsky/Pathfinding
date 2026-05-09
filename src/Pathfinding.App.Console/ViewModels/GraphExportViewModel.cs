@@ -1,8 +1,8 @@
 ﻿using Autofac.Features.AttributeFilters;
-using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.App.Console.Export;
 using Pathfinding.App.Console.Extensions;
+using Pathfinding.App.Console.Factories;
 using Pathfinding.App.Console.Injection;
 using Pathfinding.App.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.App.Console.Models;
@@ -21,7 +21,7 @@ namespace Pathfinding.App.Console.ViewModels;
 internal sealed class GraphExportViewModel : ViewModel, IGraphExportViewModel, IDisposable
 {
     private readonly IReadHistoryOptions options;
-    private readonly Dictionary<StreamFormat, Serializer> serializers;
+    private readonly ISerializerFactory serializerFactory;
     private readonly CompositeDisposable disposables = [];
 
     private int[] selectedGraphIds = [];
@@ -35,22 +35,17 @@ internal sealed class GraphExportViewModel : ViewModel, IGraphExportViewModel, I
 
     public IReadOnlyList<ExportOptions> AvailableOptions => options.AvailableExportOptions;
 
-    public IReadOnlyCollection<StreamFormat> StreamFormats { get; }
+    public IReadOnlyCollection<StreamFormat> StreamFormats => serializerFactory.AvailiableFormats;
 
     public ReactiveCommand<Func<StreamModel>, Unit> ExportGraphCommand { get; }
 
     public GraphExportViewModel(IReadHistoryOptions options,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
-        Meta<Serializer>[] serializers,
+        ISerializerFactory serializerFactory,
         ILog logger) : base(logger)
     {
         this.options = options;
-        this.serializers = serializers.ToDictionary(
-                x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat],
-                x => x.Value);
-        StreamFormats = [.. serializers
-            .OrderBy(x => x.Metadata[MetadataKeys.Order])
-            .Select(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat])];
+        this.serializerFactory = serializerFactory;
         ExportGraphCommand = ReactiveCommand.CreateFromTask<Func<StreamModel>>(ExportGraph, CanExport()).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsSelectedMessage>(this, OnGraphSelected).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
@@ -71,7 +66,7 @@ internal sealed class GraphExportViewModel : ViewModel, IGraphExportViewModel, I
             var histories = await options
                 .ReadHistoryAsync(Option, SelectedGraphIds, token)
                 .ConfigureAwait(false);
-            var serializer = serializers[stream.Format.Value];
+            var serializer = serializerFactory.CreateSerializer(stream.Format.Value);
             await serializer
                 .SerializeToAsync(histories, stream.Stream, token)
                 .ConfigureAwait(false);
