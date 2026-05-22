@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Pathfinding.Domain.Interface\Pathfinding.Domain.Interface.csproj" />
+    <ProjectReference Include="..\..\src\Pathfinding.Serialization\Pathfinding.Serialization.csproj" />
     <ProjectReference Include="..\..\src\Pathfinding.Service.Interface\Pathfinding.Service.Interface.csproj" />
     <ProjectReference Include="..\..\src\Pathfinding.Service\Pathfinding.Service.csproj" />
     <ProjectReference Include="..\..\src\Pathfinding.Shared\Pathfinding.Shared.csproj" />

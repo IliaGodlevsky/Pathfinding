@@ -1,8 +1,8 @@
-﻿using Pathfinding.Service.Interface;
-using Pathfinding.Service.Serializers.Exceptions;
+﻿using Pathfinding.Serialization.Exceptions;
+using Pathfinding.Service.Interface;
 using System.IO.Compression;
 
-namespace Pathfinding.Service.Serializers;
+namespace Pathfinding.Serialization;
 
 public sealed class BundleSerializer<T> : ISerializer<T>
     where T : IBundleSerializable, new()

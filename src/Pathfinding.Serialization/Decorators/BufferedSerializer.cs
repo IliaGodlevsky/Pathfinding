@@ -1,7 +1,7 @@
-﻿using Pathfinding.Service.Interface;
-using Pathfinding.Service.Serializers.Exceptions;
+﻿using Pathfinding.Serialization.Exceptions;
+using Pathfinding.Service.Interface;
 
-namespace Pathfinding.Service.Serializers.Decorators;
+namespace Pathfinding.Serialization.Decorators;
 
 public sealed class BufferedSerializer<T>(ISerializer<T> serializer) : ISerializer<T>
 {

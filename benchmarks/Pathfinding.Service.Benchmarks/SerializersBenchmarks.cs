@@ -1,7 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Pathfinding.Infrastructure.Business.Benchmarks.Data;
-using Pathfinding.Service.Serializers;
-using Pathfinding.Service.Serializers.Decorators;
+using Pathfinding.Serialization;
+using Pathfinding.Serialization.Decorators;
 
 namespace Pathfinding.Service.Benchmarks;
 

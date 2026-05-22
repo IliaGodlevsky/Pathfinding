@@ -1,7 +1,7 @@
-﻿using Pathfinding.Service.Interface;
-using Pathfinding.Service.Serializers.Exceptions;
+﻿using Pathfinding.Serialization.Exceptions;
+using Pathfinding.Service.Interface;
 
-namespace Pathfinding.Service.Serializers;
+namespace Pathfinding.Serialization;
 
 public sealed class BinarySerializer<T> : ISerializer<T>
     where T : IBinarySerializable, new()

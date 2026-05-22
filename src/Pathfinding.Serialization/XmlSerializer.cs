@@ -1,9 +1,9 @@
-﻿using Pathfinding.Service.Interface;
-using Pathfinding.Service.Serializers.Exceptions;
+﻿using Pathfinding.Serialization.Exceptions;
+using Pathfinding.Service.Interface;
 using System.Text;
 using System.Xml.Serialization;
 
-namespace Pathfinding.Service.Serializers;
+namespace Pathfinding.Serialization;
 
 public sealed class XmlSerializer<T> : ISerializer<T>
     where T : new()

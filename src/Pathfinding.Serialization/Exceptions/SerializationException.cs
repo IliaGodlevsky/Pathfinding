@@ -1,4 +1,4 @@
-﻿namespace Pathfinding.Service.Serializers.Exceptions;
+﻿namespace Pathfinding.Serialization.Exceptions;
 
 public class SerializationException : SystemException
 {

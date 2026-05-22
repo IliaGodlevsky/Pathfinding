@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Pathfinding.Data\Pathfinding.Data.csproj" />
     <ProjectReference Include="..\Pathfinding.Logging\Pathfinding.Logging.csproj" />
+    <ProjectReference Include="..\Pathfinding.Serialization\Pathfinding.Serialization.csproj" />
     <ProjectReference Include="..\Pathfinding.Service\Pathfinding.Service.csproj" />
   </ItemGroup>
 

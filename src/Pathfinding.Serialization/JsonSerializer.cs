@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
+using Pathfinding.Serialization.Exceptions;
 using Pathfinding.Service.Interface;
-using Pathfinding.Service.Serializers.Exceptions;
 using System.Text;
 
-namespace Pathfinding.Service.Serializers;
+namespace Pathfinding.Serialization;
 
 public sealed class JsonSerializer<T> : ISerializer<T>
 {

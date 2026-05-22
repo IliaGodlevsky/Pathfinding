@@ -1,8 +1,8 @@
-﻿using Pathfinding.Service.Interface;
-using Pathfinding.Service.Serializers.Exceptions;
+﻿using Pathfinding.Serialization.Exceptions;
+using Pathfinding.Service.Interface;
 using System.IO.Compression;
 
-namespace Pathfinding.Service.Serializers.Decorators;
+namespace Pathfinding.Serialization.Decorators;
 
 public sealed class CompressSerializer<T>(ISerializer<T> serializer) : ISerializer<T>
 {

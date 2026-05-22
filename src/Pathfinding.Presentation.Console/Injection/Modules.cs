@@ -13,6 +13,8 @@ using Pathfinding.Presentation.Console.Factories.Algos;
 using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.ViewModels;
 using Pathfinding.Presentation.Console.Views;
+using Pathfinding.Serialization;
+using Pathfinding.Serialization.Decorators;
 using Pathfinding.Service;
 using Pathfinding.Service.Algorithms;
 using Pathfinding.Service.Algorithms.Heuristics;
@@ -21,8 +23,6 @@ using Pathfinding.Service.Commands;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Serialization;
 using Pathfinding.Service.Layers;
-using Pathfinding.Service.Serializers;
-using Pathfinding.Service.Serializers.Decorators;
 using Pathfinding.Service.Services;
 using Terminal.Gui;
 using Attribute = System.Attribute;
@@ -100,12 +100,14 @@ internal static class Modules
         builder.RegisterType<BundleSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
             .As<Serializer>().WithMetadata(MetadataKeys.Order, 1)
             .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Csv);
+
         builder.RegisterDecorator<Serializer>(
             (_, inner) => new CompressSerializer<PathfindingHistoriesSerializationModel>(inner),
             fromKey: KeyFilters.Compress);
         builder.RegisterDecorator<Serializer>(
             (_, _, inner) => new BufferedSerializer<PathfindingHistoriesSerializationModel>(inner),
             condition: ctx => ctx.CurrentInstance is not CompressSerializer<PathfindingHistoriesSerializationModel>);
+
         builder.RegisterType<SerializerFactory>().As<ISerializerFactory>().SingleInstance();
 
         builder.RegisterType<DefaultStepRule>().As<IStepRule>().SingleInstance()

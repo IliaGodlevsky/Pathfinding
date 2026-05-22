@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.Data;
 using Pathfinding.Domain.Enums;
+using Pathfinding.Domain.Interface;
 using Pathfinding.Logging.Interface;
 using Pathfinding.Presentation.Console.Extensions;
 using Pathfinding.Presentation.Console.Factories;
@@ -139,23 +140,34 @@ internal sealed class GraphAssembleViewModel : ViewModel,
     {
         await ExecuteSafe(async token =>
         {
-            var layers = GetLayers();
-            var graph = graphAssemble.AssembleGraph([Width, Length]);
-            graph.CostRange = Range;
-            await layers.OverlayAsync(graph, token).ConfigureAwait(false);
-            var request = new CreateGraphRequest<GraphVertexModel>()
-            {
-                Graph = graph,
-                Name = Name,
-                Neighborhood = Neighborhood,
-                SmoothLevel = SmoothLevel
-            };
+            var graph = await AssembleGraph(token)
+                .ConfigureAwait(false);
+            var request = CreateRequest(graph);
             var graphModel = await service
                 .CreateGraphAsync(request, token)
                 .ConfigureAwait(false);
             var info = graphModel.ToGraphInformationModel().ToGraphInfo();
             messenger.Send(new GraphsCreatedMessage(info));
         }).ConfigureAwait(false);
+    }
+
+    private async Task<IGraph<GraphVertexModel>> AssembleGraph(CancellationToken token)
+    {
+        var graph = graphAssemble.AssembleGraph([Width, Length]);
+        graph.CostRange = Range;
+        await GetLayers().OverlayAsync(graph, token).ConfigureAwait(false);
+        return graph;
+    }
+
+    private CreateGraphRequest<GraphVertexModel> CreateRequest(IGraph<GraphVertexModel> graph)
+    {
+        return new CreateGraphRequest<GraphVertexModel>()
+        {
+            Graph = graph,
+            Name = Name,
+            Neighborhood = Neighborhood,
+            SmoothLevel = SmoothLevel
+        };
     }
 
     private Layers GetLayers()

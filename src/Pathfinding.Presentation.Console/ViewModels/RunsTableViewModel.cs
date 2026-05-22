@@ -38,11 +38,11 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
         this.messenger = messenger;
         this.statisticsService = statisticsService;
 
-        messenger.RegisterAsyncHandler<RunsCreatedMessaged>(this, OnRunCreated).DisposeWith(disposables);
+        messenger.RegisterHandler<RunsCreatedMessaged>(this, OnRunCreated).DisposeWith(disposables);
         messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage>(this, OnGraphActivatedMessage).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
         messenger.RegisterHandler<RunsUpdatedMessage>(this, OnRunsUpdated).DisposeWith(disposables);
-        messenger.RegisterAsyncHandler<RunsDeletedMessage>(this, OnRunsDeleteMessage).DisposeWith(disposables);
+        messenger.RegisterHandler<RunsDeletedMessage>(this, OnRunsDeleteMessage).DisposeWith(disposables);
 
         SelectRunsCommand = ReactiveCommand.Create<int[]>(SelectRuns);
     }
@@ -95,32 +95,26 @@ internal sealed class RunsTableViewModel : ViewModel, IRunsTableViewModel, IDisp
         }
     }
 
-    private async Task OnRunsDeleteMessage(RunsDeletedMessage msg)
+    private void OnRunsDeleteMessage(RunsDeletedMessage msg)
     {
-        await ExecuteSafe(async token =>
+        var toDelete = Runs
+            .Where(x => msg.Value.Contains(x.Id))
+            .ToArray();
+        Runs.Remove(toDelete);
+        if (Runs.Count == 0)
         {
-            var toDelete = Runs
-                .Where(x => msg.Value.Contains(x.Id))
-                .ToArray();
-            Runs.Remove(toDelete);
-            if (Runs.Count == 0)
-            {
-                messenger.Send(new GraphStateChangedMessage((ActivatedGraph.Id, GraphStatuses.Editable)));
-            }
-        }).ConfigureAwait(false);
+            messenger.Send(new GraphStateChangedMessage((ActivatedGraph.Id, GraphStatuses.Editable)));
+        }
     }
 
-    private async Task OnRunCreated(RunsCreatedMessaged msg)
+    private void OnRunCreated(RunsCreatedMessaged msg)
     {
-        await ExecuteSafe(async token =>
+        int previousCount = Runs.Count;
+        Runs.Add(msg.Value.ToRunInfo());
+        if (previousCount == 0)
         {
-            int previousCount = Runs.Count;
-            Runs.Add(msg.Value.ToRunInfo());
-            if (previousCount == 0)
-            {
-                messenger.Send(new GraphStateChangedMessage((ActivatedGraph.Id, GraphStatuses.Readonly)));
-            }
-        }).ConfigureAwait(false);
+            messenger.Send(new GraphStateChangedMessage((ActivatedGraph.Id, GraphStatuses.Readonly)));
+        }
     }
 
     public void Dispose()
