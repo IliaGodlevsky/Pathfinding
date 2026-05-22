@@ -1,0 +1,110 @@
+﻿using Dapper;
+using Microsoft.Data.Sqlite;
+using Pathfinding.Domain.Entities;
+using Pathfinding.Domain.Interface.Repositories;
+
+namespace Pathfinding.Data.Sqlite.Repositories;
+
+internal sealed class SqliteRangeRepository(SqliteConnection connection,
+    SqliteTransaction transaction) : SqliteRepository(connection, transaction), IRangeRepository
+{
+    protected override string CreateTableScript { get; } = @$"
+            CREATE TABLE IF NOT EXISTS {DbTables.Ranges} (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                GraphId INTEGER NOT NULL,
+                VertexId INTEGER NOT NULL,
+                ""Order"" INTEGER NOT NULL,
+                FOREIGN KEY (GraphId) REFERENCES {DbTables.Graphs}(Id) ON DELETE CASCADE
+            );
+            CREATE INDEX IF NOT EXISTS idx_range_vertexid ON {DbTables.Ranges}(VertexId);
+            CREATE INDEX IF NOT EXISTS idx_range_graphid ON {DbTables.Ranges}(GraphId);";
+
+    public async Task<IReadOnlyCollection<PathfindingRange>> CreateAsync(
+        IReadOnlyCollection<PathfindingRange> entities,
+        CancellationToken token = default)
+    {
+        const string query = @$"
+                INSERT INTO {DbTables.Ranges} (GraphId, VertexId, ""Order"")
+                VALUES (@GraphId, @VertexId, @Order);
+                SELECT last_insert_rowid();";
+
+        foreach (var entity in entities)
+        {
+            var command = new CommandDefinition(query, entity, Transaction, cancellationToken: token);
+            entity.Id = await Connection.ExecuteScalarAsync<int>(command).ConfigureAwait(false);
+        }
+
+        return entities;
+    }
+
+    public async Task<bool> DeleteByGraphIdAsync(int graphId,
+        CancellationToken token = default)
+    {
+        const string query = $"DELETE FROM {DbTables.Ranges} WHERE GraphId = @GraphId";
+
+        var affectedRows = await Connection.ExecuteAsync(
+                new(query, new { GraphId = graphId }, Transaction, cancellationToken: token))
+            .ConfigureAwait(false);
+
+        return affectedRows > 0;
+    }
+
+    public async Task<bool> DeleteByVerticesIdsAsync(
+        IReadOnlyCollection<long> verticesIds,
+        CancellationToken token = default)
+    {
+        const string query = $"DELETE FROM {DbTables.Ranges} WHERE VertexId IN @VerticesIds";
+
+        var affectedRows = await Connection.ExecuteAsync(
+                new(query, new { VerticesIds = verticesIds.ToArray() }, Transaction, cancellationToken: token))
+            .ConfigureAwait(false);
+
+        return affectedRows > 0;
+    }
+
+    public IAsyncEnumerable<PathfindingRange> ReadByGraphIdOrderedByOrderAsync(int graphId)
+    {
+        const string query = $"SELECT * FROM {DbTables.Ranges} WHERE GraphId = @GraphId ORDER BY \"Order\"";
+        return Connection.QueryUnbufferedAsync<PathfindingRange>(query,
+            param: new { GraphId = graphId }, transaction: Transaction);
+    }
+
+    public IAsyncEnumerable<PathfindingRange> ReadByGraphIdsAsync(IReadOnlyCollection<int> ids)
+    {
+        const string query = $"SELECT * FROM {DbTables.Ranges} WHERE GraphId IN @GraphIds";
+        return Connection.QueryUnbufferedAsync<PathfindingRange>(query,
+            param: new { GraphIds = ids }, transaction: Transaction);
+
+    }
+
+    public async Task<IReadOnlyCollection<PathfindingRange>> UpsertAsync(
+        IReadOnlyCollection<PathfindingRange> entities,
+        CancellationToken token = default)
+    {
+        const string updateQuery = @$"
+                UPDATE {DbTables.Ranges}
+                SET GraphId = @GraphId,
+                    VertexId = @VertexId,
+                    ""Order"" = @Order
+                WHERE Id = @Id";
+
+        await Connection.ExecuteAsync(
+                new(updateQuery, entities.Where(e => e.Id > 0).ToArray(), Transaction, cancellationToken: token))
+            .ConfigureAwait(false);
+
+        const string insertQuery = @$"
+                INSERT INTO {DbTables.Ranges} 
+                    (GraphId, VertexId, ""Order"")
+                    VALUES (@GraphId, @VertexId, @Order); 
+                    SELECT last_insert_rowid();";
+
+        foreach (var entity in entities.Where(e => e.Id == 0))
+        {
+            var command = new CommandDefinition(insertQuery,
+                entity, Transaction, cancellationToken: token);
+            entity.Id = await Connection.ExecuteScalarAsync<int>(command)
+                .ConfigureAwait(false);
+        }
+        return entities;
+    }
+}

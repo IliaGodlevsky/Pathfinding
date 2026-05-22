@@ -1,0 +1,46 @@
+﻿using NStack;
+using Pathfinding.Presentation.Console.Extensions;
+using Pathfinding.Presentation.Console.ViewModels.Interface;
+using ReactiveMarbles.ObservableEvents;
+using ReactiveUI;
+using System.Reactive.Disposables;
+using System.Reactive.Disposables.Fluent;
+using System.Reactive.Linq;
+using Terminal.Gui;
+
+namespace Pathfinding.Presentation.Console.Views;
+
+internal sealed class GraphExportOptionsView : FrameView
+{
+    private readonly RadioGroup exportOptions = new();
+    private readonly CompositeDisposable disposables = [];
+
+    public DisplayModeLayout DisplayMode
+    {
+        get => exportOptions.DisplayMode;
+        set => exportOptions.DisplayMode = value;
+    }
+
+    public GraphExportOptionsView(IGraphExportViewModel viewModel)
+    {
+        exportOptions.RadioLabels = [.. viewModel.AvailableOptions
+            .Select(x => ustring.Make(x.ToStringRepresentation()))];
+        DisplayMode = DisplayModeLayout.Horizontal;
+        Border = new();
+        exportOptions.Events().SelectedItemChanged
+            .Where(x => x.SelectedItem >= 0)
+            .Select(x => viewModel.AvailableOptions[x.SelectedItem])
+            .BindTo(viewModel, x => x.Option)
+            .DisposeWith(disposables);
+        exportOptions.X = 1;
+        exportOptions.Y = 1;
+        exportOptions.SelectedItem = viewModel.AvailableOptions.Count - 1;
+        Add(exportOptions);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
+    }
+}

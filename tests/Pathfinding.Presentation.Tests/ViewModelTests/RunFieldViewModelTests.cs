@@ -1,0 +1,124 @@
+using CommunityToolkit.Mvvm.Messaging;
+using Moq;
+using Pathfinding.Data;
+using Pathfinding.Domain.Enums;
+using Pathfinding.Presentation.Console.Factories;
+using Pathfinding.Presentation.Console.Messages.ViewModel.Requests;
+using Pathfinding.Presentation.Console.Messages.ViewModel.ValueMessages;
+using Pathfinding.Presentation.Console.Models;
+using Pathfinding.Presentation.Console.ViewModels;
+using Pathfinding.Service;
+using Pathfinding.Shared.Primitives;
+using ReactiveUI.Builder;
+
+namespace Pathfinding.Presentation.Tests.ViewModelTests;
+
+[Category("Unit")]
+internal sealed class RunFieldViewModelTests
+{
+    [SetUp]
+    public void Setup()
+    {
+        RxAppBuilder.CreateReactiveUIBuilder().BuildApp();
+    }
+
+    [Test]
+    public async Task AwaitGraphActivatedMessage_ShouldAssembleRunGraph()
+    {
+        var messenger = new StrongReferenceMessenger();
+        var graphAssemble = new GraphAssemble<RunVertexModel>();
+        var algorithmsFactoryMock = CreateAlgorithmsFactoryMock();
+
+        using var viewModel = new RunFieldViewModel(
+            graphAssemble,
+            algorithmsFactoryMock.Object,
+            messenger);
+
+        var graph = CreateGraph();
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
+            new(1, graph, false),
+            default,
+            default));
+        await messenger.Send(message);
+
+        Assert.That(viewModel.RunGraph, Is.Not.EqualTo(Graph<RunVertexModel>.Empty));
+    }
+
+    [Test]
+    public async Task RunsSelectedMessage_ShouldActivateRun()
+    {
+        var messenger = new StrongReferenceMessenger();
+        var graphAssemble = new GraphAssemble<RunVertexModel>();
+        var algorithmsFactoryMock = CreateAlgorithmsFactoryMock();
+
+        using var viewModel = new RunFieldViewModel(
+            graphAssemble,
+            algorithmsFactoryMock.Object,
+            messenger);
+
+        var graph = CreateGraph();
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
+            new(42, graph, false),
+            default,
+            default));
+        await messenger.Send(message);
+
+        messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
+            => msg.Reply([.. graph]));
+
+        var runInfo = new RunInfoModel { Id = 7, Algorithm = Algorithms.AStar };
+        messenger.Send(new RunsSelectedMessage([runInfo]));
+
+        Assert.That(viewModel.SelectedRun.Id, Is.EqualTo(runInfo.Id));
+    }
+
+    [Test]
+    public async Task RunsDeletedMessage_ShouldClearSelectedRun()
+    {
+        var messenger = new StrongReferenceMessenger();
+        var graphAssemble = new GraphAssemble<RunVertexModel>();
+        var algorithmsFactoryMock = CreateAlgorithmsFactoryMock();
+
+        using var viewModel = new RunFieldViewModel(
+            graphAssemble,
+            algorithmsFactoryMock.Object,
+            messenger);
+
+        var graph = CreateGraph();
+        var message = new AwaitGraphActivatedMessage(new ActivatedGraphModel(
+            new(42, graph, false),
+            default,
+            default));
+        await messenger.Send(message);
+
+        messenger.Register<PathfindingRangeRequestMessage>(this, (_, msg)
+            => msg.Reply([.. graph]));
+
+        var runInfo = new RunInfoModel { Id = 4, Algorithm = Algorithms.AStar };
+        messenger.Send(new RunsSelectedMessage([runInfo]));
+
+        messenger.Send(new RunsDeletedMessage([runInfo.Id]));
+
+        Assert.That(viewModel.SelectedRun, Is.EqualTo(RunModel.Empty));
+    }
+
+    private static Graph<GraphVertexModel> CreateGraph()
+    {
+        var first = new GraphVertexModel { Id = 1, Position = new Coordinate(0), Cost = new VertexCost(1) };
+        var second = new GraphVertexModel { Id = 2, Position = new Coordinate(1), Cost = new VertexCost(3) };
+        first.Neighbors.Add(second);
+        second.Neighbors.Add(first);
+        return new Graph<GraphVertexModel>([first, second], [2]);
+    }
+
+    private static Mock<IAlgorithmsFactory> CreateAlgorithmsFactoryMock()
+    {
+        var factory = new TestAlgorithmFactory();
+        var algorithmsFactoryMock = new Mock<IAlgorithmsFactory>();
+        algorithmsFactoryMock.SetupGet(x => x.AvailableAlgorithms).Returns([Algorithms.AStar]);
+        algorithmsFactoryMock
+            .Setup(x => x.Create(It.IsAny<Algorithms>()))
+            .Returns(factory);
+        return algorithmsFactoryMock;
+    }
+}

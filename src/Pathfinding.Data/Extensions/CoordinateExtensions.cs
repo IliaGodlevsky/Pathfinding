@@ -1,0 +1,16 @@
+﻿using Pathfinding.Shared.Primitives;
+
+namespace Pathfinding.Data.Extensions;
+
+public static class CoordinateExtensions
+{
+    public static bool IsCardinal(this Coordinate self, Coordinate coordinate)
+    {
+        // Cardinal coordinate differs from the
+        // central one only for single coordinate value
+        var difference = self
+            .Zip(coordinate, (x, y) => Math.Abs(x - y))
+            .Sum();
+        return difference == 1;
+    }
+}

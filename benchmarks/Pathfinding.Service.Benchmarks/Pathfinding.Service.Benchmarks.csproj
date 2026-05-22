@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Pathfinding.Domain.Interface\Pathfinding.Domain.Interface.csproj" />
+    <ProjectReference Include="..\..\src\Pathfinding.Service.Interface\Pathfinding.Service.Interface.csproj" />
+    <ProjectReference Include="..\..\src\Pathfinding.Service\Pathfinding.Service.csproj" />
+    <ProjectReference Include="..\..\src\Pathfinding.Shared\Pathfinding.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

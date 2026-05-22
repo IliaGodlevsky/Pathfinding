@@ -1,4 +1,4 @@
-using Pathfinding.Domain.Core;
+using Pathfinding.Domain;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Requests.Create;
@@ -8,7 +8,7 @@ namespace Pathfinding.Service.Interface;
 public interface IRangeRequestService<T>
     where T : IVertex, IEntity<long>
 {
-    Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeAsync(int graphId,
+    Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeOrderedAsync(int graphId,
         CancellationToken token = default);
 
     Task<bool> CreatePathfindingVertexAsync(CreatePathfindingVertexRequest request,

@@ -2,7 +2,7 @@
 
 namespace Pathfinding.Domain.Interface;
 
-public interface IGraph<out TVertex> : IReadOnlyCollection<TVertex>, ILayer
+public interface IGraph<out TVertex> : IReadOnlyCollection<TVertex>
     where TVertex : IVertex
 {
     InclusiveValueRange<int> CostRange { get; set; }

@@ -1,4 +1,4 @@
-using Pathfinding.Domain.Core;
+using Pathfinding.Domain;
 using Pathfinding.Domain.Interface;
 
 namespace Pathfinding.Service.Interface;

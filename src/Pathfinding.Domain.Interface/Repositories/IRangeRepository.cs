@@ -1,4 +1,4 @@
-﻿using Pathfinding.Domain.Core.Entities;
+﻿using Pathfinding.Domain.Entities;
 
 namespace Pathfinding.Domain.Interface.Repositories;
 
@@ -12,7 +12,7 @@ public interface IRangeRepository
         IReadOnlyCollection<PathfindingRange> entities,
         CancellationToken token = default);
 
-    IAsyncEnumerable<PathfindingRange> ReadByGraphIdAsync(int graphId);
+    IAsyncEnumerable<PathfindingRange> ReadByGraphIdOrderedByOrderAsync(int graphId);
 
     IAsyncEnumerable<PathfindingRange> ReadByGraphIdsAsync(IReadOnlyCollection<int> ids);
 

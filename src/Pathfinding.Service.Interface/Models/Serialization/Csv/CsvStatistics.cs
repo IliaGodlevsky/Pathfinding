@@ -1,4 +1,4 @@
-﻿using Pathfinding.Domain.Core.Enums;
+﻿using Pathfinding.Domain.Enums;
 
 namespace Pathfinding.Service.Interface.Models.Serialization.Csv;
 

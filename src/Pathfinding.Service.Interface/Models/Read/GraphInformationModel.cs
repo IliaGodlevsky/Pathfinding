@@ -1,4 +1,4 @@
-﻿using Pathfinding.Domain.Core.Enums;
+﻿using Pathfinding.Domain.Enums;
 using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Service.Interface.Models.Read;

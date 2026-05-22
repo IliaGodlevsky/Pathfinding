@@ -1,0 +1,17 @@
+﻿using Pathfinding.Data;
+using Pathfinding.Domain.Interface;
+using Pathfinding.Service.Interface.Models.Read;
+
+namespace Pathfinding.Presentation.Console.Extensions;
+
+internal static class GraphModelExtensions
+{
+    public static Graph<T> CreateGraph<T>(this GraphModel<T> model)
+        where T : IVertex
+    {
+        return new(model.Vertices, model.DimensionSizes)
+        {
+            CostRange = model.CostRange,
+        };
+    }
+}

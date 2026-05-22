@@ -1,10 +1,12 @@
-﻿using Pathfinding.Domain.Core.Entities;
+﻿using Pathfinding.Domain.Entities;
 
 namespace Pathfinding.Domain.Interface.Repositories;
 
 public interface IStatisticsRepository
 {
-    IAsyncEnumerable<Statistics> ReadByGraphIdAsync(int graphId);
+    IAsyncEnumerable<Statistics> ReadByGraphIdAsync(int graphId, int skip, int take);
+
+    Task<int> ReadCountAsync(int graphId, CancellationToken token = default);
 
     IAsyncEnumerable<Statistics> ReadByGraphIdsAsync(IReadOnlyCollection<int> graphIds);
 

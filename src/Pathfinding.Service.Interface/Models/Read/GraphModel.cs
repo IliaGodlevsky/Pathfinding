@@ -1,4 +1,4 @@
-﻿using Pathfinding.Domain.Core.Enums;
+﻿using Pathfinding.Domain.Enums;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Shared.Primitives;
 

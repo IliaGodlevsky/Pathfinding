@@ -1,0 +1,34 @@
+﻿using Autofac.Features.Metadata;
+using Pathfinding.Presentation.Console.Injection;
+using Pathfinding.Presentation.Console.Models;
+using Pathfinding.Service.Interface.Models.Serialization;
+
+namespace Pathfinding.Presentation.Console.Export;
+
+internal sealed class ReadHistoryOptions : IReadHistoryOptions
+{
+    private readonly Dictionary<ExportOptions, IReadHistoryOption> options;
+
+    public IReadOnlyList<ExportOptions> AvailableExportOptions { get; }
+
+    public ReadHistoryOptions(Meta<IReadHistoryOption>[] options)
+    {
+        this.options = options.ToDictionary(
+            x => (ExportOptions)x.Metadata[MetadataKeys.ExportOptions],
+            x => x.Value);
+        AvailableExportOptions = [.. this.options.Keys];
+    }
+
+    public async Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(
+        ExportOptions option,
+        IReadOnlyCollection<int> graphIds,
+        CancellationToken token = default)
+    {
+        if (options.TryGetValue(option, out var value))
+        {
+            return await value.ReadHistoryAsync(graphIds, token).ConfigureAwait(false);
+        }
+
+        throw new KeyNotFoundException($"{option} was not found");
+    }
+}

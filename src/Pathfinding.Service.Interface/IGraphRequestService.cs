@@ -1,4 +1,4 @@
-using Pathfinding.Domain.Core;
+using Pathfinding.Domain;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Service.Interface.Models.Read;
 using Pathfinding.Service.Interface.Models.Serialization;

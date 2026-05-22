@@ -1,6 +1,4 @@
-﻿using Pathfinding.Domain.Interface.Factories;
-
-namespace Pathfinding.Domain.Interface.Extensions;
+﻿namespace Pathfinding.Domain.Interface.Extensions;
 
 public static class UnitOfWorkFactoryExtensions
 {
