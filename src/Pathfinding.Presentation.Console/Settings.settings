@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Pathfinding.App.Console" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Pathfinding.Presentation.Console" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
     <Setting Name="ConnectionString" Type="System.String" Scope="Application">
@@ -39,10 +39,10 @@
       <Value Profile="(Default)">6</Value>
     </Setting>
     <Setting Name="MaxGraphWidth" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">52</Value>
+      <Value Profile="(Default)">51</Value>
     </Setting>
     <Setting Name="MaxGraphLength" Type="System.Int32" Scope="Application">
-      <Value Profile="(Default)">51</Value>
+      <Value Profile="(Default)">45</Value>
     </Setting>
     <Setting Name="UpperValueOfCostRange" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">9</Value>

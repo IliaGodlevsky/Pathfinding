@@ -23,9 +23,9 @@ public static class GraphExtensions
         return graph.DimensionsSizes.ElementAtOrDefault(1);
     }
 
-    public static IEnumerable<Coordinate> GetCoordinates<TVertex>(this IEnumerable<TVertex> graph)
+    public static int GetDepth<TVertex>(this IGraph<TVertex> graph)
         where TVertex : IVertex
     {
-        return graph.Select(vertex => vertex.Position);
+        return graph.DimensionsSizes.ElementAtOrDefault(2);
     }
 }

@@ -22,6 +22,7 @@ internal sealed partial class GraphParametresView : FrameView
         BindTo(obstaclesInput, x => x.Obstacles);
         BindTo(graphWidthInput, x => x.Width);
         BindTo(graphLengthInput, x => x.Length);
+        BindTo(graphDepthInput, x => x.Depth);
         BindTo(upperCostInput, x => x.Range, true);
         BindTo(lowerCostInput, x => x.Range);
     }

@@ -14,7 +14,7 @@ public sealed class GraphLayer(IGraph<IVertex> layer) : ILayer
             vert.IsObstacle = vertex.IsObstacle;
             vert.Cost = vertex.Cost.DeepClone();
             vert.Neighbors = [.. vertex.Neighbors
-                .GetCoordinates()
+                .Select(x => x.Position)
                 .Select(graph.Get)];
         }
     }

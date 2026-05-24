@@ -11,6 +11,8 @@ internal interface IRequireGraphParametresViewModel
 
     public int Length { get; set; }
 
+    public int Depth { get; set; }
+
     public int Obstacles { get; set; }
 
     public InclusiveValueRange<int> Range { get; set; }

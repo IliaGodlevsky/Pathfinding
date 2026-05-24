@@ -11,8 +11,7 @@ public abstract class NeighborhoodLayer : ILayer
         foreach (var vertex in graph)
         {
             var neighborhood = CreateNeighborhood(vertex.Position);
-            var neighbours = GetNeighboursWithinGraph(neighborhood, graph);
-            vertex.Neighbors = neighbours;
+            vertex.Neighbors = GetNeighboursWithinGraph(neighborhood, graph);
         }
     }
 

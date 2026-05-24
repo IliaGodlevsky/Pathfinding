@@ -1,6 +1,7 @@
 ﻿using Pathfinding.Domain.Enums;
 using Pathfinding.Shared.Primitives;
 using ReactiveUI;
+using System.Diagnostics;
 
 namespace Pathfinding.Presentation.Console.Models;
 
@@ -43,6 +44,13 @@ internal sealed class GraphInfoModel : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref length, value);
     }
 
+    private int depth;
+    public int Depth
+    {
+        get => depth;
+        set => this.RaiseAndSetIfChanged(ref depth, value);
+    }
+
     private int obstacles;
     public int ObstaclesCount
     {
@@ -66,7 +74,8 @@ internal sealed class GraphInfoModel : ReactiveObject
 
     public object[] GetProperties()
     {
-        return [ Id, Name, Width, Length, CostRange, Neighborhood,
+        int[] parameters = Depth > 0 ? [Width, Length, Depth] : [Width, Length];
+        return [Id, Name, $"({string.Join(",", parameters)})", CostRange, Neighborhood,
             SmoothLevel, ObstaclesCount, Status ];
     }
 }

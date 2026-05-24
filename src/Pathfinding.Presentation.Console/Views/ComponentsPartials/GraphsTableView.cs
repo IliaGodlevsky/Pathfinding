@@ -9,8 +9,7 @@ internal sealed partial class GraphsTableView : TableView
 {
     private const string IdCol = "Id";
     private const string NameCol = "Name";
-    private const string WidthCol = "Width";
-    private const string LengthCol = "Length";
+    private const string ParamsCol = "Dimensions";
     private const string NeighborsCol = "Neighbors";
     private const string SmoothCol = "Smooth";
     private const string ObstaclesCol = "Obstacles";
@@ -26,8 +25,7 @@ internal sealed partial class GraphsTableView : TableView
         [
             new(IdCol, typeof(int)),
             new(NameCol, typeof(string)),
-            new(WidthCol, typeof(int)),
-            new(LengthCol, typeof(int)),
+            new(ParamsCol, typeof(string)),
             new(CostRangeCol, typeof(string)),
             new(NeighborsCol, typeof(Neighborhoods)),
             new(SmoothCol, typeof(SmoothLevels)),
@@ -39,8 +37,7 @@ internal sealed partial class GraphsTableView : TableView
         {
             { table.Columns[IdCol], new() { Visible = false } },
             { table.Columns[NameCol], new() { MinWidth = 17, MaxWidth = 17, Alignment = TextAlignment.Left } },
-            { table.Columns[WidthCol], new() { Alignment = TextAlignment.Centered } },
-            { table.Columns[LengthCol], new() { Alignment = TextAlignment.Centered } },
+            { table.Columns[ParamsCol], new() { Alignment = TextAlignment.Centered } },
             { table.Columns[CostRangeCol], new() { Alignment = TextAlignment.Centered } },
             { table.Columns[NeighborsCol], new() { Alignment = TextAlignment.Left,
                 RepresentationGetter = NeighborhoodToString } },

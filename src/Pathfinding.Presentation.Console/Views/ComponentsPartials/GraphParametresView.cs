@@ -8,6 +8,8 @@ internal sealed partial class GraphParametresView
     private readonly TextField graphWidthInput = new();
     private readonly Label graphLengthLabel = new("Length");
     private readonly TextField graphLengthInput = new();
+    private readonly Label graphDepthLabel = new("Depth");
+    private readonly TextField graphDepthInput = new();
     private readonly Label obstaclesLabel = new("Obstacles");
     private readonly TextField obstaclesInput = new();
     private readonly Label costRangeLabel = new("Range");
@@ -36,19 +38,27 @@ internal sealed partial class GraphParametresView
         graphWidthInput.Width = Dim.Fill(1);
 
         graphLengthLabel.X = 1;
-        graphLengthLabel.Y = Pos.Bottom(graphWidthLabel) + 1;
+        graphLengthLabel.Y = Pos.Bottom(graphWidthLabel);
         graphLengthLabel.Width = Dim.Percent(50, true);
 
         graphLengthInput.X = Pos.Right(graphLengthLabel) + 1;
-        graphLengthInput.Y = Pos.Bottom(graphWidthInput) + 1;
+        graphLengthInput.Y = Pos.Bottom(graphWidthInput);
         graphLengthInput.Width = Dim.Fill(1);
 
+        graphDepthLabel.X = 1;
+        graphDepthLabel.Y = Pos.Bottom(graphLengthLabel);
+        graphDepthLabel.Width = Dim.Percent(50, true);
+
+        graphDepthInput.X = Pos.Right(graphDepthLabel) + 1;
+        graphDepthInput.Y = Pos.Bottom(graphLengthInput);
+        graphDepthInput.Width = Dim.Fill(1);
+
         obstaclesLabel.X = 1;
-        obstaclesLabel.Y = Pos.Bottom(graphLengthLabel) + 1;
+        obstaclesLabel.Y = Pos.Bottom(graphDepthLabel) + 1;
         obstaclesLabel.Width = Dim.Percent(50, true);
 
         obstaclesInput.X = Pos.Right(obstaclesLabel) + 1;
-        obstaclesInput.Y = Pos.Bottom(graphLengthInput) + 1;
+        obstaclesInput.Y = Pos.Bottom(graphDepthInput) + 1;
         obstaclesInput.Width = Dim.Fill(1);
 
         costRangeLabel.Y = Pos.Bottom(obstaclesLabel) + 1;
@@ -65,12 +75,14 @@ internal sealed partial class GraphParametresView
 
         graphWidthInput.KeyPress += KeyRestriction;
         graphLengthInput.KeyPress += KeyRestriction;
+        graphDepthInput.KeyPress += KeyRestriction;
         obstaclesInput.KeyPress += KeyRestriction;
         upperCostInput.KeyPress += KeyRestriction;
         lowerCostInput.KeyPress += KeyRestriction;
 
         Add(graphWidthLabel, graphWidthInput,
             graphLengthLabel, graphLengthInput,
+            graphDepthLabel, graphDepthInput,
             obstaclesLabel, obstaclesInput,
             costRangeLabel, lowerCostInput,
             upperCostInput);

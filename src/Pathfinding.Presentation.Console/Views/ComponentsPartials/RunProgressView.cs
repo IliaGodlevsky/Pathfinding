@@ -11,7 +11,7 @@ internal partial class RunProgressView
     private void Initialize()
     {
         X = 0;
-        Y = Pos.Percent(95);
+        Y = Pos.Percent(96);
         Width = Dim.Percent(66);
         Height = Dim.Fill();
         var driver = Application.Driver;

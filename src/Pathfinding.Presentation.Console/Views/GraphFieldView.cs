@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.Data;
 using Pathfinding.Data.Extensions;
+using Pathfinding.Domain.Interface;
 using Pathfinding.Presentation.Console.Extensions;
 using Pathfinding.Presentation.Console.Injection;
 using Pathfinding.Presentation.Console.Messages.View;
@@ -24,12 +25,15 @@ internal sealed partial class GraphFieldView : FrameView
 
     private readonly IGraphFieldViewModel graphFieldViewModel;
     private readonly IRunRangeViewModel runRangeViewModel;
+    private readonly IMessenger messenger;
 
     private readonly CompositeDisposable disposables = [];
     private readonly CompositeDisposable vertexDisposables = [];
     private readonly MainLoop mainLoop;
 
-    private readonly View container = new();
+    private readonly List<View> containers = [];
+
+    private View currentContainer;
 
     public GraphFieldView(
         IGraphFieldViewModel graphFieldViewModel,
@@ -37,6 +41,7 @@ internal sealed partial class GraphFieldView : FrameView
         [KeyFilter(KeyFilters.Views)] IMessenger messenger)
     {
         mainLoop = Application.MainLoop;
+        this.messenger = messenger;
         this.graphFieldViewModel = graphFieldViewModel;
         this.runRangeViewModel = runRangeViewModel;
         Initialize();
@@ -46,10 +51,18 @@ internal sealed partial class GraphFieldView : FrameView
             .DisposeWith(disposables);
         messenger.RegisterHandler<OpenRunFieldMessage>(this, OnOpenAlgorithmRunView).DisposeWith(disposables);
         messenger.RegisterHandler<CloseRunFieldMessage>(this, OnCloseAlgorithmRunField).DisposeWith(disposables);
-        container.X = Pos.Center();
-        container.Y = Pos.Center();
-        Add(container);
+        messenger.RegisterHandler<SliceChangedMessage>(this, OnSliceChanged).DisposeWith(disposables);
         vertexDisposables.DisposeWith(disposables);
+    }
+
+    private void OnSliceChanged(SliceChangedMessage msg)
+    {
+        if (currentContainer != null)
+        {
+            Remove(currentContainer);
+            currentContainer = containers[msg.Slice - 1];
+            Add(currentContainer);
+        }
     }
 
     protected override void Dispose(bool disposing)
@@ -70,9 +83,15 @@ internal sealed partial class GraphFieldView : FrameView
 
     private void RenderGraph(Graph<GraphVertexModel> graph)
     {
-        mainLoop.Invoke(container.RemoveAll);
+        mainLoop.Invoke(() =>
+        {
+            containers.ForEach(x => x.RemoveAll());
+            containers.ForEach(Remove);
+            containers.Clear();
+        });
+        
         vertexDisposables.Clear();
-        var views = graph.Select(x =>
+        var views = graph.AsParallel().Select(x =>
         {
             var view = new GraphVertexView(x).DisposeWith(vertexDisposables);
 
@@ -91,9 +110,26 @@ internal sealed partial class GraphFieldView : FrameView
 
         mainLoop.Invoke(() =>
         {
-            container.Add(views);
-            container.Width = graph.GetWidth() * DistanceBetweenVertices;
-            container.Height = graph.GetLength();
+            int i = 0;
+            do
+            {
+                var container = new View
+                {
+                    X = Pos.Center(),
+                    Y = Pos.Center(),
+                    Width = graph.GetWidth() * DistanceBetweenVertices,
+                    Height = graph.GetLength()
+                };
+                container.Add([.. views.Where(x => ((IVertex)x.Data).Position.ElementAtOrDefault(2) == i)]);
+                containers.Add(container);
+                i++;
+            } while (i < graph.GetDepth());
+            if (containers.Count > 0)
+            {
+                currentContainer = containers[0];
+                Add(currentContainer);
+                messenger.Send(new GraphActivatedMessage(graph));
+            }
         });
     }
 

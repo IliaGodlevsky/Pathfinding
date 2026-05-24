@@ -31,6 +31,7 @@ internal sealed class GraphAssembleViewModel : ViewModel,
 {
     private static readonly InclusiveValueRange<int> WidthRange = (Settings.Default.MaxGraphWidth, 1);
     private static readonly InclusiveValueRange<int> LengthRange = (Settings.Default.MaxGraphLength, 1);
+    private static readonly InclusiveValueRange<int> DepthRange = (0, 5);
     private static readonly InclusiveValueRange<int> ObstaclesRange = (99, 0);
     private static readonly InclusiveValueRange<int> CostRange = (99, 1);
 
@@ -59,6 +60,13 @@ internal sealed class GraphAssembleViewModel : ViewModel,
     {
         get => length;
         set { length = LengthRange.ReturnInRange(value); this.RaisePropertyChanged(); }
+    }
+
+    private int depth;
+    public int Depth
+    {
+        get => depth;
+        set { depth = DepthRange.ReturnInRange(value); this.RaisePropertyChanged(); }
     }
 
     private int obstacles;
@@ -153,7 +161,10 @@ internal sealed class GraphAssembleViewModel : ViewModel,
 
     private async Task<IGraph<GraphVertexModel>> AssembleGraph(CancellationToken token)
     {
-        var graph = graphAssemble.AssembleGraph([Width, Length]);
+        int[] param = Depth > 0 
+            ? [Width, Length, Depth] 
+            : [Width, Length];
+        var graph = graphAssemble.AssembleGraph(param);
         graph.CostRange = Range;
         await GetLayers().OverlayAsync(graph, token).ConfigureAwait(false);
         return graph;

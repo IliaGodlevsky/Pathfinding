@@ -203,6 +203,7 @@ internal static class Modules
         builder.RegisterType<GraphFieldView>().Keyed<View>(KeyFilters.MainWindow).WithAttributeFiltering();
         builder.RegisterType<RunFieldView>().Keyed<View>(KeyFilters.MainWindow).WithAttributeFiltering();
         builder.RegisterType<RunProgressView>().Keyed<View>(KeyFilters.MainWindow).WithAttributeFiltering();
+        builder.RegisterType<GraphSliceView>().Keyed<View>(KeyFilters.MainWindow).WithAttributeFiltering();
 
         builder.RegisterType<GraphPanel>().Keyed<View>(KeyFilters.RightPanel).WithAttributeFiltering();
         builder.RegisterType<RunsPanel>().Keyed<View>(KeyFilters.RightPanel).WithAttributeFiltering();

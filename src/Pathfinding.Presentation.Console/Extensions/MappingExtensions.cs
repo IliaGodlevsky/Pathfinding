@@ -17,6 +17,7 @@ internal static class MappingExtensions
             SmoothLevel = model.SmoothLevel,
             Width = model.Dimensions.ElementAtOrDefault(0),
             Length = model.Dimensions.ElementAtOrDefault(1),
+            Depth = model.Dimensions.ElementAtOrDefault(2),
             ObstaclesCount = model.ObstaclesCount,
             Status = model.Status,
             CostRange = model.CostRange
