@@ -13,6 +13,7 @@ using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.ViewModels.Interface;
 using Pathfinding.Service.Algorithms.Events;
 using Pathfinding.Service.Interface;
+using Pathfinding.Service.Interface.Extensions;
 using Pathfinding.Service.Layers;
 using Pathfinding.Shared.Primitives;
 using ReactiveUI;
@@ -68,11 +69,11 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
         messenger.RegisterAwaitHandler<AwaitGraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
         messenger.RegisterHandler<RunsDeletedMessage>(this, OnRunsDeleted).DisposeWith(disposables);
         messenger.RegisterHandler<GraphsDeletedMessage>(this, OnGraphDeleted).DisposeWith(disposables);
-        messenger.RegisterHandler<RunsSelectedMessage>(this, OnRunActivated).DisposeWith(disposables);
+        messenger.RegisterAsyncHandler<RunsSelectedMessage>(this, OnRunActivated).DisposeWith(disposables);
         shortTermDisposables.DisposeWith(disposables);
     }
 
-    private void OnRunActivated(RunsSelectedMessage msg)
+    private async Task OnRunActivated(RunsSelectedMessage msg)
     {
         if (msg.Value.Length > 0)
         {
@@ -107,7 +108,7 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
                 algorithm.VertexProcessed += OnVertexProcessed;
                 try
                 {
-                    algorithm.FindPath();
+                    await algorithm.FindPathAsync().ConfigureAwait(false);
                 }
                 catch
                 {

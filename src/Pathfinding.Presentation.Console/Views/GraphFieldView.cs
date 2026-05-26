@@ -8,6 +8,7 @@ using Pathfinding.Presentation.Console.Injection;
 using Pathfinding.Presentation.Console.Messages.View;
 using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.ViewModels.Interface;
+using Pathfinding.Service.Extensions;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Reactive;
@@ -85,8 +86,11 @@ internal sealed partial class GraphFieldView : FrameView
     {
         mainLoop.Invoke(() =>
         {
-            containers.ForEach(x => x.RemoveAll());
-            containers.ForEach(Remove);
+            containers.ForEach(container =>
+            {
+                container.RemoveAll();
+                Remove(container);
+            });
             containers.Clear();
         });
         
@@ -110,20 +114,12 @@ internal sealed partial class GraphFieldView : FrameView
 
         mainLoop.Invoke(() =>
         {
-            int i = 0;
-            do
+            for (int i = 0; i < graph.GetDepth(); i++)
             {
-                var container = new View
-                {
-                    X = Pos.Center(),
-                    Y = Pos.Center(),
-                    Width = graph.GetWidth() * DistanceBetweenVertices,
-                    Height = graph.GetLength()
-                };
-                container.Add([.. views.Where(x => ((IVertex)x.Data).Position.ElementAtOrDefault(2) == i)]);
+                var container = CreateContainer(graph);
+                container.Add([.. views.Where(x => x.Model.GetZ() == i)]);
                 containers.Add(container);
-                i++;
-            } while (i < graph.GetDepth());
+            }
             if (containers.Count > 0)
             {
                 currentContainer = containers[0];
@@ -131,6 +127,17 @@ internal sealed partial class GraphFieldView : FrameView
                 messenger.Send(new GraphActivatedMessage(graph));
             }
         });
+    }
+
+    private static View CreateContainer(IGraph<GraphVertexModel> graph)
+    {
+        return new View
+        {
+            X = Pos.Center(),
+            Y = Pos.Center(),
+            Width = graph.GetWidth() * DistanceBetweenVertices,
+            Height = graph.GetLength()
+        };
     }
 
     private void BindTo<T>(GraphVertexView view, T model,

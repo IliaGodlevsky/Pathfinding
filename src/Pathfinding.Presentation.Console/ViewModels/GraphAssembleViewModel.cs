@@ -31,9 +31,11 @@ internal sealed class GraphAssembleViewModel : ViewModel,
 {
     private static readonly InclusiveValueRange<int> WidthRange = (Settings.Default.MaxGraphWidth, 1);
     private static readonly InclusiveValueRange<int> LengthRange = (Settings.Default.MaxGraphLength, 1);
-    private static readonly InclusiveValueRange<int> DepthRange = (0, 5);
+    private static readonly InclusiveValueRange<int> DepthRange = (0, 20);
     private static readonly InclusiveValueRange<int> ObstaclesRange = (99, 0);
     private static readonly InclusiveValueRange<int> CostRange = (99, 1);
+
+    private const int VerticesCountLimit = 4000;
 
     private readonly INeighborhoodLayerFactory neighborFactory;
     private readonly ISmoothLevelFactory smoothLevelFactory;
@@ -131,16 +133,13 @@ internal sealed class GraphAssembleViewModel : ViewModel,
         return this.WhenAnyValue(
             x => x.Width,
             x => x.Length,
+            x => x.Depth,
             x => x.Obstacles,
             x => x.Name,
             x => x.Range,
-            (x, y, z, a, r) => x > 0 && y > 0
-                && z >= 0 && !string.IsNullOrEmpty(a)
-                && r.UpperValueOfRange >= CostRange.LowerValueOfRange
-                && r.UpperValueOfRange <= CostRange.UpperValueOfRange
-                && r.LowerValueOfRange >= CostRange.LowerValueOfRange
-                && r.LowerValueOfRange <= CostRange.UpperValueOfRange
-                && r.UpperValueOfRange > r.LowerValueOfRange
+            (x, y, z, o, a, r) => x > 0 && y > 0
+                && o >= 0 && !string.IsNullOrEmpty(a)
+                && (z == 0 || x * y * z <= VerticesCountLimit)
         );
     }
 

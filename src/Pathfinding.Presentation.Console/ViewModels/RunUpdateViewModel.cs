@@ -12,6 +12,7 @@ using Pathfinding.Presentation.Console.ViewModels.Interface;
 using Pathfinding.Service.Algorithms.GraphPaths;
 using Pathfinding.Service.Extensions;
 using Pathfinding.Service.Interface;
+using Pathfinding.Service.Interface.Extensions;
 using Pathfinding.Service.Interface.Models.Undefined;
 using Pathfinding.Service.Interface.Requests.Read;
 using ReactiveUI;
@@ -180,8 +181,9 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         List<RunStatisticsModel> updatedRuns = [];
         if (range.Length > 1)
         {
-            updatedRuns = [.. selectedStatistics
-                .Select(x => UpdateStatistics(x, range))];
+            updatedRuns = [.. (await Task.WhenAll(selectedStatistics
+                .Select(x => UpdateStatistics(x, range)))
+                .ConfigureAwait(false))];
 
             await ExecuteSafe(async token =>
             {
@@ -193,7 +195,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         return updatedRuns;
     }
 
-    private RunStatisticsModel UpdateStatistics(RunStatisticsModel info, GraphVertexModel[] range)
+    private async Task<RunStatisticsModel> UpdateStatistics(RunStatisticsModel info, GraphVertexModel[] range)
     {
         var visitedCount = 0;
         void OnVertexProcessed(EventArgs e) => visitedCount++;
@@ -206,7 +208,7 @@ internal sealed class RunUpdateViewModel : ViewModel, IRunUpdateViewModel, IDisp
         var stopwatch = Stopwatch.StartNew();
         try
         {
-            path = algorithm.FindPath();
+            path = await algorithm.FindPathAsync().ConfigureAwait(false);
         }
         catch
         {

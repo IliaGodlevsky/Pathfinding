@@ -12,6 +12,7 @@ using Pathfinding.Presentation.Console.Resources;
 using Pathfinding.Presentation.Console.ViewModels.Interface;
 using Pathfinding.Service.Algorithms.GraphPaths;
 using Pathfinding.Service.Interface;
+using Pathfinding.Service.Interface.Extensions;
 using Pathfinding.Service.Interface.Models;
 using Pathfinding.Service.Interface.Requests.Create;
 using Pathfinding.Shared.Extensions;
@@ -235,10 +236,12 @@ internal sealed class RunCreateViewModel : ViewModel,
             return;
         }
 
-        var statistics = EnumerateWeights()
+        var tasks = EnumerateWeights()
             .SelectMany(GetBuildInfo)
             .Select(buildInfo => CreateStatistics(range, buildInfo))
             .ToArray();
+
+        var statistics = await Task.WhenAll(tasks).ConfigureAwait(false);
 
         await ExecuteSafe(async token =>
         {
@@ -263,7 +266,7 @@ internal sealed class RunCreateViewModel : ViewModel,
         }
     }
 
-    private CreateStatisticsRequest CreateStatistics(
+    private async Task<CreateStatisticsRequest> CreateStatistics(
         GraphVertexModel[] range,
         AlgorithmBuildInfo buildInfo)
     {
@@ -279,7 +282,7 @@ internal sealed class RunCreateViewModel : ViewModel,
 
         try
         {
-            path = algo.FindPath();
+            path = await algo.FindPathAsync().ConfigureAwait(false);
         }
         catch
         {

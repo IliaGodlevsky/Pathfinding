@@ -26,6 +26,8 @@ internal class VertexView<T> : Label
     protected readonly T model;
     protected readonly CompositeDisposable disposables = [];
 
+    public T Model => model;
+
     protected VertexView(T model)
     {
         model.WhenAnyValue(x => x.Cost)

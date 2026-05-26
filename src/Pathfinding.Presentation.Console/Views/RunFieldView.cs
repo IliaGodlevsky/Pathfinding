@@ -9,6 +9,7 @@ using Pathfinding.Presentation.Console.Messages.View;
 using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.Resources;
 using Pathfinding.Presentation.Console.ViewModels.Interface;
+using Pathfinding.Service.Extensions;
 using ReactiveUI;
 using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
@@ -23,6 +24,8 @@ internal sealed partial class RunFieldView : FrameView
     private readonly CompositeDisposable disposables = [];
     private readonly MainLoop mainLoop = Application.MainLoop;
     private readonly List<View> containers = [];
+
+    private int Slice { get; set; } = 1;
 
     private View currentContainer;
 
@@ -41,8 +44,8 @@ internal sealed partial class RunFieldView : FrameView
             Title = Resource.RunField
         };
         viewModel.WhenAnyValue(x => x.RunGraph)
-            .DistinctUntilChanged(x => x != Graph<RunVertexModel>.Empty)
-            .Where(x => x is not null)
+            .DistinctUntilChanged()
+            .Where(x => x != Graph<RunVertexModel>.Empty)
             .Subscribe(RenderGraphState)
             .DisposeWith(disposables);
         messenger.RegisterHandler<OpenRunFieldMessage>(this, OnOpen).DisposeWith(disposables);
@@ -53,10 +56,11 @@ internal sealed partial class RunFieldView : FrameView
 
     private void OnSliceChanged(SliceChangedMessage msg)
     {
+        Slice = msg.Slice;
         if (currentContainer != null)
         {
             Remove(currentContainer);
-            currentContainer = containers[msg.Slice - 1];
+            currentContainer = containers.ElementAtOrDefault(Slice - 1);
             Add(currentContainer);
         }
     }
@@ -79,40 +83,45 @@ internal sealed partial class RunFieldView : FrameView
 
     private void RenderGraphState(IGraph<RunVertexModel> graph)
     {
-        mainLoop.Invoke(()=>
+        mainLoop.Invoke(() =>
         {
-            foreach(var container in containers)
+            containers.ForEach(container =>
             {
                 container.RemoveAll();
                 Remove(container);
-            }
+            });
             containers.Clear();
         });
         vertexDisposables.Clear();
         var children = graph
+            .AsParallel()
             .Select(x => new RunVertexView(x).DisposeWith(vertexDisposables))
             .ToArray();
         mainLoop.Invoke(() =>
         {
-            int i = 0;
-            do
+            for (int i = 0; i < graph.GetDepth(); i++)
             {
-                var container = new View()
-                {
-                    X = Pos.Center(),
-                    Y = Pos.Center(),
-                    Width = graph.GetWidth() * GraphFieldView.DistanceBetweenVertices,
-                    Height = graph.GetLength()
-                };
-                container.Add([.. children.Where(x => ((IVertex)x.Data).Position.ElementAtOrDefault(2) == i)]);
+                var container = CreateContainer(graph);
+                container.Add([.. children.Where(x => x.Model.GetZ() == i)]);
                 containers.Add(container);
-                i++;
-            } while (i < graph.GetDepth());
-            if (containers.Count > 0 && children.Length > 0)
+            }
+            if (containers.Count > 0)
             {
-                currentContainer = containers[0];
+                Remove(currentContainer);
+                currentContainer = containers.ElementAtOrDefault(Slice - 1);
                 Add(currentContainer);
             }
         });
+    }
+
+    private static View CreateContainer(IGraph<RunVertexModel> graph)
+    {
+        return new View()
+        {
+            X = Pos.Center(),
+            Y = Pos.Center(),
+            Width = graph.GetWidth() * GraphFieldView.DistanceBetweenVertices,
+            Height = graph.GetLength()
+        };
     }
 }

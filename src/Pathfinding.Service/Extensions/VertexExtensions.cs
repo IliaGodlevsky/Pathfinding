@@ -8,4 +8,9 @@ public static class VertexExtensions
     {
         return self.Neighbors.Contains(candidate);
     }
+
+    public static int GetZ(this IPathfindingVertex self)
+    {
+        return self.Position.ElementAtOrDefault(2);
+    }
 }

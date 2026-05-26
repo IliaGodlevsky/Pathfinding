@@ -26,6 +26,11 @@ public static class GraphExtensions
     public static int GetDepth<TVertex>(this IGraph<TVertex> graph)
         where TVertex : IVertex
     {
-        return graph.DimensionsSizes.ElementAtOrDefault(2);
+        int depth = graph.DimensionsSizes.ElementAtOrDefault(2);
+        if (graph.GetWidth() > 0 && graph.GetLength() > 0)
+        {
+            return depth > 0 ? depth : 1;
+        }
+        return depth;
     }
 }
