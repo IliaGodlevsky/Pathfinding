@@ -20,10 +20,11 @@ internal sealed class GraphSliceView : FrameView
     private readonly Button prevSlice = new("<");
     private readonly Button firstSlice = new("<<");
     private readonly Button lastSlice = new(">>");
+
     private readonly Label totalSlices = new();
     private readonly TextField currentSlice = new();
-    private readonly CompositeDisposable disposables = [];
 
+    private readonly CompositeDisposable disposables = [];
     private readonly IMessenger messenger;
 
     private int ttlSlice = 0;
@@ -92,7 +93,8 @@ internal sealed class GraphSliceView : FrameView
         Add(nextSlice, prevSlice, 
             firstSlice, lastSlice, 
             totalSlices, currentSlice);
-        messenger.RegisterHandler<GraphActivatedMessage>(this, OnGraphActivated);
+
+        messenger.RegisterHandler<GraphActivatedMessage>(this, OnGraphActivated).DisposeWith(disposables);
     }
 
     private void Bind(View view, Func<int> function)
@@ -108,5 +110,11 @@ internal sealed class GraphSliceView : FrameView
         TotalSlices = Math.Max(1, msg.Graph.GetDepth());
         SliceRange = (1, TotalSlices);
         CurrentSlice = 1;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        disposables.Dispose();
+        base.Dispose(disposing);
     }
 }
