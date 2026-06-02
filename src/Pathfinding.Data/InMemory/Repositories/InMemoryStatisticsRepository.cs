@@ -97,10 +97,4 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
     {
         return set.Where(x => graphIds.Contains(x.GraphId)).ToAsyncEnumerable();
     }
-
-    public Task<int> ReadCountAsync(int graphId, CancellationToken token = default)
-    {
-        int count = set.Count(x => x.GraphId == graphId);
-        return Task.FromResult(count);
-    }
 }

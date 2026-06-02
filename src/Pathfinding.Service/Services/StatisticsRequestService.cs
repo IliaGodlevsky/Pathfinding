@@ -58,14 +58,12 @@ public sealed class StatisticsRequestService(IUnitOfWorkFactory factory) : IStat
         ReadStatisticsRequest request,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unit, t) =>
-        {
-            var result = await unit.StatisticsRepository
-                .ReadByGraphIdAsync(request.GraphId, request.Skip, request.Take)
-                .ToListAsync(t)
-                .ConfigureAwait(false);
-            return result.ToRunStatisticsModels();
-        }, token).ConfigureAwait(false);
+        await using var unitOfWork = await factory.CreateAsync(token);
+        var result = await unitOfWork.StatisticsRepository
+            .ReadByGraphIdAsync(request.GraphId, request.Skip, request.Take)
+            .ToListAsync(token)
+            .ConfigureAwait(false);
+        return result.ToRunStatisticsModels();
     }
 
     public async Task<IReadOnlyCollection<RunStatisticsModel>> CreateStatisticsAsync(
@@ -95,11 +93,5 @@ public sealed class StatisticsRequestService(IUnitOfWorkFactory factory) : IStat
                 .UpdateAsync(entities, t)
                 .ConfigureAwait(false);
         }, token).ConfigureAwait(false);
-    }
-
-    public async Task<int> ReadCountAsync(int graphId, CancellationToken token = default)
-    {
-        await using var unitOfWork = await factory.CreateAsync(token);
-        return await unitOfWork.StatisticsRepository.ReadCountAsync(graphId, token);
     }
 }

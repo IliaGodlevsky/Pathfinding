@@ -86,6 +86,7 @@ internal sealed partial class GraphFieldView : FrameView
 
             BindTo(view, x, graphFieldViewModel.DecreaseVertexCostCommand, WheeledDown);
             BindTo(view, x, graphFieldViewModel.IncreaseVertexCostCommand, WheeledUp);
+
             return view;
         }).ToArray();
 

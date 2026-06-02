@@ -114,15 +114,4 @@ internal sealed class SqliteStatisticsRepository(SqliteConnection connection,
         return Connection.QueryUnbufferedAsync<Statistics>(query,
             new { GraphIds = graphIds }, Transaction);
     }
-
-    public async Task<int> ReadCountAsync(int graphId, CancellationToken token = default)
-    {
-        const string query = $@"
-            SELECT COUNT(*)
-            FROM {DbTables.Statistics}
-            WHERE GraphId = @GraphId";
-
-        return await Connection.ExecuteScalarAsync<int>(
-            query, new { GraphId = graphId }, Transaction);
-    }
 }

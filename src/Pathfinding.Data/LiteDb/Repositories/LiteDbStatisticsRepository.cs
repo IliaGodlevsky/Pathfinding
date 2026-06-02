@@ -80,14 +80,6 @@ internal sealed class LiteDbStatisticsRepository : IStatisticsRepository
             .ToAsyncEnumerable();
     }
 
-    public Task<int> ReadCountAsync(int graphId, CancellationToken token = default)
-    {
-        var result = collection.Query()
-            .Where(x => x.GraphId == graphId)
-            .Count();
-        return Task.FromResult(result);
-    }
-
     public Task<bool> UpdateAsync(
         IReadOnlyCollection<Statistics> entities,
         CancellationToken token = default)
