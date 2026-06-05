@@ -23,7 +23,7 @@ internal sealed class GraphImportViewModel : ViewModel, IGraphImportViewModel
 
     public ReactiveCommand<Func<StreamModel>, Unit> ImportGraphCommand { get; }
 
-    public IReadOnlyCollection<StreamFormat> StreamFormats => serializerFactory.AvailiableFormats;
+    public IReadOnlyCollection<SerializationFormat> StreamFormats => serializerFactory.AvailiableFormats;
 
     public GraphImportViewModel(IGraphRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,

@@ -6,7 +6,7 @@ namespace Pathfinding.Presentation.Console.ViewModels.Interface;
 
 internal interface IGraphImportViewModel
 {
-    IReadOnlyCollection<StreamFormat> StreamFormats { get; }
+    IReadOnlyCollection<SerializationFormat> StreamFormats { get; }
 
     ReactiveCommand<Func<StreamModel>, Unit> ImportGraphCommand { get; }
 }

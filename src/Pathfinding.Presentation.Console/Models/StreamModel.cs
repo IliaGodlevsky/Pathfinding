@@ -8,12 +8,12 @@ internal sealed class StreamModel : IDisposable, IAsyncDisposable
 
     public Stream Stream { get; }
 
-    public StreamFormat? Format { get; }
+    public SerializationFormat? Format { get; }
 
     public bool IsEmpty { get; }
 
     public StreamModel(Stream stream = null,
-        StreamFormat? format = null,
+        SerializationFormat? format = null,
         params IDisposable[] additionalDisposables)
     {
         Stream = stream ?? Stream.Null;

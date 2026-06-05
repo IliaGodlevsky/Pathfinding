@@ -1,3 +1,3 @@
 ﻿namespace Pathfinding.Presentation.Console.Models;
 
-internal enum StreamFormat { Binary, Json, Xml, Csv }
+internal enum SerializationFormat { Binary, Json, Xml, Csv, MessagePack }

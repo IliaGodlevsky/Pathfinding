@@ -2,16 +2,17 @@
 
 namespace Pathfinding.Presentation.Console.Extensions;
 
-internal static class ExportFormatExtensions
+internal static class SerializationFormatExtensions
 {
-    public static string ToExtensionRepresentation(this StreamFormat exportFormat)
+    public static string ToExtensionRepresentation(this SerializationFormat exportFormat)
     {
         return exportFormat switch
         {
-            StreamFormat.Binary => ".dat",
-            StreamFormat.Json => ".json",
-            StreamFormat.Xml => ".xml",
-            StreamFormat.Csv => ".zip",
+            SerializationFormat.Binary => ".dat",
+            SerializationFormat.Json => ".json",
+            SerializationFormat.Xml => ".xml",
+            SerializationFormat.Csv => ".zip",
+            SerializationFormat.MessagePack => ".msgpack",
             _ => string.Empty
         };
     }

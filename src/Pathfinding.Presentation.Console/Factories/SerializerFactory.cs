@@ -6,16 +6,16 @@ namespace Pathfinding.Presentation.Console.Factories;
 
 internal sealed class SerializerFactory(Meta<Serializer>[] serializers) : ISerializerFactory
 {
-    private readonly Dictionary<StreamFormat, Serializer> serializers = serializers.ToDictionary(
-                x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat],
+    private readonly Dictionary<SerializationFormat, Serializer> serializers = serializers.ToDictionary(
+                x => (SerializationFormat)x.Metadata[MetadataKeys.ExportFormat],
                 x => x.Value);
 
-    public IReadOnlyList<StreamFormat> AvailiableFormats { get; } =
+    public IReadOnlyList<SerializationFormat> AvailiableFormats { get; } =
         [..serializers
         .OrderBy(x => x.Metadata[MetadataKeys.Order])
-        .Select(x => (StreamFormat)x.Metadata[MetadataKeys.ExportFormat])];
+        .Select(x => (SerializationFormat)x.Metadata[MetadataKeys.ExportFormat])];
 
-    public Serializer Create(StreamFormat format)
+    public Serializer Create(SerializationFormat format)
     {
         return serializers.GetValueOrDefault(format)
             ?? throw new KeyNotFoundException($"{format} was not found");

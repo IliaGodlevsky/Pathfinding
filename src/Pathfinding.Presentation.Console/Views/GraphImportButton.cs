@@ -37,7 +37,7 @@ internal sealed partial class GraphImportButton : Button
         base.Dispose(disposing);
     }
 
-    private static (string Path, StreamFormat? Format) GetFileName(IGraphImportViewModel viewModel)
+    private static (string Path, SerializationFormat? Format) GetFileName(IGraphImportViewModel viewModel)
     {
         var formats = viewModel.StreamFormats
             .ToDictionary(x => x.ToExtensionRepresentation());

@@ -91,16 +91,19 @@ internal static class Modules
 
         builder.RegisterType<JsonSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
             .As<Serializer>().WithMetadata(MetadataKeys.Order, 3)
-            .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Json);
+            .WithMetadata(MetadataKeys.ExportFormat, SerializationFormat.Json);
         builder.RegisterType<BinarySerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
             .Keyed<Serializer>(KeyFilters.Compress).WithMetadata(MetadataKeys.Order, 2)
-            .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Binary);
+            .WithMetadata(MetadataKeys.ExportFormat, SerializationFormat.Binary);
+        builder.RegisterType<MessagePackSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
+            .Keyed<Serializer>(KeyFilters.Compress).WithMetadata(MetadataKeys.Order, 5)
+            .WithMetadata(MetadataKeys.ExportFormat, SerializationFormat.MessagePack);
         builder.RegisterType<XmlSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
             .As<Serializer>().WithMetadata(MetadataKeys.Order, 4)
-            .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Xml);
+            .WithMetadata(MetadataKeys.ExportFormat, SerializationFormat.Xml);
         builder.RegisterType<BundleSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
             .As<Serializer>().WithMetadata(MetadataKeys.Order, 1)
-            .WithMetadata(MetadataKeys.ExportFormat, StreamFormat.Csv);
+            .WithMetadata(MetadataKeys.ExportFormat, SerializationFormat.Csv);
 
         builder.RegisterDecorator<Serializer>(
             (_, inner) => new CompressSerializer<PathfindingHistoriesSerializationModel>(inner),

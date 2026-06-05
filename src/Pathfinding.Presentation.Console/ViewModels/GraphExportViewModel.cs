@@ -35,7 +35,7 @@ internal sealed class GraphExportViewModel : ViewModel, IGraphExportViewModel, I
 
     public IReadOnlyList<ExportOptions> AvailableOptions => options.AvailableExportOptions;
 
-    public IReadOnlyCollection<StreamFormat> StreamFormats => serializerFactory.AvailiableFormats;
+    public IReadOnlyCollection<SerializationFormat> StreamFormats => serializerFactory.AvailiableFormats;
 
     public ReactiveCommand<Func<StreamModel>, Unit> ExportGraphCommand { get; }
 

@@ -62,7 +62,7 @@ internal sealed class GraphExportViewModelTests
         using var viewModel = CreateViewModel(
             messenger,
             optionsMock,
-            [CreateSerializerMeta(StreamFormat.Json, serializerMock)],
+            [CreateSerializerMeta(SerializationFormat.Json, serializerMock)],
             logMock.Object);
 
         viewModel.Option = ExportOptions.WithRuns;
@@ -72,7 +72,7 @@ internal sealed class GraphExportViewModelTests
 
         if (await viewModel.ExportGraphCommand.CanExecute.FirstAsync(value => value))
         {
-            await viewModel.ExportGraphCommand.Execute(() => new StreamModel(new MemoryStream(), StreamFormat.Json));
+            await viewModel.ExportGraphCommand.Execute(() => new StreamModel(new MemoryStream(), SerializationFormat.Json));
         }
 
         using (Assert.EnterMultipleScope())
@@ -105,7 +105,7 @@ internal sealed class GraphExportViewModelTests
         using var viewModel = CreateViewModel(
             messenger,
             optionsMock,
-            [CreateSerializerMeta(StreamFormat.Json, serializerMock)]);
+            [CreateSerializerMeta(SerializationFormat.Json, serializerMock)]);
 
         viewModel.Option = ExportOptions.GraphOnly;
 
@@ -147,7 +147,7 @@ internal sealed class GraphExportViewModelTests
         using var viewModel = CreateViewModel(
             messenger,
             optionsMock,
-            [CreateSerializerMeta(StreamFormat.Json, serializerMock)],
+            [CreateSerializerMeta(SerializationFormat.Json, serializerMock)],
             logMock.Object);
 
         viewModel.Option = ExportOptions.WithRange;
@@ -156,7 +156,7 @@ internal sealed class GraphExportViewModelTests
 
         if (await viewModel.ExportGraphCommand.CanExecute.FirstAsync(value => value))
         {
-            await viewModel.ExportGraphCommand.Execute(() => new StreamModel(new MemoryStream(), StreamFormat.Json));
+            await viewModel.ExportGraphCommand.Execute(() => new StreamModel(new MemoryStream(), SerializationFormat.Json));
         }
 
         logMock
@@ -179,7 +179,7 @@ internal sealed class GraphExportViewModelTests
     }
 
     private static Meta<Serializer> CreateSerializerMeta(
-        StreamFormat format,
+        SerializationFormat format,
         Mock<Serializer> serializerMock)
     {
         var metadata = new Dictionary<string, object>

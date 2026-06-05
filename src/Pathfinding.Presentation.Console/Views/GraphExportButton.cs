@@ -45,7 +45,7 @@ internal sealed partial class GraphExportButton
         return new(path, FileMode.Create, FileAccess.Write, FileShare.None);
     }
 
-    private static (string Path, StreamFormat? Format) GetFilePath(IGraphExportViewModel viewModel)
+    private static (string Path, SerializationFormat? Format) GetFilePath(IGraphExportViewModel viewModel)
     {
         var formats = viewModel.StreamFormats
             .ToDictionary(x => x.ToExtensionRepresentation());

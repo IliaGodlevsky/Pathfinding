@@ -1,4 +1,6 @@
-﻿using Pathfinding.Service.Interface.Extensions;
+﻿using MessagePack;
+using Pathfinding.Service.Interface.Extensions;
+using Pathfinding.Service.Interface.Models.Serialization.MessagePack;
 using System.IO.Compression;
 using System.Xml;
 using System.Xml.Schema;
@@ -7,7 +9,7 @@ using System.Xml.Serialization;
 namespace Pathfinding.Service.Interface.Models.Serialization;
 
 public class PathfindingHistoriesSerializationModel
-    : IBinarySerializable, IXmlSerializable, IBundleSerializable
+    : IBinarySerializable, IXmlSerializable, IBundleSerializable, IMessagePackSerializable
 {
     public IReadOnlyCollection<PathfindingHistorySerializationModel> Histories { get; set; } = [];
 
@@ -43,5 +45,19 @@ public class PathfindingHistoriesSerializationModel
     public async Task DeserializeAsync(ZipArchive archive, CancellationToken token = default)
     {
         Histories = await archive.ReadHistoryAsync(token).ConfigureAwait(false);
+    }
+
+    public async Task SerializePackAsync(Stream stream, CancellationToken token = default)
+    {
+        var history = Histories.ToMessagePackHistory();
+        await MessagePackSerializer.SerializeAsync(stream, history,
+            cancellationToken: token).ConfigureAwait(false);
+    }
+
+    public async Task DeserializePackAsync(Stream stream, CancellationToken token = default)
+    {
+        var result = await MessagePackSerializer.DeserializeAsync<List<MessagePackHistory>>(stream,
+            cancellationToken: token).ConfigureAwait(false);
+        Histories = result.ToHistory();
     }
 }

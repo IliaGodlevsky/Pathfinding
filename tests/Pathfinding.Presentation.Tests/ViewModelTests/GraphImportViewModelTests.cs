@@ -79,7 +79,7 @@ internal sealed class GraphImportViewModelTests
                 new Dictionary<string, object>
                 {
                     [Console.Injection.MetadataKeys.Order] = 1,
-                    [Console.Injection.MetadataKeys.ExportFormat] = StreamFormat.Json
+                    [Console.Injection.MetadataKeys.ExportFormat] = SerializationFormat.Json
                 })
         };
 
@@ -93,7 +93,7 @@ internal sealed class GraphImportViewModelTests
         messenger.Register<GraphsCreatedMessage>(this, (_, msg) => createdMessage = msg);
 
         await viewModel.ImportGraphCommand.Execute(() =>
-            new StreamModel(new MemoryStream([1, 2, 3]), StreamFormat.Json));
+            new StreamModel(new MemoryStream([1, 2, 3]), SerializationFormat.Json));
 
         using (Assert.EnterMultipleScope())
         {
@@ -122,7 +122,7 @@ internal sealed class GraphImportViewModelTests
                 new Dictionary<string, object>
                 {
                     [Console.Injection.MetadataKeys.Order] = 1,
-                    [Console.Injection.MetadataKeys.ExportFormat] = StreamFormat.Json
+                    [Console.Injection.MetadataKeys.ExportFormat] = SerializationFormat.Json
                 })
         };
 
