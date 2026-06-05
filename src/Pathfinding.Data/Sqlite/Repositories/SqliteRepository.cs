@@ -3,19 +3,10 @@ using Microsoft.Data.Sqlite;
 
 namespace Pathfinding.Data.Sqlite.Repositories;
 
-internal abstract class SqliteRepository
+internal abstract class SqliteRepository(
+    SqliteConnection connection,
+    SqliteTransaction transaction)
 {
-    protected readonly SqliteConnection Connection;
-    protected readonly SqliteTransaction Transaction;
-
-    protected abstract string CreateTableScript { get; }
-
-    protected SqliteRepository(
-        SqliteConnection connection,
-        SqliteTransaction transaction)
-    {
-        Connection = connection;
-        Transaction = transaction;
-        connection.Execute(CreateTableScript);
-    }
+    protected readonly SqliteConnection Connection = connection;
+    protected readonly SqliteTransaction Transaction = transaction;
 }

@@ -6,9 +6,9 @@ using Pathfinding.Domain.Interface.Repositories;
 namespace Pathfinding.Data.Sqlite.Repositories;
 
 internal sealed class SqliteVerticesRepository(SqliteConnection connection,
-    SqliteTransaction transaction) : SqliteRepository(connection, transaction), IVerticesRepository
+    SqliteTransaction transaction) : SqliteRepository(connection, transaction), ISqliteRepository, IVerticesRepository
 {
-    protected override string CreateTableScript { get; } =
+    public static string TableCreationScript { get; } =
         @$"CREATE TABLE IF NOT EXISTS {DbTables.Vertices} (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 GraphId INTEGER NOT NULL,

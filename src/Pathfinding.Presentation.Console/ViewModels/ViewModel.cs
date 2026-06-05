@@ -2,7 +2,6 @@
 using Pathfinding.Logging.Interface;
 using Pathfinding.Presentation.Console.Injection;
 using Pathfinding.Presentation.Console.Models;
-using Pathfinding.Shared.Primitives;
 using ReactiveUI;
 using System.Collections.Frozen;
 
@@ -14,8 +13,6 @@ internal abstract class ViewModel(ILog log) : ReactiveObject
     public readonly record struct ActiveGraph(int Id, Graph<GraphVertexModel> Graph, bool IsReadonly = false)
     {
         public static readonly ActiveGraph Empty = new(0, Graph<GraphVertexModel>.Empty, false);
-
-        public InclusiveValueRange<int> CostRange => Graph.CostRange;
 
         public IReadOnlyDictionary<long, GraphVertexModel> VertexMap { get; } = Graph.ToFrozenDictionary(x => x.Id);
     }

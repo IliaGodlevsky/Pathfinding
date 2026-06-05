@@ -22,6 +22,15 @@ public sealed class SqliteUnitOfWork(string connectionString) : IUnitOfWork
     public IStatisticsRepository StatisticsRepository
         => new SqliteStatisticsRepository(connection, transaction!);
 
+    internal static string GetTablesCreationScript()
+    {
+        return string.Concat(
+            SqliteVerticesRepository.TableCreationScript,
+            SqliteGraphRepository.TableCreationScript,
+            SqliteStatisticsRepository.TableCreationScript,
+            SqliteRangeRepository.TableCreationScript);
+    }
+
     public async Task OpenConnectionAsync(CancellationToken token = default)
     {
         await connection.OpenAsync(token).ConfigureAwait(false);

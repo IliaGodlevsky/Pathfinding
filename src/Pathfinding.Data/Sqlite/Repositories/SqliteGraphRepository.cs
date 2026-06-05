@@ -5,7 +5,8 @@ using Pathfinding.Domain.Interface.Repositories;
 
 namespace Pathfinding.Data.Sqlite.Repositories;
 
-internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParametersRepository
+internal sealed class SqliteGraphRepository(SqliteConnection connection,
+    SqliteTransaction transaction) : SqliteRepository(connection, transaction), ISqliteRepository, IGraphParametersRepository
 {
     private const string NameProperty = nameof(Graph.Name);
     private const string NeighborhoodProperty = nameof(Graph.Neighborhood);
@@ -16,7 +17,7 @@ internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParameters
     private const string UpperValueOfRange = nameof(Graph.UpperValueRange);
     private const string LowerValueOfRange = nameof(Graph.LowerValueRange);
 
-    protected override string CreateTableScript =>
+    public static string TableCreationScript =>
         @$"
             CREATE TABLE IF NOT EXISTS {DbTables.Graphs} (
                 {IdProperty} INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,12 +30,6 @@ internal sealed class SqliteGraphRepository : SqliteRepository, IGraphParameters
                 {DimensionsProperty} TEXT NOT NULL
             );
             CREATE INDEX IF NOT EXISTS idx_graph_id ON {DbTables.Graphs}(Id);";
-
-    public SqliteGraphRepository(SqliteConnection connection,
-        SqliteTransaction transaction) : base(connection, transaction)
-    {
-        _ = new SqliteVerticesRepository(connection, transaction);
-    }
 
     public async Task<Graph> CreateAsync(Graph graph, CancellationToken token = default)
     {

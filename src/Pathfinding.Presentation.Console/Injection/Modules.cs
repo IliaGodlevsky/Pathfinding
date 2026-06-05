@@ -35,7 +35,8 @@ internal static class Modules
     {
         var builder = new ContainerBuilder();
 
-        builder.RegisterInstance(new SqliteUnitOfWorkFactory(Settings.Default.ConnectionString)).As<IUnitOfWorkFactory>().SingleInstance();
+        builder.RegisterInstance(new SqliteUnitOfWorkFactory(Settings.Default.ConnectionString)).As<IUnitOfWorkFactory>()
+            .SingleInstance().OnActivated(args => args.Instance.CreateTables());
         builder.RegisterType<LiteDbInMemoryUnitOfWorkFactory>().As<IUnitOfWorkFactory>().SingleInstance().IfNotRegistered(typeof(IUnitOfWorkFactory));
 
         builder.RegisterType<GraphAssemble<GraphVertexModel>>().As<IGraphAssemble<GraphVertexModel>>().SingleInstance();

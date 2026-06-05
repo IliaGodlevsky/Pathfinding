@@ -118,7 +118,7 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
         {
             var cost = vertex.Cost.CurrentCost;
             cost += delta;
-            cost = activatedGraph.CostRange.ReturnInRange(cost);
+            cost = activatedGraph.Graph.CostRange.ReturnInRange(cost);
             vertex.Cost = new VertexCost(cost);
             var request = new UpdateVerticesRequest<GraphVertexModel>(ActivatedGraph.Id, [.. vertex.Enumerate()]);
             await service

@@ -6,9 +6,9 @@ using Pathfinding.Domain.Interface.Repositories;
 namespace Pathfinding.Data.Sqlite.Repositories;
 
 internal sealed class SqliteStatisticsRepository(SqliteConnection connection,
-    SqliteTransaction transaction) : SqliteRepository(connection, transaction), IStatisticsRepository
+    SqliteTransaction transaction) : SqliteRepository(connection, transaction), ISqliteRepository, IStatisticsRepository
 {
-    protected override string CreateTableScript { get; } = $@"
+    public static string TableCreationScript { get; } = $@"
             CREATE TABLE IF NOT EXISTS {DbTables.Statistics} (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 GraphId INTEGER NOT NULL,
