@@ -37,21 +37,22 @@ internal sealed partial class GraphImportButton : Button
         base.Dispose(disposing);
     }
 
-    private static (string Path, SerializationFormat? Format) GetFileName(IGraphImportViewModel viewModel)
+    private static (string Path, SerializationFormat? Format, bool NeedsCompress) GetFileName(IGraphImportViewModel viewModel)
     {
-        var formats = viewModel.StreamFormats
+        var formats = viewModel.SerializationFormats
             .ToDictionary(x => x.ToExtensionRepresentation());
         using var dialog = new OpenDialog(Resource.Import,
             Resource.ChooseFile, [.. formats.Keys]);
         dialog.Width = Dim.Percent(45);
         dialog.Height = Dim.Percent(55);
         Application.Run(dialog);
-        var filePath = dialog.FilePath.ToString();
-        var extension = Path.GetExtension(filePath);
+        string filePath = dialog.FilePath.ToString();
+        string extension = Path.GetExtension(filePath);
+        bool needsDecompress = filePath.Contains(".gz");
         return !dialog.Canceled
                && !string.IsNullOrEmpty(filePath)
                && formats.TryGetValue(extension, out var format)
-            ? (filePath, format)
-            : (string.Empty, null);
+            ? (filePath, format, needsDecompress)
+            : (string.Empty, null, false);
     }
 }

@@ -13,6 +13,7 @@ namespace Pathfinding.Presentation.Console.Views;
 internal sealed class GraphExportOptionsView : FrameView
 {
     private readonly RadioGroup exportOptions = new();
+    private readonly CheckBox needsCompress = new("Compress");
     private readonly CompositeDisposable disposables = [];
 
     public DisplayModeLayout DisplayMode
@@ -20,6 +21,8 @@ internal sealed class GraphExportOptionsView : FrameView
         get => exportOptions.DisplayMode;
         set => exportOptions.DisplayMode = value;
     }
+
+    public bool NeedsCompress => needsCompress.Enabled;
 
     public GraphExportOptionsView(IGraphExportViewModel viewModel)
     {
@@ -35,7 +38,9 @@ internal sealed class GraphExportOptionsView : FrameView
         exportOptions.X = 1;
         exportOptions.Y = 1;
         exportOptions.SelectedItem = viewModel.AvailableOptions.Count - 1;
-        Add(exportOptions);
+        needsCompress.X = Pos.Right(exportOptions) + 3;
+        needsCompress.Y = 1;
+        Add(exportOptions, needsCompress);
     }
 
     protected override void Dispose(bool disposing)

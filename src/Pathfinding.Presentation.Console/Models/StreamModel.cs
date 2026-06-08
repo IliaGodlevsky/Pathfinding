@@ -10,16 +10,20 @@ internal sealed class StreamModel : IDisposable, IAsyncDisposable
 
     public SerializationFormat? Format { get; }
 
+    public bool NeedsCompress { get; }
+
     public bool IsEmpty { get; }
 
     public StreamModel(Stream stream = null,
         SerializationFormat? format = null,
+        bool needsCompress = false,
         params IDisposable[] additionalDisposables)
     {
         Stream = stream ?? Stream.Null;
         Format = format;
         IsEmpty = Stream == Stream.Null || !Format.HasValue;
         disposables = [.. additionalDisposables, Stream];
+        NeedsCompress = needsCompress;
     }
 
     public void Dispose()

@@ -8,7 +8,9 @@ using Pathfinding.Presentation.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.Resources;
 using Pathfinding.Presentation.Console.ViewModels.Interface;
+using Pathfinding.Serialization.Decorators;
 using Pathfinding.Service.Interface;
+using Pathfinding.Service.Interface.Models.Serialization;
 using ReactiveUI;
 using System.Reactive;
 // ReSharper disable PossibleInvalidOperationException
@@ -23,7 +25,7 @@ internal sealed class GraphImportViewModel : ViewModel, IGraphImportViewModel
 
     public ReactiveCommand<Func<StreamModel>, Unit> ImportGraphCommand { get; }
 
-    public IReadOnlyCollection<SerializationFormat> StreamFormats => serializerFactory.AvailiableFormats;
+    public IReadOnlyCollection<SerializationFormat> SerializationFormats => serializerFactory.AvailiableFormats;
 
     public GraphImportViewModel(IGraphRequestService<GraphVertexModel> service,
         [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger,
@@ -43,6 +45,9 @@ internal sealed class GraphImportViewModel : ViewModel, IGraphImportViewModel
             await using var stream = streamFactory();
             if (stream.IsEmpty) return;
             var serializer = serializerFactory.Create(stream.Format.Value);
+            serializer = stream.NeedsCompress 
+                ? GetCompressSerializer(serializer) 
+                : serializer;
             var histories = await serializer
                 .DeserializeFromAsync(stream.Stream, token)
                 .ConfigureAwait(false);
@@ -55,5 +60,10 @@ internal sealed class GraphImportViewModel : ViewModel, IGraphImportViewModel
                 ? Resource.WasLoadedMsg
                 : Resource.WereLoadedMsg);
         }).ConfigureAwait(false);
+    }
+
+    private static CompressSerializer<PathfindingHistoriesSerializationModel> GetCompressSerializer(ISerializer<PathfindingHistoriesSerializationModel> serializer)
+    {
+        return new(serializer);
     }
 }

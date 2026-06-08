@@ -45,9 +45,9 @@ internal sealed partial class GraphExportButton
         return new(path, FileMode.Create, FileAccess.Write, FileShare.None);
     }
 
-    private static (string Path, SerializationFormat? Format) GetFilePath(IGraphExportViewModel viewModel)
+    private static (string Path, SerializationFormat? Format, bool NeedsCompress) GetFilePath(IGraphExportViewModel viewModel)
     {
-        var formats = viewModel.StreamFormats
+        var formats = viewModel.SerializationFormats
             .ToDictionary(x => x.ToExtensionRepresentation());
         using var dialog = new SaveDialog(Resource.Export,
             Resource.ChooseFile, [.. formats.Keys]);
@@ -63,10 +63,15 @@ internal sealed partial class GraphExportButton
         Application.Run(dialog);
         var filePath = dialog.FilePath.ToString();
         var extension = Path.GetExtension(filePath);
+        var filenameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
+        if (export.NeedsCompress)
+        {
+            filePath = string.Concat(filenameWithoutExtension, ".gz", extension);
+        }
         return !dialog.Canceled
                && !string.IsNullOrEmpty(filePath)
                && formats.TryGetValue(extension, out var format)
-            ? (filePath, format)
-            : (string.Empty, null);
+            ? (filePath, format, export.NeedsCompress)
+            : (string.Empty, null, false);
     }
 }

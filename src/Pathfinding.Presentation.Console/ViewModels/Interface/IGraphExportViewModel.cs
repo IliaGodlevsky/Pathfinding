@@ -10,7 +10,7 @@ internal interface IGraphExportViewModel
 
     IReadOnlyList<ExportOptions> AvailableOptions { get; }
 
-    IReadOnlyCollection<SerializationFormat> StreamFormats { get; }
+    IReadOnlyCollection<SerializationFormat> SerializationFormats { get; }
 
     ReactiveCommand<Func<StreamModel>, Unit> ExportGraphCommand { get; }
 }
