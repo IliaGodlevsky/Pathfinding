@@ -9,9 +9,6 @@ using Pathfinding.Presentation.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.Resources;
 using Pathfinding.Presentation.Console.ViewModels.Interface;
-using Pathfinding.Serialization.Decorators;
-using Pathfinding.Service.Interface;
-using Pathfinding.Service.Interface.Models.Serialization;
 using ReactiveUI;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -69,10 +66,7 @@ internal sealed class GraphExportViewModel : ViewModel, IGraphExportViewModel, I
             var histories = await options
                 .ReadHistoryAsync(Option, SelectedGraphIds, token)
                 .ConfigureAwait(false);
-            var serializer = serializerFactory.Create(stream.Format.Value);
-            serializer = stream.NeedsCompress 
-                ? GetCompressSerializer(serializer) 
-                : serializer;
+            var serializer = serializerFactory.Create(stream);
             await serializer
                 .SerializeToAsync(histories, stream.Stream, token)
                 .ConfigureAwait(false);
@@ -90,11 +84,6 @@ internal sealed class GraphExportViewModel : ViewModel, IGraphExportViewModel, I
     private void OnGraphDeleted(GraphsDeletedMessage msg)
     {
         SelectedGraphIds = [.. SelectedGraphIds.Except(msg.Value)];
-    }
-
-    private static CompressSerializer<PathfindingHistoriesSerializationModel> GetCompressSerializer(ISerializer<PathfindingHistoriesSerializationModel> serializer)
-    {
-        return new(serializer);
     }
 
     public void Dispose()

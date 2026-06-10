@@ -44,10 +44,7 @@ internal sealed class GraphImportViewModel : ViewModel, IGraphImportViewModel
         {
             await using var stream = streamFactory();
             if (stream.IsEmpty) return;
-            var serializer = serializerFactory.Create(stream.Format.Value);
-            serializer = stream.NeedsCompress 
-                ? GetCompressSerializer(serializer) 
-                : serializer;
+            var serializer = serializerFactory.Create(stream);
             var histories = await serializer
                 .DeserializeFromAsync(stream.Stream, token)
                 .ConfigureAwait(false);
@@ -60,10 +57,5 @@ internal sealed class GraphImportViewModel : ViewModel, IGraphImportViewModel
                 ? Resource.WasLoadedMsg
                 : Resource.WereLoadedMsg);
         }).ConfigureAwait(false);
-    }
-
-    private static CompressSerializer<PathfindingHistoriesSerializationModel> GetCompressSerializer(ISerializer<PathfindingHistoriesSerializationModel> serializer)
-    {
-        return new(serializer);
     }
 }

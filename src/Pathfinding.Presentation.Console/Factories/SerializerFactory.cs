@@ -1,6 +1,8 @@
 ﻿using Autofac.Features.Metadata;
 using Pathfinding.Presentation.Console.Injection;
 using Pathfinding.Presentation.Console.Models;
+using Pathfinding.Serialization.Decorators;
+using Pathfinding.Service.Interface.Models.Serialization;
 
 namespace Pathfinding.Presentation.Console.Factories;
 
@@ -15,9 +17,13 @@ internal sealed class SerializerFactory(Meta<Serializer>[] serializers) : ISeria
         .OrderBy(x => x.Metadata[MetadataKeys.Order])
         .Select(x => (SerializationFormat)x.Metadata[MetadataKeys.ExportFormat])];
 
-    public Serializer Create(SerializationFormat format)
+    public Serializer Create(StreamModel streamModel)
     {
-        return serializers.GetValueOrDefault(format)
+        SerializationFormat format = streamModel.Format!.Value;
+        var serializer = serializers.GetValueOrDefault(format)
             ?? throw new KeyNotFoundException($"{format} was not found");
+        return streamModel.NeedsCompress 
+            ? new CompressSerializer<PathfindingHistoriesSerializationModel>(serializer) 
+            : serializer;
     }
 }

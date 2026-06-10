@@ -22,7 +22,7 @@ internal sealed class GraphExportOptionsView : FrameView
         set => exportOptions.DisplayMode = value;
     }
 
-    public bool NeedsCompress => needsCompress.Enabled;
+    public bool NeedsCompress => needsCompress.Checked;
 
     public GraphExportOptionsView(IGraphExportViewModel viewModel)
     {
@@ -40,6 +40,7 @@ internal sealed class GraphExportOptionsView : FrameView
         exportOptions.SelectedItem = viewModel.AvailableOptions.Count - 1;
         needsCompress.X = Pos.Right(exportOptions) + 3;
         needsCompress.Y = 1;
+        needsCompress.Checked = false;
         Add(exportOptions, needsCompress);
     }
 

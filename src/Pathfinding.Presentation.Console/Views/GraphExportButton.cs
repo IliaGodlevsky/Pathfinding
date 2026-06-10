@@ -25,7 +25,7 @@ internal sealed partial class GraphExportButton
                 var filePath = GetFilePath(viewModel);
                 return string.IsNullOrEmpty(filePath.Path) || filePath.Format == null
                     ? new Func<StreamModel>(() => StreamModel.Empty)
-                    : () => new(OpenWrite(filePath.Path), filePath.Format);
+                    : () => new(OpenWrite(filePath.Path), filePath.Format, filePath.NeedsCompress);
             })
             .InvokeCommand(viewModel, x => x.ExportGraphCommand)
             .DisposeWith(disposables);
@@ -55,7 +55,7 @@ internal sealed partial class GraphExportButton
         dialog.Height = Dim.Percent(55);
         using var export = new GraphExportOptionsView(viewModel);
         export.ColorScheme = dialog.ColorScheme;
-        export.Width = Dim.Percent(50);
+        export.Width = Dim.Percent(60);
         export.Height = 2;
         export.X = Pos.Center();
         export.Y = 5;

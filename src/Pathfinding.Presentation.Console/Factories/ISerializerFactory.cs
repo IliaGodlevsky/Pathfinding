@@ -6,5 +6,5 @@ internal interface ISerializerFactory
 {
     IReadOnlyList<SerializationFormat> AvailiableFormats { get; }
 
-    Serializer Create(SerializationFormat format);
+    Serializer Create(StreamModel streamModel);
 }
