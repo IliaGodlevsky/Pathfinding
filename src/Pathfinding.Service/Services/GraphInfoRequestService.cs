@@ -13,63 +13,52 @@ public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory) : IGraph
     {
     }
 
-    public Task<IReadOnlyCollection<GraphInformationModel>> ReadAllGraphInfoAsync(
+    public async Task<IReadOnlyCollection<GraphInformationModel>> ReadAllGraphInfoAsync(
         CancellationToken token = default)
     {
-        return ExecuteAsync(async (unitOfWork, t) =>
-        {
-            var graphs = await unitOfWork.GraphRepository
-                .GetAll()
-                .ToListAsync(t)
-                .ConfigureAwait(false);
-            var graphIds = graphs.Select(x => x.Id).ToHashSet();
-            var obstaclesCount = await unitOfWork.GraphRepository
-                .ReadObstaclesCountAsync(graphIds, t)
-                .ConfigureAwait(false);
-            var infos = graphs.ToInformationModels();
-            infos.ForEach(x => x.ObstaclesCount = obstaclesCount.GetValueOrDefault(x.Id));
-            return infos;
-        }, token);
+        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
+        var graphs = await unitOfWork.GraphRepository
+            .GetAll()
+            .ToListAsync(token)
+            .ConfigureAwait(false);
+        var graphIds = graphs.Select(x => x.Id).ToHashSet();
+        var obstaclesCount = await unitOfWork.GraphRepository
+            .ReadObstaclesCountAsync(graphIds, token)
+            .ConfigureAwait(false);
+        var infos = graphs.ToInformationModels();
+        infos.ForEach(x => x.ObstaclesCount = obstaclesCount.GetValueOrDefault(x.Id));
+        return infos;
     }
 
-    public Task<GraphInformationModel> ReadGraphInfoAsync(
+    public async Task<GraphInformationModel> ReadGraphInfoAsync(
         int graphId,
         CancellationToken token = default)
     {
-        return ExecuteAsync(async (unitOfWork, t) =>
-        {
-            var result = await unitOfWork.GraphRepository
-                .ReadAsync(graphId, t)
-                .ConfigureAwait(false);
-            return result.ToGraphInformationModel();
-        }, token);
+        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
+        var result = await unitOfWork.GraphRepository
+            .ReadAsync(graphId, token)
+            .ConfigureAwait(false);
+        return result.ToGraphInformationModel();
     }
 
-    public Task<bool> UpdateGraphInfoAsync(
+    public async Task<bool> UpdateGraphInfoAsync(
         GraphInformationModel graph,
         CancellationToken token = default)
     {
-        return ExecuteAsync((unit, t) =>
-        {
-            var graphInfo = graph.ToGraphEntity();
-            return unit.GraphRepository.UpdateAsync(graphInfo, t);
-        }, token);
+        await using var unit = await factory.CreateAsync(token).ConfigureAwait(false);
+        var graphInfo = graph.ToGraphEntity();
+        return await unit.GraphRepository
+            .UpdateAsync(graphInfo, token)
+            .ConfigureAwait(false);
     }
 
-    public Task<bool> DeleteGraphsAsync(
+    public async Task<bool> DeleteGraphsAsync(
         IReadOnlyCollection<int> ids,
         CancellationToken token = default)
     {
-        return ExecuteAsync(
-            (unitOfWork, t) => unitOfWork.GraphRepository.DeleteAsync(ids, t),
-            token);
-    }
-
-    private async Task<TResult> ExecuteAsync<TResult>(
-        Func<IUnitOfWork, CancellationToken, Task<TResult>> action,
-        CancellationToken token)
-    {
-        await using var unit = await factory.CreateAsync(token).ConfigureAwait(false);
-        return await action(unit, token).ConfigureAwait(false);
+        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
+        return await unitOfWork.GraphRepository
+            .DeleteAsync(ids, token)
+            .ConfigureAwait(false);
     }
 }
