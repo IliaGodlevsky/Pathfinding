@@ -40,14 +40,15 @@ internal sealed class SqliteVerticesRepository(SqliteConnection connection,
         return vertices;
     }
 
-    public async Task<Vertex> ReadAsync(
+    public Task<Vertex> ReadAsync(
         long vertexId, CancellationToken token = default)
     {
         const string query = $"SELECT * FROM {DbTables.Vertices} WHERE Id = @Id";
 
-        return await Connection.QuerySingleOrDefaultAsync<Vertex>(
-                new(query, new { Id = vertexId }, Transaction, cancellationToken: token))
-            .ConfigureAwait(false);
+        var cmd = new CommandDefinition(query, new { Id = vertexId }, 
+            Transaction, cancellationToken: token);
+
+        return Connection.QuerySingleOrDefaultAsync<Vertex>(cmd);
     }
 
     public IAsyncEnumerable<Vertex> ReadVerticesByGraphIdAsync(int graphId)

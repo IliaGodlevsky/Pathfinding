@@ -19,14 +19,14 @@ internal sealed class ReadHistoryOptions : IReadHistoryOptions
         AvailableExportOptions = [.. this.options.Keys];
     }
 
-    public async Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(
+    public Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(
         ExportOptions option,
         IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
         if (options.TryGetValue(option, out var value))
         {
-            return await value.ReadHistoryAsync(graphIds, token).ConfigureAwait(false);
+            return value.ReadHistoryAsync(graphIds, token);
         }
 
         throw new KeyNotFoundException($"{option} was not found");

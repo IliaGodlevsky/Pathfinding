@@ -14,7 +14,6 @@ using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.ViewModels;
 using Pathfinding.Presentation.Console.Views;
 using Pathfinding.Serialization;
-using Pathfinding.Serialization.Decorators;
 using Pathfinding.Service;
 using Pathfinding.Service.Algorithms;
 using Pathfinding.Service.Algorithms.Heuristics;
@@ -104,8 +103,6 @@ internal static class Modules
         builder.RegisterType<BundleSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
             .As<Serializer>().WithMetadata(MetadataKeys.Order, 1)
             .WithMetadata(MetadataKeys.ExportFormat, SerializationFormat.Csv);
-        builder.RegisterDecorator<BufferedSerializer<PathfindingHistoriesSerializationModel>, Serializer>();
-
         builder.RegisterType<SerializerFactory>().As<ISerializerFactory>().SingleInstance();
 
         builder.RegisterType<DefaultStepRule>().As<IStepRule>().SingleInstance()

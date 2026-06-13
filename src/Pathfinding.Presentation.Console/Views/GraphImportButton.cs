@@ -48,7 +48,7 @@ internal sealed partial class GraphImportButton : Button
         Application.Run(dialog);
         string filePath = dialog.FilePath.ToString();
         string extension = Path.GetExtension(filePath);
-        bool needsDecompress = filePath.Contains(".gz");
+        bool needsDecompress = filePath.Contains(".gz.");
         return !dialog.Canceled
                && !string.IsNullOrEmpty(filePath)
                && formats.TryGetValue(extension, out var format)

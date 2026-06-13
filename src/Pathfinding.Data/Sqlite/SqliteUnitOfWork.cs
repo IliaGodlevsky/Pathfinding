@@ -11,16 +11,16 @@ public sealed class SqliteUnitOfWork(string connectionString) : IUnitOfWork
     private SqliteTransaction transaction;
 
     public IGraphParametersRepository GraphRepository
-        => new SqliteGraphRepository(connection, transaction!);
+        => new SqliteGraphRepository(connection, transaction);
 
     public IVerticesRepository VerticesRepository
-        => new SqliteVerticesRepository(connection, transaction!);
+        => new SqliteVerticesRepository(connection, transaction);
 
     public IRangeRepository RangeRepository
-        => new SqliteRangeRepository(connection, transaction!);
+        => new SqliteRangeRepository(connection, transaction);
 
     public IStatisticsRepository StatisticsRepository
-        => new SqliteStatisticsRepository(connection, transaction!);
+        => new SqliteStatisticsRepository(connection, transaction);
 
     internal static string GetTablesCreationScript()
     {
@@ -31,9 +31,9 @@ public sealed class SqliteUnitOfWork(string connectionString) : IUnitOfWork
             SqliteRangeRepository.TableCreationScript);
     }
 
-    public async Task OpenConnectionAsync(CancellationToken token = default)
+    public Task OpenConnectionAsync(CancellationToken token = default)
     {
-        await connection.OpenAsync(token).ConfigureAwait(false);
+        return connection.OpenAsync(token);
     }
 
     public async ValueTask BeginTransactionAsync(CancellationToken token = default)

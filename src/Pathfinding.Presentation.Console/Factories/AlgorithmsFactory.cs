@@ -3,13 +3,14 @@ using Pathfinding.Domain.Enums;
 using Pathfinding.Presentation.Console.Injection;
 using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Service.Algorithms;
+using System.Collections.Frozen;
 
 namespace Pathfinding.Presentation.Console.Factories;
 
 internal sealed class AlgorithmsFactory(Meta<IAlgorithmFactory<PathfindingProcess>>[] algorithms) : IAlgorithmsFactory
 {
-    private readonly Dictionary<Algorithms, IAlgorithmFactory<PathfindingProcess>> algorithms
-        = algorithms.ToDictionary(
+    private readonly IReadOnlyDictionary<Algorithms, IAlgorithmFactory<PathfindingProcess>> algorithms
+        = algorithms.ToFrozenDictionary(
             x => (Algorithms)x.Metadata[MetadataKeys.Algorithm],
             x => x.Value);
 
@@ -18,7 +19,7 @@ internal sealed class AlgorithmsFactory(Meta<IAlgorithmFactory<PathfindingProces
             .Select(x => (Algorithms)x.Metadata[MetadataKeys.Algorithm])];
 
     public IReadOnlyDictionary<Algorithms, AlgorithmRequirements> Requirements { get; }
-        = algorithms.ToDictionary(
+        = algorithms.ToFrozenDictionary(
             x => (Algorithms)x.Metadata[MetadataKeys.Algorithm],
             x => (AlgorithmRequirements)x.Metadata[MetadataKeys.Requirements]);
 

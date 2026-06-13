@@ -44,16 +44,6 @@ public class SerializersBenchmarks
     }
 
     [Benchmark]
-    public async Task BufferedCompressingSerializerBenchmark()
-    {
-        var serializer = new JsonSerializer<Serializable>();
-        var buffer = new BufferedSerializer<Serializable>(serializer);
-        var compress = new CompressSerializer<Serializable>(buffer);
-        var memory = new MemoryStream();
-        await compress.SerializeToAsync(toSerialize, memory);
-    }
-
-    [Benchmark]
     public async Task RegularSerializerBenchmark()
     {
         var serializer = new JsonSerializer<Serializable>();

@@ -6,10 +6,10 @@ namespace Pathfinding.Presentation.Console.Export;
 
 internal sealed class ReadGraphsWithRangeOption(IGraphRequestService<GraphVertexModel> service) : IReadHistoryOption
 {
-    public async Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(
+    public Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(
         IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
-        return await service.ReadSerializationGraphsWithRangeAsync(graphIds, token).ConfigureAwait(false);
+        return service.ReadSerializationGraphsWithRangeAsync(graphIds, token);
     }
 }

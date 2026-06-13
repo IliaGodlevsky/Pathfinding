@@ -19,8 +19,8 @@ internal sealed class StreamModel : IDisposable, IAsyncDisposable
         bool needsCompress = false,
         params IDisposable[] additionalDisposables)
     {
-        Stream = stream ?? Stream.Null;
         Format = format;
+        Stream = stream ?? Stream.Null;
         IsEmpty = Stream == Stream.Null || !Format.HasValue;
         disposables = [.. additionalDisposables, Stream];
         NeedsCompress = needsCompress;

@@ -96,7 +96,7 @@ internal sealed class GraphUpdateViewModelTests
             .Setup(x => x.UpdateGraphInfoAsync(
                 It.IsAny<GraphInformationModel>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(true));
+            .Returns(() => ValueTask.FromResult(true));
 
         var updatedMessages = new List<AwaitGraphUpdatedMessage>();
         messenger.Register<AwaitGraphUpdatedMessage>(this, (_, msg) => updatedMessages.Add(msg));

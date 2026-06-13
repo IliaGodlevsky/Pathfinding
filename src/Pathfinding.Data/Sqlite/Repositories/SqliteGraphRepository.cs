@@ -64,13 +64,12 @@ internal sealed class SqliteGraphRepository(SqliteConnection connection,
         return Connection.QueryUnbufferedAsync<Graph>(query, transaction: Transaction);
     }
 
-    public async Task<Graph> ReadAsync(int graphId, CancellationToken token = default)
+    public Task<Graph> ReadAsync(int graphId, CancellationToken token = default)
     {
         const string query = $"SELECT * FROM {DbTables.Graphs} WHERE {IdProperty} = @Id";
 
-        return await Connection.QuerySingleOrDefaultAsync<Graph>(
-                new(query, new { Id = graphId }, Transaction, cancellationToken: token))
-            .ConfigureAwait(false);
+        return Connection.QuerySingleOrDefaultAsync<Graph>(
+                new(query, new { Id = graphId }, Transaction, cancellationToken: token));
     }
 
     public async Task<bool> UpdateAsync(Graph graph, CancellationToken token = default)

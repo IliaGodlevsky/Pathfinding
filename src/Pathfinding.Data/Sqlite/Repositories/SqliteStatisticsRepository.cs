@@ -70,11 +70,8 @@ internal sealed class SqliteStatisticsRepository(SqliteConnection connection,
     {
         const string query = $"SELECT * FROM {DbTables.Statistics} WHERE Id = @Id";
 
-        var statistics = await Connection.QuerySingleOrDefaultAsync<Statistics>(
-                new(query, new { Id = id }, Transaction, cancellationToken: token))
-            .ConfigureAwait(false);
-
-        return statistics;
+        return await Connection.QuerySingleOrDefaultAsync<Statistics>(
+                new(query, new { Id = id }, Transaction, cancellationToken: token));
     }
 
     public async Task<bool> UpdateAsync(
