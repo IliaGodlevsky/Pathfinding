@@ -2,7 +2,6 @@ using Pathfinding.Data.InMemory;
 using Pathfinding.Domain;
 using Pathfinding.Domain.Enums;
 using Pathfinding.Domain.Interface;
-using Pathfinding.Domain.Interface.Extensions;
 using Pathfinding.Service.Extensions;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
@@ -17,23 +16,24 @@ public sealed class RangeRequestService<T>(IUnitOfWorkFactory factory) : IRangeR
     {
     }
 
-    public async Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeOrderedAsync(int graphId,
+    public Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeOrderedAsync(int graphId,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unit, t) =>
+        return ExecuteAsync<IReadOnlyCollection<PathfindingRangeModel>>(async (unit, t) =>
         {
-            return await unit.RangeRepository
+            var range = await unit.RangeRepository
                 .ReadByGraphIdOrderedByOrderAsync(graphId)
                 .Select(x => x.ToRangeModel())
-                .ToListAsync(token)
+                .ToListAsync(t)
                 .ConfigureAwait(false);
-        }, token).ConfigureAwait(false);
+            return range;
+        }, token);
     }
 
-    public async Task<bool> CreatePathfindingVertexAsync(CreatePathfindingVertexRequest request,
+    public Task<bool> CreatePathfindingVertexAsync(CreatePathfindingVertexRequest request,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unit, t) =>
+        return ExecuteAsync(async (unit, t) =>
         {
             var range = await unit.RangeRepository
                 .ReadByGraphIdOrderedByOrderAsync(request.GraphId)
@@ -42,7 +42,7 @@ public sealed class RangeRequestService<T>(IUnitOfWorkFactory factory) : IRangeR
 
             range.Insert(request.Index, request.ToPathfindingRange());
 
-            for (int i = 0; i < range.Count; i++)
+            for (var i = 0; i < range.Count; i++)
             {
                 range[i].Order = i;
             }
@@ -51,29 +51,32 @@ public sealed class RangeRequestService<T>(IUnitOfWorkFactory factory) : IRangeR
                 .UpsertAsync(range, t)
                 .ConfigureAwait(false);
             return true;
-        }, token).ConfigureAwait(false);
+        }, token);
     }
 
-    public async Task<bool> DeleteRangeAsync(IEnumerable<T> request,
+    public Task<bool> DeleteRangeAsync(IEnumerable<T> request,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unitOfWork, t) =>
+        return ExecuteAsync((unit, t) =>
         {
             var verticesIds = request.Select(x => x.Id).ToList();
-            return await unitOfWork.RangeRepository
-                .DeleteByVerticesIdsAsync(verticesIds, t)
-                .ConfigureAwait(false);
-        }, token).ConfigureAwait(false);
+            return unit.RangeRepository.DeleteByVerticesIdsAsync(verticesIds, t);
+        }, token);
     }
 
-    public async Task<bool> DeleteRangeAsync(int graphId,
+    public Task<bool> DeleteRangeAsync(int graphId,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unitOfWork, t) =>
-        {
-            return await unitOfWork.RangeRepository
-                .DeleteByGraphIdAsync(graphId, t)
-                .ConfigureAwait(false);
-        }, token).ConfigureAwait(false);
+        return ExecuteAsync(
+            (unit, t) => unit.RangeRepository.DeleteByGraphIdAsync(graphId, t),
+            token);
+    }
+
+    private async Task<TResult> ExecuteAsync<TResult>(
+        Func<IUnitOfWork, CancellationToken, Task<TResult>> action,
+        CancellationToken token)
+    {
+        await using var unit = await factory.CreateAsync(token).ConfigureAwait(false);
+        return await action(unit, token).ConfigureAwait(false);
     }
 }

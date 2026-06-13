@@ -1,6 +1,5 @@
 using Pathfinding.Data.InMemory;
 using Pathfinding.Domain.Interface;
-using Pathfinding.Domain.Interface.Extensions;
 using Pathfinding.Service.Extensions;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Undefined;
@@ -15,62 +14,61 @@ public sealed class StatisticsRequestService(IUnitOfWorkFactory factory) : IStat
     {
     }
 
-    public async Task<bool> DeleteRunsAsync(
+    public Task<bool> DeleteRunsAsync(
         IReadOnlyCollection<int> runIds,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unit, t) =>
-        {
-            return await unit.StatisticsRepository
-                .DeleteByIdsAsync(runIds, t)
-                .ConfigureAwait(false);
-        }, token).ConfigureAwait(false);
+        return ExecuteAsync(
+            (unit, t) => unit.StatisticsRepository.DeleteByIdsAsync(runIds, t),
+            token);
     }
 
-    public async Task<RunStatisticsModel> ReadStatisticAsync(
+    public Task<RunStatisticsModel> ReadStatisticAsync(
         int runId,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unit, t) =>
+        return ExecuteAsync(async (unit, t) =>
         {
             var statistic = await unit.StatisticsRepository
                 .ReadByIdAsync(runId, t)
                 .ConfigureAwait(false);
             return statistic.ToRunStatisticsModel();
-        }, token).ConfigureAwait(false);
+        }, token);
     }
 
-    public async Task<IReadOnlyCollection<RunStatisticsModel>> ReadStatisticsAsync(
+    public Task<IReadOnlyCollection<RunStatisticsModel>> ReadStatisticsAsync(
         IReadOnlyCollection<int> runIds,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unit, t) =>
+        return ExecuteAsync(async (unit, t) =>
         {
             var result = await unit.StatisticsRepository
                 .ReadByIdsAsync(runIds)
                 .ToListAsync(t)
                 .ConfigureAwait(false);
             return result.ToRunStatisticsModels();
-        }, token).ConfigureAwait(false);
+        }, token);
     }
 
-    public async Task<IReadOnlyCollection<RunStatisticsModel>> ReadStatisticsAsync(
+    public Task<IReadOnlyCollection<RunStatisticsModel>> ReadStatisticsAsync(
         ReadStatisticsRequest request,
         CancellationToken token = default)
     {
-        await using var unitOfWork = await factory.CreateAsync(token);
-        var result = await unitOfWork.StatisticsRepository
-            .ReadByGraphIdAsync(request.GraphId, request.Skip, request.Take)
-            .ToListAsync(token)
-            .ConfigureAwait(false);
-        return result.ToRunStatisticsModels();
+        return ExecuteAsync(async (unit, t) =>
+        {
+            var result = await unit.StatisticsRepository
+                .ReadByGraphIdAsync(request.GraphId, request.Skip, request.Take)
+                .ToListAsync(t)
+                .ConfigureAwait(false);
+            return result.ToRunStatisticsModels();
+        }, token);
     }
 
-    public async Task<IReadOnlyCollection<RunStatisticsModel>> CreateStatisticsAsync(
+    public Task<IReadOnlyCollection<RunStatisticsModel>> CreateStatisticsAsync(
         IReadOnlyCollection<CreateStatisticsRequest> request,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unit, t) =>
+        return ExecuteAsync(async (unit, t) =>
         {
             var entities = request
                 .Select(x => x.ToStatistics())
@@ -79,19 +77,23 @@ public sealed class StatisticsRequestService(IUnitOfWorkFactory factory) : IStat
                 .CreateAsync(entities, t)
                 .ConfigureAwait(false);
             return result.ToRunStatisticsModels();
-        }, token).ConfigureAwait(false);
+        }, token);
     }
 
-    public async Task<bool> UpdateStatisticsAsync(
+    public Task<bool> UpdateStatisticsAsync(
         IReadOnlyCollection<RunStatisticsModel> models,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unit, t) =>
-        {
-            var entities = models.ToStatistics();
-            return await unit.StatisticsRepository
-                .UpdateAsync(entities, t)
-                .ConfigureAwait(false);
-        }, token).ConfigureAwait(false);
+        return ExecuteAsync(
+            (unit, t) => unit.StatisticsRepository.UpdateAsync(models.ToStatistics(), t),
+            token);
+    }
+
+    private async Task<TResult> ExecuteAsync<TResult>(
+        Func<IUnitOfWork, CancellationToken, Task<TResult>> action,
+        CancellationToken token)
+    {
+        await using var unit = await factory.CreateAsync(token).ConfigureAwait(false);
+        return await action(unit, token).ConfigureAwait(false);
     }
 }
