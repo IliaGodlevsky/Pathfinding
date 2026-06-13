@@ -25,11 +25,11 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
 
     }
 
-    public Task<IReadOnlyCollection<PathfindingHistoryModel<T>>> CreatePathfindingHistoriesAsync(
+    public async ValueTask<IReadOnlyCollection<PathfindingHistoryModel<T>>> CreatePathfindingHistoriesAsync(
         IReadOnlyCollection<PathfindingHistorySerializationModel> request,
         CancellationToken token = default)
     {
-        return factory.TransactionAsync(async (unitOfWork, t) =>
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
         {
             var models = new List<PathfindingHistoryModel<T>>();
             foreach (var history in request)
@@ -91,10 +91,10 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
             }
 
             return models.AsReadOnly();
-        }, token).AsTask();
+        }, token);
     }
 
-    public async Task<bool> UpdateVerticesAsync(
+    public async ValueTask<bool> UpdateVerticesAsync(
         UpdateVerticesRequest<T> request,
         CancellationToken token = default)
     {
@@ -133,12 +133,12 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
         };
     }
 
-    public Task<GraphModel<T>> CreateGraphAsync(CreateGraphRequest<T> graph,
+    public async ValueTask<GraphModel<T>> CreateGraphAsync(CreateGraphRequest<T> graph,
         CancellationToken token = default)
     {
-        return factory.TransactionAsync(
+        return await factory.TransactionAsync(
             (unit, t) => unit.CreateGraphAsyncInternal(graph, t),
-            token).AsTask();
+            token);
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadSerializationHistoriesAsync(

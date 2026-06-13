@@ -35,9 +35,7 @@ public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory) : IGraph
         CancellationToken token = default)
     {
         await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
-        var result = await unitOfWork.GraphRepository
-            .ReadAsync(graphId, token)
-            .ConfigureAwait(false);
+        var result = await unitOfWork.GraphRepository.ReadAsync(graphId, token).ConfigureAwait(false);
         return result.ToGraphInformationModel();
     }
 
@@ -47,9 +45,7 @@ public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory) : IGraph
     {
         await using var unit = await factory.CreateAsync(token).ConfigureAwait(false);
         var graphInfo = graph.ToGraphEntity();
-        return await unit.GraphRepository
-            .UpdateAsync(graphInfo, token)
-            .ConfigureAwait(false);
+        return await unit.GraphRepository.UpdateAsync(graphInfo, token).ConfigureAwait(false);
     }
 
     public async Task<bool> DeleteGraphsAsync(
@@ -57,8 +53,6 @@ public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory) : IGraph
         CancellationToken token = default)
     {
         await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
-        return await unitOfWork.GraphRepository
-            .DeleteAsync(ids, token)
-            .ConfigureAwait(false);
+        return await unitOfWork.GraphRepository.DeleteAsync(ids, token).ConfigureAwait(false);
     }
 }

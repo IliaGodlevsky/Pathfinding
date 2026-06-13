@@ -11,7 +11,7 @@ public interface IRangeRequestService<T>
     Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeOrderedAsync(int graphId,
         CancellationToken token = default);
 
-    Task<bool> CreatePathfindingVertexAsync(CreatePathfindingVertexRequest request,
+    ValueTask<bool> CreatePathfindingVertexAsync(CreatePathfindingVertexRequest request,
         CancellationToken token = default);
 
     Task<bool> DeleteRangeAsync(IEnumerable<T> request,

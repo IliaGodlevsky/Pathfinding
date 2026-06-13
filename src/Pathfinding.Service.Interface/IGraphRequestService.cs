@@ -24,13 +24,13 @@ public interface IGraphRequestService<T>
 
     Task<GraphModel<T>> ReadGraphAsync(int graphId, CancellationToken token = default);
 
-    Task<IReadOnlyCollection<PathfindingHistoryModel<T>>> CreatePathfindingHistoriesAsync(
+    ValueTask<IReadOnlyCollection<PathfindingHistoryModel<T>>> CreatePathfindingHistoriesAsync(
         IReadOnlyCollection<PathfindingHistorySerializationModel> request,
         CancellationToken token = default);
 
-    Task<GraphModel<T>> CreateGraphAsync(CreateGraphRequest<T> graph,
+    ValueTask<GraphModel<T>> CreateGraphAsync(CreateGraphRequest<T> graph,
         CancellationToken token = default);
 
-    Task<bool> UpdateVerticesAsync(UpdateVerticesRequest<T> request,
+    ValueTask<bool> UpdateVerticesAsync(UpdateVerticesRequest<T> request,
         CancellationToken token = default);
 }

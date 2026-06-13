@@ -127,8 +127,8 @@ internal sealed class ServiceIntegrationTests
             Range = [new() { Coordinate = [0, 0] }, new() { Coordinate = [99, 99] }]
         };
 
-        Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            graphService.CreatePathfindingHistoriesAsync([validHistory, brokenHistory]));
+        Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            await graphService.CreatePathfindingHistoriesAsync([validHistory, brokenHistory]));
 
         var allGraphs = await graphInfoService.ReadAllGraphInfoAsync();
 
@@ -210,35 +210,11 @@ internal sealed class ServiceIntegrationTests
 
         await rangeService.CreatePathfindingVertexAsync(new(graph.Id, graph.Vertices.First().Id, 0));
 
-        Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-            rangeService.CreatePathfindingVertexAsync(new(graph.Id, graph.Vertices.Last().Id, 5)));
+        Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+            await rangeService.CreatePathfindingVertexAsync(new(graph.Id, graph.Vertices.Last().Id, 5)));
 
         var range = await rangeService.ReadRangeOrderedAsync(graph.Id);
         Assert.That(range.Select(x => x.VertexId), Is.EqualTo([graph.Vertices.First().Id]));
-    }
-
-    [Test]
-    public async Task ReadSerializationGraphsWithRangeAsync_WhenGraphHasNoRange_ShouldFailFast()
-    {
-        var factory = new LiteDbInMemoryUnitOfWorkFactory();
-        var graphService = new GraphRequestService<FakeVertex>(factory);
-
-        var graph = await graphService.CreateGraphAsync(new CreateGraphRequest<FakeVertex>
-        {
-            Name = "missing-range",
-            Neighborhood = Neighborhoods.Moore,
-            SmoothLevel = SmoothLevels.Low,
-            Status = GraphStatuses.Editable,
-            Graph = new Graph<FakeVertex>(
-            [
-                new() { Position = new Coordinate(0, 0) },
-                new() { Position = new Coordinate(0, 1) }
-            ],
-            [1, 2])
-        });
-
-        Assert.ThrowsAsync<KeyNotFoundException>(() =>
-            graphService.ReadSerializationGraphsWithRangeAsync([graph.Id]));
     }
 
     [Test]

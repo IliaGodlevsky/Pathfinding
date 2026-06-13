@@ -19,7 +19,7 @@ internal sealed class InMemoryGraphParametersRepository(
         {
             return Task.FromCanceled<Graph>(token);
         }
-        graph.Id = ++id;
+        graph.Id = Interlocked.Increment(ref id);
         set.Add(graph);
         return Task.FromResult(graph);
     }
@@ -102,7 +102,7 @@ internal sealed class InMemoryGraphParametersRepository(
                 .ConfigureAwait(false);
             result.Add(graphId, obstacles);
         }
-        return result;
+        return result.AsReadOnly();
     }
 
     public IAsyncEnumerable<Graph> ReadAsync(IReadOnlyCollection<int> ids)

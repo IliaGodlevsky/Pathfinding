@@ -19,7 +19,7 @@ internal sealed class InMemoryRangeRepository : IRangeRepository
         }
         foreach (var entity in entities)
         {
-            entity.Id = ++id;
+            entity.Id = Interlocked.Increment(ref id);
             set.Add(entity);
         }
         return Task.FromResult(entities);
@@ -71,7 +71,7 @@ internal sealed class InMemoryRangeRepository : IRangeRepository
             }
             else
             {
-                entity.Id = ++id;
+                entity.Id = Interlocked.Increment(ref id);
                 set.Add(entity);
             }
         }

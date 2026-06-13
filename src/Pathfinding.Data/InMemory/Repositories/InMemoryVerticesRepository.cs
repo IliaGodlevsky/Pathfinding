@@ -19,7 +19,7 @@ internal sealed class InMemoryVerticesRepository : IVerticesRepository
         }
         foreach (var vertex in vertices)
         {
-            vertex.Id = ++id;
+            vertex.Id = Interlocked.Increment(ref id);
             set.Add(vertex);
         }
         return Task.FromResult(vertices);
