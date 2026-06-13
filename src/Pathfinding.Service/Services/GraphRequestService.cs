@@ -98,13 +98,15 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
         UpdateVerticesRequest<T> request,
         CancellationToken token = default)
     {
-        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
-        var vertices = request.Vertices
-            .ToVertexEntities()
-            .ForEach(x => x.GraphId = request.GraphId);
-        return await unitOfWork.VerticesRepository
-            .UpdateVerticesAsync([.. vertices], token)
-            .ConfigureAwait(false);
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
+        {
+            var vertices = request.Vertices
+                .ToVertexEntities()
+                .ForEach(x => x.GraphId = request.GraphId);
+            return await unitOfWork.VerticesRepository
+                .UpdateVerticesAsync([.. vertices], t)
+                .ConfigureAwait(false);
+        }, token).ConfigureAwait(false);
     }
 
     public async Task<GraphModel<T>> ReadGraphAsync(
