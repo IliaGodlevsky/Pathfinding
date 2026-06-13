@@ -1,5 +1,6 @@
 using Pathfinding.Data.InMemory;
 using Pathfinding.Domain.Interface;
+using Pathfinding.Domain.Interface.Extensions;
 using Pathfinding.Service.Extensions;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
@@ -45,20 +46,24 @@ public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory) : IGraph
         GraphInformationModel graph,
         CancellationToken token = default)
     {
-        await using var unit = await factory.CreateAsync(token).ConfigureAwait(false);
-        var graphInfo = graph.ToGraphEntity();
-        return await unit.GraphRepository
-            .UpdateAsync(graphInfo, token)
-            .ConfigureAwait(false);
+        return await factory.TransactionAsync(async (unit, t) =>
+        {
+            var graphInfo = graph.ToGraphEntity();
+            return await unit.GraphRepository
+                .UpdateAsync(graphInfo, t)
+                .ConfigureAwait(false);
+        }, token).ConfigureAwait(false);
     }
 
     public async Task<bool> DeleteGraphsAsync(
         IReadOnlyCollection<int> ids,
         CancellationToken token = default)
     {
-        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
-        return await unitOfWork.GraphRepository
-            .DeleteAsync(ids, token)
-            .ConfigureAwait(false);
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
+        {
+            return await unitOfWork.GraphRepository
+                .DeleteAsync(ids, t)
+                .ConfigureAwait(false);
+        }, token).ConfigureAwait(false);
     }
 }

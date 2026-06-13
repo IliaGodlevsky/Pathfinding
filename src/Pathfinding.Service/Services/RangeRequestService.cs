@@ -2,6 +2,7 @@ using Pathfinding.Data.InMemory;
 using Pathfinding.Domain;
 using Pathfinding.Domain.Enums;
 using Pathfinding.Domain.Interface;
+using Pathfinding.Domain.Interface.Extensions;
 using Pathfinding.Service.Extensions;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
@@ -30,41 +31,47 @@ public sealed class RangeRequestService<T>(IUnitOfWorkFactory factory) : IRangeR
     public async Task<bool> CreatePathfindingVertexAsync(CreatePathfindingVertexRequest request,
         CancellationToken token = default)
     {
-        await using var unit = await factory.CreateAsync(token).ConfigureAwait(false);
-        var range = await unit.RangeRepository
-            .ReadByGraphIdOrderedByOrderAsync(request.GraphId)
-            .ToListAsync(token)
-            .ConfigureAwait(false);
-
-        range.Insert(request.Index, request.ToPathfindingRange());
-
-        for (var i = 0; i < range.Count; i++)
+        return await factory.TransactionAsync(async (unit, t) =>
         {
-            range[i].Order = i;
-        }
+            var range = await unit.RangeRepository
+                .ReadByGraphIdOrderedByOrderAsync(request.GraphId)
+                .ToListAsync(t)
+                .ConfigureAwait(false);
 
-        await unit.RangeRepository
-            .UpsertAsync(range, token)
-            .ConfigureAwait(false);
-        return true;
+            range.Insert(request.Index, request.ToPathfindingRange());
+
+            for (var i = 0; i < range.Count; i++)
+            {
+                range[i].Order = i;
+            }
+
+            await unit.RangeRepository
+                .UpsertAsync(range, t)
+                .ConfigureAwait(false);
+            return true;
+        }, token).ConfigureAwait(false);
     }
 
     public async Task<bool> DeleteRangeAsync(IEnumerable<T> request,
         CancellationToken token = default)
     {
-        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
-        var verticesIds = request.Select(x => x.Id).ToList();
-        return await unitOfWork.RangeRepository
-            .DeleteByVerticesIdsAsync(verticesIds, token)
-            .ConfigureAwait(false);
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
+        {
+            var verticesIds = request.Select(x => x.Id).ToList();
+            return await unitOfWork.RangeRepository
+                .DeleteByVerticesIdsAsync(verticesIds, t)
+                .ConfigureAwait(false);
+        }, token).ConfigureAwait(false);
     }
 
     public async Task<bool> DeleteRangeAsync(int graphId,
         CancellationToken token = default)
     {
-        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
-        return await unitOfWork.RangeRepository
-            .DeleteByGraphIdAsync(graphId, token)
-            .ConfigureAwait(false);
+        return await factory.TransactionAsync(async (unitOfWork, t) =>
+        {
+            return await unitOfWork.RangeRepository
+                .DeleteByGraphIdAsync(graphId, t)
+                .ConfigureAwait(false);
+        }, token).ConfigureAwait(false);
     }
 }
