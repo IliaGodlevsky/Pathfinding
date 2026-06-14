@@ -1,6 +1,5 @@
 using Pathfinding.Data.InMemory;
 using Pathfinding.Domain.Interface;
-using Pathfinding.Domain.Interface.Extensions;
 using Pathfinding.Service.Extensions;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Read;
