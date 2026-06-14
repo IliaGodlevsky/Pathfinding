@@ -141,16 +141,16 @@ internal sealed class RunRangeViewModel : ViewModel,
         GraphVertexModel model)
     {
         model.WhenAnyValue(expression).Skip(1).Where(x => x)
-            .Subscribe(async _ => await AddRangeToStorage(model))
+            .Subscribe(async _ => await AddRangeToStorage(model).ConfigureAwait(false))
             .DisposeWith(shortLifeDisposables);
         model.WhenAnyValue(expression).Skip(1).Where(x => !x)
-            .Subscribe(async _ => await RemoveVertexFromStorage(model))
+            .Subscribe(async _ => await RemoveVertexFromStorage(model).ConfigureAwait(false))
             .DisposeWith(shortLifeDisposables);
     }
 
-    private async Task AddRangeToStorage(GraphVertexModel vertex)
+    private Task AddRangeToStorage(GraphVertexModel vertex)
     {
-        await ExecuteSafe(async token =>
+        return ExecuteSafe(async token =>
         {
             var vertices = this.ToList();
             var index = vertices.IndexOf(vertex);
@@ -161,7 +161,7 @@ internal sealed class RunRangeViewModel : ViewModel,
             await rangeService
                 .CreatePathfindingVertexAsync(request, token)
                 .ConfigureAwait(false);
-        }).ConfigureAwait(false);
+        });
     }
 
     private void RemoveVertexFromRange(GraphVertexModel vertex)
@@ -169,14 +169,10 @@ internal sealed class RunRangeViewModel : ViewModel,
         excludeCommands.ExecuteFirst(this, vertex);
     }
 
-    private async Task RemoveVertexFromStorage(GraphVertexModel vertex)
+    private Task RemoveVertexFromStorage(GraphVertexModel vertex)
     {
-        await ExecuteSafe(async token =>
-        {
-            await rangeService
-                .DeleteRangeAsync(vertex.Enumerate(), token)
-                .ConfigureAwait(false);
-        }).ConfigureAwait(false);
+        return ExecuteSafe(token => rangeService
+            .DeleteRangeAsync(vertex.Enumerate(), token));
     }
 
     private void ClearRange()
@@ -197,9 +193,9 @@ internal sealed class RunRangeViewModel : ViewModel,
         }
     }
 
-    private async Task OnGraphFieldActivated(AwaitGraphActivatedMessage msg)
+    private Task OnGraphFieldActivated(AwaitGraphActivatedMessage msg)
     {
-        await ExecuteSafe(async token =>
+        return ExecuteSafe(async token =>
         {
             shortLifeDisposables.Clear();
             Transit.CollectionChanged -= OnCollectionChanged;
@@ -223,7 +219,7 @@ internal sealed class RunRangeViewModel : ViewModel,
                 BindTo(x => x.IsTarget, vertex);
                 BindTo(x => x.IsTransit, vertex);
             }
-        }).ConfigureAwait(false);
+        });
     }
 
     private void OnGraphBecameReadonly(GraphStateChangedMessage msg)

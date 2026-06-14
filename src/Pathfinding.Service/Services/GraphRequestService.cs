@@ -25,7 +25,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
 
     }
 
-    public async Task<IReadOnlyCollection<PathfindingHistoryModel<T>>> CreatePathfindingHistoriesAsync(
+    public async ValueTask<IReadOnlyCollection<PathfindingHistoryModel<T>>> CreatePathfindingHistoriesAsync(
         IReadOnlyCollection<PathfindingHistorySerializationModel> request,
         CancellationToken token = default)
     {
@@ -91,10 +91,10 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
             }
 
             return models.AsReadOnly();
-        }, token).ConfigureAwait(false);
+        }, token);
     }
 
-    public async Task<bool> UpdateVerticesAsync(
+    public async ValueTask<bool> UpdateVerticesAsync(
         UpdateVerticesRequest<T> request,
         CancellationToken token = default)
     {
@@ -113,134 +113,124 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
         int graphId,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unitOfWork, t) =>
+        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
+        var graphEntity = await unitOfWork.GraphRepository
+            .ReadAsync(graphId, token)
+            .ConfigureAwait(false);
+        var vertices = await unitOfWork.VerticesRepository
+            .ReadVerticesByGraphIdAsync(graphId)
+            .Select(x => x.ToVertex<T>())
+            .ToListAsync(token)
+            .ConfigureAwait(false);
+        return new GraphModel<T>
         {
-            var graphEntity = await unitOfWork.GraphRepository
-                .ReadAsync(graphId, token).ConfigureAwait(false);
-            var vertices = await unitOfWork.VerticesRepository
-                .ReadVerticesByGraphIdAsync(graphId)
-                .Select(x => x.ToVertex<T>())
-                .ToListAsync(token)
-                .ConfigureAwait(false);
-            return new GraphModel<T>
-            {
-                Vertices = vertices,
-                DimensionSizes = [.. graphEntity.Dimensions.Split(",").Select(int.Parse)],
-                Id = graphEntity.Id,
-                Name = graphEntity.Name,
-                Neighborhood = graphEntity.Neighborhood,
-                SmoothLevel = graphEntity.SmoothLevel,
-                Status = graphEntity.Status,
-                CostRange = (graphEntity.UpperValueRange, graphEntity.LowerValueRange)
-            };
-        }, token).ConfigureAwait(false);
+            Vertices = vertices,
+            DimensionSizes = [.. graphEntity.Dimensions.Split(",").Select(int.Parse)],
+            Id = graphEntity.Id,
+            Name = graphEntity.Name,
+            Neighborhood = graphEntity.Neighborhood,
+            SmoothLevel = graphEntity.SmoothLevel,
+            Status = graphEntity.Status,
+            CostRange = (graphEntity.LowerValueRange, graphEntity.UpperValueRange)
+        };
     }
 
-    public async Task<GraphModel<T>> CreateGraphAsync(CreateGraphRequest<T> graph,
+    public async ValueTask<GraphModel<T>> CreateGraphAsync(CreateGraphRequest<T> graph,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unit, t) =>
-        {
-            return await unit
-                .CreateGraphAsyncInternal(graph, t)
-                .ConfigureAwait(false);
-        }, token).ConfigureAwait(false);
+        return await factory.TransactionAsync(
+            (unit, t) => unit.CreateGraphAsyncInternal(graph, t),
+            token);
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadSerializationHistoriesAsync(
         IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unitOfWork, t) =>
-        {
-            var graphs = await unitOfWork
-                .ReadGraphsInternalAsync<T>(graphIds, t)
-                .ConfigureAwait(false);
-            var ranges = await unitOfWork
-                .ReadRangesAsyncInternal(graphIds, t)
-                .ConfigureAwait(false);
-            var statisitics = (await unitOfWork.StatisticsRepository
-                .ReadByGraphIdsAsync(graphIds)
-                .ToArrayAsync(t))
-                .GroupBy(x => x.GraphId, x => x.ToSerializationModel())
-                .ToDictionary(x => x.Key, x => x.ToArray());
-            var result = new List<PathfindingHistorySerializationModel>();
-            foreach (var graph in graphs)
-            {
-                var graphDict = graph.Vertices.ToDictionary(x => x.Id, x => x.Position);
-                var range = ranges.GetValueOrDefault(graph.Id, []).Select(x => graphDict[x.VertexId])
-                    .Select(x => new CoordinateModel() { Coordinate = x })
-                    .ToList();
-                result.Add(new()
-                {
-                    Graph = graph.ToSerializationModel(),
-                    Vertices = graph.Vertices.ToSerializationModels(),
-                    Statistics = statisitics.GetValueOrDefault(graph.Id, []),
-                    Range = range
-                });
-            }
+        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
+        var graphs = await unitOfWork
+            .ReadGraphsInternalAsync<T>(graphIds, token)
+            .ConfigureAwait(false);
+        var ranges = await unitOfWork
+            .ReadRangesAsyncInternal(graphIds, token)
+            .ConfigureAwait(false);
+        var statistics = (await unitOfWork.StatisticsRepository
+            .ReadByGraphIdsAsync(graphIds)
+            .ToArrayAsync(token)
+            .ConfigureAwait(false))
+            .GroupBy(x => x.GraphId, x => x.ToSerializationModel())
+            .ToDictionary(x => x.Key, x => x.ToArray());
 
-            return new PathfindingHistoriesSerializationModel { Histories = result };
-        }, token).ConfigureAwait(false);
+        var histories = graphs
+            .Select(graph => ToSerializationHistory(
+                graph,
+                ranges.GetValueOrDefault(graph.Id, []),
+                statistics.GetValueOrDefault(graph.Id, [])))
+            .ToList();
+
+        return new PathfindingHistoriesSerializationModel { Histories = histories };
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadSerializationGraphsAsync(
         IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unitOfWork, t) =>
-        {
-            var graphs = await unitOfWork
-                .ReadGraphsInternalAsync<T>(graphIds, t)
-                .ConfigureAwait(false);
-            var result = new List<PathfindingHistorySerializationModel>();
-            foreach (var graph in graphs)
+        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
+        var graphs = await unitOfWork
+            .ReadGraphsInternalAsync<T>(graphIds, token)
+            .ConfigureAwait(false);
+        var histories = graphs
+            .Select(graph =>
             {
                 graph.Status = GraphStatuses.Editable;
-                result.Add(new()
-                {
-                    Graph = graph.ToSerializationModel(),
-                    Vertices = graph.Vertices.ToSerializationModels(),
-                    Statistics = [],
-                    Range = []
-                });
-            }
+                return ToSerializationHistory(graph, [], []);
+            })
+            .ToList();
 
-            return new PathfindingHistoriesSerializationModel { Histories = result };
-        }, token).ConfigureAwait(false);
+        return new PathfindingHistoriesSerializationModel { Histories = histories };
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadSerializationGraphsWithRangeAsync(
         IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unitOfWork, t) =>
-        {
-            var result = new List<PathfindingHistorySerializationModel>();
-            var graphs = await unitOfWork
-                .ReadGraphsInternalAsync<T>(graphIds, t)
-                .ConfigureAwait(false);
-            var ranges = await unitOfWork
-                .ReadRangesAsyncInternal(graphIds, t)
-                .ConfigureAwait(false);
-            foreach (var graph in graphs)
+        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
+        var graphs = await unitOfWork
+            .ReadGraphsInternalAsync<T>(graphIds, token)
+            .ConfigureAwait(false);
+        var ranges = await unitOfWork
+            .ReadRangesAsyncInternal(graphIds, token)
+            .ConfigureAwait(false);
+        var histories = graphs
+            .Select(graph =>
             {
-                var graphDictionary = graph.Vertices
-                    .ToDictionary(x => x.Id, x => x.Position);
                 graph.Status = GraphStatuses.Editable;
-                var coordinates = ranges[graph.Id]
-                    .Select(x => new CoordinateModel { Coordinate = graphDictionary[x.VertexId] })
-                    .ToList();
-                result.Add(new()
-                {
-                    Graph = graph.ToSerializationModel(),
-                    Vertices = graph.Vertices.ToSerializationModels(),
-                    Statistics = [],
-                    Range = coordinates
-                });
-            }
+                return ToSerializationHistory(graph, ranges.GetValueOrDefault(graph.Id, []), []);
+            })
+            .ToList();
 
-            return new PathfindingHistoriesSerializationModel { Histories = result };
-        }, token).ConfigureAwait(false);
+        return new PathfindingHistoriesSerializationModel { Histories = histories };
+    }
+
+    private static PathfindingHistorySerializationModel ToSerializationHistory(
+        GraphModel<T> graph,
+        IReadOnlyCollection<PathfindingRangeModel> range,
+        IReadOnlyCollection<RunStatisticsSerializationModel> statistics)
+    {
+        var verticesById = graph.Vertices.ToDictionary(x => x.Id, x => x.Position);
+        var coordinates = range
+            .Select(x => verticesById.TryGetValue(x.VertexId, out var coordinate)
+                ? new CoordinateModel { Coordinate = coordinate }
+                : null)
+            .OfType<CoordinateModel>()
+            .ToList();
+
+        return new()
+        {
+            Graph = graph.ToSerializationModel(),
+            Vertices = graph.Vertices.ToSerializationModels(),
+            Statistics = statistics,
+            Range = coordinates
+        };
     }
 }

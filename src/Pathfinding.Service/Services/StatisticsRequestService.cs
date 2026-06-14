@@ -31,34 +31,30 @@ public sealed class StatisticsRequestService(IUnitOfWorkFactory factory) : IStat
         int runId,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unit, t) =>
-        {
-            var statistic = await unit.StatisticsRepository
-                .ReadByIdAsync(runId, t)
-                .ConfigureAwait(false);
-            return statistic.ToRunStatisticsModel();
-        }, token).ConfigureAwait(false);
+        await using var unit = await factory.CreateAsync(token).ConfigureAwait(false);
+        var statistic = await unit.StatisticsRepository
+            .ReadByIdAsync(runId, token)
+            .ConfigureAwait(false);
+        return statistic.ToRunStatisticsModel();
     }
 
     public async Task<IReadOnlyCollection<RunStatisticsModel>> ReadStatisticsAsync(
         IReadOnlyCollection<int> runIds,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unit, t) =>
-        {
-            var result = await unit.StatisticsRepository
-                .ReadByIdsAsync(runIds)
-                .ToListAsync(t)
-                .ConfigureAwait(false);
-            return result.ToRunStatisticsModels();
-        }, token).ConfigureAwait(false);
+        await using var unit = await factory.CreateAsync(token).ConfigureAwait(false);
+        var result = await unit.StatisticsRepository
+            .ReadByIdsAsync(runIds)
+            .ToListAsync(token)
+            .ConfigureAwait(false);
+        return result.ToRunStatisticsModels();
     }
 
     public async Task<IReadOnlyCollection<RunStatisticsModel>> ReadStatisticsAsync(
         ReadStatisticsRequest request,
         CancellationToken token = default)
     {
-        await using var unitOfWork = await factory.CreateAsync(token);
+        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
         var result = await unitOfWork.StatisticsRepository
             .ReadByGraphIdAsync(request.GraphId, request.Skip, request.Take)
             .ToListAsync(token)

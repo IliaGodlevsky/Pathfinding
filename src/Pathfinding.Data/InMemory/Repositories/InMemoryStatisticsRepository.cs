@@ -18,7 +18,7 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
         }
         foreach (var entity in statistics)
         {
-            entity.Id = ++id;
+            entity.Id = Interlocked.Increment(ref id);
             set.Add(entity);
         }
         return Task.FromResult(statistics);
