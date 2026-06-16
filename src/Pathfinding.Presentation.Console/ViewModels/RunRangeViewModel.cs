@@ -1,6 +1,7 @@
 ﻿using Autofac.Features.AttributeFilters;
 using Autofac.Features.Metadata;
 using CommunityToolkit.Mvvm.Messaging;
+using DynamicData;
 using Pathfinding.Domain.Enums;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Logging.Interface;
@@ -151,17 +152,12 @@ internal sealed class RunRangeViewModel : ViewModel,
     private Task AddRangeToStorage(GraphVertexModel vertex)
     {
         return ExecuteSafe(async token =>
-        {
-            var vertices = this.ToList();
-            var index = vertices.IndexOf(vertex);
-            var request = new CreatePathfindingVertexRequest(
-                ActivatedGraph.Id,
-                vertex.Id,
-                index);
             await rangeService
-                .CreatePathfindingVertexAsync(request, token)
-                .ConfigureAwait(false);
-        });
+                .CreatePathfindingVertexAsync(new(
+                    ActivatedGraph.Id,
+                    vertex.Id,
+                    this.IndexOf(vertex)), token).ConfigureAwait(false)
+        );
     }
 
     private void RemoveVertexFromRange(GraphVertexModel vertex)

@@ -8,7 +8,7 @@ public interface IGraphInfoRequestService
 
     ValueTask<bool> UpdateGraphInfoAsync(GraphInformationModel graph, CancellationToken token = default);
 
-    ValueTask<IReadOnlyCollection<GraphInformationModel>> ReadAllGraphInfoAsync(CancellationToken token = default);
+    Task<IReadOnlyCollection<GraphInformationModel>> ReadAllGraphInfoAsync(CancellationToken token = default);
 
     ValueTask<bool> DeleteGraphsAsync(IReadOnlyCollection<int> ids, CancellationToken token = default);
 }

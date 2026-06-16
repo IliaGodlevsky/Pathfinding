@@ -8,7 +8,7 @@ public abstract class NeighborhoodLayer : ILayer
 {
     public void Overlay(IGraph<IVertex> graph)
     {
-        foreach (var vertex in graph)
+        foreach (var vertex in graph.AsParallel())
         {
             var neighborhood = CreateNeighborhood(vertex.Position);
             var neighbours = GetNeighboursWithinGraph(neighborhood, graph);

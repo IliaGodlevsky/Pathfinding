@@ -7,15 +7,13 @@ using Pathfinding.Shared.Extensions;
 
 namespace Pathfinding.Service.Services;
 
-public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory)
-    : IGraphInfoRequestService
+public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory) : IGraphInfoRequestService
 {
-    public GraphInfoRequestService()
-        : this(new InMemoryUnitOfWorkFactory())
+    public GraphInfoRequestService() : this(new InMemoryUnitOfWorkFactory())
     {
     }
 
-    public ValueTask<IReadOnlyCollection<GraphInformationModel>> ReadAllGraphInfoAsync(
+    public async Task<IReadOnlyCollection<GraphInformationModel>> ReadAllGraphInfoAsync(
         CancellationToken token = default)
     {
         await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
@@ -41,7 +39,7 @@ public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory)
         return result.ToGraphInformationModel();
     }
 
-    public ValueTask<bool> UpdateGraphInfoAsync(
+    public async ValueTask<bool> UpdateGraphInfoAsync(
         GraphInformationModel graph,
         CancellationToken token = default)
     {
@@ -50,7 +48,7 @@ public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory)
         return await unit.GraphRepository.UpdateAsync(graphInfo, token).ConfigureAwait(false);
     }
 
-    public ValueTask<bool> DeleteGraphsAsync(
+    public async ValueTask<bool> DeleteGraphsAsync(
         IReadOnlyCollection<int> ids,
         CancellationToken token = default)
     {

@@ -1,6 +1,5 @@
 using Pathfinding.Data.InMemory;
 using Pathfinding.Domain;
-using Pathfinding.Domain.Enums;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Extensions;
 using Pathfinding.Service.Extensions;

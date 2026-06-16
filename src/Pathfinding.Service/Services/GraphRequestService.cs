@@ -69,9 +69,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
                     VertexId = x.Vertex.Id,
                     Order = x.Order
                 }).ToArray();
-                await unitOfWork.RangeRepository
-                    .CreateAsync(entities, t)
-                    .ConfigureAwait(false);
+                await unitOfWork.RangeRepository.CreateAsync(entities, t).ConfigureAwait(false);
                 models.Add(new PathfindingHistoryModel<T>
                 {
                     Graph = new GraphModel<T>
@@ -89,24 +87,21 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
                     Range = range
                 });
             }
-
             return models.AsReadOnly();
-        }, token);
+        }, token).ConfigureAwait(false);
     }
 
     public async ValueTask<bool> UpdateVerticesAsync(
         UpdateVerticesRequest<T> request,
         CancellationToken token = default)
     {
-        return await factory.TransactionAsync(async (unitOfWork, t) =>
-        {
-            var vertices = request.Vertices
-                .ToVertexEntities()
-                .ForEach(x => x.GraphId = request.GraphId);
-            return await unitOfWork.VerticesRepository
-                .UpdateVerticesAsync([.. vertices], t)
-                .ConfigureAwait(false);
-        }, token).ConfigureAwait(false);
+        await using var unitOfWork = await factory.CreateAsync(token).ConfigureAwait(false);
+        var vertices = request.Vertices
+            .ToVertexEntities()
+            .ForEach(x => x.GraphId = request.GraphId);
+        return await unitOfWork.VerticesRepository
+            .UpdateVerticesAsync([.. vertices], token)
+            .ConfigureAwait(false);
     }
 
     public async Task<GraphModel<T>> ReadGraphAsync(
@@ -140,7 +135,7 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
     {
         return await factory.TransactionAsync(
             (unit, t) => unit.CreateGraphAsyncInternal(graph, t),
-            token);
+            token).ConfigureAwait(false);
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadSerializationHistoriesAsync(
