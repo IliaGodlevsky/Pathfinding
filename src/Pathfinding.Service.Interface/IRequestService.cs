@@ -7,7 +7,8 @@ public interface IRequestService<T> :
     IGraphRequestService<T>,
     IStatisticsRequestService,
     IGraphInfoRequestService,
-    IRangeRequestService<T>
+    IRangeRequestService<T>,
+    IDataTransferRequestService<T>
     where T : IVertex, IEntity<long>
 {
 }

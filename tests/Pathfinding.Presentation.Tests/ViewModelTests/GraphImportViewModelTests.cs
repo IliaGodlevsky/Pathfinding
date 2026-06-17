@@ -21,7 +21,7 @@ internal sealed class GraphImportViewModelTests
     public async Task ImportGraphCommand_ShouldDeserializeAndPublishMessageAsync()
     {
         var messenger = new StrongReferenceMessenger();
-        var serviceMock = new Mock<IGraphRequestService<GraphVertexModel>>();
+        var serviceMock = new Mock<IDataTransferRequestService<GraphVertexModel>>();
         var serializerMock = new Mock<Serializer>();
         var logMock = new Mock<ILog>();
 
@@ -112,7 +112,7 @@ internal sealed class GraphImportViewModelTests
     public async Task ImportGraphCommand_EmptyStream_ShouldNotCallServiceAsync()
     {
         var messenger = new StrongReferenceMessenger();
-        var serviceMock = new Mock<IGraphRequestService<GraphVertexModel>>();
+        var serviceMock = new Mock<IDataTransferRequestService<GraphVertexModel>>();
         var serializerMock = new Mock<Serializer>();
 
         var serializerMeta = new[]

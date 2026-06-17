@@ -6,6 +6,7 @@ using Pathfinding.Domain.Entities;
 using Pathfinding.Domain.Enums;
 using Pathfinding.Domain.Interface.Repositories;
 using Pathfinding.Infrastructure.Business.Tests;
+using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Models.Serialization;
 using Pathfinding.Service.Interface.Models.Undefined;
 using Pathfinding.Service.Interface.Requests.Create;
@@ -248,7 +249,7 @@ internal class GraphRequestServiceTests
             unit.Setup(x => x.RangeRepository).Returns(rangeRepository.Object);
         });
 
-        var service = mock.Create<GraphRequestService<FakeVertex>>();
+        var service = mock.Create<DataTransferRequestService<FakeVertex>>();
 
         var result = await service.CreatePathfindingHistoriesAsync([history]);
 
@@ -306,7 +307,7 @@ internal class GraphRequestServiceTests
             .Setup(x => x.ReadByGraphIdsAsync(graphId.Enumerate().ToArray()))
             .Returns(range.ToAsyncEnumerable());
 
-        var service = mock.Create<GraphRequestService<FakeVertex>>();
+        var service = mock.Create<DataTransferRequestService<FakeVertex>>();
 
         var result = await service.ReadSerializationGraphsAsync([graphId]);
 
@@ -371,7 +372,7 @@ internal class GraphRequestServiceTests
             .Setup(x => x.ReadAsync(range[0].VertexId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(vertices[0]);
 
-        var service = mock.Create<GraphRequestService<FakeVertex>>();
+        var service = mock.Create<DataTransferRequestService<FakeVertex>>();
 
         var result = await service.ReadSerializationGraphsWithRangeAsync([graphId]);
 

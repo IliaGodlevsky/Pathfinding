@@ -25,7 +25,7 @@ internal sealed class GraphCopyViewModelTests
     public async Task CopyCommand_CanExecute_ShouldCopy()
     {
         var messenger = new StrongReferenceMessenger();
-        var serviceMock = new Mock<IGraphRequestService<GraphVertexModel>>();
+        var serviceMock = new Mock<IDataTransferRequestService<GraphVertexModel>>();
 
         var models = Generators.GenerateGraphInfos(3).ToArray();
 
@@ -90,7 +90,7 @@ internal sealed class GraphCopyViewModelTests
     public async Task CopyGraphCommand_ThrowsException_ShouldLogError()
     {
         var messenger = new StrongReferenceMessenger();
-        var serviceMock = new Mock<IGraphRequestService<GraphVertexModel>>();
+        var serviceMock = new Mock<IDataTransferRequestService<GraphVertexModel>>();
 
         serviceMock
             .Setup(x => x.ReadSerializationHistoriesAsync(
@@ -113,7 +113,7 @@ internal sealed class GraphCopyViewModelTests
     }
 
     private static GraphCopyViewModel CreateViewModel(StrongReferenceMessenger messenger,
-        Mock<IGraphRequestService<GraphVertexModel>> serviceMock, ILog logger = null)
+        Mock<IDataTransferRequestService<GraphVertexModel>> serviceMock, ILog logger = null)
     {
         return new GraphCopyViewModel(messenger, serviceMock.Object, logger ?? Mock.Of<ILog>());
     }

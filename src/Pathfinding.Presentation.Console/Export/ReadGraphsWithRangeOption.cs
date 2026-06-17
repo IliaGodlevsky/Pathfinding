@@ -4,7 +4,7 @@ using Pathfinding.Service.Interface.Models.Serialization;
 
 namespace Pathfinding.Presentation.Console.Export;
 
-internal sealed class ReadGraphsWithRangeOption(IGraphRequestService<GraphVertexModel> service) : IReadHistoryOption
+internal sealed class ReadGraphsWithRangeOption(IDataTransferRequestService<GraphVertexModel> service) : IReadHistoryOption
 {
     public Task<PathfindingHistoriesSerializationModel> ReadHistoryAsync(
         IReadOnlyCollection<int> graphIds,

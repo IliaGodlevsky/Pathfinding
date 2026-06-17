@@ -68,6 +68,7 @@ internal static class Modules
         builder.RegisterType<RangeRequestService<GraphVertexModel>>().As<IRangeRequestService<GraphVertexModel>>().SingleInstance();
         builder.RegisterType<StatisticsRequestService>().As<IStatisticsRequestService>().SingleInstance();
         builder.RegisterType<GraphInfoRequestService>().As<IGraphInfoRequestService>().SingleInstance();
+        builder.RegisterType<DataTransferRequestService<GraphVertexModel>>().As<IDataTransferRequestService<GraphVertexModel>>().SingleInstance();
 
         builder.RegisterType<IncludeSourceVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
             .WithMetadata(MetadataKeys.Order, 2).Keyed<Command>(KeyFilters.IncludeCommands);

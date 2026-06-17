@@ -18,6 +18,7 @@ internal sealed class ServiceIntegrationTests
     {
         var factory = new LiteDbInMemoryUnitOfWorkFactory();
         var graphService = new GraphRequestService<FakeVertex>(factory);
+        var dataTransferService = new DataTransferRequestService<FakeVertex>(factory);
         var rangeService = new RangeRequestService<FakeVertex>(factory);
         var statisticsService = new StatisticsRequestService(factory);
 
@@ -62,7 +63,7 @@ internal sealed class ServiceIntegrationTests
             }
         ]);
 
-        var histories = await graphService.ReadSerializationHistoriesAsync([graph.Id]);
+        var histories = await dataTransferService.ReadSerializationHistoriesAsync([graph.Id]);
 
         using (Assert.EnterMultipleScope())
         {
@@ -88,7 +89,7 @@ internal sealed class ServiceIntegrationTests
     public async Task CreatePathfindingHistoriesAsync_WhenRangeContainsOutOfBoundsVertex_ShouldRollbackWholeBatch()
     {
         var factory = new LiteDbInMemoryUnitOfWorkFactory();
-        var graphService = new GraphRequestService<FakeVertex>(factory);
+        var graphService = new DataTransferRequestService<FakeVertex>(factory);
         var graphInfoService = new GraphInfoRequestService(factory);
 
         var validHistory = new PathfindingHistorySerializationModel
