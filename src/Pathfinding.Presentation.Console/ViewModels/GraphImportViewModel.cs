@@ -8,9 +8,8 @@ using Pathfinding.Presentation.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.Resources;
 using Pathfinding.Presentation.Console.ViewModels.Interface;
-using Pathfinding.Serialization.Decorators;
+using Pathfinding.Serialization.Services;
 using Pathfinding.Service.Interface;
-using Pathfinding.Service.Interface.Models.Serialization;
 using ReactiveUI;
 using System.Reactive;
 // ReSharper disable PossibleInvalidOperationException

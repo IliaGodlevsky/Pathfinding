@@ -1,12 +1,13 @@
 ﻿using MessagePack;
-using Pathfinding.Service.Interface.Extensions;
-using Pathfinding.Service.Interface.Models.Serialization.MessagePack;
+using Pathfinding.Serialization.Extensions;
+using Pathfinding.Serialization.Models.MessagePack;
+using Pathfinding.Service.Interface;
 using System.IO.Compression;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace Pathfinding.Service.Interface.Models.Serialization;
+namespace Pathfinding.Serialization.Models;
 
 public class PathfindingHistoriesSerializationModel
     : IBinarySerializable, IXmlSerializable, IBundleSerializable, IMessagePackSerializable

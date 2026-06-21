@@ -9,10 +9,10 @@ using Pathfinding.Presentation.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.Resources;
 using Pathfinding.Presentation.Console.ViewModels;
-using Pathfinding.Service.Interface.Models.Serialization;
+using Pathfinding.Serialization.Models;
 using ReactiveUI.Builder;
 using System.Reactive.Linq;
-using Serializer = Pathfinding.Service.Interface.ISerializer<Pathfinding.Service.Interface.Models.Serialization.PathfindingHistoriesSerializationModel>;
+using Serializer = Pathfinding.Service.Interface.ISerializer<Pathfinding.Serialization.Models.PathfindingHistoriesSerializationModel>;
 
 namespace Pathfinding.Presentation.Tests.ViewModelTests;
 

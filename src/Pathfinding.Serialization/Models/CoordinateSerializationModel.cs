@@ -1,11 +1,12 @@
-﻿using Pathfinding.Service.Interface.Extensions;
+﻿using Pathfinding.Serialization.Extensions;
+using Pathfinding.Service.Interface;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace Pathfinding.Service.Interface.Models.Undefined;
+namespace Pathfinding.Serialization.Models;
 
-public record CoordinateModel : IBinarySerializable, IXmlSerializable
+public record CoordinateSerializationModel : IBinarySerializable, IXmlSerializable
 {
     public IReadOnlyCollection<int> Coordinate { get; set; }
 

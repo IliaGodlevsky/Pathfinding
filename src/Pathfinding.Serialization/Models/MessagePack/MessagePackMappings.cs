@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
-using Pathfinding.Service.Interface.Models.Undefined;
 
-namespace Pathfinding.Service.Interface.Models.Serialization.MessagePack;
+namespace Pathfinding.Serialization.Models.MessagePack;
 
 internal static class MessagePackMappings
 {
@@ -58,12 +57,12 @@ internal static class MessagePackMappings
         return [.. models.Select(x => x.ToMessagePackStatistics(graphId))];
     }
 
-    private static MessagePackRange ToMessagePackRange(this CoordinateModel model, int graphId)
+    private static MessagePackRange ToMessagePackRange(this CoordinateSerializationModel model, int graphId)
     {
         return new() { Coordinate = JsonConvert.SerializeObject(model.Coordinate), GraphId = graphId };
     }
 
-    private static List<MessagePackRange> ToMessagePackRanges(this IEnumerable<CoordinateModel> models, int graphId)
+    private static List<MessagePackRange> ToMessagePackRanges(this IEnumerable<CoordinateSerializationModel> models, int graphId)
     {
         return [.. models.Select(x => x.ToMessagePackRange(graphId))];
     }
@@ -120,12 +119,12 @@ internal static class MessagePackMappings
         return [.. models.Select(x => x.ToStatistics())];
     }
 
-    private static CoordinateModel ToRange(this MessagePackRange model)
+    private static CoordinateSerializationModel ToRange(this MessagePackRange model)
     {
         return new() { Coordinate = JsonConvert.DeserializeObject<int[]>(model.Coordinate) };
     }
 
-    private static List<CoordinateModel> ToRanges(this IEnumerable<MessagePackRange> models)
+    private static List<CoordinateSerializationModel> ToRanges(this IEnumerable<MessagePackRange> models)
     {
         return [.. models.Select(x => x.ToRange())];
     }

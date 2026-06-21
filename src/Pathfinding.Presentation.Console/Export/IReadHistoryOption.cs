@@ -1,4 +1,4 @@
-﻿using Pathfinding.Service.Interface.Models.Serialization;
+﻿using Pathfinding.Serialization.Models;
 
 namespace Pathfinding.Presentation.Console.Export;
 

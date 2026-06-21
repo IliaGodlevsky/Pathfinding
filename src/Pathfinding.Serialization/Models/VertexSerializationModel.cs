@@ -1,23 +1,23 @@
-﻿using Pathfinding.Service.Interface.Extensions;
-using Pathfinding.Service.Interface.Models.Undefined;
+﻿using Pathfinding.Serialization.Extensions;
+using Pathfinding.Service.Interface;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 
-namespace Pathfinding.Service.Interface.Models.Serialization;
+namespace Pathfinding.Serialization.Models;
 
 public class VertexSerializationModel : IBinarySerializable, IXmlSerializable
 {
-    public CoordinateModel Position { get; set; }
+    public CoordinateSerializationModel Position { get; set; }
 
-    public VertexCostModel Cost { get; set; }
+    public VertexCostSerializationModel Cost { get; set; }
 
     public bool IsObstacle { get; set; }
 
     public async Task DeserializeAsync(Stream stream, CancellationToken token = default)
     {
-        Position = await stream.ReadSerializableAsync<CoordinateModel>(token).ConfigureAwait(false);
-        Cost = await stream.ReadSerializableAsync<VertexCostModel>(token).ConfigureAwait(false);
+        Position = await stream.ReadSerializableAsync<CoordinateSerializationModel>(token).ConfigureAwait(false);
+        Cost = await stream.ReadSerializableAsync<VertexCostSerializationModel>(token).ConfigureAwait(false);
         IsObstacle = await stream.ReadBoolAsync(token).ConfigureAwait(false);
     }
 
@@ -32,9 +32,9 @@ public class VertexSerializationModel : IBinarySerializable, IXmlSerializable
 
     public void ReadXml(XmlReader reader)
     {
-        Position = new CoordinateModel();
+        Position = new CoordinateSerializationModel();
         Position.ReadXml(reader);
-        Cost = new VertexCostModel();
+        Cost = new VertexCostSerializationModel();
         Cost.ReadXml(reader);
         IsObstacle = reader.ReadElement<bool>(nameof(IsObstacle));
     }

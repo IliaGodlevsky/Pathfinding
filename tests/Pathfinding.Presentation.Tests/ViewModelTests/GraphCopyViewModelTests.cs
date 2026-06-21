@@ -4,9 +4,9 @@ using Pathfinding.Logging.Interface;
 using Pathfinding.Presentation.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.ViewModels;
-using Pathfinding.Service.Interface;
+using Pathfinding.Serialization.Models;
+using Pathfinding.Serialization.Services;
 using Pathfinding.Service.Interface.Models.Read;
-using Pathfinding.Service.Interface.Models.Serialization;
 using ReactiveUI.Builder;
 using System.Reactive.Linq;
 

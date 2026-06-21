@@ -23,7 +23,7 @@ internal sealed partial class GraphNeighborhoodView : FrameView
         var values = labels.Select(x => map[x.ToString()]).ToList();
         neighborhoods.RadioLabels = labels;
         neighborhoods.Events().SelectedItemChanged
-            .Where(x => x.SelectedItem > -1)
+            .Where(x => x.SelectedItem > -1 && values.Count > 0)
             .Select(x => values[x.SelectedItem])
             .BindTo(viewModel, x => x.Neighborhood)
             .DisposeWith(disposables);

@@ -1,7 +1,6 @@
 ﻿using Autofac;
 using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
-using Pathfinding.Data.LiteDb;
 using Pathfinding.Data.Sqlite;
 using Pathfinding.Domain.Enums;
 using Pathfinding.Domain.Interface;
@@ -14,15 +13,17 @@ using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.ViewModels;
 using Pathfinding.Presentation.Console.Views;
 using Pathfinding.Serialization;
+using Pathfinding.Serialization.Models;
+using Pathfinding.Serialization.Services;
 using Pathfinding.Service;
 using Pathfinding.Service.Algorithms;
 using Pathfinding.Service.Algorithms.Heuristics;
 using Pathfinding.Service.Algorithms.StepRules;
 using Pathfinding.Service.Commands;
 using Pathfinding.Service.Interface;
-using Pathfinding.Service.Interface.Models.Serialization;
 using Pathfinding.Service.Layers;
 using Pathfinding.Service.Services;
+using ReactiveUI.Builder;
 using Terminal.Gui;
 using Attribute = System.Attribute;
 
@@ -30,17 +31,15 @@ namespace Pathfinding.Presentation.Console.Injection;
 
 internal static class Modules
 {
-    public static IContainer Build()
+    public static ContainerBuilder AddSqlite(this ContainerBuilder builder)
     {
-        var builder = new ContainerBuilder();
-
         builder.RegisterInstance(new SqliteUnitOfWorkFactory(Settings.Default.ConnectionString)).As<IUnitOfWorkFactory>()
             .SingleInstance().OnActivated(args => args.Instance.CreateTables());
-        builder.RegisterType<LiteDbInMemoryUnitOfWorkFactory>().As<IUnitOfWorkFactory>().SingleInstance().IfNotRegistered(typeof(IUnitOfWorkFactory));
+        return builder;
+    }
 
-        builder.RegisterType<GraphAssemble<GraphVertexModel>>().As<IGraphAssemble<GraphVertexModel>>().SingleInstance();
-        builder.RegisterType<GraphAssemble<RunVertexModel>>().As<IGraphAssemble<RunVertexModel>>().SingleInstance();
-
+    public static ContainerBuilder AddGraphLayers(this ContainerBuilder builder)
+    {
         builder.RegisterType<MooreNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Moore);
         builder.RegisterType<VonNeumannNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
@@ -49,8 +48,6 @@ internal static class Modules
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Diagonal);
         builder.RegisterType<KnightsNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Knight);
-        builder.RegisterType<NeighborhoodLayerFactory>().As<INeighborhoodLayerFactory>()
-            .WithAttributeFiltering().SingleInstance();
 
         builder.RegisterInstance(new SmoothLayer(0)).AsSelf().SingleInstance()
             .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.No);
@@ -62,14 +59,12 @@ internal static class Modules
             .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.High);
         builder.RegisterInstance(new SmoothLayer(8)).AsSelf().SingleInstance()
             .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Extreme);
-        builder.RegisterType<SmoothLevelFactory>().As<ISmoothLevelFactory>().SingleInstance();
 
-        builder.RegisterType<GraphRequestService<GraphVertexModel>>().As<IGraphRequestService<GraphVertexModel>>().SingleInstance();
-        builder.RegisterType<RangeRequestService<GraphVertexModel>>().As<IRangeRequestService<GraphVertexModel>>().SingleInstance();
-        builder.RegisterType<StatisticsRequestService>().As<IStatisticsRequestService>().SingleInstance();
-        builder.RegisterType<GraphInfoRequestService>().As<IGraphInfoRequestService>().SingleInstance();
-        builder.RegisterType<DataTransferRequestService<GraphVertexModel>>().As<IDataTransferRequestService<GraphVertexModel>>().SingleInstance();
+        return builder;
+    }
 
+    public static ContainerBuilder AddPathfindingRangeCommands(this ContainerBuilder builder)
+    {
         builder.RegisterType<IncludeSourceVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
             .WithMetadata(MetadataKeys.Order, 2).Keyed<Command>(KeyFilters.IncludeCommands);
         builder.RegisterType<IncludeTargetVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
@@ -82,12 +77,24 @@ internal static class Modules
             .WithMetadata(MetadataKeys.Order, 1).Keyed<Command>(KeyFilters.ExcludeCommands);
         builder.RegisterType<ExcludeTargetVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
             .WithMetadata(MetadataKeys.Order, 2).Keyed<Command>(KeyFilters.ExcludeCommands);
+        return builder;
+    }
+
+    public static ContainerBuilder AddTransitPathfindingRangeCommands(this ContainerBuilder builder)
+    {
         builder.RegisterType<IncludeTransitVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
             .WithMetadata(MetadataKeys.Order, 6).Keyed<Command>(KeyFilters.IncludeCommands);
         builder.RegisterType<ReplaceTransitIsolatedVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
             .WithMetadata(MetadataKeys.Order, 1).Keyed<Command>(KeyFilters.IncludeCommands);
         builder.RegisterType<ExcludeTransitVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
             .WithMetadata(MetadataKeys.Order, 3).Keyed<Command>(KeyFilters.ExcludeCommands);
+        return builder;
+    }
+
+    public static ContainerBuilder AddDataTransfering(this ContainerBuilder builder)
+    {
+        builder.RegisterType<DataTransferRequestService<GraphVertexModel>>()
+            .As<IDataTransferRequestService<GraphVertexModel>>().SingleInstance();
 
         builder.RegisterType<JsonSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
             .As<Serializer>().WithMetadata(MetadataKeys.Order, 3)
@@ -104,13 +111,30 @@ internal static class Modules
         builder.RegisterType<BundleSerializer<PathfindingHistoriesSerializationModel>>().SingleInstance()
             .As<Serializer>().WithMetadata(MetadataKeys.Order, 1)
             .WithMetadata(MetadataKeys.ExportFormat, SerializationFormat.Csv);
-        builder.RegisterType<SerializerFactory>().As<ISerializerFactory>().SingleInstance();
 
+        builder.RegisterType<ReadGraphOnlyOption>().As<IReadHistoryOption>().SingleInstance()
+            .WithMetadata(MetadataKeys.ExportOptions, ExportOptions.GraphOnly);
+        builder.RegisterType<ReadGraphsWithRangeOption>().As<IReadHistoryOption>().SingleInstance()
+            .WithMetadata(MetadataKeys.ExportOptions, ExportOptions.WithRange);
+        builder.RegisterType<ReadGraphWithRunsOptions>().As<IReadHistoryOption>().SingleInstance()
+            .WithMetadata(MetadataKeys.ExportOptions, ExportOptions.WithRuns);
+
+        builder.RegisterType<GraphCopyButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
+            .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 3);
+        builder.RegisterType<GraphExportButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
+            .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 4);
+        builder.RegisterType<GraphImportButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
+            .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 5);
+
+        return builder;
+    }
+
+    public static ContainerBuilder AddPathfindingAlgorithms(this ContainerBuilder builder)
+    {
         builder.RegisterType<DefaultStepRule>().As<IStepRule>().SingleInstance()
             .WithMetadata(MetadataKeys.StepRule, StepRules.Default);
         builder.RegisterType<LandscapeStepRule>().As<IStepRule>().SingleInstance()
             .WithMetadata(MetadataKeys.StepRule, StepRules.Landscape);
-        builder.RegisterType<StepRulesFactory>().As<IStepRuleFactory>().SingleInstance();
 
         builder.RegisterType<EuclideanDistance>().As<IHeuristic>().SingleInstance()
             .WithMetadata(MetadataKeys.Heuristics, Heuristics.Euclidean);
@@ -120,7 +144,6 @@ internal static class Modules
             .WithMetadata(MetadataKeys.Heuristics, Heuristics.Chebyshev);
         builder.RegisterType<ManhattanDistance>().As<IHeuristic>().SingleInstance()
             .WithMetadata(MetadataKeys.Heuristics, Heuristics.Manhattan);
-        builder.RegisterType<HeuristicsFactory>().As<IHeuristicsFactory>().SingleInstance();
 
         builder.RegisterType<RandomAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Random)
             .WithMetadata(MetadataKeys.Order, 15).WithMetadata(MetadataKeys.Requirements, AlgorithmRequirements.No)
@@ -170,18 +193,39 @@ internal static class Modules
         builder.RegisterType<DijkstraAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Dijkstra)
             .WithMetadata(MetadataKeys.Order, 1).WithMetadata(MetadataKeys.Requirements, AlgorithmRequirements.StepRule)
             .SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
-        builder.RegisterType<AlgorithmsFactory>().As<IAlgorithmsFactory>().SingleInstance();
 
-        builder.RegisterType<ReadGraphOnlyOption>().As<IReadHistoryOption>().SingleInstance()
-            .WithMetadata(MetadataKeys.ExportOptions, ExportOptions.GraphOnly);
-        builder.RegisterType<ReadGraphsWithRangeOption>().As<IReadHistoryOption>().SingleInstance()
-            .WithMetadata(MetadataKeys.ExportOptions, ExportOptions.WithRange);
-        builder.RegisterType<ReadGraphWithRunsOptions>().As<IReadHistoryOption>().SingleInstance()
-            .WithMetadata(MetadataKeys.ExportOptions, ExportOptions.WithRuns);
-        builder.RegisterType<ReadHistoryOptions>().As<IReadHistoryOptions>().SingleInstance();
+        return builder;
+    }
 
+    public static ContainerBuilder AddLogging(this ContainerBuilder builder)
+    {
         builder.RegisterType<FileLog>().As<ILog>().SingleInstance();
         builder.RegisterType<MessageBoxLog>().As<ILog>().SingleInstance();
+
+        return builder;
+    }
+
+    public static IContainer BuildApplication(this ContainerBuilder builder)
+    {
+        builder.RegisterType<GraphAssemble<GraphVertexModel>>().As<IGraphAssemble<GraphVertexModel>>().SingleInstance();
+        builder.RegisterType<GraphAssemble<RunVertexModel>>().As<IGraphAssemble<RunVertexModel>>().SingleInstance();
+
+        builder.RegisterType<AlgorithmsFactory>().As<IAlgorithmsFactory>().SingleInstance();
+        
+        builder.RegisterType<HeuristicsFactory>().As<IHeuristicsFactory>().SingleInstance();
+        builder.RegisterType<SerializerFactory>().As<ISerializerFactory>().SingleInstance();
+        builder.RegisterType<SmoothLevelFactory>().As<ISmoothLevelFactory>().SingleInstance();
+        builder.RegisterType<StepRulesFactory>().As<IStepRuleFactory>().SingleInstance();
+        builder.RegisterType<NeighborhoodLayerFactory>().As<INeighborhoodLayerFactory>()
+            .WithAttributeFiltering().SingleInstance();
+
+        builder.RegisterType<ReadHistoryOptions>().As<IReadHistoryOptions>().SingleInstance();
+
+        builder.RegisterType<GraphRequestService<GraphVertexModel>>().As<IGraphRequestService<GraphVertexModel>>().SingleInstance();
+        builder.RegisterType<RangeRequestService<GraphVertexModel>>().As<IRangeRequestService<GraphVertexModel>>().SingleInstance();
+        builder.RegisterType<StatisticsRequestService>().As<IStatisticsRequestService>().SingleInstance();
+        builder.RegisterType<GraphInfoRequestService>().As<IGraphInfoRequestService>().SingleInstance();
+
         builder.RegisterComposite<Logs, ILog>().As<ILog>().SingleInstance();
 
         builder.RegisterType<StrongReferenceMessenger>().Keyed<IMessenger>(KeyFilters.Views)
@@ -210,12 +254,7 @@ internal static class Modules
             .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 1);
         builder.RegisterType<GraphUpdateButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
             .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 2);
-        builder.RegisterType<GraphCopyButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
-            .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 3);
-        builder.RegisterType<GraphExportButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
-            .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 4);
-        builder.RegisterType<GraphImportButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
-            .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 5);
+
         builder.RegisterType<GraphDeleteButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
             .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 6);
 
@@ -227,5 +266,20 @@ internal static class Modules
         builder.RegisterType<RunDeleteButton>().Keyed<View>(KeyFilters.RunButtonsFrame).WithAttributeFiltering();
 
         return builder.Build();
+    }
+
+    public static ContainerBuilder Initiate()
+    {
+        RxAppBuilder.CreateReactiveUIBuilder().BuildApp();
+        Application.Init();
+        return new();
+    }
+
+    public static IContainer RunApplication(this IContainer container)
+    {
+        using var main = container.Resolve<MainView>();
+        Application.Top.Add(main);
+        Application.Run(x => true);
+        return container;
     }
 }

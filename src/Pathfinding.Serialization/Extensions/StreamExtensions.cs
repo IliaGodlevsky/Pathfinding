@@ -1,7 +1,8 @@
-﻿using System.Runtime.Serialization;
+﻿using Pathfinding.Service.Interface;
+using System.Runtime.Serialization;
 using System.Text;
 
-namespace Pathfinding.Service.Interface.Extensions;
+namespace Pathfinding.Serialization.Extensions;
 
 public static class StreamExtensions
 {

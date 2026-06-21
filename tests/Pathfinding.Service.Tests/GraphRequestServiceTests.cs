@@ -6,8 +6,8 @@ using Pathfinding.Domain.Entities;
 using Pathfinding.Domain.Enums;
 using Pathfinding.Domain.Interface.Repositories;
 using Pathfinding.Infrastructure.Business.Tests;
-using Pathfinding.Service.Interface;
-using Pathfinding.Service.Interface.Models.Serialization;
+using Pathfinding.Serialization.Models;
+using Pathfinding.Serialization.Services;
 using Pathfinding.Service.Interface.Models.Undefined;
 using Pathfinding.Service.Interface.Requests.Create;
 using Pathfinding.Service.Interface.Requests.Update;
@@ -180,14 +180,14 @@ internal class GraphRequestServiceTests
             [
                 new()
                 {
-                    Position = new CoordinateModel { Coordinate = [0, 0] },
-                    Cost = new VertexCostModel { Cost = 1 },
+                    Position = new CoordinateSerializationModel { Coordinate = [0, 0] },
+                    Cost = new VertexCostSerializationModel { Cost = 1 },
                     IsObstacle = false
                 },
                 new()
                 {
-                    Position = new CoordinateModel { Coordinate = [0, 1] },
-                    Cost = new VertexCostModel { Cost = 2 },
+                    Position = new CoordinateSerializationModel { Coordinate = [0, 1] },
+                    Cost = new VertexCostSerializationModel { Cost = 2 },
                     IsObstacle = true
                 }
             ],

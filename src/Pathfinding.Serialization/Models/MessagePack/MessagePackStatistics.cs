@@ -1,7 +1,7 @@
 ﻿using MessagePack;
 using Pathfinding.Domain.Enums;
 
-namespace Pathfinding.Service.Interface.Models.Serialization.MessagePack;
+namespace Pathfinding.Serialization.Models.MessagePack;
 
 [MessagePackObject(AllowPrivate = true)]
 internal class MessagePackStatistics

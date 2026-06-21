@@ -74,7 +74,6 @@ internal sealed class SqliteRangeRepository(SqliteConnection connection,
         const string query = $"SELECT * FROM {DbTables.Ranges} WHERE GraphId IN @GraphIds";
         return Connection.QueryUnbufferedAsync<PathfindingRange>(query,
             param: new { GraphIds = ids }, transaction: Transaction);
-
     }
 
     public async Task<IReadOnlyCollection<PathfindingRange>> UpsertAsync(

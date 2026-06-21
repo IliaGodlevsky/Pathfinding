@@ -1,9 +1,9 @@
 ﻿using Pathfinding.Domain;
 using Pathfinding.Domain.Interface;
+using Pathfinding.Serialization.Models;
 using Pathfinding.Service.Interface.Models.Read;
-using Pathfinding.Service.Interface.Models.Serialization;
 
-namespace Pathfinding.Service.Interface;
+namespace Pathfinding.Serialization.Services;
 
 public interface IDataTransferRequestService<T>
     where T : IVertex, IEntity<long>

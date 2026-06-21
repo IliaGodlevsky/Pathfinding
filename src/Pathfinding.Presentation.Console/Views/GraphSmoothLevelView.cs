@@ -24,7 +24,7 @@ internal sealed partial class GraphSmoothLevelView : FrameView
         this.smoothLevels.RadioLabels = labels;
         this.smoothLevels.Events()
             .SelectedItemChanged
-            .Where(x => x.SelectedItem > -1)
+            .Where(x => x.SelectedItem > -1 && values.Count > 0)
             .Select(x => values[x.SelectedItem])
             .BindTo(viewModel, x => x.SmoothLevel)
             .DisposeWith(disposables);

@@ -1,9 +1,9 @@
 ﻿using Autofac.Features.Metadata;
 using Pathfinding.Presentation.Console.Injection;
 using Pathfinding.Presentation.Console.Models;
-using Pathfinding.Serialization.Decorators;
-using Pathfinding.Service.Interface.Models.Serialization;
 using System.Collections.Frozen;
+
+using CompressSerializer = Pathfinding.Serialization.Decorators.CompressSerializer<Pathfinding.Serialization.Models.PathfindingHistoriesSerializationModel>;
 
 namespace Pathfinding.Presentation.Console.Factories;
 
@@ -25,7 +25,7 @@ internal sealed class SerializerFactory(Meta<Serializer>[] serializers) : ISeria
         var serializer = serializers.GetValueOrDefault(format)
             ?? throw new KeyNotFoundException($"{format} was not found");
         return streamModel.NeedsCompress 
-            ? new CompressSerializer<PathfindingHistoriesSerializationModel>(serializer)
+            ? new CompressSerializer(serializer)
             : serializer;
     }
 }

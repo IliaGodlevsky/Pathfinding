@@ -30,7 +30,7 @@ internal sealed partial class RunStepRulesView : FrameView
         var values = labels.Select(x => rules[x.ToString()!]).ToList();
         stepRules.RadioLabels = labels;
         stepRules.Events().SelectedItemChanged
-            .Where(x => x.SelectedItem > -1)
+            .Where(x => x.SelectedItem > -1 && values.Count > 0)
             .Select(x => values[x.SelectedItem])
             .BindTo(viewModel, x => x.StepRule)
             .DisposeWith(disposables);

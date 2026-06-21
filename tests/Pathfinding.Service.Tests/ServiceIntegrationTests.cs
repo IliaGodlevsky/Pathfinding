@@ -1,7 +1,8 @@
 using Pathfinding.Data;
 using Pathfinding.Data.LiteDb;
 using Pathfinding.Domain.Enums;
-using Pathfinding.Service.Interface.Models.Serialization;
+using Pathfinding.Serialization;
+using Pathfinding.Serialization.Models;
 using Pathfinding.Service.Interface.Models.Undefined;
 using Pathfinding.Service.Interface.Requests.Create;
 using Pathfinding.Service.Interface.Requests.Read;
@@ -104,10 +105,10 @@ internal sealed class ServiceIntegrationTests
             },
             Vertices =
             [
-                new() { Position = new CoordinateModel { Coordinate = [0, 0] }, Cost = new VertexCostModel { Cost = 1 } },
-                new() { Position = new CoordinateModel { Coordinate = [0, 1] }, Cost = new VertexCostModel { Cost = 1 } },
-                new() { Position = new CoordinateModel { Coordinate = [1, 0] }, Cost = new VertexCostModel { Cost = 1 } },
-                new() { Position = new CoordinateModel { Coordinate = [1, 1] }, Cost = new VertexCostModel { Cost = 1 } }
+                new() { Position = new CoordinateSerializationModel { Coordinate = [0, 0] }, Cost = new VertexCostSerializationModel { Cost = 1 } },
+                new() { Position = new CoordinateSerializationModel { Coordinate = [0, 1] }, Cost = new VertexCostSerializationModel { Cost = 1 } },
+                new() { Position = new CoordinateSerializationModel { Coordinate = [1, 0] }, Cost = new VertexCostSerializationModel { Cost = 1 } },
+                new() { Position = new CoordinateSerializationModel { Coordinate = [1, 1] }, Cost = new VertexCostSerializationModel { Cost = 1 } }
             ],
             Statistics = [],
             Range = [new() { Coordinate = [0, 0] }, new() { Coordinate = [1, 1] }]

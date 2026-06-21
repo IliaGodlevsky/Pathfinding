@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
-using Pathfinding.Service.Interface.Models.Undefined;
 
-namespace Pathfinding.Service.Interface.Models.Serialization.Csv;
+namespace Pathfinding.Serialization.Models.Csv;
 
 internal static class CsvMappings
 {
@@ -58,12 +57,12 @@ internal static class CsvMappings
         return [.. models.Select(x => x.ToStatistics(graphId))];
     }
 
-    private static CsvRange ToRange(this CoordinateModel model, int graphId)
+    private static CsvRange ToRange(this CoordinateSerializationModel model, int graphId)
     {
         return new() { Coordinate = JsonConvert.SerializeObject(model.Coordinate), GraphId = graphId };
     }
 
-    private static List<CsvRange> ToRanges(this IEnumerable<CoordinateModel> models, int graphId)
+    private static List<CsvRange> ToRanges(this IEnumerable<CoordinateSerializationModel> models, int graphId)
     {
         return [.. models.Select(x => x.ToRange(graphId))];
     }
@@ -120,12 +119,12 @@ internal static class CsvMappings
         return [.. models.Select(x => x.ToStatistics())];
     }
 
-    private static CoordinateModel ToRange(this CsvRange model)
+    private static CoordinateSerializationModel ToRange(this CsvRange model)
     {
         return new() { Coordinate = JsonConvert.DeserializeObject<int[]>(model.Coordinate) };
     }
 
-    private static List<CoordinateModel> ToRanges(this IEnumerable<CsvRange> models)
+    private static List<CoordinateSerializationModel> ToRanges(this IEnumerable<CsvRange> models)
     {
         return [.. models.Select(x => x.ToRange())];
     }

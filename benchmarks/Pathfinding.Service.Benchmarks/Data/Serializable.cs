@@ -1,7 +1,7 @@
-﻿using Pathfinding.Service.Interface;
-using Pathfinding.Service.Interface.Extensions;
+﻿using Pathfinding.Serialization.Extensions;
+using Pathfinding.Service.Interface;
 
-namespace Pathfinding.Infrastructure.Business.Benchmarks.Data;
+namespace Pathfinding.Service.Benchmarks.Data;
 
 public sealed class Serializable : IBinarySerializable
 {

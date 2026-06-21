@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Pathfinding.Data\Pathfinding.Data.csproj" />
     <ProjectReference Include="..\Pathfinding.Service.Interface\Pathfinding.Service.Interface.csproj" />
+    <ProjectReference Include="..\Pathfinding.Service\Pathfinding.Service.csproj" />
   </ItemGroup>
 
 </Project>

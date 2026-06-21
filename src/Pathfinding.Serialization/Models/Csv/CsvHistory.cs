@@ -1,4 +1,4 @@
-﻿namespace Pathfinding.Service.Interface.Models.Serialization.Csv;
+﻿namespace Pathfinding.Serialization.Models.Csv;
 
 internal class CsvHistory
 {

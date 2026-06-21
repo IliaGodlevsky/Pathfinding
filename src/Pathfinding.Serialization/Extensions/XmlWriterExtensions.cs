@@ -1,7 +1,7 @@
 ﻿using System.Xml;
 using System.Xml.Serialization;
 
-namespace Pathfinding.Service.Interface.Extensions;
+namespace Pathfinding.Serialization.Extensions;
 
 public static class XmlWriterExtensions
 {

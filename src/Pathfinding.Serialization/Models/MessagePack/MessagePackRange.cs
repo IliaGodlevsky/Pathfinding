@@ -1,6 +1,6 @@
 ﻿using MessagePack;
 
-namespace Pathfinding.Service.Interface.Models.Serialization.MessagePack;
+namespace Pathfinding.Serialization.Models.MessagePack;
 
 [MessagePackObject(AllowPrivate = true)]
 internal class MessagePackRange

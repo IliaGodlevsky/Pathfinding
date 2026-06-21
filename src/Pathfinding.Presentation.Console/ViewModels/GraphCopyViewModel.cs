@@ -6,7 +6,7 @@ using Pathfinding.Presentation.Console.Injection;
 using Pathfinding.Presentation.Console.Messages.ViewModel.ValueMessages;
 using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.ViewModels.Interface;
-using Pathfinding.Service.Interface;
+using Pathfinding.Serialization.Services;
 using ReactiveUI;
 using System.Reactive;
 using System.Reactive.Disposables;

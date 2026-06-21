@@ -6,39 +6,9 @@ using Pathfinding.Shared.Extensions;
 
 namespace Pathfinding.Service.Extensions;
 
-internal static class UnitOfWorkExtensions
+public static class UnitOfWorkExtensions
 {
-    internal static async Task<IReadOnlyCollection<GraphModel<T>>> ReadGraphsInternalAsync<T>(
-        this IUnitOfWork unit, IReadOnlyCollection<int> graphIds, CancellationToken token = default)
-        where T : IVertex, IEntity<long>, new()
-    {
-        var graphs = await unit.GraphRepository.ReadAsync(graphIds)
-            .ToArrayAsync(token)
-            .ConfigureAwait(false);
-        var vertices = (await unit.VerticesRepository.ReadVerticesByGraphIdsAsync(graphIds)
-            .ToArrayAsync(token)
-            .ConfigureAwait(false))
-            .GroupBy(x => x.GraphId, x => x.ToVertex<T>())
-            .ToDictionary(x => x.Key, x => x.ToArray());
-        var models = new List<GraphModel<T>>();
-        foreach (var graph in graphs)
-        {
-            models.Add(new()
-            {
-                DimensionSizes = [.. graph.Dimensions.Split(",").Select(int.Parse)],
-                Id = graph.Id,
-                Name = graph.Name,
-                Neighborhood = graph.Neighborhood,
-                SmoothLevel = graph.SmoothLevel,
-                Status = graph.Status,
-                CostRange = (graph.LowerValueRange, graph.UpperValueRange),
-                Vertices = vertices[graph.Id]
-            });
-        }
-        return models;
-    }
-
-    internal static async Task<GraphModel<T>> CreateGraphAsyncInternal<T>(
+    public static async Task<GraphModel<T>> CreateGraphAsyncInternal<T>(
         this IUnitOfWork unit, CreateGraphRequest<T> request, CancellationToken token = default)
         where T : IVertex, IEntity<long>, new()
     {
@@ -60,19 +30,5 @@ internal static class UnitOfWorkExtensions
             Status = graph.Status,
             CostRange = request.Graph.CostRange
         };
-    }
-
-    internal static async Task<IReadOnlyDictionary<int, IReadOnlyCollection<PathfindingRangeModel>>> ReadRangesAsyncInternal(
-        this IUnitOfWork unit, IReadOnlyCollection<int> graphIds, CancellationToken token = default)
-    {
-        return (await unit.RangeRepository
-            .ReadByGraphIdsAsync(graphIds)
-            .ToArrayAsync(token))
-            .GroupBy(x => x.GraphId)
-            .ToDictionary(
-                x => x.Key,
-                x => (IReadOnlyCollection<PathfindingRangeModel>)[.. x
-                    .OrderBy(y => y.Order)
-                    .Select(y => y.ToRangeModel())]);
     }
 }

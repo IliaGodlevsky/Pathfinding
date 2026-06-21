@@ -1,11 +1,11 @@
 ﻿using CsvHelper;
-using Pathfinding.Service.Interface.Models.Serialization;
-using Pathfinding.Service.Interface.Models.Serialization.Csv;
+using Pathfinding.Serialization.Models;
+using Pathfinding.Serialization.Models.Csv;
 using System.Globalization;
 using System.IO.Compression;
 using System.Text;
 
-namespace Pathfinding.Service.Interface.Extensions;
+namespace Pathfinding.Serialization.Extensions;
 
 internal static class ZipArchiveExtensions
 {
