@@ -1,4 +1,3 @@
-using Pathfinding.Data.InMemory;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Service.Extensions;
 using Pathfinding.Service.Interface;
@@ -9,10 +8,6 @@ namespace Pathfinding.Service.Services;
 
 public sealed class GraphInfoRequestService(IUnitOfWorkFactory factory) : IGraphInfoRequestService
 {
-    public GraphInfoRequestService() : this(new InMemoryUnitOfWorkFactory())
-    {
-    }
-
     public async Task<IReadOnlyCollection<GraphInformationModel>> ReadAllGraphInfoAsync(
         CancellationToken token = default)
     {

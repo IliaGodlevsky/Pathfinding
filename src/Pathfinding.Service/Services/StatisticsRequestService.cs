@@ -1,4 +1,3 @@
-using Pathfinding.Data.InMemory;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Service.Extensions;
 using Pathfinding.Service.Interface;
@@ -10,10 +9,6 @@ namespace Pathfinding.Service.Services;
 
 public sealed class StatisticsRequestService(IUnitOfWorkFactory factory) : IStatisticsRequestService
 {
-    public StatisticsRequestService() : this(new InMemoryUnitOfWorkFactory())
-    {
-    }
-
     public async Task<bool> DeleteRunsAsync(
         IReadOnlyCollection<int> runIds,
         CancellationToken token = default)

@@ -10,7 +10,7 @@ namespace Pathfinding.Serialization.Models;
 
 public record GraphSerializationModel : IBinarySerializable, IXmlSerializable
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
 
     public SmoothLevels SmoothLevel { get; set; }
 
@@ -18,7 +18,7 @@ public record GraphSerializationModel : IBinarySerializable, IXmlSerializable
 
     public GraphStatuses Status { get; set; }
 
-    public IReadOnlyList<int> DimensionSizes { get; set; }
+    public IReadOnlyList<int> DimensionSizes { get; set; } = [];
 
     public InclusiveValueRange<int> CostRange { get; set; }
 

@@ -1,4 +1,3 @@
-using Pathfinding.Data.InMemory;
 using Pathfinding.Domain;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Extensions;
@@ -12,10 +11,6 @@ namespace Pathfinding.Service.Services;
 public sealed class RangeRequestService<T>(IUnitOfWorkFactory factory) : IRangeRequestService<T>
     where T : IVertex, IEntity<long>, new()
 {
-    public RangeRequestService() : this(new InMemoryUnitOfWorkFactory())
-    {
-    }
-
     public async Task<IReadOnlyCollection<PathfindingRangeModel>> ReadRangeOrderedAsync(int graphId,
         CancellationToken token = default)
     {

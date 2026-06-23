@@ -1,15 +1,13 @@
-﻿using Pathfinding.Presentation.Console.Injection;
+﻿using Pathfinding.Presentation.Console;
 
-await using (Modules
-    .Initiate()
-    .AddSqlite()
-    .AddLogging()
-    .AddGraphLayers()
-    .AddDataTransfering()
-    .AddPathfindingAlgorithms()
-    .AddPathfindingRangeCommands()
-    .AddTransitPathfindingRangeCommands()
-    .BuildApplication()
-    .RunApplication())
-{
-}
+await using var app = App
+    .InitiateApp()
+    //.AddSqlite()
+    //.AddLogging()
+    //.AddGraphLayers()
+    //.AddDataTransfering()
+    //.AddPathfindingAlgorithms()
+    //.AddTransitPathfindingRangeCommands()
+    .BuildApp();
+
+app.RunApp();

@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Autofac.Features.AttributeFilters;
 using CommunityToolkit.Mvvm.Messaging;
+using Pathfinding.Data.InMemory;
 using Pathfinding.Data.Sqlite;
 using Pathfinding.Domain.Enums;
 using Pathfinding.Domain.Interface;
@@ -9,6 +10,7 @@ using Pathfinding.Logging.Loggers;
 using Pathfinding.Presentation.Console.Export;
 using Pathfinding.Presentation.Console.Factories;
 using Pathfinding.Presentation.Console.Factories.Algos;
+using Pathfinding.Presentation.Console.Injection;
 using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.ViewModels;
 using Pathfinding.Presentation.Console.Views;
@@ -27,9 +29,9 @@ using ReactiveUI.Builder;
 using Terminal.Gui;
 using Attribute = System.Attribute;
 
-namespace Pathfinding.Presentation.Console.Injection;
+namespace Pathfinding.Presentation.Console;
 
-internal static class Modules
+internal static class App
 {
     public static ContainerBuilder AddSqlite(this ContainerBuilder builder)
     {
@@ -42,15 +44,12 @@ internal static class Modules
     {
         builder.RegisterType<MooreNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Moore);
-        builder.RegisterType<VonNeumannNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
-            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.VonNeumann);
+        
         builder.RegisterType<DiagonalNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Diagonal);
         builder.RegisterType<KnightsNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Knight);
 
-        builder.RegisterInstance(new SmoothLayer(0)).AsSelf().SingleInstance()
-            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.No);
         builder.RegisterInstance(new SmoothLayer(1)).AsSelf().SingleInstance()
             .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Low);
         builder.RegisterInstance(new SmoothLayer(2)).AsSelf().SingleInstance()
@@ -60,23 +59,6 @@ internal static class Modules
         builder.RegisterInstance(new SmoothLayer(8)).AsSelf().SingleInstance()
             .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.Extreme);
 
-        return builder;
-    }
-
-    public static ContainerBuilder AddPathfindingRangeCommands(this ContainerBuilder builder)
-    {
-        builder.RegisterType<IncludeSourceVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 2).Keyed<Command>(KeyFilters.IncludeCommands);
-        builder.RegisterType<IncludeTargetVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 4).Keyed<Command>(KeyFilters.IncludeCommands);
-        builder.RegisterType<ReplaceIsolatedSourceVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 3).Keyed<Command>(KeyFilters.IncludeCommands);
-        builder.RegisterType<ReplaceIsolatedTargetVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 5).Keyed<Command>(KeyFilters.IncludeCommands);
-        builder.RegisterType<ExcludeSourceVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 1).Keyed<Command>(KeyFilters.ExcludeCommands);
-        builder.RegisterType<ExcludeTargetVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
-            .WithMetadata(MetadataKeys.Order, 2).Keyed<Command>(KeyFilters.ExcludeCommands);
         return builder;
     }
 
@@ -145,9 +127,6 @@ internal static class Modules
         builder.RegisterType<ManhattanDistance>().As<IHeuristic>().SingleInstance()
             .WithMetadata(MetadataKeys.Heuristics, Heuristics.Manhattan);
 
-        builder.RegisterType<RandomAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Random)
-            .WithMetadata(MetadataKeys.Order, 15).WithMetadata(MetadataKeys.Requirements, AlgorithmRequirements.No)
-            .SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<AStarAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.AStar)
             .WithMetadata(MetadataKeys.Order, 3).WithMetadata(MetadataKeys.Requirements, AlgorithmRequirements.All)
             .SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
@@ -205,11 +184,36 @@ internal static class Modules
         return builder;
     }
 
-    public static IContainer BuildApplication(this ContainerBuilder builder)
+    public static IContainer BuildApp(this ContainerBuilder builder)
     {
+        builder.RegisterType<InMemoryUnitOfWorkFactory>().As<IUnitOfWorkFactory>()
+            .SingleInstance().IfNotRegistered(typeof(IUnitOfWorkFactory));
+
         builder.RegisterType<GraphAssemble<GraphVertexModel>>().As<IGraphAssemble<GraphVertexModel>>().SingleInstance();
         builder.RegisterType<GraphAssemble<RunVertexModel>>().As<IGraphAssemble<RunVertexModel>>().SingleInstance();
 
+        builder.RegisterType<VonNeumannNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.VonNeumann);
+
+        builder.RegisterInstance(new SmoothLayer(0)).AsSelf().SingleInstance()
+            .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.No);
+
+        builder.RegisterType<IncludeSourceVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
+            .WithMetadata(MetadataKeys.Order, 2).Keyed<Command>(KeyFilters.IncludeCommands);
+        builder.RegisterType<IncludeTargetVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
+            .WithMetadata(MetadataKeys.Order, 4).Keyed<Command>(KeyFilters.IncludeCommands);
+        builder.RegisterType<ReplaceIsolatedSourceVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
+            .WithMetadata(MetadataKeys.Order, 3).Keyed<Command>(KeyFilters.IncludeCommands);
+        builder.RegisterType<ReplaceIsolatedTargetVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
+            .WithMetadata(MetadataKeys.Order, 5).Keyed<Command>(KeyFilters.IncludeCommands);
+        builder.RegisterType<ExcludeSourceVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
+            .WithMetadata(MetadataKeys.Order, 1).Keyed<Command>(KeyFilters.ExcludeCommands);
+        builder.RegisterType<ExcludeTargetVertex<GraphVertexModel>>().SingleInstance().WithAttributeFiltering()
+            .WithMetadata(MetadataKeys.Order, 2).Keyed<Command>(KeyFilters.ExcludeCommands);
+
+        builder.RegisterType<RandomAlgorithmFactory>().WithMetadata(MetadataKeys.Algorithm, Algorithms.Random)
+            .WithMetadata(MetadataKeys.Order, 15).WithMetadata(MetadataKeys.Requirements, AlgorithmRequirements.No)
+            .SingleInstance().As<IAlgorithmFactory<PathfindingProcess>>();
         builder.RegisterType<AlgorithmsFactory>().As<IAlgorithmsFactory>().SingleInstance();
         
         builder.RegisterType<HeuristicsFactory>().As<IHeuristicsFactory>().SingleInstance();
@@ -254,7 +258,6 @@ internal static class Modules
             .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 1);
         builder.RegisterType<GraphUpdateButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
             .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 2);
-
         builder.RegisterType<GraphDeleteButton>().Keyed<Button>(KeyFilters.GraphTableButtons)
             .WithAttributeFiltering().WithMetadata(MetadataKeys.Order, 6);
 
@@ -268,18 +271,17 @@ internal static class Modules
         return builder.Build();
     }
 
-    public static ContainerBuilder Initiate()
+    public static ContainerBuilder InitiateApp()
     {
         RxAppBuilder.CreateReactiveUIBuilder().BuildApp();
         Application.Init();
         return new();
     }
 
-    public static IContainer RunApplication(this IContainer container)
+    public static void RunApp(this IContainer container)
     {
         using var main = container.Resolve<MainView>();
         Application.Top.Add(main);
         Application.Run(x => true);
-        return container;
     }
 }

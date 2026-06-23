@@ -1,5 +1,4 @@
 ﻿using Pathfinding.Data;
-using Pathfinding.Data.InMemory;
 using Pathfinding.Domain;
 using Pathfinding.Domain.Entities;
 using Pathfinding.Domain.Enums;
@@ -18,11 +17,6 @@ namespace Pathfinding.Serialization.Services;
 public sealed class DataTransferRequestService<T>(IUnitOfWorkFactory factory) 
     : IDataTransferRequestService<T> where T : IVertex, IEntity<long>, new()
 {
-    public DataTransferRequestService() : this(new InMemoryUnitOfWorkFactory())
-    {
-
-    }
-
     public async ValueTask<IReadOnlyCollection<PathfindingHistoryModel<T>>> CreatePathfindingHistoriesAsync(
         IReadOnlyCollection<PathfindingHistorySerializationModel> request,
         CancellationToken token = default)
@@ -101,7 +95,7 @@ public sealed class DataTransferRequestService<T>(IUnitOfWorkFactory factory)
             })
             .ToList();
 
-        return new PathfindingHistoriesSerializationModel { Histories = histories };
+        return new() { Histories = histories };
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadSerializationGraphsWithRangeAsync(
@@ -119,7 +113,7 @@ public sealed class DataTransferRequestService<T>(IUnitOfWorkFactory factory)
             })
             .ToList();
 
-        return new PathfindingHistoriesSerializationModel { Histories = histories };
+        return new () { Histories = histories };
     }
 
     public async Task<PathfindingHistoriesSerializationModel> ReadSerializationHistoriesAsync(
@@ -143,7 +137,7 @@ public sealed class DataTransferRequestService<T>(IUnitOfWorkFactory factory)
                 statistics.GetValueOrDefault(graph.Id, [])))
             .ToList();
 
-        return new PathfindingHistoriesSerializationModel { Histories = histories };
+        return new () { Histories = histories };
     }
 
     private static PathfindingHistorySerializationModel ToSerializationHistory(

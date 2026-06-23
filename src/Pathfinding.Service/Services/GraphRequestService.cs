@@ -1,4 +1,3 @@
-using Pathfinding.Data.InMemory;
 using Pathfinding.Domain;
 using Pathfinding.Domain.Interface;
 using Pathfinding.Domain.Interface.Extensions;
@@ -14,11 +13,6 @@ namespace Pathfinding.Service.Services;
 public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphRequestService<T>
     where T : IVertex, IEntity<long>, new()
 {
-    public GraphRequestService() : this(new InMemoryUnitOfWorkFactory())
-    {
-
-    }
-
     public async ValueTask<bool> UpdateVerticesAsync(
         UpdateVerticesRequest<T> request,
         CancellationToken token = default)
