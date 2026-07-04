@@ -10,7 +10,7 @@ public sealed class HeuristicsFactory(IEnumerable<Meta<IHeuristic>> heuristics)
     : IHeuristicsFactory
 {
     private readonly Dictionary<Heuristics, IHeuristic> heuristics
-        = heuristics.ToDictionary(
+        = heuristics.OrderBy(x => x.Metadata[MetadataKeys.Heuristics]).ToDictionary(
             x => (Heuristics)x.Metadata[MetadataKeys.Heuristics],
             x => x.Value);
 

@@ -22,11 +22,14 @@ internal sealed partial class GraphNeighborhoodView : FrameView
         var labels = map.Keys.Select(ustring.Make).ToArray();
         var values = labels.Select(x => map[x.ToString()]).ToList();
         neighborhoods.RadioLabels = labels;
-        neighborhoods.Events().SelectedItemChanged
-            .Where(x => x.SelectedItem > -1 && values.Count > 0)
-            .Select(x => values[x.SelectedItem])
+        if (values.Count > 0)
+        {
+            neighborhoods.Events().SelectedItemChanged
+            .Where(x => x.SelectedItem > -1)
+            .Select(x => x.SelectedItem)
             .BindTo(viewModel, x => x.Neighborhood)
             .DisposeWith(disposables);
+        }
         neighborhoods.SelectedItem = 0;
         this.Events().VisibleChanged
             .Where(_ => Visible)

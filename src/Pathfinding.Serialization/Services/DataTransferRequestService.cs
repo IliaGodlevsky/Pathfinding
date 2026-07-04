@@ -183,14 +183,16 @@ public sealed class DataTransferRequestService<T>(IUnitOfWorkFactory factory)
         IReadOnlyCollection<int> graphIds, 
         CancellationToken token = default)
     {
-        var graphs = await unit.GraphRepository.ReadAsync(graphIds)
+        var graphs = await unit
+            .GraphRepository
+            .ReadAsync(graphIds)
             .ToArrayAsync(token)
             .ConfigureAwait(false);
-        var vertices = (await unit.VerticesRepository.ReadVerticesByGraphIdsAsync(graphIds)
-            .ToArrayAsync(token)
-            .ConfigureAwait(false))
+        var vertices = await unit.VerticesRepository
+            .ReadVerticesByGraphIdsAsync(graphIds)
             .GroupBy(x => x.GraphId, x => x.ToVertex<T>())
-            .ToDictionary(x => x.Key, x => x.ToArray());
+            .ToDictionaryAsync(x => x.Key, x => x.ToArray(), cancellationToken: token)
+            .ConfigureAwait(false);
         var models = new List<GraphModel<T>>();
         foreach (var graph in graphs)
         {

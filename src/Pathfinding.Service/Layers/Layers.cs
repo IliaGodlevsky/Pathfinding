@@ -3,7 +3,7 @@ using Pathfinding.Service.Interface;
 
 namespace Pathfinding.Service.Layers;
 
-public sealed class Layers(params ILayer[] layers) : List<ILayer>(layers), ILayer
+public sealed class Layers(params ILayer[] layers) : ILayer
 {
     public Layers(IEnumerable<ILayer> layers)
         : this([.. layers])

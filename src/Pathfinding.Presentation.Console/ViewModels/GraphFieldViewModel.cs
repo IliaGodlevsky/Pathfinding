@@ -121,9 +121,7 @@ internal sealed class GraphFieldViewModel : ViewModel, IGraphFieldViewModel, IDi
             cost = activatedGraph.Graph.CostRange.ReturnInRange(cost);
             vertex.Cost = new VertexCost(cost);
             var request = new UpdateVerticesRequest<GraphVertexModel>(ActivatedGraph.Id, [.. vertex.Enumerate()]);
-            await service
-                .UpdateVerticesAsync(request, token)
-                .ConfigureAwait(false);
+            await service.UpdateVerticesAsync(request, token).ConfigureAwait(false);
         }).ConfigureAwait(false);
     }
 

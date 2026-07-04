@@ -22,12 +22,15 @@ internal sealed partial class GraphSmoothLevelView : FrameView
         var labels = smoothLevels.Keys.Select(ustring.Make).ToArray();
         var values = labels.Select(x => smoothLevels[x.ToString()]).ToList();
         this.smoothLevels.RadioLabels = labels;
-        this.smoothLevels.Events()
-            .SelectedItemChanged
-            .Where(x => x.SelectedItem > -1 && values.Count > 0)
-            .Select(x => values[x.SelectedItem])
-            .BindTo(viewModel, x => x.SmoothLevel)
-            .DisposeWith(disposables);
+        if (values.Count > 0)
+        {
+            this.smoothLevels.Events()
+                .SelectedItemChanged
+                .Where(x => x.SelectedItem > -1)
+                .Select(x => x.SelectedItem)
+                .BindTo(viewModel, x => x.SmoothLevel)
+                .DisposeWith(disposables);
+        }
         this.smoothLevels.SelectedItem = 0;
         VisibleChanged += OnVisibilityChanged;
     }

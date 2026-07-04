@@ -14,6 +14,7 @@ using Pathfinding.Presentation.Console.Injection;
 using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.ViewModels;
 using Pathfinding.Presentation.Console.Views;
+using Pathfinding.Presentation.Console.Views.Converters;
 using Pathfinding.Serialization;
 using Pathfinding.Serialization.Models;
 using Pathfinding.Serialization.Services;
@@ -271,15 +272,19 @@ internal static class App
         return builder.Build();
     }
 
-    public static ContainerBuilder InitiateApp()
-    {
-        RxAppBuilder.CreateReactiveUIBuilder().BuildApp();
-        Application.Init();
-        return new();
-    }
+    public static ContainerBuilder InitiateApp() => new();
 
     public static void RunApp(this IContainer container)
     {
+        RxAppBuilder.CreateReactiveUIBuilder()
+            .WithConverters(
+                new NStackStringToRegularStringConverter(),
+                new Int32ToNeighborhoodsConverter(),
+                new Int32ToSmoothLevelsConverter(),
+                new Int32ToStepRulesConverter(),
+                new Int32ToExportOptionsConverter())
+            .BuildApp();
+        Application.Init();
         using var main = container.Resolve<MainView>();
         Application.Top.Add(main);
         Application.Run(x => true);

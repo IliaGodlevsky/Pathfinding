@@ -7,7 +7,8 @@ namespace Pathfinding.Presentation.Console.Factories;
 
 internal sealed class SmoothLevelFactory(Meta<SmoothLayer>[] layers) : ISmoothLevelFactory
 {
-    private readonly Dictionary<SmoothLevels, SmoothLayer> layers = layers.ToDictionary(
+    private readonly Dictionary<SmoothLevels, SmoothLayer> layers
+        = layers.OrderBy(x => x.Metadata[MetadataKeys.SmoothLevels]).ToDictionary(
             x => (SmoothLevels)x.Metadata[MetadataKeys.SmoothLevels],
             x => x.Value);
 

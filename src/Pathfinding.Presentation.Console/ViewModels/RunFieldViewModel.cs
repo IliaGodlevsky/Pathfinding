@@ -166,9 +166,8 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
     private async Task OnGraphActivated(AwaitGraphActivatedMessage msg)
     {
         activeGraph = msg.Value.ActiveGraph;
-        var graphLayer = new GraphLayer(activeGraph.Graph);
         var runGraph = await graphAssemble.AssembleGraphAsync(
-            graphLayer,
+            new GraphLayer(activeGraph.Graph),
             activeGraph.Graph.DimensionsSizes);
         runGraph.CostRange = activeGraph.Graph.CostRange;
         RunGraph = Graph<RunVertexModel>.Empty;

@@ -63,9 +63,9 @@ internal sealed partial class GraphExportButton
         Application.Run(dialog);
         var filePath = dialog.FilePath.ToString();
         var extension = Path.GetExtension(filePath);
-        var filenameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
         if (export.NeedsCompress)
         {
+            var filenameWithoutExtension = Path.GetFileNameWithoutExtension(filePath);
             filePath = string.Concat(filenameWithoutExtension, ".gz", extension);
         }
         return !dialog.Canceled

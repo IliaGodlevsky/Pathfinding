@@ -25,11 +25,8 @@ internal sealed class ReadHistoryOptions : IReadHistoryOptions
         IReadOnlyCollection<int> graphIds,
         CancellationToken token = default)
     {
-        if (options.TryGetValue(option, out var value))
-        {
-            return value.ReadHistoryAsync(graphIds, token);
-        }
-
-        throw new KeyNotFoundException($"{option} was not found");
+        return options.TryGetValue(option, out var value)
+            ? value.ReadHistoryAsync(graphIds, token)
+            : throw new KeyNotFoundException($"{option} was not found");
     }
 }

@@ -10,8 +10,8 @@ public sealed class NeighborhoodLayerFactory(
     [KeyFilter(KeyFilters.Neighborhoods)] Meta<NeighborhoodLayer>[] layers) : INeighborhoodLayerFactory
 {
     private readonly Dictionary<Neighborhoods, NeighborhoodLayer> layers
-        = layers.ToDictionary(
-            x => (Neighborhoods)x.Metadata[MetadataKeys.Neighborhoods], 
+        = layers.OrderBy(x => x.Metadata[MetadataKeys.Neighborhoods]).ToDictionary(
+            x => (Neighborhoods)x.Metadata[MetadataKeys.Neighborhoods],
             x => x.Value);
 
     public IReadOnlyCollection<Neighborhoods> AvailableNeighborhoods => layers.Keys;

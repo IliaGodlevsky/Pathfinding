@@ -56,7 +56,6 @@ public sealed class GraphRequestService<T>(IUnitOfWorkFactory factory) : IGraphR
         CancellationToken token = default)
     {
         return await factory.TransactionAsync(
-            (unit, t) => unit.CreateGraphAsyncInternal(graph, t),
-            token).ConfigureAwait(false);
+            (unit, t) => unit.CreateGraphAsyncInternal(graph, t), token).ConfigureAwait(false);
     }
 }
