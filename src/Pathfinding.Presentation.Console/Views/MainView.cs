@@ -21,7 +21,7 @@ internal sealed class MainView : Window, IAsyncDisposable
         };
         statusBar = new(
         [
-            new(Key.F1, "~F1~ Help", ShowKeyboardHelp),
+            new(Key.F1, "~F1~ Keys: Ctrl+A select all, Ctrl+R reset order", ShowKeyboardHelp),
             new(Key.F2, "~F2~ Legend", ShowGraphLegend)
         ]);
 
@@ -44,8 +44,20 @@ internal sealed class MainView : Window, IAsyncDisposable
 
     private static void ShowKeyboardHelp()
     {
-        using var dialog = new KeyboardHelpDialog();
-        Application.Run(dialog);
+        MessageBox.Query(
+            "Keyboard shortcuts",
+            "NAVIGATION\n" +
+            "Tab / Shift+Tab  Move focus forward / backward\n" +
+            "Arrow keys       Move through tables and fields\n" +
+            "Enter            Activate the selected graph\n\n" +
+            "TABLES\n" +
+            "Ctrl+A           Select every row in the focused table\n" +
+            "Ctrl+R           Restore the default run order\n" +
+            "Mouse click      Sort runs by the clicked column\n\n" +
+            "HELP\n" +
+            "F1               Show keyboard shortcuts\n" +
+            "F2               Show the graph color legend",
+            "Close");
     }
 
     private static void ShowGraphLegend()
