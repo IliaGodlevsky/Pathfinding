@@ -44,20 +44,8 @@ internal sealed class MainView : Window, IAsyncDisposable
 
     private static void ShowKeyboardHelp()
     {
-        MessageBox.Query(
-            "Keyboard shortcuts",
-            "NAVIGATION\n" +
-            "Tab / Shift+Tab  Move focus forward / backward\n" +
-            "Arrow keys       Move through tables and fields\n" +
-            "Enter            Activate the selected graph\n\n" +
-            "TABLES\n" +
-            "Ctrl+A           Select every row in the focused table\n" +
-            "Ctrl+R           Restore the default run order\n" +
-            "Mouse click      Sort runs by the clicked column\n\n" +
-            "HELP\n" +
-            "F1               Show keyboard shortcuts\n" +
-            "F2               Show the graph color legend",
-            "Close");
+        using var dialog = new KeyboardHelpDialog();
+        Application.Run(dialog);
     }
 
     private static void ShowGraphLegend()
