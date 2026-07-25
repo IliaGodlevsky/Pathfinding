@@ -9,7 +9,7 @@ internal static class GraphGeneratorsExtensions
         return generator switch
         {
             GraphGenerators.RandomTerrain => "Random terrain",
-            GraphGenerators.PerfectMaze => "Perfect maze (fixed walls)",
+            GraphGenerators.PerfectMaze => "Perfect maze",
             _ => throw new ArgumentOutOfRangeException(nameof(generator), generator, null)
         };
     }

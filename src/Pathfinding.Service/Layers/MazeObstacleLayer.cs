@@ -4,7 +4,7 @@ using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Service.Layers;
 
-public sealed class MazeObstacleLayer(Random random) : ILayer
+public sealed class MazeObstacleLayer(int obstaclePercent, Random random) : ILayer
 {
     private static readonly (int X, int Y)[] Directions =
     [
@@ -29,6 +29,7 @@ public sealed class MazeObstacleLayer(Random random) : ILayer
             {
                 vertex.IsObstacle = false;
             }
+            AdjustObstacleCount(graph);
             return;
         }
 
@@ -67,5 +68,76 @@ public sealed class MazeObstacleLayer(Random random) : ILayer
             visited.Add(next);
             pending.Push(next);
         }
+
+        AdjustObstacleCount(graph);
+    }
+
+    private void AdjustObstacleCount(IGraph<IVertex> graph)
+    {
+        var target = graph.Count * obstaclePercent / 100;
+        var current = graph.Count(vertex => vertex.IsObstacle);
+        if (current > target)
+        {
+            foreach (var vertex in graph
+                .Where(vertex => vertex.IsObstacle)
+                .OrderBy(_ => random.Next())
+                .Take(current - target))
+            {
+                vertex.IsObstacle = false;
+            }
+            return;
+        }
+
+        while (current < target)
+        {
+            var removed = false;
+            foreach (var vertex in graph
+                .Where(vertex => !vertex.IsObstacle)
+                .OrderBy(_ => random.Next()))
+            {
+                vertex.IsObstacle = true;
+                if (IsOpenAreaConnected(graph))
+                {
+                    current++;
+                    removed = true;
+                    break;
+                }
+                vertex.IsObstacle = false;
+            }
+            if (!removed)
+            {
+                break;
+            }
+        }
+    }
+
+    private static bool IsOpenAreaConnected(IGraph<IVertex> graph)
+    {
+        var open = graph.Where(vertex => !vertex.IsObstacle).ToArray();
+        if (open.Length < 2)
+        {
+            return true;
+        }
+
+        var visited = new HashSet<Coordinate> { open[0].Position };
+        var pending = new Queue<Coordinate>();
+        pending.Enqueue(open[0].Position);
+        while (pending.TryDequeue(out var current))
+        {
+            foreach (var direction in Directions)
+            {
+                var next = new Coordinate(
+                    current[0] + direction.X / 2,
+                    current[1] + direction.Y / 2);
+                if (next[0] < 0 || next[0] >= graph.DimensionsSizes[0] ||
+                    next[1] < 0 || next[1] >= graph.DimensionsSizes[1] ||
+                    graph.Get(next).IsObstacle || !visited.Add(next))
+                {
+                    continue;
+                }
+                pending.Enqueue(next);
+            }
+        }
+        return visited.Count == open.Length;
     }
 }

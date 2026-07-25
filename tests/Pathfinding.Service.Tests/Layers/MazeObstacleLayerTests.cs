@@ -13,24 +13,40 @@ public sealed class MazeObstacleLayerTests
         var first = CreateGraph(11, 11);
         var second = CreateGraph(11, 11);
 
-        new MazeObstacleLayer(new Random(12345)).Overlay(first);
-        new MazeObstacleLayer(new Random(12345)).Overlay(second);
+        new MazeObstacleLayer(60, new Random(12345)).Overlay(first);
+        new MazeObstacleLayer(60, new Random(12345)).Overlay(second);
 
         var firstLayout = first.Select(vertex => vertex.IsObstacle).ToArray();
         var openVertices = first.Where(vertex => !vertex.IsObstacle).ToArray();
         Assert.That(second.Select(vertex => vertex.IsObstacle), Is.EqualTo(firstLayout));
-        Assert.That(openVertices, Has.Length.EqualTo(49));
+        Assert.That(first.Count(vertex => vertex.IsObstacle), Is.EqualTo(72));
         Assert.That(CountReachable(first, openVertices[0].Position), Is.EqualTo(openVertices.Length));
     }
 
     [Test]
-    public void Overlay_WhenGraphIsTooSmall_LeavesEveryVertexOpen()
+    public void Overlay_WhenGraphIsTooSmall_StillRespectsObstaclePercentage()
     {
         var graph = CreateGraph(2, 2);
 
-        new MazeObstacleLayer(new Random(12345)).Overlay(graph);
+        new MazeObstacleLayer(50, new Random(12345)).Overlay(graph);
 
-        Assert.That(graph.All(vertex => !vertex.IsObstacle), Is.True);
+        Assert.That(graph.Count(vertex => vertex.IsObstacle), Is.EqualTo(2));
+    }
+
+    [TestCase(20)]
+    [TestCase(80)]
+    public void Overlay_RespectsObstaclePercentage_AndKeepsOpenAreaConnected(
+        int obstaclePercent)
+    {
+        var graph = CreateGraph(11, 11);
+
+        new MazeObstacleLayer(obstaclePercent, new Random(12345)).Overlay(graph);
+
+        var openVertices = graph.Where(vertex => !vertex.IsObstacle).ToArray();
+        Assert.That(graph.Count(vertex => vertex.IsObstacle),
+            Is.EqualTo(graph.Count * obstaclePercent / 100));
+        Assert.That(CountReachable(graph, openVertices[0].Position),
+            Is.EqualTo(openVertices.Length));
     }
 
     private static int CountReachable(Graph<FakeVertex> graph, Coordinate start)

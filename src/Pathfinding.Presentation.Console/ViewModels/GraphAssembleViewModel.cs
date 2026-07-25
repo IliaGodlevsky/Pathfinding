@@ -80,18 +80,8 @@ internal sealed class GraphAssembleViewModel : ViewModel,
     public GraphGenerators Generator
     {
         get => generator;
-        set
-        {
-            if (generator == value)
-            {
-                return;
-            }
-            this.RaiseAndSetIfChanged(ref generator, value);
-            this.RaisePropertyChanged(nameof(CanSetObstaclePercentage));
-        }
+        set => this.RaiseAndSetIfChanged(ref generator, value);
     }
-
-    public bool CanSetObstaclePercentage => Generator == GraphGenerators.RandomTerrain;
 
     private SmoothLevels level;
     public SmoothLevels SmoothLevel
@@ -208,7 +198,7 @@ internal sealed class GraphAssembleViewModel : ViewModel,
         ILayer obstacleLayer = Generator switch
         {
             GraphGenerators.RandomTerrain => new ObstacleLayer(Obstacles, random),
-            GraphGenerators.PerfectMaze => new MazeObstacleLayer(random),
+            GraphGenerators.PerfectMaze => new MazeObstacleLayer(Obstacles, random),
             _ => throw new ArgumentOutOfRangeException(nameof(Generator), Generator, null)
         };
         var smoothLayer = smoothLevelFactory.Create(SmoothLevel);
