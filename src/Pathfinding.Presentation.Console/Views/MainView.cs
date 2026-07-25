@@ -1,10 +1,5 @@
 ﻿using Autofac.Features.AttributeFilters;
-using CommunityToolkit.Mvvm.Messaging;
 using Pathfinding.Presentation.Console.Injection;
-using Pathfinding.Presentation.Console.Messages.ViewModel.ValueMessages;
-using Pathfinding.Presentation.Console.Models;
-using System.Reactive.Disposables;
-using System.Reactive.Disposables.Fluent;
 using Terminal.Gui;
 
 namespace Pathfinding.Presentation.Console.Views;
@@ -12,12 +7,8 @@ namespace Pathfinding.Presentation.Console.Views;
 internal sealed class MainView : Window, IAsyncDisposable
 {
     private readonly StatusBar statusBar;
-    private readonly CompositeDisposable disposables = [];
-    private RunInfoModel[] selectedRuns = [];
 
-    public MainView(
-        [KeyFilter(KeyFilters.MainWindow)] View[] children,
-        [KeyFilter(KeyFilters.ViewModels)] IMessenger messenger)
+    public MainView([KeyFilter(KeyFilters.MainWindow)] View[] children)
     {
         X = 0;
         Y = 0;
@@ -31,14 +22,11 @@ internal sealed class MainView : Window, IAsyncDisposable
         statusBar = new(
         [
             new(Key.F1, "~F1~ Help", ShowKeyboardHelp),
-            new(Key.F2, "~F2~ Legend", ShowGraphLegend),
-            new(Key.F3, "~F3~ Compare runs  |  Ctrl+A Select all", ShowRunComparison)
+            new(Key.F2, "~F2~ Legend  |  Ctrl+A Select all  |  Ctrl+R Reset run order", ShowGraphLegend)
         ]);
 
         Add(children);
         Add(statusBar);
-        messenger.RegisterHandler<RunsSelectedMessage>(this,
-            message => selectedRuns = message.Value).DisposeWith(disposables);
         Loaded += OnActivate;
     }
 
@@ -51,7 +39,6 @@ internal sealed class MainView : Window, IAsyncDisposable
     protected override void Dispose(bool disposing)
     {
         Loaded -= OnActivate;
-        disposables.Dispose();
         base.Dispose(disposing);
     }
 
@@ -72,21 +59,6 @@ internal sealed class MainView : Window, IAsyncDisposable
     private static void ShowGraphLegend()
     {
         using var dialog = new GraphLegendDialog();
-        Application.Run(dialog);
-    }
-
-    private void ShowRunComparison()
-    {
-        if (selectedRuns.Length < 2)
-        {
-            MessageBox.Query(
-                "Compare runs",
-                "Select at least two runs to compare.",
-                "Ok");
-            return;
-        }
-
-        using var dialog = new RunComparisonDialog(selectedRuns);
         Application.Run(dialog);
     }
 

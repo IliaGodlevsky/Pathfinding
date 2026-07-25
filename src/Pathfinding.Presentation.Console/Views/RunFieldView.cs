@@ -30,7 +30,7 @@ internal sealed partial class RunFieldView : FrameView
         X = 0;
         Y = 0;
         Width = Dim.Percent(66);
-        Height = Dim.Percent(95);
+        Height = Dim.Percent(95) - 1;
         Border = new()
         {
             BorderBrush = Color.BrightYellow,

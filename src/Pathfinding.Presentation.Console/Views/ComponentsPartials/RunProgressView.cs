@@ -11,9 +11,9 @@ internal partial class RunProgressView
     private void Initialize()
     {
         X = 0;
-        Y = Pos.Percent(95);
+        Y = Pos.Percent(95) - 1;
         Width = Dim.Percent(66);
-        Height = Dim.Fill();
+        Height = Dim.Fill(1);
         var driver = Application.Driver;
         bar.ColorScheme = new()
         {
