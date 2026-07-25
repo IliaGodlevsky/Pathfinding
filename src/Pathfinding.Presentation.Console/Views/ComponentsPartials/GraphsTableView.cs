@@ -35,29 +35,8 @@ internal sealed partial class GraphsTableView : TableView
             new(StatusCol, typeof(GraphStatuses)),
         ]);
         table.PrimaryKey = [table.Columns[IdCol]];
-        var columnStyles = new Dictionary<DataColumn, ColumnStyle>()
-        {
-            { table.Columns[IdCol], new() { Visible = false } },
-            { table.Columns[NameCol], new() { MinWidth = 17, MaxWidth = 17, Alignment = TextAlignment.Left } },
-            { table.Columns[WidthCol], new() { Alignment = TextAlignment.Centered } },
-            { table.Columns[LengthCol], new() { Alignment = TextAlignment.Centered } },
-            { table.Columns[CostRangeCol], new() { Alignment = TextAlignment.Centered } },
-            { table.Columns[NeighborsCol], new() { Alignment = TextAlignment.Left,
-                RepresentationGetter = NeighborhoodToString } },
-            { table.Columns[SmoothCol], new() { Alignment = TextAlignment.Left,
-                RepresentationGetter = SmoothLevelToString } },
-            { table.Columns[ObstaclesCol], new() { Alignment = TextAlignment.Centered } },
-            { table.Columns[StatusCol], new () { Alignment = TextAlignment.Centered,
-                RepresentationGetter = GraphStatusToString } },
-        };
-        Style = new TableStyle()
-        {
-            ExpandLastColumn = false,
-            ShowVerticalCellLines = false,
-            AlwaysShowHeaders = true,
-            ShowVerticalHeaderLines = false,
-            ColumnStyles = columnStyles
-        };
+        Table = table;
+        SetTableStyle();
         int line = 1;
         if (Style.ShowHorizontalHeaderOverline)
         {
@@ -73,8 +52,34 @@ internal sealed partial class GraphsTableView : TableView
         X = 0;
         Y = Pos.Percent(0);
         Width = Dim.Fill();
-        Height = Dim.Percent(90);
-        Table = table;
+        Height = Dim.Percent(85);
+    }
+
+    private void SetTableStyle()
+    {
+        var columnStyles = new Dictionary<DataColumn, ColumnStyle>()
+        {
+            { Table.Columns[IdCol], new() { Visible = false } },
+            { Table.Columns[NameCol], new() { MinWidth = 17, MaxWidth = 17, Alignment = TextAlignment.Left } },
+            { Table.Columns[WidthCol], new() { Alignment = TextAlignment.Centered } },
+            { Table.Columns[LengthCol], new() { Alignment = TextAlignment.Centered } },
+            { Table.Columns[CostRangeCol], new() { Alignment = TextAlignment.Centered } },
+            { Table.Columns[NeighborsCol], new() { Alignment = TextAlignment.Left,
+                RepresentationGetter = NeighborhoodToString } },
+            { Table.Columns[SmoothCol], new() { Alignment = TextAlignment.Left,
+                RepresentationGetter = SmoothLevelToString } },
+            { Table.Columns[ObstaclesCol], new() { Alignment = TextAlignment.Centered } },
+            { Table.Columns[StatusCol], new () { Alignment = TextAlignment.Centered,
+                RepresentationGetter = GraphStatusToString } },
+        };
+        Style = new TableStyle()
+        {
+            ExpandLastColumn = false,
+            ShowVerticalCellLines = false,
+            AlwaysShowHeaders = true,
+            ShowVerticalHeaderLines = false,
+            ColumnStyles = columnStyles
+        };
     }
 
     private static string SmoothLevelToString(object level)

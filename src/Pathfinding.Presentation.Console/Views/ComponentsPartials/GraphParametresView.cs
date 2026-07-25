@@ -13,6 +13,8 @@ internal sealed partial class GraphParametresView
     private readonly Label costRangeLabel = new("Range");
     private readonly TextField upperCostInput = new();
     private readonly TextField lowerCostInput = new();
+    private readonly Label seedLabel = new("Seed");
+    private readonly TextField seedInput = new();
 
     private void Initialize()
     {
@@ -63,17 +65,27 @@ internal sealed partial class GraphParametresView
         upperCostInput.Y = Pos.Bottom(obstaclesInput) + 1;
         upperCostInput.Width = Dim.Percent(17);
 
+        seedLabel.X = 1;
+        seedLabel.Y = Pos.Bottom(costRangeLabel) + 1;
+        seedLabel.Width = Dim.Percent(50, true);
+
+        seedInput.X = Pos.Right(seedLabel) + 1;
+        seedInput.Y = Pos.Bottom(lowerCostInput) + 1;
+        seedInput.Width = Dim.Fill(1);
+
         graphWidthInput.KeyPress += KeyRestriction;
         graphLengthInput.KeyPress += KeyRestriction;
         obstaclesInput.KeyPress += KeyRestriction;
         upperCostInput.KeyPress += KeyRestriction;
         lowerCostInput.KeyPress += KeyRestriction;
+        seedInput.KeyPress += KeyRestriction;
 
         Add(graphWidthLabel, graphWidthInput,
             graphLengthLabel, graphLengthInput,
             obstaclesLabel, obstaclesInput,
             costRangeLabel, lowerCostInput,
-            upperCostInput);
+            upperCostInput,
+            seedLabel, seedInput);
     }
 
     private void KeyRestriction(KeyEventEventArgs args)

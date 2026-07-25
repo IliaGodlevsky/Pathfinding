@@ -68,6 +68,13 @@ internal sealed class GraphAssembleViewModel : ViewModel,
         set { obstacles = ObstaclesRange.ReturnInRange(value); this.RaisePropertyChanged(); }
     }
 
+    private int seed = Random.Shared.Next();
+    public int Seed
+    {
+        get => seed;
+        set => this.RaiseAndSetIfChanged(ref seed, value);
+    }
+
     private SmoothLevels level;
     public SmoothLevels SmoothLevel
     {
@@ -172,11 +179,12 @@ internal sealed class GraphAssembleViewModel : ViewModel,
 
     private Layers GetLayers()
     {
+        var random = new Random(Seed);
         var costLayer = new VertexCostLayer(range
-            => new VertexCost(Random.Shared.Next(
+            => new VertexCost(random.Next(
                 range.LowerValueOfRange,
                 range.UpperValueOfRange + 1)));
-        var obstacleLayer = new ObstacleLayer(Obstacles);
+        var obstacleLayer = new ObstacleLayer(Obstacles, random);
         var smoothLayer = smoothLevelFactory.Create(SmoothLevel);
         var neighborhoodLayer = neighborFactory.Create(Neighborhood);
         return new(neighborhoodLayer, costLayer, obstacleLayer, smoothLayer);
