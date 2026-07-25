@@ -22,7 +22,7 @@ internal sealed class MainView : Window, IAsyncDisposable
         statusBar = new(
         [
             new(Key.F1, "~F1~ Help", ShowKeyboardHelp),
-            new(Key.F2, "~F2~ Legend  |  Ctrl+A Select all  |  Ctrl+R Reset run order", ShowGraphLegend)
+            new(Key.F2, "~F2~ Legend", ShowGraphLegend)
         ]);
 
         Add(children);
@@ -44,16 +44,8 @@ internal sealed class MainView : Window, IAsyncDisposable
 
     private static void ShowKeyboardHelp()
     {
-        MessageBox.Query(
-            "Keyboard shortcuts",
-            "F1       Show this help\n" +
-            "Tab      Move focus\n" +
-            "Enter    Activate the selected graph\n" +
-            "Ctrl+A   Select all rows in the focused table\n" +
-            "Ctrl+R   Restore the default run order\n" +
-            "Arrows   Move through tables and fields\n\n" +
-            "Tip: click a run-table column heading to sort it.",
-            "Ok");
+        using var dialog = new KeyboardHelpDialog();
+        Application.Run(dialog);
     }
 
     private static void ShowGraphLegend()
