@@ -13,7 +13,6 @@ using Pathfinding.Presentation.Console.Models;
 using Pathfinding.Presentation.Console.ViewModels.Interface;
 using Pathfinding.Service.Interface;
 using Pathfinding.Service.Interface.Extensions;
-using Pathfinding.Service.Interface.Requests.Create;
 using Pathfinding.Shared.Extensions;
 using ReactiveUI;
 using System.Collections;

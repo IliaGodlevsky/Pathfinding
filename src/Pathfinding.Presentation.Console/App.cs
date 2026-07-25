@@ -36,8 +36,8 @@ internal static class App
 {
     public static ContainerBuilder AddSqlite(this ContainerBuilder builder)
     {
-        builder.RegisterInstance(new SqliteUnitOfWorkFactory(Settings.Default.ConnectionString)).As<IUnitOfWorkFactory>()
-            .SingleInstance().OnActivated(args => args.Instance.CreateTables());
+        builder.RegisterInstance(new SqliteUnitOfWorkFactory(Settings.Default.ConnectionString))
+            .As<IUnitOfWorkFactory>().SingleInstance().OnActivated(args => args.Instance.CreateTables());
         return builder;
     }
 
@@ -45,7 +45,6 @@ internal static class App
     {
         builder.RegisterType<MooreNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Moore);
-        
         builder.RegisterType<DiagonalNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Diagonal);
         builder.RegisterType<KnightsNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
@@ -274,7 +273,7 @@ internal static class App
 
     public static ContainerBuilder InitiateApp() => new();
 
-    public static void RunApp(this IContainer container)
+    public static async Task RunAppAsync(this IContainer container)
     {
         RxAppBuilder.CreateReactiveUIBuilder()
             .WithConverters(
@@ -285,7 +284,7 @@ internal static class App
                 new Int32ToExportOptionsConverter())
             .BuildApp();
         Application.Init();
-        using var main = container.Resolve<MainView>();
+        await using var main = container.Resolve<MainView>();
         Application.Top.Add(main);
         Application.Run(x => true);
     }

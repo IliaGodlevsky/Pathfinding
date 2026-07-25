@@ -1,10 +1,12 @@
-﻿namespace Pathfinding.Presentation.Console.Models;
+﻿using System.Reactive.Disposables;
+
+namespace Pathfinding.Presentation.Console.Models;
 
 internal sealed class StreamModel : IDisposable, IAsyncDisposable
 {
     public static readonly StreamModel Empty = new();
 
-    private readonly List<IDisposable> disposables;
+    private readonly CompositeDisposable disposables;
 
     public Stream Stream { get; }
 
@@ -28,26 +30,12 @@ internal sealed class StreamModel : IDisposable, IAsyncDisposable
 
     public void Dispose()
     {
-        foreach (var disposable in disposables)
-        {
-            disposable.Dispose();
-        }
-        disposables.Clear();
+        disposables.Dispose();
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        foreach (var disposable in disposables)
-        {
-            if (disposable is IAsyncDisposable async)
-            {
-                await async.DisposeAsync().ConfigureAwait(false);
-            }
-            else
-            {
-                disposable.Dispose();
-            }
-        }
-        disposables.Clear();
+        disposables.Dispose();
+        return ValueTask.CompletedTask;
     }
 }

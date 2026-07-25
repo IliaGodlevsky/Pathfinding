@@ -10,4 +10,4 @@ await using var app = App
     .AddTransitPathfindingRangeCommands()
     .BuildApp();
 
-app.RunApp();
+await app.RunAppAsync();

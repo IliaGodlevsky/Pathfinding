@@ -60,7 +60,7 @@ public sealed class DataTransferRequestService<T>(IUnitOfWorkFactory factory)
                         Order = i
                     })], t)
                     .ConfigureAwait(false);
-                models.Add(new PathfindingHistoryModel<T>
+                models.Add(new()
                 {
                     Graph = new GraphModel<T>
                     {

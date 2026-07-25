@@ -25,10 +25,10 @@ internal sealed partial class GraphNeighborhoodView : FrameView
         if (values.Count > 0)
         {
             neighborhoods.Events().SelectedItemChanged
-            .Where(x => x.SelectedItem > -1)
-            .Select(x => x.SelectedItem)
-            .BindTo(viewModel, x => x.Neighborhood)
-            .DisposeWith(disposables);
+                .Where(x => x.SelectedItem > -1)
+                .Select(x => x.SelectedItem)
+                .BindTo(viewModel, x => x.Neighborhood)
+                .DisposeWith(disposables);
         }
         neighborhoods.SelectedItem = 0;
         this.Events().VisibleChanged

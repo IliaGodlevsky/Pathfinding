@@ -16,7 +16,7 @@ internal sealed partial class GraphNameUpdateView : FrameView
     {
         Initialize();
         nameField.Events().TextChanged
-            .Select(_ => nameField.Text)
+            .Select(_ => nameField.Text.ToString())
             .BindTo(viewModel, x => x.Name)
             .DisposeWith(disposables);
         viewModel.WhenAnyValue(x => x.Name)

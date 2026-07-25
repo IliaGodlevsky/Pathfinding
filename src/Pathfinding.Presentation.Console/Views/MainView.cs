@@ -4,7 +4,7 @@ using Terminal.Gui;
 
 namespace Pathfinding.Presentation.Console.Views;
 
-internal sealed class MainView : Window
+internal sealed class MainView : Window, IAsyncDisposable
 {
     public MainView([KeyFilter(KeyFilters.MainWindow)] View[] children)
     {
@@ -12,9 +12,19 @@ internal sealed class MainView : Window
         Y = 0;
         Height = Dim.Fill();
         Width = Dim.Fill();
-        Border = new() { DrawMarginFrame = false, BorderThickness = new(0) };
+        Border = new() 
+        { 
+            DrawMarginFrame = false, 
+            BorderThickness = new(0) 
+        };
         Add(children);
         Loaded += OnActivate;
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        Dispose();
+        return ValueTask.CompletedTask;
     }
 
     protected override void Dispose(bool disposing)
