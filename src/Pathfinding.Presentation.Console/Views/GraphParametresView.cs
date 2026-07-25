@@ -25,6 +25,12 @@ internal sealed partial class GraphParametresView : FrameView
         BindTo(seedInput, x => x.Seed);
         BindTo(upperCostInput, x => x.Range, true);
         BindTo(lowerCostInput, x => x.Range);
+        obstaclesInput.Enabled = viewModel.CanSetObstaclePercentage;
+        viewModel.Events().PropertyChanged
+            .Where(args => args.PropertyName == nameof(viewModel.CanSetObstaclePercentage))
+            .Subscribe(_ => Application.MainLoop.Invoke(() =>
+                obstaclesInput.Enabled = viewModel.CanSetObstaclePercentage))
+            .DisposeWith(disposables);
     }
 
     private void BindTo(TextField field, Expression<Func<IRequireGraphParametresViewModel, int>> expression)

@@ -80,8 +80,18 @@ internal sealed class GraphAssembleViewModel : ViewModel,
     public GraphGenerators Generator
     {
         get => generator;
-        set => this.RaiseAndSetIfChanged(ref generator, value);
+        set
+        {
+            if (generator == value)
+            {
+                return;
+            }
+            this.RaiseAndSetIfChanged(ref generator, value);
+            this.RaisePropertyChanged(nameof(CanSetObstaclePercentage));
+        }
     }
+
+    public bool CanSetObstaclePercentage => Generator == GraphGenerators.RandomTerrain;
 
     private SmoothLevels level;
     public SmoothLevels SmoothLevel

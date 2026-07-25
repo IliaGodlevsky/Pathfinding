@@ -8,7 +8,7 @@ internal sealed partial class GraphParametresView
     private readonly TextField graphWidthInput = new();
     private readonly Label graphLengthLabel = new("Length");
     private readonly TextField graphLengthInput = new();
-    private readonly Label obstaclesLabel = new("Obstacles");
+    private readonly Label obstaclesLabel = new("Obstacles %");
     private readonly TextField obstaclesInput = new();
     private readonly Label costRangeLabel = new("Range");
     private readonly TextField upperCostInput = new();

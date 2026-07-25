@@ -13,6 +13,8 @@ internal interface IRequireGraphParametresViewModel
 
     public int Obstacles { get; set; }
 
+    public bool CanSetObstaclePercentage { get; }
+
     public int Seed { get; set; }
 
     public InclusiveValueRange<int> Range { get; set; }
