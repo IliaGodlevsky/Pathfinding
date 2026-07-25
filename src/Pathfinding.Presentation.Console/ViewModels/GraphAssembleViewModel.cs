@@ -27,6 +27,7 @@ internal sealed class GraphAssembleViewModel : ViewModel,
     IRequireGraphParametresViewModel,
     IRequireSmoothLevelViewModel,
     IRequireNeighborhoodNameViewModel,
+    IRequireGraphGeneratorViewModel,
     IDisposable
 {
     private static readonly InclusiveValueRange<int> WidthRange = (Settings.Default.MaxGraphWidth, 1);
@@ -75,6 +76,13 @@ internal sealed class GraphAssembleViewModel : ViewModel,
         set => this.RaiseAndSetIfChanged(ref seed, value);
     }
 
+    private GraphGenerators generator;
+    public GraphGenerators Generator
+    {
+        get => generator;
+        set => this.RaiseAndSetIfChanged(ref generator, value);
+    }
+
     private SmoothLevels level;
     public SmoothLevels SmoothLevel
     {
@@ -104,6 +112,9 @@ internal sealed class GraphAssembleViewModel : ViewModel,
     public IReadOnlyCollection<Neighborhoods> AllowedNeighborhoods { get; }
 
     public IReadOnlyCollection<SmoothLevels> AllowedLevels { get; }
+
+    public IReadOnlyCollection<GraphGenerators> AllowedGenerators { get; } =
+        Enum.GetValues<GraphGenerators>();
 
     public ReactiveCommand<Unit, Unit> AssembleGraphCommand { get; }
 
@@ -184,7 +195,12 @@ internal sealed class GraphAssembleViewModel : ViewModel,
             => new VertexCost(random.Next(
                 range.LowerValueOfRange,
                 range.UpperValueOfRange + 1)));
-        var obstacleLayer = new ObstacleLayer(Obstacles, random);
+        ILayer obstacleLayer = Generator switch
+        {
+            GraphGenerators.RandomTerrain => new ObstacleLayer(Obstacles, random),
+            GraphGenerators.PerfectMaze => new MazeObstacleLayer(random),
+            _ => throw new ArgumentOutOfRangeException(nameof(Generator), Generator, null)
+        };
         var smoothLayer = smoothLevelFactory.Create(SmoothLevel);
         var neighborhoodLayer = neighborFactory.Create(Neighborhood);
         return new(neighborhoodLayer, costLayer, obstacleLayer, smoothLayer);
