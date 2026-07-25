@@ -11,7 +11,7 @@ internal sealed partial class GraphNameView
     {
         X = 1;
         Y = 1;
-        Height = Dim.Percent(15, true);
+        Height = 3;
         Width = Dim.Fill(3);
         Border = new Border()
         {

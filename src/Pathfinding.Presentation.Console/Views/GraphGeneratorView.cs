@@ -17,20 +17,20 @@ internal sealed class GraphGeneratorView : FrameView
     public GraphGeneratorView(IRequireGraphGeneratorViewModel viewModel)
     {
         X = 1;
-        Y = Pos.Percent(15);
+        Y = 5;
         Width = Dim.Fill(3);
-        Height = 2;
-        Border = new Border { BorderStyle = BorderStyle.None };
+        Height = 5;
+        Border = new Border
+        {
+            BorderStyle = BorderStyle.Rounded,
+            Padding = new Thickness(0),
+            Title = "Generator"
+        };
 
         var generators = viewModel.AllowedGenerators.ToArray();
-        var label = new Label("Generator")
-        {
-            X = 1,
-            Y = 0
-        };
         var options = new RadioGroup
         {
-            X = Pos.Right(label) + 2,
+            X = 1,
             Y = 0,
             RadioLabels = generators
                 .Select(generator => ustring.Make(generator.ToStringRepresentation()))
@@ -41,7 +41,7 @@ internal sealed class GraphGeneratorView : FrameView
             .Select(args => generators[args.SelectedItem])
             .BindTo(viewModel, model => model.Generator)
             .DisposeWith(disposables);
-        Add(label, options);
+        Add(options);
     }
 
     protected override void Dispose(bool disposing)

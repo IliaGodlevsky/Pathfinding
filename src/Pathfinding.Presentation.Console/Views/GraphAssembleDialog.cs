@@ -36,8 +36,8 @@ internal sealed class GraphAssembleDialog : Dialog
             .Subscribe(_ => Application.RequestStop())
             .DisposeWith(disposables);
         Add(name, generator, parametres, neighborhood, smoothLevels);
-        Width = Dim.Percent(27);
-        Height = Dim.Percent(37);
+        Width = Dim.Percent(35);
+        Height = Dim.Percent(50);
         AddButton(cancelButton);
         AddButton(createButton);
         Title = "Assemble graph";

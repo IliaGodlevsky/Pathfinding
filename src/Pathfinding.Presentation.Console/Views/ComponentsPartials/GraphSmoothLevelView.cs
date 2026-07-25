@@ -8,10 +8,10 @@ internal sealed partial class GraphSmoothLevelView
 
     private void Initialize()
     {
-        X = Pos.Percent(70) + 1;
-        Y = Pos.Percent(25) + 1;
+        X = Pos.Percent(67);
+        Y = 12;
         Width = Dim.Fill(1);
-        Height = Dim.Percent(60);
+        Height = Dim.Fill(4);
         Border = new Border()
         {
             BorderStyle = BorderStyle.Rounded,

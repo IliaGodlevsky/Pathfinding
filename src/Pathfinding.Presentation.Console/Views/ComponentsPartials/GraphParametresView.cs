@@ -19,9 +19,9 @@ internal sealed partial class GraphParametresView
     private void Initialize()
     {
         X = 1;
-        Y = Pos.Percent(25) + 1;
-        Width = Dim.Percent(35);
-        Height = Dim.Percent(60);
+        Y = 12;
+        Width = Dim.Percent(32);
+        Height = Dim.Fill(4);
         Border = new Border()
         {
             BorderStyle = BorderStyle.Rounded,
@@ -31,7 +31,7 @@ internal sealed partial class GraphParametresView
 
         graphWidthLabel.X = 1;
         graphWidthLabel.Y = 1;
-        graphWidthLabel.Width = Dim.Percent(50, true);
+        graphWidthLabel.Width = Dim.Percent(60, true);
 
         graphWidthInput.X = Pos.Right(graphWidthLabel) + 1;
         graphWidthInput.Y = 1;
@@ -39,7 +39,7 @@ internal sealed partial class GraphParametresView
 
         graphLengthLabel.X = 1;
         graphLengthLabel.Y = Pos.Bottom(graphWidthLabel) + 1;
-        graphLengthLabel.Width = Dim.Percent(50, true);
+        graphLengthLabel.Width = Dim.Percent(60, true);
 
         graphLengthInput.X = Pos.Right(graphLengthLabel) + 1;
         graphLengthInput.Y = Pos.Bottom(graphWidthInput) + 1;
@@ -47,7 +47,7 @@ internal sealed partial class GraphParametresView
 
         obstaclesLabel.X = 1;
         obstaclesLabel.Y = Pos.Bottom(graphLengthLabel) + 1;
-        obstaclesLabel.Width = Dim.Percent(50, true);
+        obstaclesLabel.Width = Dim.Percent(60, true);
 
         obstaclesInput.X = Pos.Right(obstaclesLabel) + 1;
         obstaclesInput.Y = Pos.Bottom(graphLengthInput) + 1;
@@ -55,7 +55,7 @@ internal sealed partial class GraphParametresView
 
         costRangeLabel.Y = Pos.Bottom(obstaclesLabel) + 1;
         costRangeLabel.X = 1;
-        costRangeLabel.Width = Dim.Percent(50, true);
+        costRangeLabel.Width = Dim.Percent(60, true);
 
         lowerCostInput.X = Pos.Right(costRangeLabel) + 1;
         lowerCostInput.Y = Pos.Bottom(obstaclesInput) + 1;
@@ -67,7 +67,7 @@ internal sealed partial class GraphParametresView
 
         seedLabel.X = 1;
         seedLabel.Y = Pos.Bottom(costRangeLabel) + 1;
-        seedLabel.Width = Dim.Percent(50, true);
+        seedLabel.Width = Dim.Percent(60, true);
 
         seedInput.X = Pos.Right(seedLabel) + 1;
         seedInput.Y = Pos.Bottom(lowerCostInput) + 1;
