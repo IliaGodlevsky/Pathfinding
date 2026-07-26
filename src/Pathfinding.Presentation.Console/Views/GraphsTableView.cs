@@ -7,6 +7,7 @@ using Pathfinding.Presentation.Console.ViewModels.Interface;
 using Pathfinding.Shared.Extensions;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
+using System.Data;
 using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Disposables;

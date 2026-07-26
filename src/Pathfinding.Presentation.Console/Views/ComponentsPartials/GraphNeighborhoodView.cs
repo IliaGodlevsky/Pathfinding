@@ -11,7 +11,7 @@ internal sealed partial class GraphNeighborhoodView
         X = Pos.Percent(34);
         Y = 12;
         Width = Dim.Percent(32);
-        Height = Dim.Fill(4);
+        Height = Dim.Fill(3);
         Border = new Border()
         {
             BorderStyle = BorderStyle.Rounded,
