@@ -27,6 +27,7 @@ internal sealed class GraphAssembleViewModel : ViewModel,
     IRequireGraphParametresViewModel,
     IRequireSmoothLevelViewModel,
     IRequireNeighborhoodNameViewModel,
+    IRequireGraphGeneratorViewModel,
     IDisposable
 {
     private static readonly InclusiveValueRange<int> WidthRange = (Settings.Default.MaxGraphWidth, 1);
@@ -68,6 +69,20 @@ internal sealed class GraphAssembleViewModel : ViewModel,
         set { obstacles = ObstaclesRange.ReturnInRange(value); this.RaisePropertyChanged(); }
     }
 
+    private int seed = Random.Shared.Next();
+    public int Seed
+    {
+        get => seed;
+        set => this.RaiseAndSetIfChanged(ref seed, value);
+    }
+
+    private GraphGenerators generator;
+    public GraphGenerators Generator
+    {
+        get => generator;
+        set => this.RaiseAndSetIfChanged(ref generator, value);
+    }
+
     private SmoothLevels level;
     public SmoothLevels SmoothLevel
     {
@@ -97,6 +112,9 @@ internal sealed class GraphAssembleViewModel : ViewModel,
     public IReadOnlyCollection<Neighborhoods> AllowedNeighborhoods { get; }
 
     public IReadOnlyCollection<SmoothLevels> AllowedLevels { get; }
+
+    public IReadOnlyCollection<GraphGenerators> AllowedGenerators { get; } =
+        Enum.GetValues<GraphGenerators>();
 
     public ReactiveCommand<Unit, Unit> AssembleGraphCommand { get; }
 
@@ -172,11 +190,17 @@ internal sealed class GraphAssembleViewModel : ViewModel,
 
     private Layers GetLayers()
     {
+        var random = new Random(Seed);
         var costLayer = new VertexCostLayer(range
-            => new VertexCost(Random.Shared.Next(
+            => new VertexCost(random.Next(
                 range.LowerValueOfRange,
                 range.UpperValueOfRange + 1)));
-        var obstacleLayer = new ObstacleLayer(Obstacles);
+        ILayer obstacleLayer = Generator switch
+        {
+            GraphGenerators.RandomTerrain => new ObstacleLayer(Obstacles, random),
+            GraphGenerators.PerfectMaze => new MazeObstacleLayer(Obstacles, random),
+            _ => throw new ArgumentOutOfRangeException(nameof(Generator), Generator, null)
+        };
         var smoothLayer = smoothLevelFactory.Create(SmoothLevel);
         var neighborhoodLayer = neighborFactory.Create(Neighborhood);
         return new(neighborhoodLayer, costLayer, obstacleLayer, smoothLayer);

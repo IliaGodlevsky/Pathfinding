@@ -10,7 +10,7 @@ internal sealed partial class GraphFieldView
         X = 0;
         Y = 0;
         Width = Dim.Percent(66);
-        Height = Dim.Percent(95);
+        Height = Dim.Percent(95) - 1;
         Border = new Border()
         {
             BorderBrush = Color.BrightYellow,

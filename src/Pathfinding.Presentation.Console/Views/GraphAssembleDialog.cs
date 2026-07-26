@@ -17,6 +17,7 @@ internal sealed class GraphAssembleDialog : Dialog
     {
         var name = new GraphNameView(viewModel).DisposeWith(disposables);
         var parametres = new GraphParametresView(viewModel).DisposeWith(disposables);
+        var generator = new GraphGeneratorView(viewModel).DisposeWith(disposables);
         var neighborhood = new GraphNeighborhoodView(viewModel).DisposeWith(disposables);
         var smoothLevels = new GraphSmoothLevelView(viewModel).DisposeWith(disposables);
         var createButton = new Button("Create").DisposeWith(disposables);
@@ -34,9 +35,9 @@ internal sealed class GraphAssembleDialog : Dialog
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
             .Subscribe(_ => Application.RequestStop())
             .DisposeWith(disposables);
-        Add(name, parametres, neighborhood, smoothLevels);
-        Width = Dim.Percent(27);
-        Height = Dim.Percent(37);
+        Add(name, generator, parametres, neighborhood, smoothLevels);
+        Width = Dim.Percent(35);
+        Height = Dim.Percent(50);
         AddButton(cancelButton);
         AddButton(createButton);
         Title = "Assemble graph";

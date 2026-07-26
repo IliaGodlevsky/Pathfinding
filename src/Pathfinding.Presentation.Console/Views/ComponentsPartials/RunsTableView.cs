@@ -24,6 +24,7 @@ internal sealed partial class RunsTableView : TableView
     private const string Descending = "DESC";
 
     private readonly int headerLinesConsumed;
+    private readonly DataTable sourceTable = new();
 
     private void SetTableStyle()
     {
@@ -92,8 +93,7 @@ internal sealed partial class RunsTableView : TableView
 
     public RunsTableView()
     {
-        Table = new();
-        Table.Columns.AddRange(
+        sourceTable.Columns.AddRange(
         [
             new (IdCol, typeof(int)),
             new (AlgorithmCol, typeof(Algorithms)),
@@ -106,6 +106,8 @@ internal sealed partial class RunsTableView : TableView
             new (WeightCol, typeof(object)),
             new (StatusCol, typeof(RunStatuses))
         ]);
+        sourceTable.PrimaryKey = [sourceTable.Columns[IdCol]];
+        Table = sourceTable;
         SetTableStyle();
         int line = 1;
         if (Style.ShowHorizontalHeaderOverline)
@@ -122,6 +124,6 @@ internal sealed partial class RunsTableView : TableView
         X = 0;
         Y = Pos.Percent(0);
         Width = Dim.Fill();
-        Height = Dim.Percent(93);
+        Height = Dim.Percent(88);
     }
 }

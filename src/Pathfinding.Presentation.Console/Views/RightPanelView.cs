@@ -11,7 +11,7 @@ internal sealed class RightPanelView : View
         X = Pos.Percent(66);
         Y = 0;
         Width = Dim.Percent(34);
-        Height = Dim.Fill();
+        Height = Dim.Fill(1);
         Border = new Border();
 
         Add(children);

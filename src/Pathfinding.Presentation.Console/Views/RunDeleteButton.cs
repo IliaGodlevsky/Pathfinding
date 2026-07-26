@@ -21,9 +21,19 @@ internal sealed partial class RunDeleteButton : Button
             .DisposeWith(disposables);
         this.Events().MouseClick
             .Where(x => x.MouseEvent.Flags == MouseFlags.Button1Clicked)
+            .Where(_ => ConfirmDeletion())
             .Select(x => Unit.Default)
             .InvokeCommand(viewModel, x => x.DeleteRunsCommand)
             .DisposeWith(disposables);
+    }
+
+    private static bool ConfirmDeletion()
+    {
+        return MessageBox.Query(
+            "Delete runs?",
+            "Delete the selected runs?\nThis action cannot be undone.",
+            "Cancel",
+            "Delete") == 1;
     }
 
     protected override void Dispose(bool disposing)

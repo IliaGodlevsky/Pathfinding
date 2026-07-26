@@ -8,6 +8,7 @@ using Pathfinding.Shared.Extensions;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
 using System.Collections.Specialized;
+using System.Data;
 using System.Linq.Expressions;
 using System.Reactive.Disposables;
 using System.Reactive.Disposables.Fluent;
@@ -22,6 +23,8 @@ internal sealed partial class RunsTableView : TableView
     private readonly Dictionary<string, bool> sortOrder = [];
     private readonly CompositeDisposable disposables = [];
     private readonly IRunsTableViewModel viewModel;
+    private string filter = string.Empty;
+    private string sortExpression = string.Empty;
 
     public RunsTableView(IRunsTableViewModel viewModel,
         [KeyFilter(KeyFilters.Views)] IMessenger messenger) : this()
@@ -96,12 +99,55 @@ internal sealed partial class RunsTableView : TableView
     {
         Application.MainLoop.Invoke(() =>
         {
-            var row = Table.Rows.Find(id);
-            row[column] = value;
-            Table.AcceptChanges();
-            SetNeedsDisplay();
-            SetCursorInvisible();
+            var row = sourceTable.Rows.Find(id);
+            if (row is not null)
+            {
+                row[column] = value;
+                sourceTable.AcceptChanges();
+                ApplyFilter(filter);
+            }
         });
+    }
+
+    internal void ApplyFilter(string value)
+    {
+        filter = value?.Trim() ?? string.Empty;
+        var filtered = sourceTable.Clone();
+        var rows = sourceTable.AsEnumerable().Where(row =>
+            string.IsNullOrEmpty(filter) ||
+            row.ItemArray.Any(cell => cell?.ToString()?.Contains(
+                filter, StringComparison.OrdinalIgnoreCase) == true) ||
+            GetRenderedValues(row).Any(value => value?.Contains(
+                filter, StringComparison.OrdinalIgnoreCase) == true));
+        foreach (var row in rows)
+        {
+            filtered.ImportRow(row);
+        }
+
+        if (!string.IsNullOrEmpty(sortExpression))
+        {
+            filtered.DefaultView.Sort = sortExpression;
+            filtered = filtered.DefaultView.ToTable();
+        }
+        Table = filtered;
+        SetTableStyle();
+        MultiSelectedRegions.Clear();
+        SetNeedsDisplay();
+        SetCursorInvisible();
+    }
+
+    private static IEnumerable<string> GetRenderedValues(DataRow row)
+    {
+        yield return AlgorithmToString(row[AlgorithmCol]);
+        yield return RunStatusToString(row[StatusCol]);
+        if (row[StepCol] != DBNull.Value)
+        {
+            yield return StepRulesToString(row[StepCol]);
+        }
+        if (row[LogicCol] != DBNull.Value)
+        {
+            yield return HeuristicsToString(row[LogicCol]);
+        }
     }
 
     private int GetRunId(int selectedRow)
@@ -122,11 +168,8 @@ internal sealed partial class RunsTableView : TableView
 
     private void OrderTable(string columnName, string order)
     {
-        Table.DefaultView.Sort = $"{columnName} {order}";
-        Table = Table.DefaultView.ToTable();
-        SetTableStyle();
-        Table.AcceptChanges();
-        SetNeedsDisplay();
+        sortExpression = $"{columnName} {order}";
+        ApplyFilter(filter);
     }
 
     private static object ToTableValue<T>(T? value)
@@ -134,7 +177,7 @@ internal sealed partial class RunsTableView : TableView
 
     private void OnAdded(RunInfoModel model)
     {
-        Table.Rows.Add(model.Id,
+        sourceTable.Rows.Add(model.Id,
             model.Algorithm,
             model.Visited,
             model.Steps,
@@ -150,21 +193,23 @@ internal sealed partial class RunsTableView : TableView
         BindTo(model, CostCol, x => x.Cost).DisposeWith(sub);
         BindTo(model, StatusCol, x => x.ResultStatus).DisposeWith(sub);
         modelsSubs.Add(model.Id, sub);
-        Table.AcceptChanges();
+        sourceTable.AcceptChanges();
+        ApplyFilter(filter);
     }
 
     private void OnRemoved(RunInfoModel model)
     {
-        var row = Table.Rows.Find(model.Id);
-        var index = Table.Rows.IndexOf(row);
+        var visibleRow = Table.Rows.Find(model.Id);
+        var index = visibleRow is null ? -1 : Table.Rows.IndexOf(visibleRow);
+        var row = sourceTable.Rows.Find(model.Id);
         if (row != null)
         {
             row.Delete();
             modelsSubs[model.Id].Dispose();
             modelsSubs.Remove(model.Id);
-            Table.AcceptChanges();
-            MultiSelectedRegions.Clear();
-            if (Table.Rows.Count > 0)
+            sourceTable.AcceptChanges();
+            ApplyFilter(filter);
+            if (Table.Rows.Count > 0 && index >= 0)
             {
                 SelectedCellChangedEventArgs args = index == Table.Rows.Count
                     ? new(Table, 0, 0, index, index - 1)
@@ -183,11 +228,13 @@ internal sealed partial class RunsTableView : TableView
             {
                 case NotifyCollectionChangedAction.Reset:
                     MultiSelectedRegions.Clear();
-                    Table.Clear();
-                    Table.AcceptChanges();
+                    sourceTable.Clear();
+                    sourceTable.AcceptChanges();
                     modelsSubs.Values.ForEach(x => x.Dispose());
                     modelsSubs.Clear();
                     sortOrder.Clear();
+                    sortExpression = string.Empty;
+                    ApplyFilter(filter);
                     break;
                 case NotifyCollectionChangedAction.Add:
                     OnAdded((RunInfoModel)e.NewItems[0]);
