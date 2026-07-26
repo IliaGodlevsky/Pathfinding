@@ -16,10 +16,10 @@ internal sealed class GraphGeneratorView : FrameView
 
     public GraphGeneratorView(IRequireGraphGeneratorViewModel viewModel)
     {
-        X = 1;
-        Y = 5;
-        Width = Dim.Fill(3);
-        Height = 5;
+        X = Pos.Percent(40);
+        Y = 4 + Pos.Percent(35);
+        Width = Dim.Percent(33);
+        Height = Dim.Fill(3);
         Border = new Border
         {
             BorderStyle = BorderStyle.Rounded,

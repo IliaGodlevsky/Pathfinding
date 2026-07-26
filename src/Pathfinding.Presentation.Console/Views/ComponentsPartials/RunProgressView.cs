@@ -5,11 +5,11 @@ namespace Pathfinding.Presentation.Console.Views;
 internal partial class RunProgressView
 {
     private readonly ProgressBar bar = new();
-    private readonly Button restartButton = new("|<");
+    private readonly Button restartButton = new("<<");
     private readonly Button previousButton = new("<");
-    private readonly Button playButton = new("Play");
+    private readonly Button playButton = new("Play ");
     private readonly Button nextButton = new(">");
-    private readonly Button finishButton = new(">|");
+    private readonly Button finishButton = new(">>");
     private readonly Button speedButton = new("1x");
 
     private void Initialize()
@@ -30,15 +30,15 @@ internal partial class RunProgressView
         };
         bar.Fraction = 0;
 
-        bar.Width = Dim.Fill(36);
+        bar.Width = Dim.Fill(41);
         bar.X = 1;
         bar.Y = Pos.Center();
-        bar.ProgressBarStyle = ProgressBarStyle.Blocks;
+        bar.ProgressBarStyle = ProgressBarStyle.Continuous;
         bar.ProgressBarFormat = ProgressBarFormat.Framed;
 
         PositionButton(restartButton, Pos.Right(bar) + 1, 5);
         PositionButton(previousButton, Pos.Right(restartButton), 5);
-        PositionButton(playButton, Pos.Right(previousButton), 8);
+        PositionButton(playButton, Pos.Right(previousButton), 9);
         PositionButton(nextButton, Pos.Right(playButton), 5);
         PositionButton(finishButton, Pos.Right(nextButton), 5);
         PositionButton(speedButton, Pos.Right(finishButton), 7);

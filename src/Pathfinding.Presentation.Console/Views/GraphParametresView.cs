@@ -78,10 +78,7 @@ internal sealed partial class GraphParametresView : FrameView
                 {
                     var property = compiled(viewModel);
                     var value = (isUpper ? property.UpperValueOfRange : property.LowerValueOfRange).ToString();
-                    if (field.Text != value)
-                    {
-                        field.Text = value;
-                    }
+                    field.Text = value;
                 });
             })
             .Subscribe()

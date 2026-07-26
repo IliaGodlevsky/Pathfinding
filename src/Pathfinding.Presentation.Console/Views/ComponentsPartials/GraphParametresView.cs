@@ -8,7 +8,7 @@ internal sealed partial class GraphParametresView
     private readonly TextField graphWidthInput = new();
     private readonly Label graphLengthLabel = new("Length");
     private readonly TextField graphLengthInput = new();
-    private readonly Label obstaclesLabel = new("Obstacles %");
+    private readonly Label obstaclesLabel = new("Obstacles");
     private readonly TextField obstaclesInput = new();
     private readonly Label costRangeLabel = new("Range");
     private readonly TextField upperCostInput = new();
@@ -19,9 +19,9 @@ internal sealed partial class GraphParametresView
     private void Initialize()
     {
         X = 1;
-        Y = 12;
-        Width = Dim.Percent(32);
-        Height = Dim.Fill(4);
+        Y = 4;
+        Width = Dim.Percent(37);
+        Height = Dim.Fill(3);
         Border = new Border()
         {
             BorderStyle = BorderStyle.Rounded,
@@ -55,7 +55,7 @@ internal sealed partial class GraphParametresView
 
         costRangeLabel.Y = Pos.Bottom(obstaclesLabel) + 1;
         costRangeLabel.X = 1;
-        costRangeLabel.Width = Dim.Percent(60, true);
+        costRangeLabel.Width = Dim.Percent(55, true);
 
         lowerCostInput.X = Pos.Right(costRangeLabel) + 1;
         lowerCostInput.Y = Pos.Bottom(obstaclesInput) + 1;

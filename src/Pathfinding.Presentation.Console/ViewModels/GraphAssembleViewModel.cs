@@ -105,7 +105,8 @@ internal sealed class GraphAssembleViewModel : ViewModel,
         {
             int upper = CostRange.ReturnInRange(value.UpperValueOfRange);
             int lower = CostRange.ReturnInRange(value.LowerValueOfRange);
-            this.RaiseAndSetIfChanged(ref range, (upper, lower));
+            range = new(upper, lower);
+            this.RaisePropertyChanged();
         }
     }
 
