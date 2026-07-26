@@ -7,6 +7,7 @@ using Pathfinding.Presentation.Console.ViewModels.Interface;
 using Pathfinding.Shared.Extensions;
 using ReactiveMarbles.ObservableEvents;
 using ReactiveUI;
+using System.Data;
 using System.Linq.Expressions;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -23,6 +24,7 @@ internal sealed partial class GraphsTableView
 
     private readonly MainLoop mainLoop = Application.MainLoop;
     private readonly ConsoleDriver driver = Application.Driver;
+    private string filter = string.Empty;
 
     public GraphsTableView(IGraphTableViewModel viewModel,
         [KeyFilter(KeyFilters.Views)] IMessenger messenger) : this()
@@ -34,7 +36,7 @@ internal sealed partial class GraphsTableView
             .InvokeCommand(viewModel, x => x.LoadGraphsCommand)
             .DisposeWith(disposables);
         this.Events().CellActivated
-            .Where(x => x.Row < table.Rows.Count)
+            .Where(x => x.Row < Table.Rows.Count)
             .Select(x => GetGraphId(x.Row))
             .Do(_ => SetCursorInvisible())
             .InvokeCommand(viewModel, x => x.ActivateGraphCommand)
@@ -51,7 +53,7 @@ internal sealed partial class GraphsTableView
             .InvokeCommand(viewModel, x => x.SelectGraphsCommand)
             .DisposeWith(disposables);
         this.Events().SelectedCellChanged
-            .Where(x => x.NewRow > -1 && x.NewRow < table.Rows.Count)
+            .Where(x => x.NewRow > -1 && x.NewRow < Table.Rows.Count)
             .Select(_ => GetAllSelectedCells().Select(x => x.Y)
                 .Distinct().Select(GetGraphId).ToArray())
             .Do(_ => SetCursorInvisible())
@@ -73,13 +75,33 @@ internal sealed partial class GraphsTableView
         return (int)Table.Rows[selectedRow][IdCol];
     }
 
+    internal void ApplyFilter(string value)
+    {
+        filter = value?.Trim() ?? string.Empty;
+        var filtered = table.Clone();
+        var rows = table.AsEnumerable().Where(row =>
+            string.IsNullOrEmpty(filter) ||
+            row.ItemArray.Any(cell => cell?.ToString()?.Contains(
+                filter, StringComparison.OrdinalIgnoreCase) == true));
+        foreach (var row in rows)
+        {
+            filtered.ImportRow(row);
+        }
+
+        Table = filtered;
+        SetTableStyle();
+        MultiSelectedRegions.Clear();
+        SetNeedsDisplay();
+        SetCursorInvisible();
+    }
+
     private void AddToTable(GraphInfoModel model)
     {
         mainLoop.Invoke(() =>
         {
             table.Rows.Add(model.GetProperties());
             table.AcceptChanges();
-            SetNeedsDisplay();
+            ApplyFilter(filter);
             var composite = new CompositeDisposable();
             BindTo(model, ObstaclesCol, x => x.ObstaclesCount).DisposeWith(composite);
             BindTo(model, NameCol, x => x.Name).DisposeWith(composite);
@@ -116,8 +138,7 @@ internal sealed partial class GraphsTableView
             {
                 row[column] = value;
                 table.AcceptChanges();
-                SetNeedsDisplay();
-                SetCursorInvisible();
+                ApplyFilter(filter);
             }
         });
     }
@@ -129,18 +150,19 @@ internal sealed partial class GraphsTableView
             var row = table.Rows.Find(model.Id);
             if (row is not null)
             {
-                var index = table.Rows.IndexOf(row);
+                var visibleRow = Table.Rows.Find(model.Id);
+                var index = visibleRow is null ? -1 : Table.Rows.IndexOf(visibleRow);
                 row.Delete();
                 table.AcceptChanges();
                 var toDispose = modelChangingSubs[model.Id];
                 modelChangingSubs.Remove(model.Id);
                 disposables.Remove(toDispose);
-                MultiSelectedRegions.Clear();
-                if (table.Rows.Count > 0)
+                ApplyFilter(filter);
+                if (Table.Rows.Count > 0 && index >= 0)
                 {
-                    SelectedCellChangedEventArgs args = index == table.Rows.Count
-                        ? new(table, 0, 0, index, index - 1)
-                        : new(table, 0, 0, index, index);
+                    SelectedCellChangedEventArgs args = index == Table.Rows.Count
+                        ? new(Table, 0, 0, index, index - 1)
+                        : new(Table, 0, 0, index, index);
                     OnSelectedCellChanged(args);
                     SetSelection(0, args.NewRow, false);
                 }

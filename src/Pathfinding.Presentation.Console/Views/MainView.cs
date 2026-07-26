@@ -6,6 +6,8 @@ namespace Pathfinding.Presentation.Console.Views;
 
 internal sealed class MainView : Window, IAsyncDisposable
 {
+    private readonly StatusBar statusBar;
+
     public MainView([KeyFilter(KeyFilters.MainWindow)] View[] children)
     {
         X = 0;
@@ -17,7 +19,14 @@ internal sealed class MainView : Window, IAsyncDisposable
             DrawMarginFrame = false, 
             BorderThickness = new(0) 
         };
+        statusBar = new(
+        [
+            new(Key.F1, "~F1~ Keys: Ctrl+A select all, Ctrl+R reset order", ShowKeyboardHelp),
+            new(Key.F2, "~F2~ Legend", ShowGraphLegend)
+        ]);
+
         Add(children);
+        Add(statusBar);
         Loaded += OnActivate;
     }
 
@@ -31,6 +40,18 @@ internal sealed class MainView : Window, IAsyncDisposable
     {
         Loaded -= OnActivate;
         base.Dispose(disposing);
+    }
+
+    private static void ShowKeyboardHelp()
+    {
+        using var dialog = new KeyboardHelpDialog();
+        Application.Run(dialog);
+    }
+
+    private static void ShowGraphLegend()
+    {
+        using var dialog = new GraphLegendDialog();
+        Application.Run(dialog);
     }
 
     private void OnActivate()

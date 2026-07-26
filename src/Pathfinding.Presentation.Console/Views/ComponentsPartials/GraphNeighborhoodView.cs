@@ -8,10 +8,10 @@ internal sealed partial class GraphNeighborhoodView
 
     private void Initialize()
     {
-        X = Pos.Percent(35) + 1;
-        Y = Pos.Percent(25) + 1;
-        Width = Dim.Percent(35);
-        Height = Dim.Percent(60);
+        X = Pos.Percent(34);
+        Y = 12;
+        Width = Dim.Percent(32);
+        Height = Dim.Fill(3);
         Border = new Border()
         {
             BorderStyle = BorderStyle.Rounded,
