@@ -5,15 +5,19 @@ namespace Pathfinding.Presentation.Console.Views;
 internal partial class RunProgressView
 {
     private readonly ProgressBar bar = new();
-    private readonly Label leftLabel = new("-");
-    private readonly Label rightLabel = new("+");
+    private readonly Button restartButton = new("|<");
+    private readonly Button previousButton = new("<");
+    private readonly Button playButton = new("Play");
+    private readonly Button nextButton = new(">");
+    private readonly Button finishButton = new(">|");
+    private readonly Button speedButton = new("1x");
 
     private void Initialize()
     {
         X = 0;
-        Y = Pos.Percent(95);
+        Y = Pos.Percent(95) - 1;
         Width = Dim.Percent(66);
-        Height = Dim.Fill();
+        Height = Dim.Fill(1);
         var driver = Application.Driver;
         bar.ColorScheme = new()
         {
@@ -26,27 +30,36 @@ internal partial class RunProgressView
         };
         bar.Fraction = 0;
 
-        bar.Width = Dim.Percent(94);
-        bar.X = Pos.Right(leftLabel);
+        bar.Width = Dim.Fill(36);
+        bar.X = 1;
         bar.Y = Pos.Center();
         bar.ProgressBarStyle = ProgressBarStyle.Blocks;
         bar.ProgressBarFormat = ProgressBarFormat.Framed;
 
-        leftLabel.WantContinuousButtonPressed = true;
-        leftLabel.TextAlignment = TextAlignment.Centered;
-        leftLabel.Y = Pos.Center();
-        leftLabel.Width = Dim.Percent(3);
-        leftLabel.X = 1;
+        PositionButton(restartButton, Pos.Right(bar) + 1, 5);
+        PositionButton(previousButton, Pos.Right(restartButton), 5);
+        PositionButton(playButton, Pos.Right(previousButton), 8);
+        PositionButton(nextButton, Pos.Right(playButton), 5);
+        PositionButton(finishButton, Pos.Right(nextButton), 5);
+        PositionButton(speedButton, Pos.Right(finishButton), 7);
 
-        rightLabel.X = Pos.Right(bar) + 1;
-        rightLabel.Y = Pos.Center();
-        rightLabel.TextAlignment = TextAlignment.Centered;
-        rightLabel.WantContinuousButtonPressed = true;
-        rightLabel.Width = Dim.Percent(3);
+        Add(bar, restartButton, previousButton, playButton,
+            nextButton, finishButton, speedButton);
+        SetControlsVisible(false);
+    }
 
-        Add(rightLabel, bar, leftLabel);
-        rightLabel.Visible = false;
-        leftLabel.Visible = false;
-        bar.Visible = false;
+    private static void PositionButton(Button button, Pos x, int width)
+    {
+        button.X = x;
+        button.Y = Pos.Center();
+        button.Width = width;
+    }
+
+    private void SetControlsVisible(bool visible)
+    {
+        foreach (var control in Subviews)
+        {
+            control.Visible = visible;
+        }
     }
 }

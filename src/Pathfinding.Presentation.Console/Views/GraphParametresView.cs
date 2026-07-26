@@ -22,6 +22,7 @@ internal sealed partial class GraphParametresView : FrameView
         BindTo(obstaclesInput, x => x.Obstacles);
         BindTo(graphWidthInput, x => x.Width);
         BindTo(graphLengthInput, x => x.Length);
+        BindTo(seedInput, x => x.Seed);
         BindTo(upperCostInput, x => x.Range, true);
         BindTo(lowerCostInput, x => x.Range);
     }
@@ -94,6 +95,7 @@ internal sealed partial class GraphParametresView : FrameView
         obstaclesInput.KeyPress -= KeyRestriction;
         upperCostInput.KeyPress -= KeyRestriction;
         lowerCostInput.KeyPress -= KeyRestriction;
+        seedInput.KeyPress -= KeyRestriction;
         disposables.Dispose();
         base.Dispose(disposing);
     }

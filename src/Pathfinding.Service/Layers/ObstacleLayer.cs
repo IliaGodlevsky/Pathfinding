@@ -6,7 +6,7 @@ using static System.Linq.Enumerable;
 
 namespace Pathfinding.Service.Layers;
 
-public sealed class ObstacleLayer(int obstaclePercent) : ILayer
+public sealed class ObstacleLayer(int obstaclePercent, Random random = null) : ILayer
 {
     public void Overlay(IGraph<IVertex> graph)
     {
@@ -14,7 +14,7 @@ public sealed class ObstacleLayer(int obstaclePercent) : ILayer
         var regularsCount = graph.Count - obstaclesCount;
         Repeat(true, obstaclesCount)
            .Concat(Repeat(false, regularsCount))
-           .OrderBy(_ => Random.Shared.NextDouble()) // shuffle
+           .OrderBy(_ => (random ?? Random.Shared).NextDouble()) // shuffle
            .Zip(graph, (o, v) => (Vertex: v, Obstacle: o))
            .ForEach(item => item.Vertex.IsObstacle = item.Obstacle);
     }
