@@ -277,7 +277,6 @@ internal static class App
     {
         RxAppBuilder.CreateReactiveUIBuilder()
             .WithConverters(
-                new NStackStringToRegularStringConverter(),
                 new Int32ToNeighborhoodsConverter(),
                 new Int32ToSmoothLevelsConverter(),
                 new Int32ToStepRulesConverter(),

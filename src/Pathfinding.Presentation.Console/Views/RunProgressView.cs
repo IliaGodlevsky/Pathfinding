@@ -21,7 +21,7 @@ internal sealed partial class RunProgressView : FrameView
     private readonly IRunFieldViewModel viewModel;
     private readonly CompositeDisposable disposables = [];
     private readonly SerialDisposable playback = new();
-    private static readonly double[] PlaybackSpeeds = [0.25, 0.5, 1, 2, 4];
+    private static readonly float[] PlaybackSpeeds = [0.25f, 0.5f, 1, 2, 4, 6];
     private int playbackSpeedIndex = 2;
 
     private float Fraction
@@ -47,7 +47,7 @@ internal sealed partial class RunProgressView : FrameView
         playButton.Clicked += TogglePlayback;
         nextButton.Clicked += Next;
         finishButton.Clicked += Finish;
-        speedButton.Clicked += ChangeSpeed;
+        speedButton.MouseClick += ChangeSpeed;
 
         BindTo(bar, x => (float)Math.Round((x.MouseEvent.X + 1f) / bar.Bounds.Width, 3), Button1Clicked);
         BindTo(bar, x => (float)Math.Round(((int)x.KeyEvent.Key - (int)D1) / 9f, 3), D2, D3, D4, D5, D6, D7, D8, D9);
@@ -56,6 +56,12 @@ internal sealed partial class RunProgressView : FrameView
         BindTo(bar, _ => Fraction + GetFractionPerClick(), CursorRight);
         BindTo(bar, _ => Fraction - GetExtraFractionPerClick(), CursorLeft | ShiftMask);
         BindTo(bar, _ => Fraction + GetExtraFractionPerClick(), CursorRight | ShiftMask);
+
+        foreach (var button in new[] { nextButton, playButton, previousButton, finishButton, restartButton })
+        {
+            BindTo(button, _ => Fraction + GetFractionPerClick() * PlaybackSpeeds[playbackSpeedIndex], WheeledUp);
+            BindTo(button, _ => Fraction - GetFractionPerClick() * PlaybackSpeeds[playbackSpeedIndex], WheeledDown);
+        }
 
         BindTo(bar, _ => RunModel.FractionRange.LowerValueOfRange, CursorLeft | CtrlMask, D1);
         BindTo(bar, _ => RunModel.FractionRange.UpperValueOfRange, CursorRight | CtrlMask, D0);
@@ -114,7 +120,7 @@ internal sealed partial class RunProgressView : FrameView
             SetFraction(RunModel.FractionRange.LowerValueOfRange);
         }
         playButton.Text = "Pause";
-        playback.Disposable = Observable.Interval(TimeSpan.FromMilliseconds(100))
+        playback.Disposable = Observable.Interval(TimeSpan.FromMilliseconds(75))
             .Subscribe(_ => Application.MainLoop.Invoke(AdvancePlayback));
     }
 
@@ -125,8 +131,7 @@ internal sealed partial class RunProgressView : FrameView
             PausePlayback();
             return;
         }
-        var next = Fraction + GetFractionPerClick() *
-            (float)PlaybackSpeeds[playbackSpeedIndex];
+        var next = Fraction + GetFractionPerClick() * PlaybackSpeeds[playbackSpeedIndex];
         SetFraction(next);
         if (next >= RunModel.FractionRange.UpperValueOfRange)
         {
@@ -140,9 +145,20 @@ internal sealed partial class RunProgressView : FrameView
         playButton.Text = "Play";
     }
 
-    private void ChangeSpeed()
+    private void ChangeSpeed(MouseEventArgs e)
     {
-        playbackSpeedIndex = (playbackSpeedIndex + 1) % PlaybackSpeeds.Length;
+        if (e.MouseEvent.Flags == Button1Clicked)
+        {
+            playbackSpeedIndex = (playbackSpeedIndex + 1) % PlaybackSpeeds.Length;
+        }
+        else if (e.MouseEvent.Flags == Button3Clicked)
+        {
+            if (playbackSpeedIndex <= 0)
+            {
+                playbackSpeedIndex = PlaybackSpeeds.Length;
+            }
+            playbackSpeedIndex = (playbackSpeedIndex - 1) % PlaybackSpeeds.Length;
+        }
         speedButton.Text = $"{PlaybackSpeeds[playbackSpeedIndex]:0.##}x";
     }
 
@@ -185,7 +201,7 @@ internal sealed partial class RunProgressView : FrameView
         playButton.Clicked -= TogglePlayback;
         nextButton.Clicked -= Next;
         finishButton.Clicked -= Finish;
-        speedButton.Clicked -= ChangeSpeed;
+        speedButton.MouseClick -= ChangeSpeed;
         disposables.Dispose();
         base.Dispose(disposing);
     }
