@@ -12,9 +12,6 @@ public abstract class PathfindingProcess(IReadOnlyCollection<IPathfindingVertex>
         IPathfindingVertex Source,
         IPathfindingVertex Target)
     {
-        public static SubRange From(IPathfindingVertex source, 
-            IPathfindingVertex target) => new(source, target);
-
         public static readonly SubRange Default = new(
             NullPathfindingVertex.Instance,
             NullPathfindingVertex.Instance);
@@ -26,10 +23,7 @@ public abstract class PathfindingProcess(IReadOnlyCollection<IPathfindingVertex>
     public IGraphPath FindPath()
     {
         var subPaths = new List<IGraphPath>();
-        var subRanges = range
-            .Zip(range.Skip(1), SubRange.From)
-            .ToArray();
-        foreach (var subRange in subRanges)
+        foreach (var subRange in GetSubRanges())
         {
             PrepareForSubPathfinding(subRange);
             while (!IsDestination())
@@ -44,6 +38,11 @@ public abstract class PathfindingProcess(IReadOnlyCollection<IPathfindingVertex>
             DropState();
         }
         return CreatePath(subPaths);
+    }
+
+    private IEnumerable<SubRange> GetSubRanges()
+    {
+        return range.Zip(range.Skip(1), (s, t) => new SubRange(s, t));
     }
 
     protected abstract void MoveNextVertex();

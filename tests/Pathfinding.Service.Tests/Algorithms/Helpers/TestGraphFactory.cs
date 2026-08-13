@@ -43,7 +43,7 @@ internal static class TestGraphFactory
     {
         var matrices = new MatrixLayer(CostMatrix, ObstacleMatrix);
         var neighborhoodLayer = new MooreNeighborhoodLayer();
-        var layers = new Layers.Layers(matrices, neighborhoodLayer);
+        var layers = new Service.Layers.Layers(matrices, neighborhoodLayer);
         var graph = new GraphAssemble<TestVertex>().AssembleGraph([GridSize, GridSize]);
         layers.Overlay(graph);
         var source = graph.Get(0, 0);

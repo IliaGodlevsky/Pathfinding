@@ -3,23 +3,24 @@ using Pathfinding.Shared.Primitives;
 
 namespace Pathfinding.Data.InMemory.Repositories;
 
-internal sealed class EntityComparer<T>
-    : Singleton<EntityComparer<T>, IEqualityComparer<IEntity<T>>>, IEqualityComparer<IEntity<T>>
+internal sealed class EntityComparer<T, U>
+    : Singleton<EntityComparer<T, U>, IEqualityComparer<U>>, IEqualityComparer<U>
     where T : IEquatable<T>
+    where U : IEntity<T>
 {
     private EntityComparer()
     {
 
     }
 
-    public bool Equals(IEntity<T> x, IEntity<T> y)
+    public bool Equals(U x, U y)
     {
         return x is not null
-               && y is not null
-               && x.Id.Equals(y.Id);
+            && y is not null
+            && x.Id.Equals(y.Id);
     }
 
-    public int GetHashCode(IEntity<T> obj)
+    public int GetHashCode(U obj)
     {
         return obj.Id.GetHashCode();
     }

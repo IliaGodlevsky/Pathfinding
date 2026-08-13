@@ -6,22 +6,13 @@ namespace Pathfinding.Data.InMemory.Repositories;
 internal sealed class InMemoryGraphParametersRepository(
     InMemoryRangeRepository rangeRepository,
     InMemoryVerticesRepository verticesRepository,
-    InMemoryStatisticsRepository statisticsRepository) : IGraphParametersRepository
+    InMemoryStatisticsRepository statisticsRepository) : InMemoryRepository<int, Graph>, IGraphParametersRepository
 {
-    private int id;
-
-    private readonly HashSet<Graph> set = new(EntityComparer<int>.Interface);
-
-    public Task<Graph> CreateAsync(Graph graph,
+    public async Task<Graph> CreateAsync(Graph graph,
         CancellationToken token = default)
     {
-        if (token.IsCancellationRequested)
-        {
-            return Task.FromCanceled<Graph>(token);
-        }
-        graph.Id = Interlocked.Increment(ref id);
-        set.Add(graph);
-        return Task.FromResult(graph);
+        var result = await CreateAsync([graph], token).ConfigureAwait(false);
+        return result.FirstOrDefault();
     }
 
     public async Task<bool> DeleteAsync(int graphId,
@@ -33,7 +24,7 @@ internal sealed class InMemoryGraphParametersRepository(
         await rangeRepository.DeleteByGraphIdAsync(graphId, token).ConfigureAwait(false);
         await verticesRepository.DeleteVerticesByGraphIdAsync(graphId).ConfigureAwait(false);
         await statisticsRepository.DeleteByGraphId(graphId).ConfigureAwait(false);
-        int deleted = set.RemoveWhere(x => x.Id == graphId);
+        int deleted = Set.RemoveWhere(x => x.Id == graphId);
         return deleted == 1;
     }
 
@@ -51,19 +42,7 @@ internal sealed class InMemoryGraphParametersRepository(
 
     public IAsyncEnumerable<Graph> GetAll()
     {
-        return set.ToAsyncEnumerable();
-    }
-
-    public Task<Graph> ReadAsync(int graphId,
-        CancellationToken token = default)
-    {
-        if (token.IsCancellationRequested)
-        {
-            return Task.FromCanceled<Graph>(token);
-        }
-        var equal = new Graph { Id = graphId };
-        set.TryGetValue(equal, out var result);
-        return Task.FromResult(result);
+        return Set.ToAsyncEnumerable();
     }
 
     public Task<bool> UpdateAsync(Graph graph,
@@ -74,7 +53,7 @@ internal sealed class InMemoryGraphParametersRepository(
             return Task.FromCanceled<bool>(token);
         }
         var equal = new Graph { Id = graph.Id };
-        if (set.TryGetValue(equal, out var result))
+        if (Set.TryGetValue(equal, out var result))
         {
             result.Dimensions = graph.Dimensions;
             result.Name = graph.Name;
@@ -107,6 +86,11 @@ internal sealed class InMemoryGraphParametersRepository(
 
     public IAsyncEnumerable<Graph> ReadAsync(IReadOnlyCollection<int> ids)
     {
-        return set.Where(x => ids.Contains(x.Id)).ToAsyncEnumerable();
+        return Set.Where(x => ids.Contains(x.Id)).ToAsyncEnumerable();
+    }
+
+    protected override int NextId()
+    {
+        return id++;
     }
 }

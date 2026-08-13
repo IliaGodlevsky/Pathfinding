@@ -124,11 +124,11 @@ public sealed class MazeObstacleLayer(int obstaclePercent, Random random) : ILay
         pending.Enqueue(open[0].Position);
         while (pending.TryDequeue(out var current))
         {
-            foreach (var direction in Directions)
+            foreach (var (X, Y) in Directions)
             {
                 var next = new Coordinate(
-                    current[0] + direction.X / 2,
-                    current[1] + direction.Y / 2);
+                    current[0] + X / 2,
+                    current[1] + Y / 2);
                 if (next[0] < 0 || next[0] >= graph.DimensionsSizes[0] ||
                     next[1] < 0 || next[1] >= graph.DimensionsSizes[1] ||
                     graph.Get(next).IsObstacle || !visited.Add(next))

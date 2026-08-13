@@ -119,8 +119,8 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
                     algorithm.VertexProcessed -= OnVertexProcessed;
                 }
 
-                var rangeCoordinates = range.Select(x => x.Position).ToArray();
-                run = new(RunGraph, subRevisions, rangeCoordinates) { Id = model.Id };
+                run = new(RunGraph, subRevisions, 
+                    [.. range.Select(x => x.Position)]) { Id = model.Id };
                 Runs.Add(run);
             }
             SelectedRun = run;
@@ -168,7 +168,7 @@ internal sealed class RunFieldViewModel : ReactiveObject, IRunFieldViewModel, ID
         activeGraph = msg.Value.ActiveGraph;
         var runGraph = await graphAssemble.AssembleGraphAsync(
             new GraphLayer(activeGraph.Graph),
-            activeGraph.Graph.DimensionsSizes);
+            activeGraph.Graph.DimensionsSizes).ConfigureAwait(false);
         runGraph.CostRange = activeGraph.Graph.CostRange;
         RunGraph = Graph<RunVertexModel>.Empty;
         this.RaisePropertyChanged(nameof(RunGraph));

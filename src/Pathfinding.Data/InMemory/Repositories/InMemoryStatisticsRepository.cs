@@ -3,30 +3,12 @@ using Pathfinding.Domain.Interface.Repositories;
 
 namespace Pathfinding.Data.InMemory.Repositories;
 
-internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
+internal sealed class InMemoryStatisticsRepository 
+    : InMemoryRepository<int, Statistics>, IStatisticsRepository
 {
-    private int id;
-    private readonly HashSet<Statistics> set = new(EntityComparer<int>.Instance);
-
-    public Task<IReadOnlyCollection<Statistics>> CreateAsync(
-        IReadOnlyCollection<Statistics> statistics,
-        CancellationToken token = default)
-    {
-        if (token.IsCancellationRequested)
-        {
-            return Task.FromCanceled<IReadOnlyCollection<Statistics>>(token);
-        }
-        foreach (var entity in statistics)
-        {
-            entity.Id = Interlocked.Increment(ref id);
-            set.Add(entity);
-        }
-        return Task.FromResult(statistics);
-    }
-
     public IAsyncEnumerable<Statistics> ReadByGraphIdAsync(int graphId, int skip, int take)
     {
-        return set
+        return Set
             .Where(s => s.GraphId == graphId)
             .Skip(skip)
             .Take(take)
@@ -35,7 +17,7 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
 
     public Task<bool> DeleteByGraphId(int graphId)
     {
-        bool removed = set.RemoveWhere(s => s.GraphId == graphId) > 0;
+        bool removed = Set.RemoveWhere(s => s.GraphId == graphId) > 0;
         return Task.FromResult(removed);
     }
 
@@ -46,7 +28,7 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
         {
             return Task.FromCanceled<bool>(token);
         }
-        var removed = set.RemoveWhere(s => ids.Contains(s.Id)) > 0;
+        var removed = Set.RemoveWhere(s => ids.Contains(s.Id)) > 0;
         return Task.FromResult(removed);
     }
 
@@ -57,7 +39,7 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
             return Task.FromCanceled<Statistics>(token);
         }
         var tracking = new Statistics { Id = statId };
-        set.TryGetValue(tracking, out var statistics);
+        Set.TryGetValue(tracking, out var statistics);
         return Task.FromResult(statistics);
     }
 
@@ -71,7 +53,7 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
         }
         foreach (var entity in entities)
         {
-            if (set.TryGetValue(entity, out var statistics))
+            if (Set.TryGetValue(entity, out var statistics))
             {
                 statistics.StepRule = entity.StepRule;
                 statistics.Steps = entity.Steps;
@@ -90,11 +72,16 @@ internal sealed class InMemoryStatisticsRepository : IStatisticsRepository
     public IAsyncEnumerable<Statistics> ReadByIdsAsync(
         IReadOnlyCollection<int> runIds)
     {
-        return set.Where(x => runIds.Contains(x.Id)).ToAsyncEnumerable();
+        return Set.Where(x => runIds.Contains(x.Id)).ToAsyncEnumerable();
     }
 
     public IAsyncEnumerable<Statistics> ReadByGraphIdsAsync(IReadOnlyCollection<int> graphIds)
     {
-        return set.Where(x => graphIds.Contains(x.GraphId)).ToAsyncEnumerable();
+        return Set.Where(x => graphIds.Contains(x.GraphId)).ToAsyncEnumerable();
+    }
+
+    protected override int NextId()
+    {
+        return id++;
     }
 }

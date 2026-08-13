@@ -32,9 +32,8 @@ internal sealed class GraphGeneratorView : FrameView
         {
             X = 1,
             Y = 0,
-            RadioLabels = generators
-                .Select(generator => ustring.Make(generator.ToStringRepresentation()))
-                .ToArray()
+            RadioLabels = [.. generators
+                .Select(generator => ustring.Make(generator.ToStringRepresentation()))]
         };
         options.Events().SelectedItemChanged
             .Where(args => args.SelectedItem >= 0 && args.SelectedItem < generators.Length)
