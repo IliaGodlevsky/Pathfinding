@@ -91,6 +91,6 @@ internal sealed class InMemoryGraphParametersRepository(
 
     protected override int NextId()
     {
-        return id++;
+        return ++id;
     }
 }

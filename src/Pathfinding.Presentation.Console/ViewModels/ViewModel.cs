@@ -12,7 +12,7 @@ internal abstract class ViewModel(ILog log) : ReactiveObject
 {
     public readonly record struct ActiveGraph(int Id, Graph<GraphVertexModel> Graph, bool IsReadonly = false)
     {
-        public static readonly ActiveGraph Empty = new(0, Graph<GraphVertexModel>.Empty, false);
+        public static readonly ActiveGraph Empty = new(0, Graph<GraphVertexModel>.Empty);
 
         public IReadOnlyDictionary<long, GraphVertexModel> VertexMap { get; } = Graph.ToFrozenDictionary(x => x.Id);
     }

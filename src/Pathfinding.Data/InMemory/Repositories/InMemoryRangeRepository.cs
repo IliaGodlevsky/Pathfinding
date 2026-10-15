@@ -52,7 +52,7 @@ internal sealed class InMemoryRangeRepository
             }
             else
             {
-                entity.Id = Interlocked.Increment(ref id);
+                entity.Id = NextId();
                 Set.Add(entity);
             }
         }
@@ -66,6 +66,6 @@ internal sealed class InMemoryRangeRepository
 
     protected override int NextId()
     {
-        return id++;
+        return ++id;
     }
 }

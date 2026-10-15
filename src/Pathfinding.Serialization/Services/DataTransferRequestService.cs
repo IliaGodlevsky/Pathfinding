@@ -62,7 +62,7 @@ public sealed class DataTransferRequestService<T>(IUnitOfWorkFactory factory)
                     .ConfigureAwait(false);
                 models.Add(new()
                 {
-                    Graph = new GraphModel<T>
+                    Graph = new()
                     {
                         Id = model.Id,
                         DimensionSizes = graphModel.DimensionSizes,

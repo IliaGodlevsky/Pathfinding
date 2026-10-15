@@ -16,10 +16,8 @@ public interface IRangeRepository
 
     IAsyncEnumerable<PathfindingRange> ReadByGraphIdsAsync(IReadOnlyCollection<int> ids);
 
-    Task<bool> DeleteByVerticesIdsAsync(
-        IReadOnlyCollection<long> verticesIds,
+    Task<bool> DeleteByVerticesIdsAsync(IReadOnlyCollection<long> verticesIds,
         CancellationToken token = default);
 
-    Task<bool> DeleteByGraphIdAsync(int graphId,
-        CancellationToken token = default);
+    Task<bool> DeleteByGraphIdAsync(int graphId, CancellationToken token = default);
 }

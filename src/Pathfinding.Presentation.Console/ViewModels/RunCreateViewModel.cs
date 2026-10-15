@@ -227,21 +227,20 @@ internal sealed class RunCreateViewModel : ViewModel,
 
     private async Task CreateAlgorithm()
     {
-        var range = messenger.SendAndGetResponse<
-            PathfindingRangeRequestMessage, GraphVertexModel[]>(new());
-        if (range.Length < 2)
-        {
-            log.Info(Resource.RangeIsNotSetMsg);
-            return;
-        }
-
-        var statistics = EnumerateWeights()
-            .SelectMany(GetBuildInfo)
-            .Select(buildInfo => CreateStatistics(range, buildInfo))
-            .ToArray();
-
         await ExecuteSafe(async token =>
         {
+            var range = messenger.SendAndGetResponse<
+                PathfindingRangeRequestMessage, GraphVertexModel[]>(new());
+            if (range.Length < 2)
+            {
+                log.Info(Resource.RangeIsNotSetMsg);
+                return;
+            }
+
+            var statistics = EnumerateWeights()
+                .SelectMany(GetBuildInfo)
+                .Select(buildInfo => CreateStatistics(range, buildInfo))
+                .ToArray();
             var result = await statisticsService
                 .CreateStatisticsAsync(statistics, token)
                 .ConfigureAwait(false);
@@ -268,8 +267,6 @@ internal sealed class RunCreateViewModel : ViewModel,
         AlgorithmBuildInfo buildInfo)
     {
         int visitedCount = 0;
-        void OnVertexProcessed(EventArgs e) => visitedCount++;
-
         var factory = algorithmsFactory.Create(buildInfo.Algorithm);
         var algo = factory.Create(range, buildInfo);
         algo.VertexProcessed += OnVertexProcessed;
@@ -304,6 +301,8 @@ internal sealed class RunCreateViewModel : ViewModel,
             ResultStatus = status,
             GraphId = ActivatedGraph.Id
         };
+
+        void OnVertexProcessed(EventArgs e) => visitedCount++;
     }
 
     private static InclusiveValueRange<double> GetWeightRange()

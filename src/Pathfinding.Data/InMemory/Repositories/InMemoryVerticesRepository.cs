@@ -48,6 +48,6 @@ internal sealed class InMemoryVerticesRepository
 
     protected override long NextId()
     {
-        return id++;
+        return ++id;
     }
 }

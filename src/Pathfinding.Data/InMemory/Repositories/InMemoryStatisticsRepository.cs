@@ -82,6 +82,6 @@ internal sealed class InMemoryStatisticsRepository
 
     protected override int NextId()
     {
-        return id++;
+        return ++id;
     }
 }

@@ -6,12 +6,14 @@ public abstract class InMemoryRepository<T, U>
     where U : IEntity<T>, new()
     where T : struct, IEquatable<T>
 {
-    protected T id;
     protected readonly HashSet<U> Set = new(EntityComparer<T, U>.Instance);
+
+    protected T id = default;
 
     protected abstract T NextId();
 
-    public virtual Task<IReadOnlyCollection<U>> CreateAsync(IReadOnlyCollection<U> entities,
+    public virtual Task<IReadOnlyCollection<U>> CreateAsync(
+        IReadOnlyCollection<U> entities,
         CancellationToken token = default)
     {
         if (token.IsCancellationRequested)
@@ -20,8 +22,10 @@ public abstract class InMemoryRepository<T, U>
         }
         foreach (var entity in entities)
         {
-            entity.Id = NextId();
-            Set.Add(entity);
+            do
+            {
+                entity.Id = NextId();
+            } while (!Set.Add(entity));
         }
         return Task.FromResult(entities);
     }
