@@ -43,8 +43,8 @@ internal static class App
 
     public static ContainerBuilder AddGraphLayers(this ContainerBuilder builder)
     {
-        builder.RegisterType<MooreNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
-            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Moore);
+        builder.RegisterType<VonNeumannNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.VonNeumann);
         builder.RegisterType<DiagonalNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
             .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Diagonal);
         builder.RegisterType<KnightsNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
@@ -192,8 +192,8 @@ internal static class App
         builder.RegisterType<GraphAssemble<GraphVertexModel>>().As<IGraphAssemble<GraphVertexModel>>().SingleInstance();
         builder.RegisterType<GraphAssemble<RunVertexModel>>().As<IGraphAssemble<RunVertexModel>>().SingleInstance();
 
-        builder.RegisterType<VonNeumannNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
-            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.VonNeumann);
+        builder.RegisterType<MooreNeighborhoodLayer>().Keyed<NeighborhoodLayer>(KeyFilters.Neighborhoods)
+            .SingleInstance().WithMetadata(MetadataKeys.Neighborhoods, Neighborhoods.Moore);
 
         builder.RegisterInstance(new SmoothLayer(0)).AsSelf().SingleInstance()
             .WithMetadata(MetadataKeys.SmoothLevels, SmoothLevels.No);
